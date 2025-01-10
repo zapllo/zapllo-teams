@@ -1,0 +1,59 @@
+1. Sign Up redirects to Create organization
+2. On creating Organization, redirect to /dashboard (Save the token on signup as well)
+3. Create a teams section, where the admin will add team members (might be manager or an admin => roles) that will register a new user associated to that organization (he can login and would be a part of the organization)
+4. Tasks assign.
+5. Delegate tasks.
+6. Display team member cards in teams section.
+
+
+
+
+UI Changes:
+
+Finish the Checkout Page
+
+1. Text-xs for my leaves card - approval status (and the approval buttons to the left - text-start).
+2. Double check all the approval buttons in all the cards (All leaves, my leaves, all attendance).
+3. Register Face modal - UI.
+4. Illustrations everywhere where no entries are present.  (Don't render table if no entries are present)
+5. Register faces page (Hide scrollbar and check for misalignments).
+6. Edit task modal (make it look like the task modal).
+
+Fixes:
+
+1. Resolve S3 bucket issue (Fix).
+2. Replace Alerts with toasts everywhere - Approval modals (Fix).
+3. Separate Trial for Leaves & Attendance (Add a new trial field to the organization) and conditionally render the trial and leaves buttons on the sidebar according to the trial start.
+
+
+sendgrid /XL7Mju?U_$xS-97
+recovery 5RWNDFCJRGD9262E5JQBKPTQ
+
+
+
+
+
+INTERAKT
+Email - shubhodeep@zapllo.com
+Pass - AZazGAkZ:7Bf
+
+
+
+
+
+1. Teams 
+2. Settings
+3. Billing
+
+
+
+
+
+Pending:
+
+1. All tasks section fix for the assigned to and by default.
+2. Start trial for the attendance and leave management. 
+3. Email triggers for the leave and attendance.
+4. Toast message at login and registration (Email already exists and all the other cases where errors might occur, handle them and display the appropriate message). 
+5. Registration form, make the labels the same as the other forms. 
+6. Checkout.
