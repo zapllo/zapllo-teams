@@ -4,24 +4,34 @@ import { NextRequest, NextResponse } from "next/server";
 
 connectDB();
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(
+    request: NextRequest,
+    { params }: { params: { id: string } }
+) {
     const { id } = params;
 
     try {
-        // Find the user in the database based on the user ID
-        const user = await User.findById(id).select("firstName lastName");
+        const user = await User.findById(id)
+            .populate("reportingManager", "firstName lastName whatsappNo")
+            .exec();
 
         if (!user) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
+        const organizationUsers = await User.find({ organization: user.organization });
+        const employeeIndex = organizationUsers
+            .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+            .findIndex((u) => u._id.toString() === id);
+
+        const employeeId = `EMP${employeeIndex + 1}`;
+
         return NextResponse.json({
-            message: "User found",
-            data: {
-                firstName: user.firstName,
+            user: {
+                ...user.toObject(),
+                employeeId,
             },
         });
-        
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 400 });
     }

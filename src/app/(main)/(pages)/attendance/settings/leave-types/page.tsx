@@ -4,20 +4,22 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
-import { Edit2, Info, Plus, Trash2, X } from "lucide-react";
+import { Edit2, Info, Plus, Repeat, Trash2, X } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import DeleteConfirmationDialog from "@/components/modals/deleteConfirmationDialog";
 import Loader from "@/components/ui/loader";
 import { toast, Toaster } from "sonner";
 import { CrossCircledIcon } from "@radix-ui/react-icons";
-import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { Button } from "@/components/ui/button";
 
 interface LeaveFormData {
   leaveType: string;
   description: string;
   allotedLeaves: number;
   type: "Paid" | "Unpaid";
+  leaveReset: "Reset" | "CarryForward";
   backdatedLeaveDays: number;
   advanceLeaveDays: number;
   includeHolidays: boolean;
@@ -31,6 +33,7 @@ interface LeaveType {
   allotedLeaves: number;
   description: string;
   type: "Paid" | "Unpaid";
+  leaveReset: "Reset" | "CarryForward";
   backdatedLeaveDays: number; // Number of backdated leave days allowed
   advanceLeaveDays: number; // Number of advance leave days allowed
   includeHolidays: boolean; // Whether holidays are included in leave calculation
@@ -45,6 +48,7 @@ const LeaveTypes: React.FC = () => {
     description: "",
     allotedLeaves: 0,
     type: "Paid",
+    leaveReset: "Reset",
     backdatedLeaveDays: 0,
     advanceLeaveDays: 0,
     includeHolidays: false,
@@ -59,6 +63,7 @@ const LeaveTypes: React.FC = () => {
   const unitOptions = ["Full Day", "Half Day", "Short Leave"] as const; // Define unit options
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false); // Control the modal state
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // Control the modal state
   const [isLoading, setIsLoading] = useState(false); // Loader for create and edit
   const [isDeleting, setIsDeleting] = useState(false); // Loader for delete
   const [activeTab, setActiveTab] = useState<"All" | "Paid" | "Unpaid">("All"); // State to manage active tab
@@ -163,6 +168,7 @@ const LeaveTypes: React.FC = () => {
       description: leave.description || "", // Prefill description
       allotedLeaves: leave.allotedLeaves,
       type: leave.type,
+      leaveReset: leave.leaveReset,
       backdatedLeaveDays: leave.backdatedLeaveDays || 0, // Prefill backdatedLeaveDays if available
       advanceLeaveDays: leave.advanceLeaveDays || 0, // Prefill advanceLeaveDays if available
       includeHolidays: leave.includeHolidays || false, // Prefill includeHolidays
@@ -208,6 +214,25 @@ const LeaveTypes: React.FC = () => {
     }
   };
 
+  const handleUpdateLeaveBalance = async () => {
+    try {
+      setLoading(true);
+      // Call the endpoint to update leave balances
+      await axios.post("/api/leaves/updateLeaveBalances");
+      toast.success("Leave balances updated successfully!");
+      fetchLeaveTypes(); // Refresh leave types after update
+    } catch (error) {
+      console.error("Error updating leave balances:", error);
+      toast.error("Failed to update leave balances.");
+    } finally {
+      setLoading(false);
+      setIsUpdateModalOpen(false); // Close the modal
+    }
+  };
+
+
+
+
   return (
     <div className="container mx-auto p-6">
       {/* Tabs for filtering */}
@@ -226,6 +251,7 @@ const LeaveTypes: React.FC = () => {
                   description: "",
                   allotedLeaves: 0,
                   type: "Paid",
+                  leaveReset: "Reset",
                   backdatedLeaveDays: 0,
                   advanceLeaveDays: 0,
                   includeHolidays: false,
@@ -272,8 +298,38 @@ const LeaveTypes: React.FC = () => {
             >
               Unpaid
             </button>
+            <Dialog open={isUpdateModalOpen} onOpenChange={setIsUpdateModalOpen}>
+              <DialogTrigger asChild>
+                <button className={clsx(
+                  "text-xs px-4 flex items-center  h-8 mt-[2px]  rounded-md",
+                  "border-[#815BF5] hover:bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white",
+                  "bg-transparent text-white border-[#505356]  border"
+                )}>
+                  <Repeat className="h-4" />
+                  Update Leave Balance for 2025</button>
+              </DialogTrigger>
+              <DialogContent className="p-6 ">
+                <DialogHeader>
+                  Have you updated Leave Reset setting for all Leave Types?
+                </DialogHeader>
+                <DialogDescription>
+                  By default, Leave balance will reset to the number of allotted leaves. If you want to carry forward the previous year&apos;s balance, then please Edit Leave Type and update Leave Reset criteria.
+                </DialogDescription>
+                <DialogFooter>
+                  <DialogClose>
+                    <Button className="bg-transparent hover:border-gray-400 hover:bg-transparent border rounded">
+                      Cancel
+                    </Button>
+                  </DialogClose>
+                  <Button onClick={handleUpdateLeaveBalance} className="bg-red-500 hover:bg-red-700 border rounded">
+                    Confirm
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
           </div>
-          <DialogContent className=" z-[100] m-auto h-full mt-4  flex items-center justify-center">
+          <DialogContent className=" z-[100] m-auto h-full max-h-screen  flex items-center justify-center">
             <div className="bg-[#0b0d29]  overflow-y-scroll scrollbar-hide h-full m-auto max-w-lg  shadow-lg w-full    rounded-lg">
               <div className="flex border-b py-2  w-full justify-between ">
                 <DialogTitle className="text-md   px-6 py-2 font-medium">
@@ -432,7 +488,7 @@ const LeaveTypes: React.FC = () => {
                   <div className="bg-[#121212] p-2 rounded">
                     <div className="flex gap-2 bg-[#121212]  rounded">
                       <div className="flex gap-2">
-                        <label className="block text-sm mt-1 text-[#787CA5]">
+                        <label className="block text-sm mt-1 text-muted-foreground">
                           Unit
                         </label>
                         <div className="flex space-x-4">
@@ -441,7 +497,7 @@ const LeaveTypes: React.FC = () => {
                               key={unit}
                               type="button"
                               className={clsx(
-                                "px-4 py-2 text-xs rounded  text-[#787CA5] bg-[#815BF5]",
+                                "px-4 py-2 text-xs rounded  text-muted-foreground bg-[#815BF5]",
                                 formData.unit.includes(unit)
                                   ? "bg-[#017A5B] text-white"
                                   : "bg-transparent border border-[#505356]  "
@@ -454,12 +510,47 @@ const LeaveTypes: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="mt-3 flex gap-1 text-muted-foreground">
+                    <div className="mt-3 flex gap-1 text-[#787CA5]">
                       <Info className="h-5" />
                       <p className=" text-sm ">
                         Deduction (in Days) : Full Day - 1, Half Day - 0.5,
                         Short Leave - 0.25{" "}
                       </p>
+                    </div>
+                  </div>
+                  <div className="flex space-x-4">
+                    <div className="flex gap-4">
+                      <label className="block text-sm mt-2 ">Leave Reset</label>
+                      <div className="flex ">
+                        <button
+                          type="button"
+                          className={clsx(
+                            " py-1 text-sm h-8 mt-1 px-2  border-r-0 rounded-l  border border-[#505356]    cursor-pointer",
+                            formData.leaveReset === "Reset"
+                              ? "bg-[#017A5B] text-white"
+                              : "bg-transparent  border border-[#505356] "
+                          )}
+                          onClick={() =>
+                            setFormData({ ...formData, leaveReset: "Reset" })
+                          }
+                        >
+                          Reset
+                        </button>
+                        <button
+                          type="button"
+                          className={clsx(
+                            " py-1 text-sm h-8 mt-1 px-2 border-l-0  rounded-r  border  border-[#505356]    cursor-pointer",
+                            formData.leaveReset === "CarryForward"
+                              ? "bg-[#fc8929] text-white"
+                              : "bg-transparent  border border-[#505356] "
+                          )}
+                          onClick={() =>
+                            setFormData({ ...formData, leaveReset: "CarryForward" })
+                          }
+                        >
+                          Carry Forward
+                        </button>
+                      </div>
                     </div>
                   </div>
                   <div className="flex justify-end">

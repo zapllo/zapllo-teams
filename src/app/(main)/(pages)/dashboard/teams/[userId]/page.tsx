@@ -1,0 +1,403 @@
+'use client';
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { ArrowLeft, Calendar } from "lucide-react";
+import EmployeeProfile from "@/components/teams/profile/page";
+import Loader from "@/components/ui/loader";
+import CustomDatePicker from "@/components/globals/date-picker";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import SalaryMenu from "@/components/teams/salary/page";
+import DeductionMenu from "@/components/teams/deductions/page";
+import PersonalDetails from "@/components/teams/personal-details/page";
+import PayslipPage from "@/components/teams/payslip/page";
+
+interface UserDetails {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    whatsappNo: string;
+    profilePic: string;
+    role: string;
+    reportingManager: {
+        firstName: string;
+        lastName: string;
+        whatsappNo: string;
+    } | null;
+    isLeaveAccess: boolean;
+    isTaskAccess: boolean;
+    country: string;
+    designation: string;
+    staffType: string;
+    contactNumber: string;
+    asset: string;
+    branch: string;
+    status: string;
+    employeeId: string; // EMP1, EMP2, etc.
+}
+
+export default function UserDetailPage({ params }: { params: { userId: string } }) {
+    const { userId } = params;
+    const [user, setUser] = useState<UserDetails | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState<string>("Profile"); // Active section state
+    const [attendanceData, setAttendanceData] = useState<any>(null);
+    const [attendanceLoading, setAttendanceLoading] = useState(false);
+    const [startDate, setStartDate] = useState<Date | null>(null);
+    const [endDate, setEndDate] = useState<Date | null>(null);
+    const [isDateDialogOpen, setIsDateDialogOpen] = useState(false);
+    const [datePickerTarget, setDatePickerTarget] = useState<'start' | 'end'>('start');
+
+    const router = useRouter();
+
+    useEffect(() => {
+        if (userId) {
+            // Fetch user details
+            axios
+                .get(`/api/users/${userId}`)
+                .then((response) => {
+                    setUser(response.data.user);
+                    setLoading(false);
+                })
+                .catch((error) => {
+                    console.error("Error fetching user details:", error);
+                    setLoading(false);
+                });
+        }
+    }, [userId]);
+
+    // Fetch attendance report
+    const fetchAttendanceReport = async () => {
+        if (!userId || !startDate || !endDate) return;
+        setAttendanceLoading(true);
+
+        try {
+            const response = await axios.post(`/api/reports/cumulative`, {
+                startDate: startDate.toISOString(),
+                endDate: endDate.toISOString(),
+                employeeId: userId,
+            });
+
+            setAttendanceData(response.data);
+        } catch (error) {
+            console.error("Error fetching attendance report:", error);
+        } finally {
+            setAttendanceLoading(false);
+        }
+    };
+
+
+    useEffect(() => {
+        if (activeTab === "Attendance") {
+            fetchAttendanceReport();
+        }
+    }, [activeTab]);
+
+    const renderAttendanceSection = () => {
+        return (
+            <div>
+                <h2 className="text-xl font-semibold mb-4">Attendance Report</h2>
+
+                {/* Date Selection and Fetch Button */}
+                <div className="flex gap-4 mb-4">
+                    <button
+                        className="px-4 py-2 flex items-center text-sm gap-2 bg-transparent border text-white rounded"
+                        onClick={() => {
+                            setDatePickerTarget("start");
+                            setIsDateDialogOpen(true);
+                        }}
+                    >
+                        <Calendar className="h-5" /> {startDate ? startDate.toDateString() : "Select Start Date"}
+                    </button>
+                    <button
+                        className="px-4 py-2 flex text-sm items-center gap-2 bg-transparent border text-white rounded"
+                        onClick={() => {
+                            setDatePickerTarget("end");
+                            setIsDateDialogOpen(true);
+                        }}
+                    >
+                        <Calendar className="h-5" /> {endDate ? endDate.toDateString() : "Select End Date"}
+                    </button>
+                    <div className="ml-auto">
+                        <button
+                            className="px-4 text-sm py-2 bg-[#017a5b] -600 text-white rounded"
+                            onClick={fetchAttendanceReport}
+                            disabled={!startDate || !endDate}
+                        >
+                            Fetch Report
+                        </button>
+                    </div>
+                </div>
+
+                {/* Attendance Report */}
+                {attendanceLoading ? (
+                    <Loader />
+                ) : attendanceData ? (
+                    <div className="border mt-2 rounded-xl p-4">
+                        <div className="flex gap-4">
+                            <div>
+                                <span className="border text-xs text-blue-400 text-= p-2 rounded">Total Days: {attendanceData.totalDays}</span>
+                            </div>
+                            <div>
+                                <span className="border text-xs text-yellow-400  p-2 rounded">Working: {attendanceData.workingDays}</span>
+                            </div>
+                            <div>
+                                <span className="border text-xs text-green-400  p-2 rounded">Week Offs: {attendanceData.weekOffs}</span>
+                            </div>
+                            <div>
+                                <span className="border text-xs text-red-500  p-2 rounded">Holidays: {attendanceData.holidays.length}</span>
+                            </div>
+                        </div>
+
+                        <table className="w-full mt-4 border-collapse border">
+                            <thead>
+                                <tr>
+                                    <th className="border px-4 py-2 text-left">User</th>
+                                    <th className="border px-4 py-2 text-left">Present</th>
+                                    <th className="border px-4 py-2 text-left">Absent</th>
+                                    <th className="border px-4 py-2 text-left">Leave</th>
+                                    <th className="border px-4 py-2 text-left">Reporting Manager</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {attendanceData.report.map((entry: any, index: number) => (
+                                    <tr key={index}>
+                                        <td className="border px-4 py-2">{entry.user}</td>
+                                        <td className="border px-4 py-2">{entry.present}</td>
+                                        <td className="border px-4 py-2">{entry.absent}</td>
+                                        <td className="border px-4 py-2">{entry.leave}</td>
+                                        <td className="border px-4 py-2">{entry.reportingManager}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <div className="flex w-full justify-center -ml-4">
+                        <div className="mt-2">
+                            <DotLottieReact
+                                src="/lottie/empty.lottie"
+                                loop
+                                className="h-56"
+                                autoplay
+                            />
+                            <h1 className="text-center font-bold text-md  -ml-4">
+                                No Attendance Records Found
+                            </h1>
+                            <p className="text-center text-sm -ml-4 p-2">
+                                The list is currently empty for the selected date range.
+                            </p>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+
+
+    const renderActiveSection = () => {
+        switch (activeTab) {
+            case "Profile":
+                return <EmployeeProfile userId={userId} />;
+            case "Personal Details":
+                return <PersonalDetails userId={userId} />;
+            case "Attendance":
+                return renderAttendanceSection();
+            case "Salary Overview":
+                return <SalaryMenu userId={userId} />;
+            case "Deductions":
+                return <DeductionMenu userId={userId} />;
+            case "Payslip":
+                return <PayslipPage userId={userId} />; // Placeholder
+            default:
+                return null;
+        }
+    };
+
+    const handleUpdateField = async (field: string, value: string) => {
+        if (!user) return;
+
+        try {
+            // Update UI optimistically
+            setUser((prevUser) => ({
+                ...prevUser!,
+                [field]: value,
+            }));
+
+            // Send the PATCH request to update the user
+            const response = await axios.patch(`/api/users/update`, {
+                _id: user._id, // Pass the user's ID
+                [field]: value, // Pass the updated field and value
+            });
+
+            if (response.data.success) {
+                console.log("User updated successfully:", response.data.user);
+            } else {
+                console.error("Failed to update user:", response.data.error);
+                // Revert the UI update if the API call fails
+                setUser((prevUser) => ({
+                    ...prevUser!,
+                    [field]: user[field as keyof UserDetails], // Restore original value
+                }));
+            }
+        } catch (error) {
+            console.error("Error updating user:", error);
+            // Revert the UI update in case of an error
+            setUser((prevUser) => ({
+                ...prevUser!,
+                [field]: user[field as keyof UserDetails],
+            }));
+        }
+    };
+
+
+    if (loading) return <p><Loader /></p>;
+    if (!user) return <p>User not found.</p>;
+
+    return (
+        <div className="w-full max-w-5xl overflow-y-scroll overflow-x-hidden h-full scrollbar-hide mt-16 mx-auto">
+            {/* Header */}
+            <div className="flex items-center mb-4">
+                <button onClick={() => router.back()}>
+                    <div className="flex items-center gap-2 font-medium text-xl cursor-pointer">
+                        <ArrowLeft className="h-7 rounded-full border-white border w-7 hover:bg-white hover:text-black" />
+                        <h1>Back</h1>
+                    </div>
+                </button>
+            </div>
+
+            {/* User Summary */}
+            <div className="border mt-4 p-6 rounded-xl shadow-md flex justify-between items-center">
+                <div className="flex justify-between w-full items-center gap-4">
+                    <div>
+                        <div className="flex items-center gap-2 relative">
+                            <img src='/at.png' className="absolute -bottom-2 left-6   z-[100]  h-6" />
+
+                            <div className='p-[2px]  rounded-full bg-gradient-to-r from-[#815BF5] to-[#FC8929]'>
+                                <div className='p-1 rounded-full bg-[#04061e] '>
+                                    <Avatar className="rounded-full h-16 w-16 flex bg-[#815BF5] items-center ">
+
+                                        {user.profilePic ? (
+                                            <img
+                                                src={user.profilePic}
+                                                alt={`${user.firstName} ${user.lastName}`}
+                                                className="h-full w-full rounded-full object-cover"
+                                            />
+                                        ) : (
+                                            <AvatarFallback className="">
+                                                <h1 className="text-2xl">
+                                                    {`${user.firstName}`.slice(0, 1)}
+                                                    {`${user.lastName}`.slice(0, 1)}
+                                                </h1>
+                                            </AvatarFallback>
+                                        )}
+                                    </Avatar>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h1 className="text-xl font-semibold">{`${user.firstName} ${user.lastName}`}</h1>
+                                <div className="flex items-center gap-2  ">
+                                    <div
+                                        className={`w-fit px-4 py-1 rounded text-xs ${user.role === "orgAdmin"
+                                            ? "bg-[#B4173B]"
+                                            : user.role === "manager"
+                                                ? "bg-blue-600"
+                                                : user.role === "member"
+                                                    ? "bg-[#007A5A]"
+                                                    : "bg-gray-500"
+                                            }`}
+                                    >
+                                        {user.role === "orgAdmin"
+                                            ? "Admin"
+                                            : user.role === "member"
+                                                ? "Member"
+                                                : user.role === "manager"
+                                                    ? "Manager"
+                                                    : user.role}
+
+                                    </div>
+                                    <p className="text-gray-500">ID: {user.employeeId}</p>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                    <div className="relative">
+                        <select
+                            className="p-2 border text-sm font-medium bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white rounded-xl outline-none focus:ring-[#815BF5]"
+                            value={user.status || ""}
+                            onChange={(e) => handleUpdateField("status", e.target.value)}
+                        >
+                            <option
+                                className="p-2 bg-[#04061E] text-white hover:bg-[#815BF5] font-medium"
+                                value="Active"
+                            >
+                                Active
+                            </option>
+                            <option
+                                className="p-2 bg-[#04061E] text-white hover:bg-[#FC8929] font-medium"
+                                value="Deactivated"
+                            >
+                                Deactivated
+                            </option>
+                        </select>
+                    </div>
+
+                </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="grid mb-24 grid-cols-4 gap-6 mt-6">
+                <div className="col-span-1 rounded-xl p-4 border">
+                    <div className="flex flex-col gap-4">
+                        {["Profile", "Personal Details", "Attendance", "Salary Overview", "Deductions", "Payslip"].map((tab) => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab)}
+                                className={`text-left w-full px-4 py-2 border rounded-2xl ${activeTab === tab
+                                    ? "bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white"
+                                    : ""
+                                    }`}
+                            >
+                                {tab}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Active Section */}
+                <div className="col-span-3">
+                    <div className="border p-6 rounded-xl shadow-md">{renderActiveSection()}</div>
+                </div>
+                <Dialog open={isDateDialogOpen} onOpenChange={setIsDateDialogOpen}>
+                    <DialogContent className="z-[100] scale-90  flex justify-center ">
+                        <div className="z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
+                            <div className="w-full flex mb-4 justify-between">
+                                <CustomDatePicker
+                                    selectedDate={datePickerTarget === 'start' ? startDate : endDate}
+                                    onDateChange={(date) => {
+                                        if (datePickerTarget === 'start') {
+                                            setStartDate(date);
+                                        } else {
+                                            setEndDate(date);
+                                        }
+                                    }}
+                                    onCloseDialog={() => setIsDateDialogOpen(false)}
+                                />
+                            </div>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+
+            </div>
+        </div>
+    );
+}

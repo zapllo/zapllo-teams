@@ -23,10 +23,16 @@ import Loader from "@/components/ui/loader";
 import CustomDatePicker from "@/components/globals/date-picker";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css'; // Import necessary styles for the progress bar
+
+
+
 interface LeaveType {
   allotedLeaves: number;
   _id: string;
   leaveType: string;
+  userLeaveBalance: number;
 }
 
 interface LeaveDay {
@@ -391,8 +397,53 @@ const MyLeaves: React.FC = () => {
     );
   }
 
+  const LeaveCard = ({ leaveType }: { leaveType: LeaveType }) => {
+    // Calculate consumed leaves and percentage
+    const consumedLeaves = leaveType.allotedLeaves - leaveDetails[leaveType._id]?.userLeaveBalance;
+    const percentage = consumedLeaves ? (consumedLeaves / leaveType.allotedLeaves) * 100 : 0;
+
+    return (
+      <div key={leaveType._id} className="w-60 relative flex-shrink-0 border px-4 py-3">
+        {/* Circular Progress Bar */}
+        <Info
+            className="h-4 absolute ml-48  text-blue-200 cursor-pointer"
+            onClick={() => handleInfoClick(leaveType.leaveType)}
+          />
+        <div className="flex justify-center ">
+          <div className="scale-75" style={{ width: 100, height: 100 }}>
+            <CircularProgressbar
+              value={percentage}
+              text={`Consumed ${consumedLeaves}`}
+              styles={buildStyles({
+                pathColor: '#815BF5', // color of the progress bar (you can choose a color that matches the design)
+                textColor: '#ffffff', // color of the text inside the circle
+                trailColor: '#9ca3af', // color of the remaining path
+                textSize: '12'
+              })}
+            />
+          </div>
+        </div>
+
+        <div className="flex  justify-center">
+
+          <h1 className="text-sm  font-semibold">{leaveType.leaveType}</h1>
+         
+        </div>
+        <div className="  text-center ">
+          {/* <p className="text-xs">Allotted: {leaveType.allotedLeaves}</p> */}
+          {leaveDetails[leaveType._id] ? (
+            <p className="text-muted-foreground text-xs">
+              Balance: {leaveDetails[leaveType._id]?.userLeaveBalance ?? "N/A"}
+            </p>
+          ) : (
+            <p className="text-xs">Loading...</p>
+          )}
+        </div>
 
 
+      </div>
+    );
+  };
   return (
     <div className="container h-screen  overflow-y-scroll scrollbar-hide t mx-auto p-6">
       <div className="flex items-center justify-center gap-4 mb-4">
@@ -479,54 +530,19 @@ const MyLeaves: React.FC = () => {
 
       {/* Leave Balance and Type Filter */}
       {leaveTypes.length > 0 && (
-        <div className="relative items-center space-x-4 mb-4">
+        <div className="relative flex justify-center  items-center space-x-4 mb-4">
 
 
-          {/* Left Arrow */}
-          <button
-            onClick={scrollLeft}
-            className="absolute left-0 z-20 p-2 mt-8 bg-[#fc8929] hover:opacity-100 opacity-70 rounded-full"
-          >
-            <ChevronLeft className="h-5 w-5 text-white" />
-          </button>
-
+        
           {/* Scrollable Container */}
           <div
             ref={scrollContainerRef}
             className="flex overflow-x-scroll max-w-6xl w-full scrollbar-hide gap-4 px-2"
           >
             {leaveTypes.map((leaveType) => (
-              <div
-                key={leaveType._id}
-                className="w-64 flex-shrink-0 border px-4 py-3"
-              >
-                <div className="flex justify-between">
-                  <h1 className="text-sm">{leaveType.leaveType}</h1>
-                  <Info
-                    className="h-4 mt-1 text-blue-200 cursor-pointer"
-                    onClick={() => handleInfoClick(leaveType.leaveType)}
-                  />
-                </div>
-                <div className="mt-2">
-                  <p className="text-xs">Allotted: {leaveType.allotedLeaves}</p>
-                  {leaveDetails[leaveType._id] ? (
-                    <p className="text-xs">
-                      Balance:{" "}
-                      {leaveDetails[leaveType._id]?.userLeaveBalance ?? "N/A"}
-                    </p>
-                  ) : (
-                    <p className="text-xs">Loading...</p>
-                  )}
-                </div>
-              </div>
+              <LeaveCard key={leaveType._id} leaveType={leaveType} />
             ))}
-            {/* Right Arrow */}
-            <button
-              onClick={scrollRight}
-              className="absolute right-0 z-20 p-2   mt-8 bg-[#fc8929] hover:opacity-100 opacity-70 rounded-full"
-            >
-              <ChevronRight className="h-5 w-5 text-white" />
-            </button>
+         
           </div>
 
 

@@ -6,10 +6,24 @@ interface ILeaveBalance {
     balance: number; // Remaining balance for this leave type
 }
 
+interface Allowance {
+    name: string;
+    amount: number;
+}
+
+interface IBankDetails {
+    bankName: string;
+    branchName: string;
+    accountNumber: string;
+    ifscCode: string;
+}
+
+
 interface IReminders {
     dailyReminderTime: string; // Time in HH:MM AM/PM format
     email: boolean;            // Email reminder toggle
     whatsapp: boolean;         // WhatsApp reminder toggle
+    dailyAttendanceReportTime: string; // New field for daily attendance report time
 }
 
 // Define an interface for the User document
@@ -48,7 +62,28 @@ export interface IUser extends Document {
     isTaskAccess: boolean;
     reminders: IReminders;
     weeklyOffs: string[]; // Array of days (e.g., ["Sun", "Sat"])
+    designation: string; // Editable input field
+    staffType: string; // Editable dropdown (e.g., "Regular Employee", "Contractor", "Work Basis")
+    contactNumber: string;
+    asset: string; // Editable input field
+    branch: string; // Editable input field
+    department: string; // Editable input field
+    status: string;
+    salaryDetails?: Allowance[]; // New field for salary details
+    deductionDetails?: Allowance[]; // New field for salary details
+    monthCalculationType?: string;
+    gender: "Male" | "Female" | "Other" | null; // New gen  der field
+    bankDetails?: IBankDetails;
+    createdAt: Date;
 }
+
+const BankDetailsSchema: Schema<IBankDetails> = new Schema({
+    bankName: { type: String, default: "" },
+    branchName: { type: String, default: "" },
+    accountNumber: { type: String, default: "" },
+    ifscCode: { type: String, default: "" },
+});
+
 
 // Define the schema
 const userSchema: Schema<IUser> = new mongoose.Schema({
@@ -116,11 +151,43 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
         dailyReminderTime: { type: String, default: "09:00 AM" }, // Stores time in HH:MM AM/PM format
         email: { type: Boolean, default: false }, // Email reminder toggle
         whatsapp: { type: Boolean, default: false }, // WhatsApp reminder toggle
+        dailyAttendanceReportTime: { type: String, default: "09:00 AM" }, // Time for daily attendance report
     },
     weeklyOffs: {
         type: [String], // Stores weekly off days as an array of strings (e.g., ["Sun", "Sat"])
         default: [],    // Empty array by default
     },
+    designation: { type: String, default: null }, // New optional field
+    staffType: { type: String, enum: ["Regular Employee", "Contractor", "Work Basis"], default: null }, // Enum for valid options
+    asset: { type: String, default: null }, // New optional field
+    branch: { type: String, default: null }, // New optional field
+    department: { type: String, default: null }, // New optional field
+    status: { type: String, enum: ["Active", "Deactivated"], default: "Active" }, // Status field with default
+    monthCalculationType: {
+        type: String,
+        enum: [
+            "Calendar Month",
+            "Every Month 30 Days",
+            "Every Month 28 Days",
+            "Every Month 26 Days",
+            "Exclude Weekly Offs",
+        ],
+        default: "Calendar Month", // Set a default type
+    },
+    salaryDetails: [
+        {
+            name: { type: String, },
+            amount: { type: Number, },
+        },
+    ],
+    deductionDetails: [
+        {
+            name: { type: String, },
+            amount: { type: Number, },
+        },
+    ],
+    gender: { type: String, enum: ["Male", "Female", "Other"], default: null }, // Gender field
+    bankDetails: { type: BankDetailsSchema, default: null }, // Include Bank Details Field
 }, { timestamps: true });
 
 // Define and export the User model

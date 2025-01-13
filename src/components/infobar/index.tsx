@@ -125,6 +125,10 @@ const InfoBar = (props: Props) => {
       return "Task Management";
     } else if (pathName === "/dashboard/teams") {
       return "My Team";
+    } else if (pathName.startsWith("/dashboard/teams/")) {
+      return "Employee Details";
+    } else if (pathName === "/attendance/payslip-details") {
+      return "Payslip Details";
     } else if (pathName === "/dashboard/settings") {
       return "Settings";
     } else if (pathName === "/dashboard/settings/categories") {

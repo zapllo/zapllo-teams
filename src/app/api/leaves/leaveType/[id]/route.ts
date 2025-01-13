@@ -27,6 +27,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
             advanceLeaveDays,
             includeHolidays,
             includeWeekOffs,
+            leaveReset,
             unit,
         } = await request.json();
 
@@ -42,6 +43,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         leave.description = description || leave.description;
         leave.allotedLeaves = allotedLeaves || leave.allotedLeaves;
         leave.type = type || leave.type;
+        leave.leaveReset = leaveReset || leave.leaveReset;
         leave.backdatedLeaveDays = backdatedLeaveDays ?? leave.backdatedLeaveDays; // Handle zero values correctly
         leave.advanceLeaveDays = advanceLeaveDays ?? leave.advanceLeaveDays;
         leave.includeHolidays = includeHolidays ?? leave.includeHolidays;

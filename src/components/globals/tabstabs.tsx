@@ -32,6 +32,7 @@ import { CrossCircledIcon } from "@radix-ui/react-icons";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { FaSearch } from "react-icons/fa";
 import { validateEmail } from "@/helper/emailValidation";
+import { useRouter } from "next/navigation";
 
 interface User {
   _id: string;
@@ -59,7 +60,6 @@ export default function TeamTabs() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState('IN'); // Default country as India
   const [countryCode, setCountryCode] = useState('+91'); // Default country code for India
-
   const [newMember, setNewMember] = useState({
     email: "",
     role: "member",
@@ -72,8 +72,6 @@ export default function TeamTabs() {
     isLeaveAccess: false, // new field
     isTaskAccess: false,  // new field
   });
-
-
   const [users, setUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User>();
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -113,6 +111,12 @@ export default function TeamTabs() {
     whatsappNo: "",
     password: "",
   });
+
+  const router = useRouter();
+
+  const handleUserClick = (userId: string) => {
+    router.push(`/dashboard/teams/${userId}`);
+  };
 
   const validateInputs = () => {
     const emailError = validateEmail(newMember.email);
@@ -695,7 +699,7 @@ export default function TeamTabs() {
           />
         </div>
         <div className="flex justify-center  -ml-96">
-          <div className="flex items-center gap-1 bg-gray-800 p-2 rounded-2xl" >
+          <div className="flex items-center gap-1 bg-gradient-to-b from-[#815BF5] to-[#FC8929] p-2 rounded-2xl" >
             <Users2Icon className="h-4" />
             <h1 className="text-sm"> {filteredUsers.length} Members</h1>
           </div>
@@ -708,7 +712,7 @@ export default function TeamTabs() {
             })
             .map((user) => (
               <div key={user._id}>
-                <Card key={user.firstName} className="flex rounded-xl bg-[#] border cursor-pointer items-center justify-between w-full p-2">
+                <Card onClick={() => handleUserClick(user._id)} key={user.firstName} className="flex rounded-xl bg-[#] hover:border-[#815bf5] border cursor-pointer items-center justify-between w-full p-2">
                   <div className="items-center flex gap-4">
                     <div className="flex gap-2">
                       <Avatar className="scale-75">
@@ -772,7 +776,8 @@ export default function TeamTabs() {
 
                   {loggedInUserRole == "orgAdmin" && (
                     <div className=" flex gap-2">
-                      <div className="bg-transparent  hover:bg-transparent" onClick={() => {
+                      <div className="bg-transparent  hover:bg-transparent" onClick={(event) => {
+                        event.stopPropagation(); // Prevent the parent click event
                         setEditedUser({
                           _id: user._id,
                           email: user.email,
@@ -787,11 +792,19 @@ export default function TeamTabs() {
                           isLeaveAccess: user.isLeaveAccess,
                           isTaskAccess: user.isTaskAccess,
                         });
-                        setIsEditModalOpen(true);
-                      }}>
+                        setIsEditModalOpen(true); // Open the edit modal
+                      }}
+                      >
                         <Pencil className="h-5 text-blue-500" />
                       </div>
-                      <div className="bg-transparent hover:bg-transparent" onClick={() => openDeleteDialog(user)}>
+                      {/* Delete Button */}
+                      <div
+                        className="bg-transparent hover:bg-transparent"
+                        onClick={(event) => {
+                          event.stopPropagation(); // Prevent the parent click event
+                          openDeleteDialog(user); // Open the delete confirmation dialog
+                        }}
+                      >
                         <Trash2 className="text-[#9C2121] h-5" />
                       </div>
                     </div>

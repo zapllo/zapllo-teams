@@ -56,6 +56,7 @@ export async function POST(request: NextRequest) {
             includeHolidays,
             includeWeekOffs,
             unit,
+            leaveReset,
         } = await request.json();
 
         // Validate the selected units
@@ -76,6 +77,7 @@ export async function POST(request: NextRequest) {
             advanceLeaveDays,
             includeHolidays,
             includeWeekOffs,
+            leaveReset,
             unit: selectedUnits,  // Use validated units here
             organization: authenticatedUser.organization, // Automatically assign the organization from the authenticated user
         });

@@ -12,6 +12,11 @@ enum LeaveUnit {
     ShortLeave = 'Short Leave',
 }
 
+enum LeaveReset {
+    Reset = 'Reset',
+    CarryForward = 'CarryForward',
+}
+
 // Define the interface for the Leave document
 export interface ILeaveType extends Document {
     _id: mongoose.Types.ObjectId;
@@ -24,6 +29,7 @@ export interface ILeaveType extends Document {
     includeHolidays: boolean;
     includeWeekOffs: boolean;
     unit: LeaveUnit[]; // Full Day, Half Day, Short Leave
+    leaveReset: LeaveReset; // Reset or CarryForward
     organization: mongoose.Types.ObjectId;
 }
 
@@ -65,6 +71,11 @@ const leaveTypeSchema: Schema<ILeaveType> = new mongoose.Schema({
     unit: {
         type: [String],
         enum: Object.values(LeaveUnit), // Only 'Full Day', 'Half Day', 'Short Leave'
+        required: true,
+    },
+    leaveReset: {
+        type: String,
+        enum: Object.values(LeaveReset), // 'Reset' or 'CarryForward'
         required: true,
     },
     organization: {

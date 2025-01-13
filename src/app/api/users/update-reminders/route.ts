@@ -22,6 +22,7 @@ export async function PATCH(request: NextRequest) {
                 dailyReminderTime: reminders.dailyReminderTime,
                 email: reminders.email,
                 whatsapp: reminders.whatsapp,
+                dailyAttendanceReportTime: reminders.dailyAttendanceReportTime,
             };
         } else {
             // Update reminders fields if already exists

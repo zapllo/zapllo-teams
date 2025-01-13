@@ -32,6 +32,14 @@ export async function PATCH(request: NextRequest) {
       country,
       isLeaveAccess = true, // Set default to false if not provided
       isTaskAccess = true,  // Set default to false if not provided
+      designation,  // New field
+      staffType,    // New field
+      asset,        // New field
+      branch,       // New field
+      department,
+      status,       // New field
+      gender, // New gender field
+      bankDetails,
     } = reqBody;
 
     const userToEdit = await User.findById(_id);
@@ -64,7 +72,17 @@ export async function PATCH(request: NextRequest) {
     // Set or update access fields
     userToEdit.isLeaveAccess = typeof isLeaveAccess !== "undefined" ? isLeaveAccess : userToEdit.isLeaveAccess;
     userToEdit.isTaskAccess = typeof isTaskAccess !== "undefined" ? isTaskAccess : userToEdit.isTaskAccess;
-
+    if (designation !== undefined) userToEdit.designation = designation;
+    if (staffType !== undefined) userToEdit.staffType = staffType;
+    if (asset !== undefined) userToEdit.asset = asset;
+    if (branch !== undefined) userToEdit.branch = branch;
+    if (department !== undefined) userToEdit.department = department;
+    if (status !== undefined) userToEdit.status = status;
+    if (gender !== undefined) userToEdit.gender = gender; // Update gender field
+    // Update bank details if provided
+    if (bankDetails) {
+      userToEdit.bankDetails = bankDetails;
+    }
 
     await userToEdit.save();
 

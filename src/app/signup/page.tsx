@@ -283,6 +283,7 @@ export default function SignupPage() {
           <div className="flex justify-center">
             <img src="/logo.png" className="h-7" alt="Logo" />
           </div>
+          <h1 className="text-center font-bold mt-2 text-3xl">Start Free Trial</h1>
           <p className="text-neutral-600 text-sm font-bold text-center max-w-sm mt-2 dark:text-neutral-300">
             Let’s get started by filling up the form below
           </p>
