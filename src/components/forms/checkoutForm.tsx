@@ -196,6 +196,7 @@ const MultiStepForm = ({ selectedPlan }: { selectedPlan: PlanKeys }) => {
                 subscribedUserCount: formData.subscribedUserCount,
                 email: formData.email,
             });
+            setIsPaymentProcessing(false);
 
             const { orderId } = data;
 
@@ -225,8 +226,10 @@ const MultiStepForm = ({ selectedPlan }: { selectedPlan: PlanKeys }) => {
                     };
 
                     try {
+                        setIsPaymentProcessing(true);
                         const verification = await axios.post('/api/onboardingSuccess', paymentResult);
                         if (verification.data.success) {
+                            // setIsPaymentProcessing(false);
                             toast(<div className=" w-full mb-6 gap-2 m-auto  ">
                                 <div className="w-full flex  justify-center">
                                     <DotLottieReact
@@ -241,10 +244,14 @@ const MultiStepForm = ({ selectedPlan }: { selectedPlan: PlanKeys }) => {
                             setIsPaymentProcessing(false);
 
                         } else {
+                            setIsPaymentProcessing(false);
                             toast.error('Payment verification failed.');
                         }
                     } catch (error) {
+                        setIsPaymentProcessing(false);
                         console.error('Error verifying payment:', error);
+                    } finally {
+                        setIsPaymentProcessing(false); // Reset the loader
                     }
                 },
                 prefill: {
@@ -262,10 +269,16 @@ const MultiStepForm = ({ selectedPlan }: { selectedPlan: PlanKeys }) => {
             };
 
             const rzp1 = new (window as any).Razorpay(options);
+            // Attach a handler to reset the loader when the Razorpay modal is closed
+            rzp1.on('modal.closed', () => {
+                setIsPaymentProcessing(false); // Reset the loader
+            });
+
             rzp1.open();
         } catch (error) {
             console.error('Error initiating payment:', error);
             toast.error('Something went wrong. Please try again.');
+            setIsPaymentProcessing(false);
         }
     };
 

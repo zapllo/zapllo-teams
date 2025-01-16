@@ -20,12 +20,10 @@ export async function POST(request: NextRequest) {
         }
 
         //check if password is correct
-        const validPassword = await bcryptjs.compare
-            (password, user.password)
+        const validPassword = await bcryptjs.compare(password, user.password);
         if (!validPassword) {
-            return NextResponse.json({ error: "Invlid password" }, { status: 400 })
+            return NextResponse.json({ error: "Invalid password" }, { status: 400 });
         }
-
         //create token data
         // A JavaScript object (tokenData) is created to store essential user 
         // information. In this case, it includes the user's unique identifier (id), 
