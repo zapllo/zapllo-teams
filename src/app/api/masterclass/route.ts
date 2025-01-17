@@ -2,17 +2,11 @@ import { sendEmail, SendEmailOptions } from "@/lib/sendEmail";
 import { NextRequest, NextResponse } from "next/server";
 
 
-// Helper function to format date and time
+// Helper function to format date and set time to 11:00 AM
 
-const formatDate = (dateInput: string | Date, timeInput: string): string => {
-  // Create a new Date object for the date and time
-  const date = new Date(dateInput);  // Parse the provided date
-  const time = new Date(timeInput);  // Parse the provided time
-
-  // Get day, month, year from the date
-  const day = date.getDate();
-  const month = date.toLocaleString("default", { month: "short" });
-  const year = date.getFullYear();
+const formatDate = (dateInput: string): string => {
+  // Extract the date from the input
+  const dateTime = new Date(dateInput);
 
   // Function to get the ordinal suffix for the day (1st, 2nd, 3rd, 4th, etc.)
   const getOrdinalSuffix = (day: number): string => {
@@ -21,24 +15,19 @@ const formatDate = (dateInput: string | Date, timeInput: string): string => {
     return suffix[(value - 20) % 10] || suffix[value] || suffix[0];
   };
 
-  const dayWithSuffix = `${day}${getOrdinalSuffix(day)}`;
+  // Get day, month, and year
+  const day = dateTime.getDate();
+  const month = dateTime.toLocaleString("default", { month: "short" });  // Short month name (Jan, Feb, etc.)
+  const year = dateTime.getFullYear();
 
-  // Get the hours and minutes from the time
-  const hours = time.getHours();
-  const minutes = time.getMinutes();
-  const period = hours >= 12 ? "PM" : "AM";
+  const formattedDay = `${day}${getOrdinalSuffix(day)}`;
 
-  // Convert to 12-hour format
-  const formattedHours = hours % 12 || 12; // Use 12-hour format
-  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes; // Ensure two digits for minutes
+  // Hardcode time to 11:00 AM
+  const formattedTime = "11:00 AM";
 
-  const formattedTime = `${formattedHours}:${formattedMinutes} ${period}`;
-
-  // Return formatted string in desired format
-  return `${dayWithSuffix} ${month} ${year}, ${formattedTime}`;
+  // Return the formatted date and hardcoded time
+  return `${formattedDay} ${month} ${year}, ${formattedTime}`;
 };
-
-
 
 
 // API route handler
@@ -71,7 +60,7 @@ export async function POST(request: NextRequest) {
                 <div style="border-radius:8px; margin-top:4px; color:#000000; padding:10px; background-color:#ECF1F6">
                   <p><strong>Workshop Details</strong></p>
                   <p><strong>Event Name:</strong> Business Automation Masterclass</p>
-                  <p><strong>Date & Time:</strong> ${formatDate(date, time)}</p>
+                  <p><strong>Date & Time:</strong> ${formatDate(date)}</p>
                 </div>
                 <p>Here's what you will learn in 2 hours:</p>
                   <p>✅ Why You Need to be System Dependent Instead of People Dependent</p>
