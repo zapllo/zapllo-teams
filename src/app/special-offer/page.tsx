@@ -1052,7 +1052,7 @@ export default function Home() {
                     </p>
 
                     {/* Get Freedom Offer Button */}
-                    <a href="#cards2">
+                    <a href="#cards">
                         <button
                             className="flex items-center justify-center gap-2 px-8 py-3 rounded-full text-white font-semibold transition-all"
                             style={{
@@ -1214,7 +1214,7 @@ export default function Home() {
                     </p>
 
                     {/* Get Freedom Offer Button */}
-                    <a href="#cards2">
+                    <a href="#cards">
                         <button
                             className="flex items-center justify-center gap-2 px-8 py-3 rounded-full text-white font-semibold transition-all"
                             style={{

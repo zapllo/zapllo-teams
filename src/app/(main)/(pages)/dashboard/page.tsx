@@ -176,7 +176,7 @@ console.log(progress, 'progress')
 
   return (
 
-    <div className=' dark:bg-[#04061e] mb-16 overflow-y-scroll
+    <div className=' dark:bg-[#04061e] bg-[#ffffff] mb-16 overflow-y-scroll
      pt-2 scale-95 h-screen gap- relative overflow-x-hidden scrollbar-hide'>
 
       {/* <h1 className='text-xl gap-2 sticky top-0 z-[10] -mt-12   dark:bg-[#04071F] backdrop-blur-lg flex items-center border-b'>   <Home className='h-5' />  Dashboard
