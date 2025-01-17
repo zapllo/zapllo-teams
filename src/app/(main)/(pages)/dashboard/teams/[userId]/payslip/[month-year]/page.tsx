@@ -129,6 +129,29 @@ export default function PayslipPage({
     };
 
 
+    useEffect(() => {
+        const fetchPayslipData = async () => {
+            try {
+                const [payslipResponse, userResponse, generateResponse] = await Promise.all([
+                    axios.get(`/api/payslip/${userId}`),
+                    axios.get(`/api/users/${userId}`),
+                    axios.post(`/api/payslip/generate`, { userId, month, year }),
+                ]);
+
+                setPayslipData(payslipResponse.data.payslip);
+                setUserData(userResponse.data.user);
+                setTotalWorkingDays(generateResponse.data.totalWorkingDays);
+            } catch (error) {
+                console.error("Error fetching payslip data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPayslipData();
+    }, [userId, month, year]);
+
+
     if (loadingPrint) {
         return (
             <div className="flex justify-center items-center h-screen">
@@ -141,29 +164,6 @@ export default function PayslipPage({
             </div>
         );
     }
-
-
-
-
-    useEffect(() => {
-        const fetchPayslipData = async () => {
-            try {
-                const [payslipResponse, userResponse] = await Promise.all([
-                    axios.get(`/api/payslip/${userId}`),
-                    axios.get(`/api/users/${userId}`),
-                ]);
-
-                setPayslipData(payslipResponse.data.payslip);
-                setUserData(userResponse.data.user);
-                setLoading(false);
-            } catch (error) {
-                console.error("Error fetching payslip data:", error);
-                setLoading(false);
-            }
-        };
-
-        fetchPayslipData();
-    }, [userId]);
 
 
     const handleEmailShare = async () => {
@@ -194,27 +194,7 @@ export default function PayslipPage({
         }
     };
 
-    useEffect(() => {
-        const fetchPayslipData = async () => {
-            try {
-                const response = await axios.post(`/api/payslip/generate`, {
-                    userId,
-                    month,
-                    year,
-                });
 
-                const { payslip, totalWorkingDays } = response.data;
-                setPayslipData(payslip);
-                setTotalWorkingDays(totalWorkingDays);
-                setLoading(false);
-            } catch (error) {
-                console.error("Error fetching payslip data:", error);
-                setLoading(false);
-            }
-        };
-
-        fetchPayslipData();
-    }, [userId, month, year]);
 
     if (loading) return <div>Loading...</div>;
     if (!payslipData || !userData) return <div className="ml-24 text-2xl font-bold mt-12">No data available</div>;
