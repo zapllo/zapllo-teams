@@ -52,6 +52,11 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
     const [isDateDialogOpen, setIsDateDialogOpen] = useState(false);
     const [datePickerTarget, setDatePickerTarget] = useState<'start' | 'end'>('start');
 
+
+    const [month, setMonth] = useState<number>(new Date().getMonth() + 1); // Default to current month
+    const [year, setYear] = useState<number>(new Date().getFullYear()); // Default to current year
+    const [uniqueLink, setUniqueLink] = useState<string | null>(null);
+
     const router = useRouter();
 
     useEffect(() => {
@@ -200,6 +205,21 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
 
 
 
+    const handleGeneratePayslip = async () => {
+        setLoading(true);
+
+        try {
+            const response = await axios.post("/api/payslip/generate", { userId, month, year });
+            if (response.data.success) {
+                setUniqueLink(response.data.uniqueLink);
+            }
+        } catch (error) {
+            console.error("Error generating payslip:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const renderActiveSection = () => {
         switch (activeTab) {
             case "Profile":
@@ -213,7 +233,61 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
             case "Deductions":
                 return <DeductionMenu userId={userId} />;
             case "Payslip":
-                return <PayslipPage userId={userId} />; // Placeholder
+                return (<div className="p-6">
+                    <h1 className="text-xl font-bold mb-4">Generate Payslip</h1>
+                    <div className="flex gap-4 mb-4">
+                        {/* Month Dropdown */}
+                        <select
+                            className="p-2 border rounded"
+                            value={month}
+                            onChange={(e) => setMonth(parseInt(e.target.value))}
+                        >
+                            {Array.from({ length: 12 }, (_, i) => (
+                                <option key={i + 1} value={i + 1}>
+                                    {new Date(0, i).toLocaleString("default", { month: "long" })}
+                                </option>
+                            ))}
+                        </select>
+
+                        {/* Year Dropdown */}
+                        <select
+                            className="p-2 border rounded"
+                            value={year}
+                            onChange={(e) => setYear(parseInt(e.target.value))}
+                        >
+                            {Array.from({ length: 5 }, (_, i) => (
+                                <option key={i} value={new Date().getFullYear() - i}>
+                                    {new Date().getFullYear() - i}
+                                </option>
+                            ))}
+                        </select>
+
+                        {/* Generate Button */}
+                        <button
+                            className={`px-4 py-2 text-white rounded ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-[#815bf5] -600"
+                                }`}
+                            onClick={handleGeneratePayslip}
+                            disabled={loading}
+                        >
+                            {loading ? "Generating..." : "Generate"}
+                        </button>
+                    </div>
+
+                    {/* Display Generated Link */}
+                    {uniqueLink && (
+                        <div className="mt-4">
+                            <p className="text-sm text-gray-600">Payslip generated successfully:</p>
+                            <a
+                                href={uniqueLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-500 underline"
+                            >
+                                View Payslip
+                            </a>
+                        </div>
+                    )}
+                </div>)
             default:
                 return null;
         }
@@ -276,7 +350,7 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
                 <div className="flex justify-between w-full items-center gap-4">
                     <div>
                         <div className="flex items-center gap-2 relative">
-                            <img src='/at.png' className="absolute -bottom-2 left-6   z-[100]  h-6" />
+                            <img src='/branding/badge.png' className="absolute -bottom-2 left-6   z-[40]  h-6" />
 
                             <div className='p-[2px]  rounded-full bg-gradient-to-r from-[#815BF5] to-[#FC8929]'>
                                 <div className='p-1 rounded-full bg-[#04061e] '>

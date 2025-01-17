@@ -5,6 +5,7 @@ import { Dialog, DialogClose, DialogContent } from "@/components/ui/dialog";
 import { Plus, Trash2 } from 'lucide-react';
 import { CrossCircledIcon } from '@radix-ui/react-icons';
 import axios from 'axios';
+import { toast } from 'sonner';
 
 interface Allowance {
     name: string;
@@ -115,10 +116,10 @@ export default function DeductionMenu({ userId }: SalaryDetailsProps) {
                     deductionDetails
                 }),
             });
-            alert('Deduction details saved successfully!');
+            toast.success('Deduction details saved successfully!');
         } catch (error) {
             console.error('Error saving deduction details:', error);
-            alert('Failed to save deduction details.');
+            toast.error('Failed to save deduction details.');
         }
     };
 
@@ -151,14 +152,14 @@ export default function DeductionMenu({ userId }: SalaryDetailsProps) {
 
                 // Update the client-side state with the updated salary details
                 setDeductionDetails(data.deductionDetails);
-                alert(`Allowance "${allowanceToDelete.name}" deleted successfully.`);
+                toast.success(`Allowance "${allowanceToDelete.name}" deleted successfully.`);
             } else {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Failed to delete allowance.');
             }
         } catch (error) {
             console.error('Error deleting allowance:', error);
-            alert('Failed to delete allowance.');
+            toast.error('Failed to delete allowance.');
         }
     };
 

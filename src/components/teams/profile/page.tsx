@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Loader from "@/components/ui/loader";
+import { toast } from "sonner";
 
 interface UserDetails {
   _id: string;
@@ -63,11 +64,11 @@ export default function EmployeeProfile({ userId }: { userId: string }) {
       try {
         const response = await axios.patch(`/api/users/update`, { ...user, _id: user._id });
         if (response.data.success) {
-          alert("User details updated successfully!");
+          toast.success("User details updated successfully!");
         }
       } catch (error) {
         console.error("Error updating user details:", error);
-        alert("Failed to update user details.");
+        toast.error("Failed to update user details.");
       }
     }
   };
@@ -140,7 +141,7 @@ export default function EmployeeProfile({ userId }: { userId: string }) {
                     <span className="absolute inset-0 rounded-full bg-white"></span>
                   )}
                 </span>
-                <span className="text-white font-semibold">{gender}</span>
+                <span className="text-white font-">{gender}</span>
               </label>
             ))}
           </div>

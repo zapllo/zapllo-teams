@@ -9,6 +9,7 @@ import {
 } from "../../ui/simple-accordion";
 import { Separator } from "@/components/ui/separator";
 import axios from "axios";
+import { toast } from "sonner";
 
 export default function PersonalDetails({ userId }: { userId: string }) {
 
@@ -43,10 +44,10 @@ export default function PersonalDetails({ userId }: { userId: string }) {
                 _id: userId,
                 bankDetails,
             });
-            alert("Bank details updated successfully!");
+            toast.success("Bank details updated successfully!");
         } catch (error) {
             console.error("Error updating bank details:", error);
-            alert("Failed to update bank details.");
+            toast.error("Failed to update bank details.");
         }
     };
 

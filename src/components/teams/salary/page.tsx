@@ -5,6 +5,7 @@ import { Dialog, DialogClose, DialogContent } from "@/components/ui/dialog";
 import { Plus, Trash2 } from 'lucide-react';
 import { CrossCircledIcon } from '@radix-ui/react-icons';
 import axios from 'axios';
+import { toast } from 'sonner';
 
 interface Allowance {
   name: string;
@@ -117,10 +118,10 @@ export default function SalaryMenu({ userId }: SalaryDetailsProps) {
           salaryDetails
         }),
       });
-      alert('Salary details saved successfully!');
+      toast.success('Salary details saved successfully!');
     } catch (error) {
       console.error('Error saving salary details:', error);
-      alert('Failed to save salary details.');
+      toast.error('Failed to save salary details.');
     }
   };
 
@@ -134,11 +135,11 @@ export default function SalaryMenu({ userId }: SalaryDetailsProps) {
         },
         body: JSON.stringify({ monthCalculationType: selectedCalculationMethod }),
       });
-      alert('Month calculation type saved successfully!');
+      toast.success('Month calculation type saved successfully!');
       setIsCalculationDialogOpen(false); // Close the dialog
     } catch (error) {
       console.error('Error saving month calculation type:', error);
-      alert('Failed to save month calculation type.');
+      toast.error('Failed to save month calculation type.');
     }
   };
 
@@ -169,14 +170,14 @@ export default function SalaryMenu({ userId }: SalaryDetailsProps) {
 
         // Update the client-side state with the updated salary details
         setSalaryDetails(data.salaryDetails);
-        alert(`Allowance "${allowanceToDelete.name}" deleted successfully.`);
+        toast.success(`Allowance "${allowanceToDelete.name}" deleted successfully.`);
       } else {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Failed to delete allowance.');
       }
     } catch (error) {
       console.error('Error deleting allowance:', error);
-      alert('Failed to delete allowance.');
+      toast.error('Failed to delete allowance.');
     }
   };
 
