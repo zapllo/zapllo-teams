@@ -79,7 +79,7 @@ export default function EmployeeProfile({ userId }: { userId: string }) {
   return (
     <div>
       {/* Profile Form */}
-      <h2 className="text-xl font-semibold mb-4">Profile Information</h2>
+      <h2 className="text-lg font-semibold mb-4">Profile Information</h2>
 
       <div className="grid grid-cols-2 gap-4">
         {/* Name */}
@@ -132,8 +132,8 @@ export default function EmployeeProfile({ userId }: { userId: string }) {
                   className="hidden"
                 />
                 <span
-                  className={`relative w-4 h-4 rounded-full border-2 flex-shrink-0 mr-2 ${user.gender === gender
-                    ? "bg-[#FC8929] border-transparent p-[2px]"
+                  className={`relative w-4 h-4 rounded-full border-[3px] flex-shrink-0 mr-2 ${user.gender === gender
+                    ? "bg-[#FC8929] border-transparent "
                     : "bg-[#37384b] border-gray-400"
                     }`}
                 >

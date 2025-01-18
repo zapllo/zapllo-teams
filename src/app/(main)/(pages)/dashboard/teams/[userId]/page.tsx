@@ -14,6 +14,9 @@ import SalaryMenu from "@/components/teams/salary/page";
 import DeductionMenu from "@/components/teams/deductions/page";
 import PersonalDetails from "@/components/teams/personal-details/page";
 import PayslipPage from "@/components/teams/payslip/page";
+import UserLogs from "@/components/teams/logs/userLogs";
+import { FaCalendarAlt, FaFileAlt, FaFileInvoice, FaHistory, FaMinusCircle, FaUser, FaWallet } from "react-icons/fa";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface UserDetails {
     _id: string;
@@ -51,8 +54,6 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
     const [endDate, setEndDate] = useState<Date | null>(null);
     const [isDateDialogOpen, setIsDateDialogOpen] = useState(false);
     const [datePickerTarget, setDatePickerTarget] = useState<'start' | 'end'>('start');
-
-
     const [month, setMonth] = useState<number>(new Date().getMonth() + 1); // Default to current month
     const [year, setYear] = useState<number>(new Date().getFullYear()); // Default to current year
     const [uniqueLink, setUniqueLink] = useState<string | null>(null);
@@ -95,7 +96,6 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
         }
     };
 
-
     useEffect(() => {
         if (activeTab === "Attendance") {
             fetchAttendanceReport();
@@ -105,7 +105,7 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
     const renderAttendanceSection = () => {
         return (
             <div>
-                <h2 className="text-xl font-semibold mb-4">Attendance Report</h2>
+                <h2 className="text-lg font-semibold mb-4">Attendance Report</h2>
 
                 {/* Date Selection and Fetch Button */}
                 <div className="flex gap-4 mb-4">
@@ -204,7 +204,6 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
     };
 
 
-
     const handleGeneratePayslip = async () => {
         setLoading(true);
 
@@ -234,11 +233,11 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
                 return <DeductionMenu userId={userId} />;
             case "Payslip":
                 return (<div className="p-6">
-                    <h1 className="text-xl font-bold mb-4">Generate Payslip</h1>
+                    <h1 className="text-lg font-bold mb-4">Generate Payslip</h1>
                     <div className="flex gap-4 mb-4">
                         {/* Month Dropdown */}
                         <select
-                            className="p-2 border rounded"
+                            className="p-2 border bg-[#04061E] outline-none rounded"
                             value={month}
                             onChange={(e) => setMonth(parseInt(e.target.value))}
                         >
@@ -251,7 +250,7 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
 
                         {/* Year Dropdown */}
                         <select
-                            className="p-2 border rounded"
+                            className="p-2 border outline-none bg-[#04061E] rounded"
                             value={year}
                             onChange={(e) => setYear(parseInt(e.target.value))}
                         >
@@ -261,10 +260,9 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
                                 </option>
                             ))}
                         </select>
-
                         {/* Generate Button */}
                         <button
-                            className={`px-4 py-2 text-white rounded ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-[#815bf5] -600"
+                            className={`px-4 py-2 text-white rounded ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-[#017a5b] hover:bg-green-800 text-sm -600"
                                 }`}
                             onClick={handleGeneratePayslip}
                             disabled={loading}
@@ -288,6 +286,8 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
                         </div>
                     )}
                 </div>)
+            case "User Logs":
+                return <UserLogs userId={userId} />
             default:
                 return null;
         }
@@ -330,29 +330,38 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
     };
 
 
+    const tabs = [
+        { name: "Profile", icon: <FaUser className="h-4 w-4" /> },
+        { name: "Personal Details", icon: <FaFileAlt className="h-4 w-4" /> },
+        { name: "Attendance", icon: <FaCalendarAlt className="h-4 w-4" /> },
+        { name: "Salary Overview", icon: <FaWallet className="h-4 w-4" /> },
+        { name: "Deductions", icon: <FaMinusCircle className="h-4 w-4" /> },
+        { name: "Payslip", icon: <FaFileInvoice className="h-4 w-4" /> },
+        { name: "User Logs", icon: <FaHistory className="h-4 w-4" /> },
+    ];
+
     if (loading) return <p><Loader /></p>;
     if (!user) return <p>User not found.</p>;
 
     return (
         <div className="w-full max-w-5xl overflow-y-scroll overflow-x-hidden h-full scrollbar-hide mt-16 mx-auto">
             {/* Header */}
-            <div className="flex items-center mb-4">
-                <button onClick={() => router.back()}>
-                    <div className="flex items-center gap-2 font-medium text-xl cursor-pointer">
-                        <ArrowLeft className="h-7 rounded-full border-white border w-7 hover:bg-white hover:text-black" />
-                        <h1>Back</h1>
-                    </div>
-                </button>
-            </div>
-
             {/* User Summary */}
-            <div className="border mt-4 p-6 rounded-xl shadow-md flex justify-between items-center">
+            <div className="border rounded-xl relative mt-4 p-6 ">
+                <div className="flex items-cente absolute left-0 scale-75  p-1 top-0 r mb-4">
+                    <button onClick={() => router.back()}>
+                        <div className="flex items-center gap-2 font-medium text-xl cursor-pointer">
+                            <ArrowLeft className="h-7 rounded-full border-white border w-7 hover:bg-white hover:text-black" />
+                            {/* <h1>Back</h1> */}
+                        </div>
+                    </button>
+                </div>
                 <div className="flex justify-between w-full items-center gap-4">
                     <div>
                         <div className="flex items-center gap-2 relative">
-                            <img src='/branding/badge.png' className="absolute -bottom-2 left-6   z-[40]  h-6" />
+                            <img src='/branding/badge.png' className="absolute -bottom-2 scale-90  left-6   z-[40]  h-6" />
 
-                            <div className='p-[2px]  rounded-full bg-gradient-to-r from-[#815BF5] to-[#FC8929]'>
+                            <div className='p-[2px] scale-90  rounded-full bg-gradient-to-r from-[#815BF5] to-[#FC8929]'>
                                 <div className='p-1 rounded-full bg-[#04061e] '>
                                     <Avatar className="rounded-full h-16 w-16 flex bg-[#815BF5] items-center ">
 
@@ -375,7 +384,7 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
                             </div>
 
                             <div>
-                                <h1 className="text-xl font-semibold">{`${user.firstName} ${user.lastName}`}</h1>
+                                <h1 className="text-lg font-semibold">{`${user.firstName} ${user.lastName}`}</h1>
                                 <div className="flex items-center gap-2  ">
                                     <div
                                         className={`w-fit px-4 py-1 rounded text-xs ${user.role === "orgAdmin"
@@ -405,25 +414,27 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
                         </div>
                     </div>
                     <div className="relative">
-                        <select
-                            className="p-2 border text-sm font-medium bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white rounded-xl outline-none focus:ring-[#815BF5]"
-                            value={user.status || ""}
-                            onChange={(e) => handleUpdateField("status", e.target.value)}
+                        <Select
+                            value={user.status || "Active"}
+                            onValueChange={(value) => handleUpdateField("status", value)}
                         >
-                            <option
-                                className="p-2 bg-[#04061E] text-white hover:bg-[#815BF5] font-medium"
-                                value="Active"
-                            >
-                                Active
-                            </option>
-                            <option
-                                className="p-2 bg-[#04061E] text-white hover:bg-[#FC8929] font-medium"
-                                value="Deactivated"
-                            >
-                                Deactivated
-                            </option>
-                        </select>
+                            <SelectTrigger className=" bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white outline-none focus:ring-[#815BF5]">
+                                <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                            <SelectContent className="p-1 bg-[#04061E] text-white rounded-xl shadow-lg">
+                                <SelectItem value="Active" className="hover:bg-[#815BF5] font-medium">
+                                    Active
+                                </SelectItem>
+                                <SelectItem
+                                    value="Deactivated"
+                                    className="hover:bg-[#FC8929] font-medium"
+                                >
+                                    Deactivated
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
+
 
                 </div>
             </div>
@@ -432,16 +443,17 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
             <div className="grid mb-24 grid-cols-4 gap-6 mt-6">
                 <div className="col-span-1 rounded-xl p-4 border">
                     <div className="flex flex-col gap-4">
-                        {["Profile", "Personal Details", "Attendance", "Salary Overview", "Deductions", "Payslip"].map((tab) => (
+                        {tabs.map((tab) => (
                             <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                className={`text-left w-full px-4 py-2 border rounded-2xl ${activeTab === tab
+                                key={tab.name}
+                                onClick={() => setActiveTab(tab.name)}
+                                className={`flex items-center gap-4 px-4 text-sm py-2 border rounded-2xl text-left ${activeTab === tab.name
                                     ? "bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white"
                                     : ""
                                     }`}
                             >
-                                {tab}
+                                {tab.icon}
+                                {tab.name}
                             </button>
                         ))}
                     </div>

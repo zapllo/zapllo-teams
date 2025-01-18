@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { X } from 'lucide-react';
 import Loader from '@/components/ui/loader';
+import { toast } from 'sonner';
 
 export default function PayslipDetailsPage() {
     const [formData, setFormData] = useState({
@@ -88,8 +89,9 @@ export default function PayslipDetailsPage() {
             });
 
             if (payslipResponse.data.success) {
+                toast.success('Payslip details saved successfully!')
                 setSuccessMessage('Payslip details saved successfully!');
-              
+
             } else {
                 setErrorMessage('Failed to save payslip details.');
             }

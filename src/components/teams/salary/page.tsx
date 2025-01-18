@@ -236,14 +236,14 @@ export default function SalaryMenu({ userId }: SalaryDetailsProps) {
     <div className="space-y-6">
       <div className='flex justify-between items-center'>
         <div>
-          <h2 className="text-xl font-semibold">Salary Details</h2>
+          <h2 className="text-lg font-semibold">Salary Details</h2>
           <p className='text-muted-foreground text-sm'>
             Calculated according to -  {selectedCalculationMethod}
           </p>
         </div>
         <button
           onClick={() => setIsCalculationDialogOpen(true)}
-          className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600"
+          className="px-4 py-2 text-sm bg-[#815bf5] -700 text-white rounded-md hover:bg-primary"
         >
           Select Salary Type
         </button>
@@ -299,7 +299,7 @@ export default function SalaryMenu({ userId }: SalaryDetailsProps) {
       <div className="flex justify-between">
         <button
           onClick={saveSalaryDetails}
-          className="px-4 py-2 bg-[#017a5b] text-white rounded-md hover:bg-green-800 ml-auto"
+          className="px-4 py-2 text-sm bg-[#017a5b] text-white rounded-md hover:bg-green-800 ml-auto"
         >
           Save Salary Details
         </button>

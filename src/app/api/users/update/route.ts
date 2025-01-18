@@ -40,6 +40,9 @@ export async function PATCH(request: NextRequest) {
       status,       // New field
       gender, // New gender field
       bankDetails,
+      legalDocuments,
+      contactDetails,
+      personalInformation,
     } = reqBody;
 
     const userToEdit = await User.findById(_id);
@@ -83,6 +86,25 @@ export async function PATCH(request: NextRequest) {
     if (bankDetails) {
       userToEdit.bankDetails = bankDetails;
     }
+
+    // Update legal documents if provided
+    if (legalDocuments) {
+      userToEdit.legalDocuments = {
+        ...userToEdit.legalDocuments, // Preserve existing documents
+        ...legalDocuments, // Overwrite with new data
+      };
+    }
+
+    if (contactDetails) {
+      userToEdit.contactDetails = contactDetails;
+    }
+
+    // Update personal information if provided
+    if (personalInformation) {
+      userToEdit.personalInformation = personalInformation;
+    }
+
+
 
     await userToEdit.save();
 

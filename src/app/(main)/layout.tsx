@@ -144,7 +144,7 @@ const Layout = (props: Props) => {
           </div>
         </div>
         <Link href="/dashboard/billing">
-          <Button className="h-9 bg-[#017a5b] hover:bg-[#23ac8a] text-white hover:text-white mt-4 text-md">
+          <Button className="h-9 bg-[#017a5b] hover:bg-green-800 text-white hover:text-white mt-4 text-md">
             Upgrade to Pro
           </Button>
         </Link>
@@ -237,7 +237,7 @@ const Layout = (props: Props) => {
               Upgrade now for uninterrupted access
             </h1>
             <Link href="/dashboard/billing">
-              <Button className="h-5 rounded dark:bg-[#017a5b] w-fit px-2 py-3 text-xs text-white">
+              <Button className="h-5 rounded dark:bg-[#017a5b] dark:hover:bg-green-800 w-fit px-2 py-3 text-xs text-white">
                 Upgrade Now
               </Button>
             </Link>

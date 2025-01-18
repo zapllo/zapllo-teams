@@ -14,27 +14,34 @@ export async function POST(req: NextRequest) {
 
         // Generate unique link (using userId, month, and year)
         const uniqueLink = `/dashboard/teams/${userId}/payslip/${month}-${year}`;
-
+        const publicLink = `/payslip/${userId}/${month}-${year}`
         // Check if a payslip for the same month and year already exists
         const existingPayslip = await PayslipLog.findOne({ userId, month, year });
         if (existingPayslip) {
             return NextResponse.json({
                 success: true,
                 uniqueLink: existingPayslip.uniqueLink,
+                publicLink: existingPayslip.publicLink,
                 message: "Payslip already generated!",
             });
         }
 
-        // Save the payslip log
+        // Extract salary and deduction details
+        const { salaryDetails = [], deductionDetails = [] } = user;
+
+        // Save the payslip log with salary and deduction details
         const payslip = new PayslipLog({
             userId,
             month,
             year,
             uniqueLink,
+            publicLink,
+            salaryDetails,
+            deductionDetails,
         });
         await payslip.save();
 
-        return NextResponse.json({ success: true, uniqueLink });
+        return NextResponse.json({ success: true, uniqueLink, publicLink });
     } catch (error) {
         console.error("Error generating payslip:", error);
         return NextResponse.json({ success: false, message: "Failed to generate payslip" }, { status: 500 });

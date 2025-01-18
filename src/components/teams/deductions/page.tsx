@@ -171,7 +171,7 @@ export default function DeductionMenu({ userId }: SalaryDetailsProps) {
         <div className="space-y-6">
             <div className='flex justify-between items-center'>
                 <div>
-                    <h2 className="text-xl font-semibold">Deduction Details</h2>
+                    <h2 className="text-lg font-semibold">Deduction Details</h2>
 
                 </div>
 

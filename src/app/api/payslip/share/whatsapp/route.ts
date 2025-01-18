@@ -1,6 +1,12 @@
 import User from "@/models/userModel";
 import { NextRequest, NextResponse } from "next/server";
 
+
+function formatMonth(month: number): string {
+    const date = new Date(0, month - 1); // Month is 0-indexed in Date
+    return new Intl.DateTimeFormat("en-US", { month: "short" }).format(date);
+}
+
 export async function POST(request: NextRequest) {
     try {
         const { userId, month, year } = await request.json();
@@ -18,12 +24,17 @@ export async function POST(request: NextRequest) {
         if (!phoneNumber || !country) {
             return NextResponse.json({ error: "User phone number or country is missing" }, { status: 400 });
         }
-        const uniqueLink = `https://zapllo.com/dashboard/teams/${userId}/payslip/${month}-${year}`
+
+        // Format the month
+        const formattedMonth = formatMonth(month);
+
+
+        const uniqueLink = `https://zapllo.com/payslip/${userId}/${month}-${year}`
         // Prepare payload for webhook
         const payload = {
             phoneNumber,
             country,
-            bodyVariables: [uniqueLink, month, year],
+            bodyVariables: [uniqueLink, formattedMonth, year],
             templateName: "payslip_details_v2", // Replace with your actual template name
             mediaUrl: null, // Optional media URL, if needed
         };

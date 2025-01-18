@@ -18,12 +18,31 @@ interface IBankDetails {
     ifscCode: string;
 }
 
+interface ILegalDocuments {
+    aadharCard?: string; // URL for Aadhar Card
+    drivingLicense?: string; // URL for Driving License
+    panCard?: string; // URL for PAN Card
+    passportPhoto?: string; // URL for Passport Photo
+}
+
 
 interface IReminders {
     dailyReminderTime: string; // Time in HH:MM AM/PM format
     email: boolean;            // Email reminder toggle
     whatsapp: boolean;         // WhatsApp reminder toggle
     dailyAttendanceReportTime: string; // New field for daily attendance report time
+}
+
+interface IContactDetails {
+    emergencyContact: string;
+    contactPersonName: string;
+    relation: string;
+    address: string;
+}
+
+interface IPersonalInformation {
+    dateOfBirth: Date | null;
+    dateOfJoining: Date | null;
 }
 
 // Define an interface for the User document
@@ -74,8 +93,13 @@ export interface IUser extends Document {
     monthCalculationType?: string;
     gender: "Male" | "Female" | "Other" | null; // New gen  der field
     bankDetails?: IBankDetails;
+    legalDocuments?: ILegalDocuments;
+    contactDetails?: IContactDetails; // New contact details field
+    personalInformation?: IPersonalInformation;
     createdAt: Date;
 }
+
+
 
 const BankDetailsSchema: Schema<IBankDetails> = new Schema({
     bankName: { type: String, default: "" },
@@ -84,6 +108,25 @@ const BankDetailsSchema: Schema<IBankDetails> = new Schema({
     ifscCode: { type: String, default: "" },
 });
 
+const ContactDetailsSchema: Schema<IContactDetails> = new Schema({
+    emergencyContact: { type: String, default: "" },
+    contactPersonName: { type: String, default: "" },
+    relation: { type: String, default: "" },
+    address: { type: String, default: "" },
+});
+
+const LegalDocumentsSchema: Schema<ILegalDocuments> = new Schema({
+    aadharCard: { type: String, default: "" },
+    drivingLicense: { type: String, default: "" },
+    panCard: { type: String, default: "" },
+    passportPhoto: { type: String, default: "" },
+});
+
+
+const PersonalInformationSchema: Schema<IPersonalInformation> = new Schema({
+    dateOfBirth: { type: Date, default: null },
+    dateOfJoining: { type: Date, default: null },
+});
 
 // Define the schema
 const userSchema: Schema<IUser> = new mongoose.Schema({
@@ -188,6 +231,9 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
     ],
     gender: { type: String, enum: ["Male", "Female", "Other"], default: null }, // Gender field
     bankDetails: { type: BankDetailsSchema, default: null }, // Include Bank Details Field
+    legalDocuments: { type: LegalDocumentsSchema, default: {} },
+    contactDetails: { type: ContactDetailsSchema, default: null },
+    personalInformation: { type: PersonalInformationSchema, default: null },
 }, { timestamps: true });
 
 // Define and export the User model
