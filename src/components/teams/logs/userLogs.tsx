@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 
 interface PayslipLogData {
+    _id: string;
     salaryDetails: {
         name: string;
         amount: number;
@@ -96,7 +97,7 @@ export default function UserLogs({ userId }: { userId: string }) {
                     <AccordionContent2>
                         <div className="grid grid-cols-1 gap-4">
                             {payslipLogData?.map((payslips, index) => (
-                                <div>
+                                <div key={payslips._id}>
                                     <Link href={payslips.publicLink}>
                                         <h1 className="hover:underline text-blue-500 cursor-pointer">
                                             {new Date(payslips.year, payslips.month - 1).toLocaleString('default', { month: 'short', year: 'numeric' })}
