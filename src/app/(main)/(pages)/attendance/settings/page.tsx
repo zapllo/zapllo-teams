@@ -84,8 +84,8 @@ export default function Settings({ }: Props) {
 
 
     return (
-        <div className='pt-4 w-full max-w-screen overflow-y-scroll h-screen  '>
-            <div className=' bg-[#0B0D29] px-4  mt-4 mx-2  my-4  p-2 border rounded-xl '>
+        <div className='pt-4 w-full max-w-screen  overflow-y-scroll h-full '>
+            <div className=' bg-[#0B0D29] px-4   mx-2  p-2 border rounded-xl '>
                 <h1 className='text-sm text-muted-foreground'>Leave Types</h1>
             </div>
             <Link href='/attendance/settings/leave-types'>

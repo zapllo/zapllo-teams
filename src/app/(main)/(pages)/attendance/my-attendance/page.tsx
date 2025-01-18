@@ -1021,7 +1021,7 @@ export default function MyAttendance() {
 
   console.log(todayEntries, 'todays');
   return (
-    <div className="container h-screen overflow-y-scroll scrollbar-hide rounded-lg p-4 shadow-lg">
+    <div className="container mt-6 h-screen overflow-y-scroll scrollbar-hide rounded-lg p-4 shadow-lg">
       {/* <Toaster /> */}
       {displayLoader && (
         <div className="absolute  w-screen h-screen  z-[100]  inset-0 bg-[#04061e] -900  bg-opacity-90 rounded-xl flex justify-center items-center">

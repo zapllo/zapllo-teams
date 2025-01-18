@@ -8,6 +8,7 @@ import axios from 'axios';
 import { Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import React, { useState, useEffect } from 'react';
+import Loader from '@/components/ui/loader';
 
 // Generate all weekdays of a selected month, excluding weekends (Saturday, Sunday)
 const generateWeekdaysInMonth = (year: number, month: number) => {
@@ -393,6 +394,9 @@ const AttendanceDashboard: React.FC = () => {
   }, [])
 
 
+  if (attendanceLoading) {
+    return <Loader />;
+  }
 
   return (
     <div className="p-6 h-screen overflow-y-scroll">
