@@ -1021,7 +1021,7 @@ export default function MyAttendance() {
 
   console.log(todayEntries, 'todays');
   return (
-    <div className="container mt-6 h-screen overflow-y-scroll scrollbar-hide rounded-lg p-4 shadow-lg">
+    <div className="container m h-screen overflow-y-scroll scrollbar-hide rounded-lg p-4 shadow-lg">
       {/* <Toaster /> */}
       {displayLoader && (
         <div className="absolute  w-screen h-screen  z-[100]  inset-0 bg-[#04061e] -900  bg-opacity-90 rounded-xl flex justify-center items-center">
@@ -1053,23 +1053,30 @@ export default function MyAttendance() {
           </div>
         </div>
       )}
-      <div className="login-section flex justify-center mb-6">
-        {hasRegisteredFaces ? (
-          <button
-            onClick={handleLoginLogout}
-            className={`bg-${isLoggedIn ? "red-800" : "[#017a5b]"
-              } -500 text-white py-2 px-4 rounded text-sm`}
-          >
-            {isLoggedIn ? "Logout" : "Login"}
-          </button>
-        ) : (
-          <button
-            onClick={() => setIsRegisterFaceModalOpen(true)}
-            className="bg-[#815BF5] text-white py-2 px-6 rounded text-xs"
-          >
-            Register Faces
-          </button>
-        )}
+      <div className="login-section   flex justify-center ">
+        <div className=" flex justify-center m-auto mt-4">
+
+          {hasRegisteredFaces ? (
+            <div>
+              <button
+                onClick={handleLoginLogout}
+                className={`bg-${isLoggedIn ? "red-800" : "[#017a5b]"
+                  } -500 text-white py-2 px-4 rounded text-sm`}
+              >
+                {isLoggedIn ? "Logout" : "Login"}
+              </button>
+            </div>
+          ) : (
+            <div className="">
+              <button
+                onClick={() => setIsRegisterFaceModalOpen(true)}
+                className="bg-[#815BF5] text-white py-2 px-6 rounded text-xs"
+              >
+                Register Faces
+              </button>
+            </div>
+          )}
+        </div>
       </div>
       {/* Login/Logout Button */}
       {/* <div className="login-section flex justify-center mb-6">

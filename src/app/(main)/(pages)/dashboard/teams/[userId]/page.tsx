@@ -15,8 +15,9 @@ import DeductionMenu from "@/components/teams/deductions/page";
 import PersonalDetails from "@/components/teams/personal-details/page";
 import PayslipPage from "@/components/teams/payslip/page";
 import UserLogs from "@/components/teams/logs/userLogs";
-import { FaCalendarAlt, FaFileAlt, FaFileInvoice, FaHistory, FaMinusCircle, FaUser, FaWallet } from "react-icons/fa";
+import { FaCalendarAlt, FaFileAlt, FaFileInvoice, FaHistory, FaLock, FaMinusCircle, FaUser, FaWallet } from "react-icons/fa";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
 
 interface UserDetails {
     _id: string;
@@ -57,6 +58,10 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
     const [month, setMonth] = useState<number>(new Date().getMonth() + 1); // Default to current month
     const [year, setYear] = useState<number>(new Date().getFullYear()); // Default to current year
     const [uniqueLink, setUniqueLink] = useState<string | null>(null);
+    const [leavesTrialExpires, setLeavesTrialExpires] = useState<Date | null>(null);
+    const [attendanceTrialExpires, setAttendanceTrialExpires] = useState<Date | null>(null);
+    const [subscribedPlan, setSubscribedPlan] = useState<string | null>(null);
+    const [isPlanEligible, setIsPlanEligible] = useState<boolean>(false);
 
     const router = useRouter();
 
@@ -75,6 +80,42 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
                 });
         }
     }, [userId]);
+
+    useEffect(() => {
+        const fetchPlanStatus = async () => {
+            try {
+                const response = await axios.get("/api/organization/getById");
+                const {
+                    leavesTrialExpires: leavesExpire,
+                    attendanceTrialExpires: attendanceExpire,
+                    subscribedPlan: plan,
+                } = response.data.data;
+
+                const eligiblePlans = ["Money Saver Bundle", "Zapllo Payroll"];
+                setLeavesTrialExpires(leavesExpire ? new Date(leavesExpire) : null);
+                setAttendanceTrialExpires(attendanceExpire ? new Date(attendanceExpire) : null);
+                setSubscribedPlan(plan);
+                setIsPlanEligible(eligiblePlans.includes(plan));
+            } catch (error) {
+                console.error("Error fetching plan status:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPlanStatus();
+    }, []);
+console.log(subscribedPlan, 'plan?')
+    const handleTabClick = (tabName: string) => {
+        const lockedTabs = ["Attendance", "Salary Overview", "Deductions", "Payslip", "User Logs"];
+        const isLocked = !isPlanEligible && lockedTabs.includes(tabName);
+
+        if (isLocked) {
+            toast.error("Purchase Money Saver Bundle to unlock");
+        } else {
+            setActiveTab(tabName);
+        }
+    };
 
     // Fetch attendance report
     const fetchAttendanceReport = async () => {
@@ -218,6 +259,53 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
             setLoading(false);
         }
     };
+
+
+    const renderTabs = () => {
+        return tabs.map((tab) => {
+            const lockedTabs = ["Attendance", "Salary Overview", "Deductions", "Payslip", "User Logs"];
+            const isLocked = !isPlanEligible && lockedTabs.includes(tab.name);
+    
+            return (
+                <button
+                    key={tab.name}
+                    onClick={() => handleTabClick(tab.name)}
+                    className={`relative flex items-center gap-4 px-4 text-sm py-2 border rounded-2xl text-left ${
+                        activeTab === tab.name && !isLocked
+                            ? "bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white"
+                            : ""
+                    }`}
+                >
+                    {/* Tab Content */}
+                    <div
+                        className={`flex items-center gap-4 ${
+                            isLocked ? "blur-" : "blur-none"
+                        }`}
+                    >
+                        {tab.icon}
+                        {tab.name}
+                    </div>
+    
+                    {/* Lock Overlay */}
+                    {isLocked && (
+                        <div
+                            className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-80 rounded-2xl"
+                            style={{ pointerEvents: "auto" }}
+                        >
+                            <FaLock
+                                className="text-white text-lg cursor-pointer"
+                                onClick={(e) => {
+                                    e.stopPropagation(); // Prevent tab click
+                                    toast.error("Purchase Money Saver Bundle to unlock");
+                                }}
+                            />
+                        </div>
+                    )}
+                </button>
+            );
+        });
+    };
+    
 
     const renderActiveSection = () => {
         switch (activeTab) {
@@ -443,19 +531,7 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
             <div className="grid mb-24 grid-cols-4 gap-6 mt-6">
                 <div className="col-span-1 rounded-xl p-4 border">
                     <div className="flex flex-col gap-4">
-                        {tabs.map((tab) => (
-                            <button
-                                key={tab.name}
-                                onClick={() => setActiveTab(tab.name)}
-                                className={`flex items-center gap-4 px-4 text-sm py-2 border rounded-2xl text-left ${activeTab === tab.name
-                                    ? "bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white"
-                                    : ""
-                                    }`}
-                            >
-                                {tab.icon}
-                                {tab.name}
-                            </button>
-                        ))}
+                       {renderTabs()}
                     </div>
                 </div>
 

@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
       firstName: reqBody.firstName,
       lastName: reqBody.lastName,
       email,
-      password: hashedPassword,
+      password,
       trialExpires,
       role: newUserRole,
       organization: newOrganizationId,

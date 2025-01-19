@@ -68,12 +68,15 @@ const Layout = (props: Props) => {
 
 
     return (
-        <div className={`flex overflow-hidden  dark:bg-[#04061e] scrollbar-hide h-full w-full `}>
-            <LeavesSidebar />
-            <div className='w-full overflow-hidden please h-full '>
-                <div className='  mt-12 ml-48 '>
-                    {props.children}
-                </div>
+        <div className="flex h-screen overflow-hidden bg-[#04061e]">
+            {/* Sidebar */}
+            <div className="w-48 shrink-0">
+                <LeavesSidebar />
+            </div>
+
+            {/* Main Content */}
+            <div className="flex-grow scrollbar-hide overflow-auto">
+                <div className="p-4 mt-8">{props.children}</div>
             </div>
         </div>
 
