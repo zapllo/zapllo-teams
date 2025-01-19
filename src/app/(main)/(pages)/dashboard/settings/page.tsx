@@ -202,7 +202,7 @@ export default function Page() {
     getUserDetails();
   }, []);
 
- 
+
 
   const updateSettings = async () => {
     try {
@@ -246,17 +246,19 @@ export default function Page() {
 
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+
+
+
   return (
     <div className="p-4  h-fit max-h-screen  scrollbar-hide overflow-y-scroll ">
       {/* <Toaster /> */}
 
       {role === "orgAdmin" && (
         <div>
-          {loading ? <Loader /> : ""}
           <div className=" mt-2 bg- p-2 px-4 border bg-[#0A0D28] text-lg rounded-xl ">
-            <h1 className="text-sm text-muted-foreground">Organization Details</h1>
+            <h1 className="text-md text-muted-foreground">Organization Details</h1>
           </div>
-          <div className=" text-xs grid grid-cols-1 text- p-2 gap-2 py-2">
+          <div className=" text-sm grid grid-cols-1 text- p-2 gap-2 py-2">
             <div className="grid-cols-2 grid gap-2 p-2">
               <div className="space-y-8 mt-2">
                 <h1 className="">Company Name</h1>
@@ -306,25 +308,24 @@ export default function Page() {
                     <option value="" disabled>
                       Select Team Size
                     </option>
-                    <option value="1-5">1-5</option>
-                    <option value="5-10">5-10</option>
-                    <option value="10-15">10-15</option>
-                    <option value="15-20">15-20</option>
-                    <option value="20-25">20-25</option>
-                    <option value="25+">25+</option>
+                    <option value="1-10">1-10</option>
+                    <option value="11-20">11-20</option>
+                    <option value="21-30">21-30</option>
+                    <option value="31-50">31-50</option>
+                    <option value="51+">51+</option>
                   </select>
                 </div>
               </div>
-              <div className="mt-2">
-                <button
-                  onClick={handleUpdateOrganization}
-                  className="mt-4 px-4 py-2 ml-auto bg-[#007A5A] hover:bg-[#0c4f3e] text-white rounded"
-                >
-                  {loading ? <Loader /> : "Update Organization "}
-                </button>
-              </div>
-            </div>
 
+            </div>
+            <div className="mt-2  flex justify-end">
+              <button
+                onClick={handleUpdateOrganization}
+                className="mt-4 px-4 py-2 text-xs bg-[#007A5A] hover:bg-[#0c4f3e] text-white rounded"
+              >
+                {loading ? <Loader /> : "Update Organization "}
+              </button>
+            </div>
             <div className="flex gap-2"></div>
             <div className="flex gap-2"></div>
           </div>
@@ -333,21 +334,21 @@ export default function Page() {
       {role === "orgAdmin" && (
         <div>
           <div className=" mt-4 bg-[#0A0D28] p-2 px-4 border rounded-xl ">
-            <h1 className="text-sm text-muted-foreground">WhatsApp Integration</h1>
+            <h1 className="text- text-muted-foreground">WhatsApp Integration</h1>
           </div>
           <div onClick={() => setWabaOpen(true)} className="mb-2  mt-2 flex   px-4 py-4  ' cursor-pointer ' underline-offset-4  m border-b w-full  ">
-            <h1 className=" text-xs text-start w-full">Connect your WABA Number</h1>
+            <h1 className=" text-sm text-start w-full">Connect your WABA Number</h1>
             <ChevronRight className="h-4" />
           </div>
         </div>
       )}
       <div className=" mt-6 bg-[#0A0D28] p-2 px-4 border rounded-xl ">
-        <h1 className="text-sm text-muted-foreground">Task App Settings</h1>
+        <h1 className="text- text-muted-foreground">Task App Settings</h1>
       </div>
       <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
         <DialogTrigger className="w-full  items-center mt-2  flex justify-">
           <div className="mb-2  px-4 ' ' underline-offset-4 py-4  m border-b w-full  ">
-            <h1 className=" text-xs text-start w-full">Notifications & Reminders</h1>
+            <h1 className=" text-sm text-start w-full">Notifications & Reminders</h1>
           </div>
           <ChevronRight className="h-4 -ml-10" />
         </DialogTrigger>
@@ -533,7 +534,7 @@ export default function Page() {
         </DialogContent>
       </Dialog>
       <div className="mb-24   px-4 ' cursor-pointer ' underline-offset-4  m border-b w-full  py-2">
-        <h1 className=" text-xs text-start w-full">Export Tasks (Coming Soon)</h1>
+        <h1 className=" text-sm text-start w-full">Export Tasks (Coming Soon)</h1>
       </div>
 
       {/* 

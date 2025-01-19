@@ -3,7 +3,8 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { usePathname, useRouter } from 'next/navigation';
 import { GearIcon, PieChartIcon, CardStackIcon } from '@radix-ui/react-icons';
-import { GitBranchPlus, GitGraphIcon } from 'lucide-react';
+import { GitBranchPlus, GitBranchPlusIcon, GitGraphIcon, PieChart, Settings, WalletCards } from 'lucide-react';
+import { FaCodeBranch } from 'react-icons/fa';
 
 const SettingsSidebar: React.FC = () => {
     const pathname = usePathname();
@@ -24,7 +25,7 @@ const SettingsSidebar: React.FC = () => {
                         className={`w-[90%] rounded-lg mt-6 gap-2 px-4 justify-start hover:bg-[#37384B] hover:rounded-lg bg-transparent mb-2 ${isActive('/dashboard/settings') ? 'bg-[#815BF5] hover:bg-[#815BF5] rounded-lg text-white' : 'text-gray-400'}`}
                         onClick={() => handleNavigation('/dashboard/settings')}
                     >
-                        <GearIcon className="h-5" /> General
+                        <Settings className="h-5" /> General
                     </Button>
                 </div>
                 <div className="flex justify-center">
@@ -33,7 +34,7 @@ const SettingsSidebar: React.FC = () => {
                         className={`w-[90%] rounded-lg gap-2 px-4 bg-transparent justify-start hover:rounded-lg hover:bg-[#37384B]  mb-2 ${isActive('/dashboard/settings/categories') ? 'bg-[#815BF5] hover:bg-[#815BF5] text-white rounded-lg' : 'text-gray-400'}`}
                         onClick={() => handleNavigation('/dashboard/settings/categories')}
                     >
-                        <PieChartIcon className="h-5" /> Categories
+                        <PieChart className="h-5" /> Categories
                     </Button>
                 </div>
                 <div className="flex justify-center">
@@ -42,7 +43,7 @@ const SettingsSidebar: React.FC = () => {
                         className={`w-[90%] rounded-lg gap-2 px-4 bg-transparent justify-start hover:bg-[#37384B] hover:rounded-lg mb-2 ${isActive('/dashboard/billing') ? 'bg-[#815BF5] text-white rounded-lg' : 'text-gray-400'}`}
                         onClick={() => handleNavigation('/dashboard/billing')}
                     >
-                        <CardStackIcon className="h-5" /> Billing
+                        <WalletCards className="h-5" /> Billing
                     </Button>
                 </div>
                 <div className="flex justify-center">
@@ -51,7 +52,7 @@ const SettingsSidebar: React.FC = () => {
                         className={`w-[90%] rounded-lg gap-2 px-4 bg-transparent justify-start hover:bg-[#37384B] hover:rounded-lg mb-2 ${isActive('/dashboard/integrations') ? 'bg-[#815BF5] text-white rounded-lg' : 'text-gray-400'}`}
                         onClick={() => handleNavigation('/dashboard/integrations')}
                     >
-                        <GitBranchPlus className="h-5" /> Integrations
+                        <GitBranchPlusIcon className='h-5' /> Integrations
                     </Button>
                 </div>
             </div>

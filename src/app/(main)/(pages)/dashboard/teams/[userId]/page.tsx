@@ -289,11 +289,11 @@ console.log(subscribedPlan, 'plan?')
                     {/* Lock Overlay */}
                     {isLocked && (
                         <div
-                            className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-80 rounded-2xl"
+                            className="absolute inset-0 flex  items-center justify-start bg-black bg-opacity-80 rounded-2xl"
                             style={{ pointerEvents: "auto" }}
                         >
                             <FaLock
-                                className="text-white text-lg cursor-pointer"
+                                className="text-gray-400 ml-4 text-lg cursor-pointer"
                                 onClick={(e) => {
                                     e.stopPropagation(); // Prevent tab click
                                     toast.error("Purchase Money Saver Bundle to unlock");

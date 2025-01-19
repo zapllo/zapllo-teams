@@ -66,6 +66,12 @@ export default function PersonalDetails({ userId }: { userId: string }) {
                 relation: "",
                 address: "",
             });
+
+              // Set contactDetails or initialize with empty fields
+              setPersonalInfo(user.personalInformation || {
+                dateOfBirth: "",
+                dateOfJoining: "",
+            });
         } catch (error) {
             console.error("Error fetching user details:", error);
         }
@@ -114,6 +120,8 @@ export default function PersonalDetails({ userId }: { userId: string }) {
     useEffect(() => {
         fetchUserDetails();
     }, [userId]);
+
+    console.log(personalInfo, 'personal info')
 
     return (
         <div className="w-full max-w-3xl mx-auto">
@@ -278,11 +286,11 @@ export default function PersonalDetails({ userId }: { userId: string }) {
                     </AccordionTrigger2>
                     <AccordionContent2 className="border rounded-xl  justify-between  p-4">
                         <div className="grid  grid-cols-2  gap-4">
-                            <div>
-                                <label className="block text-sm">Date of Birth</label>
+                            <div >
+                                <label className="block text-muted-foreground  text-xs">Date of Birth</label>
                                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                                     <DialogTrigger onClick={() => setDatePickerTarget("dateOfBirth")}>
-                                        <button className="px-4 mt-2 gap-2 hover:border-muted-foreground py-2 border bg-transparent  text-white flex items-center rounded">
+                                        <button className="px-2 mt-2 gap-1 hover:border-muted-foreground py-2 border bg-transparent  text-white text-sm flex items-center rounded">
                                             <Calendar className="h-4" />
                                             {personalInfo.dateOfBirth
                                                 ? new Date(personalInfo.dateOfBirth).toDateString()
@@ -303,11 +311,11 @@ export default function PersonalDetails({ userId }: { userId: string }) {
                                 </Dialog>
                             </div>
                             <div>
-                                <label className="block">Date of Joining</label>
+                                <label className="block text-xs text-muted-foreground">Date of Joining</label>
 
                                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                                     <DialogTrigger onClick={() => setDatePickerTarget("dateOfJoining")}>
-                                        <button className="px-4 mt-2 py-2 border  gap-2 hover:border-muted-foreground bg-transparent  text-white flex items-center rounded">
+                                        <button className="px-2 mt-2 py-2 text-sm border  gap-1 hover:border-muted-foreground bg-transparent  text-white flex items-center rounded">
                                             <Calendar className="h-4" />
                                             {personalInfo.dateOfJoining
                                                 ? new Date(personalInfo.dateOfJoining).toDateString()

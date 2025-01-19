@@ -207,7 +207,7 @@ export default function PayslipDetailsPage() {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="bg-[#815bf5] -500 text-white px-4 py-2 w-full rounded-md  disabled:opacity-50"
+                    className="bg-[#815bf5] text-sm hover:bg-primary -500 text-white px-4 py-2 w-full rounded-md  disabled:opacity-50"
                 >
                     {loading ? <Loader /> : 'Save Payslip Details'}
                 </button>
