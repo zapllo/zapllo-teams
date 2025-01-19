@@ -60,9 +60,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     if (password) {
-      const salt = await bcryptjs.genSalt(10);
-      const hashedPassword = await bcryptjs.hash(password, salt);
-      userToEdit.password = hashedPassword;
+      userToEdit.password = password;
     }
 
     if (whatsappNo) userToEdit.whatsappNo = whatsappNo;
