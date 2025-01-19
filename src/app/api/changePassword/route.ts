@@ -18,14 +18,12 @@ export async function PATCH(request: NextRequest) {
         const reqBody = await request.json();
         const { currentPassword, newPassword } = reqBody;
 
-        const validPassword = await bcryptjs.compare(currentPassword, authenticatedUser.password);
-        if (!validPassword) {
-            return NextResponse.json({ error: "Current password is incorrect" }, { status: 400 });
+        if (currentPassword !== authenticatedUser.password) {
+            return NextResponse.json({ error: "Invalid password" }, { status: 400 });
         }
 
-        const salt = await bcryptjs.genSalt(10);
-        const hashedPassword = await bcryptjs.hash(newPassword, salt);
-        authenticatedUser.password = hashedPassword;
+
+        authenticatedUser.password = newPassword;
 
         await authenticatedUser.save();
 

@@ -20,8 +20,8 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 12);
-        user.password = hashedPassword;
+
+        user.password = password;
         await user.save();
 
         return NextResponse.json({ message: "Password reset successfully" }, { status: 200 });
