@@ -427,6 +427,7 @@ export default function Home() {
                                     "Zapllo Tasks - Task Delegation App",
                                     "Zapllo Payroll - Attendance Tracking App",
                                     "Zapllo Payroll - Leave Management App",
+                                    "Zapllo Payroll - Payslip & Salary Tracking App",
                                     "Zapllo Intranet",
                                     "Zapllo AI - Proprietory AI Technology",
                                     "Zapllo WABA - Official WhatsApp API & Marketing Software",
@@ -1075,6 +1076,142 @@ export default function Home() {
                     </a>
                 </div>
             </div>
+            <div>
+                <div className="flex flex-col items-center justify-center mt-20">
+                    {/* ZaplloTask Gradient Text */}
+                    <h2
+                        className="font-spaceGrotesk font-bold text-4xl text-transparent bg-clip-text bg-gradient-to-r from-[#815BF5] to-[#FC8929]"
+                    >
+                        Zapllo Payroll
+                    </h2>
+
+                    {/* Task Delegation App Title */}
+                    <h1
+                        className="font-spaceGrotesk font-extrabold text-white mt-2 text-center"
+                        style={{
+                            fontSize: "46px",
+                            lineHeight: "58.7px",
+                            width: "650px",
+                            height: "59px",
+                        }}
+                    >
+                        Payslip & Salary Tracking App
+                    </h1>
+
+                    {/* Updated Subtitle Text */}
+                    <p
+                        className="font-golosText text-white text-center mt-2"
+                        style={{
+                            fontSize: "17px",
+                            lineHeight: "30px",
+                            width: "1004px",
+                        }}
+                    >
+                        Simplify salary management for your organization with automated solutions.
+                    </p>
+                </div>
+                <div>
+                    <div className="container mx-auto flex flex-col md:flex-row items-center gap-12 py-16">
+                        {/* Left Side Image */}
+                        <div className="p-8 rounded-lg w-full md:w-1/3 flex items-center justify-center">
+                            <img
+                                src="/mockups/payslip.jpg"
+                                alt="Book Cover Placeholder"
+                                className="w-full h-full scale-[200%]"
+                            />
+                        </div>
+
+                        {/* Right Side Feature Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full md:w-2/3">
+                            {[
+                                {
+                                    title: "Update Salary Details",
+                                    description:
+                                        "Easily update salary details for your employees, including basic pay and allowances.",
+                                },
+                                {
+                                    title: "Dynamic Payslip Generation",
+                                    description:
+                                        "Generate payslips dynamically for any selected month and year.",
+                                },
+                                {
+                                    title: "Custom Letterhead",
+                                    description:
+                                        "Update your company logo and details to personalize payslip letterheads.",
+                                },
+                                {
+                                    title: "Employee Information Updates",
+                                    description:
+                                        "Keep employee records up-to-date, including job titles and contact details.",
+                                },
+                                {
+                                    title: "Shareable & Downloadable Payslips",
+                                    description:
+                                        "Generate and share payslip links, or download them for offline use.",
+                                },
+                                {
+                                    title: "Automated Email & WhatsApp Delivery",
+                                    description:
+                                        "Send payslips directly to employees' emails and WhatsApp accounts.",
+                                },
+                            ].map((feature, index) => (
+                                <div
+                                    key={index}
+                                    className="bg-[#0B0C24] p-6 rounded-lg border border-[#37384B] flex items-start space-x-4"
+                                >
+                                    <img
+                                        src="/tick.png" // Replace with actual path
+                                        alt="Tick Icon"
+                                        className="flex-shrink-0"
+                                        style={{
+                                            width: "20.4px",
+                                            height: "20.4px",
+                                            marginTop: "5px",
+                                            marginLeft: "5px",
+                                        }}
+                                    />
+                                    <div>
+                                        <h3 className="text-xl font-semibold text-white">
+                                            {feature.title}
+                                        </h3>
+                                        <p className="text-[#676B93] mt-2">{feature.description}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+                <div className="container mx-auto flex flex-col items-center gap-6 ">
+                    {/* Total Value Text */}
+                    <p
+                        className="text-center text-white font-golosText"
+                        style={{
+                            fontSize: "24px",
+                            fontWeight: "400",
+                            lineHeight: "28.8px",
+                        }}
+                    >
+                        Total Value - <span style={{ fontWeight: "700" }}>₹12,000</span> per
+                        employee
+                    </p>
+
+                    {/* Get Freedom Offer Button */}
+                    <a href="#cards">
+                        <button
+                            className="flex items-center justify-center gap-2 px-8 py-3 rounded-full text-white font-semibold transition-all"
+                            style={{
+                                width: "328px",
+                                height: "56px",
+                                background:
+                                    "radial-gradient(51.84% 97.12% at 50% 100%, #A587FF 0%, #5E29FF 100%)",
+                                borderBottom: "1px solid #A485FF",
+                            }}
+                        >
+                            Get New Year Offer Now
+                        </button>
+                    </a>
+                </div>
+            </div>
 
             <div>
                 <div className="flex flex-col items-center justify-center mt-20">
@@ -1434,6 +1571,7 @@ export default function Home() {
                                     "Zapllo Tasks - Task Delegation App",
                                     "Zapllo Payroll - Attendance Tracking App",
                                     "Zapllo Payroll - Leave Management App",
+                                    "Zapllo Payroll - Payslip & Salary Tracking App",
                                     "Zapllo Intranet",
                                     "Zapllo AI - Proprietory AI Technology",
                                     "Zapllo WABA - Official WhatsApp API & Marketing Software",

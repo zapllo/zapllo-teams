@@ -6,10 +6,12 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
 import { CrossCircledIcon, StopwatchIcon } from '@radix-ui/react-icons'
+import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api'
 import dayjs from 'dayjs'
 import { Calendar, CameraIcon, ChevronRight, Clock } from 'lucide-react'
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 type Props = {}
 
@@ -21,6 +23,40 @@ export default function Settings({ }: Props) {
 
     // For controlling the visibility of the Time Picker dialog
     const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
+
+    const [isLocationDialogOpen, setIsLocationDialogOpen] = useState(false);
+    const [currentLocation, setCurrentLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+    const mapContainerStyle = {
+        width: '100%',
+        height: '300px',
+    };
+
+    // Fetch user's current location
+    useEffect(() => {
+        if (isLocationDialogOpen) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setCurrentLocation({
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                    });
+                },
+                (error) => {
+                    console.error('Error fetching location:', error);
+                    setCurrentLocation(null); // Handle error case
+                }
+            );
+        }
+    }, [isLocationDialogOpen]);
+
+    const handleSaveLocation = () => {
+        // Save the location in the backend or perform the desired action
+        console.log('Location saved:', currentLocation);
+        setIsLocationDialogOpen(false);
+        toast.success("Office Location updated successfully")
+    };
+
 
 
     // Fetch the current daily report time
@@ -217,11 +253,43 @@ export default function Settings({ }: Props) {
                 <ChevronRight className='h-5' />
             </div>
 
-            <div className='mb-2 flex justify-between gap-1 cursor-pointer   my-4 mx-2 p-2 w- m border-b rounded py-2'>
+            <div onClick={() => setIsLocationDialogOpen(true)} className='mb-2 flex justify-between gap-1 cursor-pointer    my-4 mx-2 p-2 w- m border-b rounded py-2'>
                 {/* <StopwatchIcon className='h-4 ml-1' /> */}
                 <h1 className=' text-sm px-2'>Office Location</h1>
                 <ChevronRight className='h-5 ' />
             </div>
+
+            <Dialog open={isLocationDialogOpen} onOpenChange={setIsLocationDialogOpen}>
+                <DialogContent className="p-6">
+                    <DialogHeader>
+                        <DialogTitle>Set Office Location</DialogTitle>
+                    </DialogHeader>
+                    <div className="mt-4">
+                        {currentLocation ? (
+                            <LoadScript googleMapsApiKey="AIzaSyASY9lRvSpjIR2skVaTLd6x7M1Kx2zY-4k">
+                                <GoogleMap
+                                    mapContainerStyle={mapContainerStyle}
+                                    center={currentLocation}
+                                    zoom={13}
+                                    options={{
+                                        disableDefaultUI: true,
+                                        zoomControl: true,
+                                    }}
+                                >
+                                    <Marker position={currentLocation} />
+                                </GoogleMap>
+                            </LoadScript>
+                        ) : (
+                            <p>Fetching current location...</p>
+                        )}
+                    </div>
+                    <DialogFooter className="mt-4">
+                        <Button onClick={handleSaveLocation} className="w-full bg-[#815bf5]">
+                            Save
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             <div className=' bg-[#0B0D29] px-4  mt-4 mx-2  my-4  p-2 border rounded-xl '>
 

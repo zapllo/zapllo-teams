@@ -1337,24 +1337,45 @@ export default function Billing() {
                                                                 </li>
                                                             ))}
                                                         </ul>
+                                                        <h1 className='p-4 text-blue-400 text-lg whitespace-nowrap'>Zapllo Payslip & Salary Tracking App</h1>
+                                                        <ul className="list-disc space-y-2  w-full items-center text-sm">
+                                                            {[
+                                                                "Update Salary Details",
+                                                                "Dynamic Payslip Generation",
+                                                                "Custom Letterhead",
+                                                                "Employee Information Updates",
+                                                                "Shareable & Downloadable Payslips",
+                                                                "Automated Email & WhatsApp Delivery",
+                                                            ].map((item, index) => (
+                                                                <li key={index} className="flex gap-2 items-center">
+                                                                    <img src="/icons/tick.png" />
+                                                                    <span
+                                                                        className="text-sm font-medium"
+                                                                    >
+                                                                        {item}
+                                                                    </span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+
                                                         <h1 className='p-4 text-blue-400 text-lg whitespace-nowrap'>Task Delegation App</h1>
                                                         <ul className="list-disc space-y-2  w-full items-center text-sm">
                                                             {[
-                                                                "Delegate Unlimited Tasks",
-                                                                "Team Performance Report",
-                                                                "Links Management for your Team",
-                                                                "Email Notifications",
-                                                                "WhatsApp Notifications",
-                                                                "Automatic WhatsApp Reminders",
-                                                                "Automatic Email Reminders",
-                                                                "Repeated Tasks",
-                                                                "Zapllo AI -Proprietory AI Technology",
-                                                                "File Uploads",
-                                                                "Delegate Tasks with Voice Notes",
-                                                                "Task Wise Reminders",
-                                                                "Daily Task & Team Reports",
-                                                                "Save more than 4 hours per day",
-
+                                                                // "Delegate Unlimited Tasks",
+                                                                // "Team Performance Report",
+                                                                // "Links Management for your Team",
+                                                                // "Email Notifications",
+                                                                // "WhatsApp Notifications",
+                                                                // "Automatic WhatsApp Reminders",
+                                                                // "Automatic Email Reminders",
+                                                                // "Repeated Tasks",
+                                                                // "Zapllo AI -Proprietory AI Technology",
+                                                                // "File Uploads",
+                                                                // "Delegate Tasks with Voice Notes",
+                                                                // "Task Wise Reminders",
+                                                                // "Daily Task & Team Reports",
+                                                                // "Save more than 4 hours per day",
+                                                                "Every feature from task delegation app included"
 
                                                             ].map((item, index) => (
                                                                 <li key={index} className="flex gap-2 items-center">
