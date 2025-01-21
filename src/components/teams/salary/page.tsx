@@ -184,15 +184,14 @@ export default function SalaryMenu({ userId }: SalaryDetailsProps) {
 
   const renderCalculationDialog = () => (
     <Dialog open={isCalculationDialogOpen} onOpenChange={setIsCalculationDialogOpen}>
-      <DialogContent className="z-[100] h-screen max-w-md w-full p-4">
+      <DialogContent className="z-[100] h-full  w-full p-4">
         <div className='flex items-center justify-between w-full'>
-
-          <h2 className="text-lg font-semibold ">Month Calculation</h2>
+          <h2 className="text-md font-semibold ">Month Calculation</h2>
           <DialogClose>
             <CrossCircledIcon className="scale-150  cursor-pointer hover:bg-white rounded-full hover:text-[#815BF5]" />
           </DialogClose>
         </div>
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 gap-2">
           {[
             { method: 'Calendar Month', description: 'Ex: March - 31 Days, April - 30 Days etc (Per day salary = Salary/No. of days in month)' },
             { method: 'Every Month 30 Days', description: 'Ex: March - 30 Days, April - 30 Days etc (Per day salary = Salary/30)' },
@@ -202,7 +201,7 @@ export default function SalaryMenu({ userId }: SalaryDetailsProps) {
           ].map((option) => (
             <label
               key={option.method}
-              className={`block p-4 border rounded-lg cursor-pointer ${selectedCalculationMethod === option.method ? 'bg-gradient-to-l from-[#815BF5] to-purple-900 text-white border-transparent -50' : ''
+              className={`block p-4 text-sm border rounded-lg cursor-pointer ${selectedCalculationMethod === option.method ? 'bg-gradient-to-l from-[#815BF5] to-purple-900 text-white border-transparent -50' : ''
                 }`}
             >
               <input
@@ -214,11 +213,11 @@ export default function SalaryMenu({ userId }: SalaryDetailsProps) {
                 className="hidden"
               />
               <h3 className="font-semibold">{option.method}</h3>
-              <p className="text-sm text-gray-300">{option.description}</p>
+              <p className="text-xs text-gray-300">{option.description}</p>
             </label>
           ))}
         </div>
-        <div className="flex justify-end mt-4 space-x-3">
+        <div className="mt-4 ">
 
           <button
             className="px-4 py-2 w-full text-white bg-[#815bf5] rounded-md hover:bg-primary"
