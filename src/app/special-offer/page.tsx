@@ -190,7 +190,7 @@ export default function Home() {
 
             <div className="  bg-[#05071E]">
                 <div className="mb-4 mt-12 ">
-                    <h1 className="text-center  text-4xl font-semibold text-green-500">Zapllo New Year Sale</h1>
+                    <h1 className="text-center  text-4xl font-semibold text-green-500">Zapllo Republic Day Sale</h1>
                     <div
                         className={cn(
                             "group mt-6  relative mx-auto flex max-w-fit flex-row items-center justify-center rounded-2xl  px-4 py-1.5 md:text-3xl font-medium   ",
@@ -210,7 +210,7 @@ export default function Home() {
                     <div className="absolute 2xl:right-36 mt-16 right-16 ">
                         <img src="/icons/offer.png" />
                         <h1 className="text-white text-xl -mt-28 ml-20 ">Use Code</h1>
-                        <span className="font-bold text-white text-3xl -mt-28 ml-14">&quot;NY2025&quot;</span>
+                        <span className="font-bold text-white text-3xl -mt-28 ml-12">&quot;REPUBLIC&quot;</span>
                         {/* <Clock className="h-4" /> */}
                         <h1 className="text-white text-2xl  ml-[90px] ">
                             {formatTime(timeLeft)}
@@ -452,7 +452,7 @@ export default function Home() {
                                 Today&apos;s Offer - ₹5999 per user per year
                             </p>
                             <p className="text-center mt-2   text-green-600" style={{ fontSize: "15px", fontWeight: "400", lineHeight: "24px" }}>
-                                Zapllo New Year Offer - ₹2999 per user per year
+                                Republic Day Offer - ₹2999 per user per year
                             </p>
 
 
@@ -1596,7 +1596,7 @@ export default function Home() {
                                 Today&apos;s Offer - ₹5999 per user per year
                             </p>
                             <p className="text-center mt-2   text-green-600" style={{ fontSize: "15px", fontWeight: "400", lineHeight: "24px" }}>
-                                Zapllo New Year Offer - ₹2999 per user per year
+                                Republic Day Offer - ₹2999 per user per year
                             </p>
 
 

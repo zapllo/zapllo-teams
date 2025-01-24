@@ -29,7 +29,7 @@ const MultiStepForm = ({ selectedPlan }: { selectedPlan: PlanKeys }) => {
         whatsappNo: '',
         selectedPlan,
         subscribedUserCount: 20, // Changed from quantity to subscribedUserCount
-        discountCode: 'NY2025',
+        discountCode: 'REPUBLIC',
     });
     const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
 

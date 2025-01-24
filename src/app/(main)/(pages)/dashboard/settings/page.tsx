@@ -7,6 +7,7 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import Loader from "@/components/ui/loader";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { CrossCircledIcon, StopwatchIcon } from "@radix-ui/react-icons";
@@ -276,47 +277,69 @@ export default function Page() {
                   />
                 </div>
                 <div>
-                  <select
-                    value={industry}
-                    onChange={(e: any) => setIndustry(e.target.value)}
-                    className="w- mt-2 w-full outline-none bg-[#0B0D29] border rounded px-3 py-2"
-                  >
-                    <option value="" disabled>
-                      Select Industry
-                    </option>
-                    <option value="Retail">Retail</option>
-                    <option value="Technology">Technology</option>
-                    <option value="Healthcare">Healthcare</option>
-                    <option value="Finance">Finance</option>
-                    <option value="Education">Education</option>
-                    <option value="Other">Other</option>
-                  </select>
+                  {/* Industry Dropdown */}
+                  <Select value={industry} onValueChange={(value) => setIndustry(value)}>
+                    <SelectTrigger className="bg-[#0B0D29] mt-2 text-white outline-none focus:ring-[#815BF5]">
+                      <SelectValue placeholder="Select Industry" />
+                    </SelectTrigger>
+                    <SelectContent className="p-1 bg-[#04061E] text-white rounded-xl shadow-lg">
+                      <SelectItem value="Retail" className="hover:bg-[#815BF5] font-medium">
+                        Retail
+                      </SelectItem>
+                      <SelectItem value="Technology" className="hover:bg-[#815BF5] font-medium">
+                        Technology
+                      </SelectItem>
+                      <SelectItem value="Healthcare" className="hover:bg-[#815BF5] font-medium">
+                        Healthcare
+                      </SelectItem>
+                      <SelectItem value="Finance" className="hover:bg-[#815BF5] font-medium">
+                        Finance
+                      </SelectItem>
+                      <SelectItem value="Education" className="hover:bg-[#815BF5] font-medium">
+                        Education
+                      </SelectItem>
+                      <SelectItem value="Other" className="hover:bg-[#815BF5] font-medium">
+                        Other
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
+
                 <div>
+                  {/* Description Textarea */}
                   <textarea
-                    className="px-4 py-2 mt-2 w-full bg-[#0B0D29] focus-within:border-[#815BF5]  border rounded outline-none"
+                    className="px-4 py-2 mt-2 w-full bg-[#0B0D29] focus-within:border-[#815BF5] border rounded outline-none"
                     value={description}
-                    onChange={(e: any) => setDescription(e.target.value)}
+                    onChange={(e) => setDescription(e.target.value)}
                   />
                 </div>
+
                 <div>
-                  <select
-                    value={teamSize}
-                    onChange={(e: any) => setTeamSize(e.target.value)}
-                    className="mt-2 border bg-[#0B0D29] outline-none w-full  rounded px-3 py-2"
-                  >
-                    <option value="" disabled>
-                      Select Team Size
-                    </option>
-                    <option value="1-10">1-10</option>
-                    <option value="11-20">11-20</option>
-                    <option value="21-30">21-30</option>
-                    <option value="31-50">31-50</option>
-                    <option value="51+">51+</option>
-                  </select>
+                  {/* Team Size Dropdown */}
+                  <Select value={teamSize} onValueChange={(value) => setTeamSize(value)}>
+                    <SelectTrigger className=" text-white bg-[#0B0D29] outline-none focus:ring-[#815BF5]">
+                      <SelectValue placeholder="Select Team Size" />
+                    </SelectTrigger>
+                    <SelectContent className="p-1 bg-[#04061E] text-white rounded-xl shadow-lg">
+                      <SelectItem value="1-10" className="hover:bg-[#815BF5] font-medium">
+                        1-10
+                      </SelectItem>
+                      <SelectItem value="11-20" className="hover:bg-[#815BF5] font-medium">
+                        11-20
+                      </SelectItem>
+                      <SelectItem value="21-30" className="hover:bg-[#815BF5] font-medium">
+                        21-30
+                      </SelectItem>
+                      <SelectItem value="31-50" className="hover:bg-[#815BF5] font-medium">
+                        31-50
+                      </SelectItem>
+                      <SelectItem value="51+" className="hover:bg-[#815BF5] font-medium">
+                        51+
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-
             </div>
             <div className="mt-2  flex justify-end">
               <button

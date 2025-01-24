@@ -949,37 +949,37 @@ export default function Billing() {
                             )}
                         </div>
 
+                        <div className='flex justify-center mb-8 '>
+                            <div className="flex justify-center  w-80">
+                                {/* Sliding Tabs */}
+                                <div className="relative border h-12 flex bg-[#0A0D28] rounded-full w-full">
+                                    {/* Active Tab Indicator */}
+                                    <div
+                                        className={`absolute  scale-[85%]  top-0 bottom-0 left-0 w-1/2 transform rounded-full transition-all duration-300 ${planTab === "Zapllo Sales" ? "translate-x-full" : "translate-x-0"
+                                            }`}
+                                        style={{
+                                            background: "linear-gradient(90deg, #815BF5, #FC7A57)",
+                                        }}
+                                    ></div>
 
-                        <div className="flex justify-center mb-8">
-                            {/* Sliding Tabs */}
-                            <div className="relative border h-10 flex bg-[#0A0D28] rounded-full w-80">
-                                {/* Active Tab Indicator */}
-                                <div
-                                    className={`absolute  scale-[85%]  top-0 bottom-0 left-0 w-1/2 transform rounded-full transition-all duration-300 ${planTab === "Zapllo Sales" ? "translate-x-full" : "translate-x-0"
-                                        }`}
-                                    style={{
-                                        background: "linear-gradient(90deg, #815BF5, #FC7A57)",
-                                    }}
-                                ></div>
-
-                                {/* Tabs */}
-                                <button
-                                    onClick={() => setPlanTab("Zapllo Teams")}
-                                    className={`relative w-1/2 text-center z-10 -mt-1 font-medium py-2 transition-colors duration-300 ${planTab === "Zapllo Teams" ? "text-white" : "text-gray-400"
-                                        }`}
-                                >
-                                    Zapllo Teams
-                                </button>
-                                <button
-                                    onClick={() => setPlanTab("Zapllo Sales")}
-                                    className={`relative w-1/2 text-center z-10 -mt-1 font-medium py-2 transition-colors duration-300 ${planTab === "Zapllo Sales" ? "text-white" : "text-gray-400"
-                                        }`}
-                                >
-                                    Zapllo Sales
-                                </button>
+                                    {/* Tabs */}
+                                    <button
+                                        onClick={() => setPlanTab("Zapllo Teams")}
+                                        className={`relative w-1/2  text-center z-10  font-medium py-2 transition-colors duration-300 ${planTab === "Zapllo Teams" ? "text-white" : "text-gray-400"
+                                            }`}
+                                    >
+                                        Zapllo Teams
+                                    </button>
+                                    <button
+                                        onClick={() => setPlanTab("Zapllo Sales")}
+                                        className={`relative w-1/2 text-center z-10  font-medium py-2 transition-colors duration-300 ${planTab === "Zapllo Sales" ? "text-white" : "text-gray-400"
+                                            }`}
+                                    >
+                                        Zapllo Sales
+                                    </button>
+                                </div>
                             </div>
                         </div>
-
                         {/* Plan Cards */}
                         <div className="w-full flex justify-center">
                             <div className="max-w-5xl mx-auto">

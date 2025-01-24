@@ -174,7 +174,7 @@ export default function SpecialOfferCheckout() {
                 <div className="absolute 2xl:right-36 mt-4 right-16 ">
                     <img src="/icons/offer.png" />
                     <h1 className="text-white text-xl -mt-28 ml-20 ">Use Code</h1>
-                    <span className="font-bold text-white text-3xl -mt-28 ml-14">&quot;NY2025&quot;</span>
+                    <span className="font-bold text-white text-3xl -mt-28 ml-12">&quot;REPUBLIC&quot;</span>
                     {/* <Clock className="h-4" /> */}
                     <h1 className="text-white text-2xl  ml-[90px] ">
                         {formatTime(timeLeft)}
