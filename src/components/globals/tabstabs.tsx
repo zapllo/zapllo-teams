@@ -285,6 +285,15 @@ export default function TeamTabs() {
           isLeaveAccess: false,
         });
         setSelectedManager("");
+        setIsSubmitted(false); // Reset isSubmitted state
+        setErrors({
+          email: "",
+          firstName: "",
+          lastName: "",
+          whatsappNo: "",
+          password: "",
+        });
+
         toast(<div className=" w-full mb-6 gap-2 m-auto  ">
           <div className="w-full flex  justify-center">
             <DotLottieReact
@@ -470,7 +479,7 @@ export default function TeamTabs() {
 
   console.log(editedUser, 'edited user')
   return (
-    <div className="w-full max-w-5xl overflow-y-scroll overflow-x-hidden h-screen mb-12  scrollbar-hide mt-16 mx-auto">
+    <div className="w-full max-w-5xl overflow-y-scroll  overflow-x-hidden h-screen mb-12 scrollbar-hide mt-16 mx-auto">
       {/* <Toaster /> */}
       <div className="gap-2 ml-44  mb-6 w-full">
         <div className="flex mt-4  gap-2 mb-4">
@@ -502,7 +511,36 @@ export default function TeamTabs() {
                 </option>
               ))}
             </select>
-            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <Dialog open={isModalOpen} onOpenChange={(isOpen) => {
+              setIsModalOpen(isOpen);
+              if (!isOpen) {
+                // Reset the form fields and errors when modal closes
+                setNewMember({
+                  email: "",
+                  role: "member",
+                  password: "",
+                  firstName: "",
+                  lastName: "",
+                  whatsappNo: "",
+                  reportingManager: "",
+                  country: "IN",
+                  isTaskAccess: false,
+                  isLeaveAccess: false,
+                });
+                setSelectedManager("");
+                setIsSubmitted(false); // Reset submission state
+                setErrors({
+                  email: "",
+                  firstName: "",
+                  lastName: "",
+                  whatsappNo: "",
+                  password: "",
+                });
+
+                setErrorMessage(""); // Clear error messages
+              }
+            }}
+            >
               {loggedInUserRole === "orgAdmin" && (
                 <DialogTrigger asChild>
                   <Button size="sm" className="ml-4 bg-[#017a5b] hover:bg-[#15624f] border gap-2" onClick={() => setIsModalOpen(true)}>
