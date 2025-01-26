@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Loader from "@/components/ui/loader";
 import { Progress } from "@/components/ui/progress";
+import { useTrialStatus } from "@/providers/trial-status-provider";
 import axios from "axios";
 import { formatDistanceToNow } from "date-fns";
 import { CalendarMinus, Globe, Home, Lock, Megaphone } from "lucide-react";
@@ -23,6 +24,7 @@ interface ChecklistItem {
 
 const DashboardPage = () => {
   const [progress, setProgress] = useState<String[]>([]);
+  const { fetchTrialIconStatus } = useTrialStatus(); // Get fetchTrialStatus from context
   const [userId, setUserId] = useState("");
   const [leavesTrialExpires, setLeavesTrialExpires] = useState(Date());
   const [attendanceTrialExpires, setAttendanceTrialExpires] = useState(Date());
@@ -97,28 +99,28 @@ const DashboardPage = () => {
 
   useEffect(() => {
     const fetchChecklistItems = async () => {
-        try {
-            const res = await axios.get("/api/checklist/get");
-            setChecklistItems(res.data.checklistItems);
-            // Fetch user progress
-            const progressRes = await axios.get('/api/get-checklist-progress');
-            setProgress(progressRes.data.progress || []);
-        } catch (error) {
-            console.error("Error fetching checklist items:", error);
-        }
+      try {
+        const res = await axios.get("/api/checklist/get");
+        setChecklistItems(res.data.checklistItems);
+        // Fetch user progress
+        const progressRes = await axios.get('/api/get-checklist-progress');
+        setProgress(progressRes.data.progress || []);
+      } catch (error) {
+        console.error("Error fetching checklist items:", error);
+      }
     };
 
     fetchChecklistItems();
 
-}, []);
+  }, []);
 
   const calculateProgress = () => {
     if (!checklistItems.length) return 0;
     const completedCount = checklistItems.filter((item) => progress.includes(item._id)).length;
     const progressPercentage = (completedCount / checklistItems.length) * 100;
     return Math.round(progressPercentage);
-};
-  
+  };
+
 
   const fetchTrialStatus = async () => {
     const response = await axios.get("/api/organization/getById");
@@ -149,7 +151,7 @@ const DashboardPage = () => {
     setIsTaskPlanEligible(isTaskPlanEligible); // Track task plan eligibility
     setIsLoading(false); // Data fetched, stop showing the global loader
   };
-console.log(progress, 'progress')
+  console.log(progress, 'progress')
 
   useEffect(() => {
     fetchTrialStatus();
@@ -164,6 +166,7 @@ console.log(progress, 'progress')
         product,
         trialExpires: trialDate,
       });
+      await fetchTrialIconStatus(); // Refresh the trial status in the context
       await fetchTrialStatus(); // Refresh the trial status after starting the trial
     } catch (error) {
       console.error("Error starting trial:", error);

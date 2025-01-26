@@ -15,6 +15,7 @@ import { Separator } from '@/components/ui/separator';
 import { Database, GitBranch, LucideMousePointerClick, LogOut } from 'lucide-react';
 import axios from 'axios';
 import { IconLogout2 } from '@tabler/icons-react';
+import { useTrialStatus } from '@/providers/trial-status-provider';
 
 type Props = {};
 
@@ -22,8 +23,9 @@ const MenuOptions = (props: Props) => {
   const pathName = usePathname();
   const [role, setRole] = useState("");
   const router = useRouter();
-  const [leavesTrialExpires, setLeavesTrialExpires] = useState<Date | null>(null);
-  const [attendanceTrialExpires, setAttendanceTrialExpires] = useState<Date | null>(null);
+  // const [leavesTrialExpires, setLeavesTrialExpires] = useState<Date | null>(null);
+  // const [attendanceTrialExpires, setAttendanceTrialExpires] = useState<Date | null>(null);
+  const { leavesTrialExpires, attendanceTrialExpires } = useTrialStatus(); // Access trial status
 
   const logout = async () => {
     try {
@@ -47,31 +49,31 @@ const MenuOptions = (props: Props) => {
     getUserDetails();
   }, []);
 
-  const fetchTrialStatus = async () => {
-    try {
-      const response = await axios.get('/api/organization/getById');
-      const { leavesTrialExpires, attendanceTrialExpires } = response.data.data;
-      setLeavesTrialExpires(
-        leavesTrialExpires && new Date(leavesTrialExpires) > new Date()
-          ? new Date(leavesTrialExpires)
-          : null
-      );
-      setAttendanceTrialExpires(
-        attendanceTrialExpires && new Date(attendanceTrialExpires) > new Date()
-          ? new Date(attendanceTrialExpires)
-          : null
-      );
-    } catch (error) {
-      console.error("Failed to fetch trial status:", error);
-    }
-  };
+  // const fetchTrialStatus = async () => {
+  //   try {
+  //     const response = await axios.get('/api/organization/getById');
+  //     const { leavesTrialExpires, attendanceTrialExpires } = response.data.data;
+  //     setLeavesTrialExpires(
+  //       leavesTrialExpires && new Date(leavesTrialExpires) > new Date()
+  //         ? new Date(leavesTrialExpires)
+  //         : null
+  //     );
+  //     setAttendanceTrialExpires(
+  //       attendanceTrialExpires && new Date(attendanceTrialExpires) > new Date()
+  //         ? new Date(attendanceTrialExpires)
+  //         : null
+  //     );
+  //   } catch (error) {
+  //     console.error("Failed to fetch trial status:", error);
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchTrialStatus();
-  }, []);
+  // useEffect(() => {
+  //   fetchTrialStatus();
+  // }, []);
 
   const filteredMenuOptions = menuOptions.filter(menuItem => {
-    if (menuItem.name === "Leaves & Attendance") {
+    if (menuItem.name === 'Leaves & Attendance') {
       return leavesTrialExpires || attendanceTrialExpires;
     }
     // Exclude "Billing" for roles 'member' and 'manager'

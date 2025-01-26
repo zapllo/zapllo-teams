@@ -44,6 +44,7 @@ export default function TaskManagement() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [tasks, setTasks] = useState([]);
     const [currentUser, setCurrentUser] = useState<any>();
+    const [isPlanEligible, setIsPlanEligible] = useState(false);
     const [isTrialExpired, setIsTrialExpired] = useState(false);
     const [userId, setUserId] = useState("");
     const [progress, setProgress] = useState<boolean[]>([]);
@@ -54,8 +55,13 @@ export default function TaskManagement() {
 
     useEffect(() => {
         const getUserDetails = async () => {
-            const res = await axios.get('/api/users/me')
-            setCurrentUser(res.data.data);
+            const userRes = await axios.get('/api/users/me');
+            const user = userRes.data.data;
+            setCurrentUser(user);
+            if (!user.isTaskAccess) {
+                router.push('/dashboard');
+                return;
+            }
             const trialStatusRes = await axios.get('/api/organization/trial-status');
             setIsTrialExpired(trialStatusRes.data.isExpired);
         }
@@ -121,27 +127,45 @@ export default function TaskManagement() {
     useEffect(() => {
         const getUserDetails = async () => {
             try {
-                // Fetch trial status
-                const response = await axios.get('/api/organization/getById');
-                console.log(response.data.data); // Log the organization data
-
-                const organization = response.data.data;
-
+                const orgRes = await axios.get('/api/organization/getById');
+                const {
+                    trialExpires,
+                    leavesTrialExpires,
+                    attendanceTrialExpires,
+                    subscribedPlan,
+                } = orgRes.data.data;
+    
                 // Check if the trial has expired
-                const isExpired = organization.trialExpires && new Date(organization.trialExpires) <= new Date();
-                console.log('isExpired:', isExpired);
-                console.log('trialExpires:', organization.trialExpires);
-
-                setIsTrialExpired(isExpired); // Set to true if expired, false otherwise
+                const trialExpired = trialExpires && new Date(trialExpires) <= new Date();
+                setIsTrialExpired(trialExpired);
+    
+                // Define eligible plans
+                const eligiblePlans = ['Money Saver Bundle', 'Zapllo Tasks'];
+    
+                if (trialExpired) {
+                    // If the trial has expired, check for eligible plans
+                    const isPlanEligible = eligiblePlans.includes(subscribedPlan);
+                    setIsPlanEligible(isPlanEligible);
+    
+                    // Redirect if no eligible plan
+                    if (!isPlanEligible) {
+                        router.push('/dashboard');
+                        return;
+                    }
+                }
+    
+                // If trial is active, no need to check for eligible plans
             } catch (error) {
-                console.error('Error fetching user details or trial status:', error);
+                console.error('Error fetching user or plan details:', error);
+                router.push('/dashboard'); // Redirect on error
             }
-        }
+        };
+    
         getUserDetails();
-    }, []);
+    }, [router]);
+    
 
 
-   
 
 
     return (

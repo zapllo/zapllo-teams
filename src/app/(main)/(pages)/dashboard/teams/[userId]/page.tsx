@@ -62,23 +62,34 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
     const [attendanceTrialExpires, setAttendanceTrialExpires] = useState<Date | null>(null);
     const [subscribedPlan, setSubscribedPlan] = useState<string | null>(null);
     const [isPlanEligible, setIsPlanEligible] = useState<boolean>(false);
+    const [currentUserRole, setCurrentUserRole] = useState<string | null>(null); // Role of the logged-in user
 
     const router = useRouter();
 
     useEffect(() => {
-        if (userId) {
-            // Fetch user details
-            axios
-                .get(`/api/users/${userId}`)
-                .then((response) => {
+        const fetchUserDetails = async () => {
+            try {
+                const userRes = await axios.get("/api/users/me");
+                const currentUser = userRes.data.data;
+                setCurrentUserRole(currentUser.role);
+
+                if (currentUser.role !== "orgAdmin") {
+                    setLoading(false);
+                    return;
+                }
+
+                if (userId) {
+                    const response = await axios.get(`/api/users/${userId}`);
                     setUser(response.data.user);
-                    setLoading(false);
-                })
-                .catch((error) => {
-                    console.error("Error fetching user details:", error);
-                    setLoading(false);
-                });
-        }
+                }
+            } catch (error) {
+                console.error("Error fetching user details:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchUserDetails();
     }, [userId]);
 
     useEffect(() => {
@@ -105,7 +116,7 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
 
         fetchPlanStatus();
     }, []);
-console.log(subscribedPlan, 'plan?')
+    console.log(subscribedPlan, 'plan?')
     const handleTabClick = (tabName: string) => {
         const lockedTabs = ["Attendance", "Salary Overview", "Deductions", "Payslip", "User Logs"];
         const isLocked = !isPlanEligible && lockedTabs.includes(tabName);
@@ -265,27 +276,25 @@ console.log(subscribedPlan, 'plan?')
         return tabs.map((tab) => {
             const lockedTabs = ["Attendance", "Salary Overview", "Deductions", "Payslip", "User Logs"];
             const isLocked = !isPlanEligible && lockedTabs.includes(tab.name);
-    
+
             return (
                 <button
                     key={tab.name}
                     onClick={() => handleTabClick(tab.name)}
-                    className={`relative flex items-center gap-4 px-4 text-sm py-2 border rounded-2xl text-left ${
-                        activeTab === tab.name && !isLocked
-                            ? "bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white"
-                            : ""
-                    }`}
+                    className={`relative flex items-center gap-4 px-4 text-sm py-2 border rounded-2xl text-left ${activeTab === tab.name && !isLocked
+                        ? "bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white"
+                        : ""
+                        }`}
                 >
                     {/* Tab Content */}
                     <div
-                        className={`flex items-center gap-4 ${
-                            isLocked ? "blur-" : "blur-none"
-                        }`}
+                        className={`flex items-center gap-4 ${isLocked ? "blur-" : "blur-none"
+                            }`}
                     >
                         {tab.icon}
                         {tab.name}
                     </div>
-    
+
                     {/* Lock Overlay */}
                     {isLocked && (
                         <div
@@ -305,7 +314,7 @@ console.log(subscribedPlan, 'plan?')
             );
         });
     };
-    
+
 
     const renderActiveSection = () => {
         switch (activeTab) {
@@ -429,6 +438,37 @@ console.log(subscribedPlan, 'plan?')
     ];
 
     if (loading) return <p><Loader /></p>;
+
+
+    if (currentUserRole !== "orgAdmin") {
+        return (
+            <div className="w-full max-w-5xl overflow-y-scroll overflow-x-hidden h-full scrollbar-hide mt-16 mx-auto">
+                {/* Header */}
+                {/* User Summary */}
+                <div className="border rounded-xl relative mt-4 p-6 ">
+                    <div className="flex items-center absolute left-0 scale-75 p-1 top-0">
+                        <button onClick={() => router.back()}>
+                            <div className="flex items-center gap-2 font-medium text-xl cursor-pointer">
+                                <ArrowLeft className="h-7 rounded-full border-white border w-7 hover:bg-white hover:text-black" />
+                            </div>
+                        </button>
+                    </div>
+                    <div className="flex justify-between w-full items-center gap-4">
+                        <div>
+                           
+                        </div>
+                    </div>
+
+                    <div className="mt-8 text-center">
+                        <h1 className="text-xl font-semibold text-red-500">
+                            You're not authorized to access Employee Details 
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     if (!user) return <p>User not found.</p>;
 
     return (
@@ -531,7 +571,7 @@ console.log(subscribedPlan, 'plan?')
             <div className="grid mb-24 grid-cols-4 gap-6 mt-6">
                 <div className="col-span-1 rounded-xl p-4 border">
                     <div className="flex flex-col gap-4">
-                       {renderTabs()}
+                        {renderTabs()}
                     </div>
                 </div>
 
