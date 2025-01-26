@@ -461,7 +461,7 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
 
                     <div className="mt-8 text-center">
                         <h1 className="text-xl font-semibold text-red-500">
-                            You're not authorized to access Employee Details 
+                            You&apos;re not authorized to access Employee Details 
                         </h1>
                     </div>
                 </div>
