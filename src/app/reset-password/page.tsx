@@ -45,7 +45,11 @@ export default function ResetPassword() {
             }
         } catch (error: any) {
             console.log("Failed to reset password", error.message);
-            toast.error("Failed to reset password");
+            if (error.response?.data?.error === "Invalid or expired token") {
+                toast.error("The reset link has expired. Please request a new one.");
+            } else {
+                toast.error("Failed to reset password");
+            }
         } finally {
             setLoading(false);
         }

@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
             throw new Error('Insufficient leave balance.');
         }
 
-        userLeaveBalance.balance -= totalAppliedDays; // Deduct applied days
+        // userLeaveBalance.balance -= totalAppliedDays; // Deduct applied days
         await user.save({ session });
 
         const newLeave = new Leave({

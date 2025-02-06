@@ -341,7 +341,7 @@ export default function Approvals() {
     };
 
     fetchApprovals();
-  }, [filter, selectedEntry]);
+  }, [filter]);
 
   // Separate filter functions for Leave and Regularization to maintain type integrity
   const filterLeavesByDate = (leaves: Leave[]): Leave[] => {
