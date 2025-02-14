@@ -60,6 +60,12 @@ export default function NewBlogPage() {
 
     // Quill reference
     const quillRef = useRef<any>(null);
+    const [isClient, setIsClient] = useState(false); // Track if component is mounted
+
+    useEffect(() => {
+        setIsClient(true); // Ensure Quill only loads after mount
+    }, []);
+
 
     // Generate slug from title if user hasn’t manually edited the slug
     useEffect(() => {
@@ -99,6 +105,7 @@ export default function NewBlogPage() {
 
     // Custom image handler for Quill
     const handleInEditorImageUpload = () => {
+        if (!isClient) return; // Prevents server-side execution
         const input = document.createElement("input");
         input.type = "file";
         input.accept = "image/*";
@@ -278,21 +285,12 @@ export default function NewBlogPage() {
                             )}
                         </div>
 
-                        {/* Content WYSIWYG */}
-                        <div>
-                            <Label>Content</Label>
-                            {
-                                // Function ref to avoid TS error
-                            }
-                            <QuillWrapper
-                                ref={quillRef}
-                                value={content}
-                                onChange={setContent}
-                                modules={modules}
-                                theme="snow"
-                                className="mt-2 border bg-gray-300 h-full mb-12 text-black"
-                            />
-                        </div>
+                        {isClient && (
+                            <div>
+                                <Label>Content</Label>
+                                <QuillWrapper ref={quillRef} value={content} onChange={setContent} modules={modules} theme="snow" className="mt-2 border bg-gray-300 h-full mb-12 text-black" />
+                            </div>
+                        )}
 
                         {/* SEO Fields */}
                         <div className="grid gap-4 md:grid-cols-2">
