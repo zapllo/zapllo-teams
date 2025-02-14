@@ -1,59 +1,39 @@
-// Input component extends from shadcnui - https://ui.shadcn.com/docs/components/input
-"use client";
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { useMotionTemplate, useMotionValue, motion } from "framer-motion";
 
-export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> { }
+interface InputProps extends React.ComponentProps<"input"> {
+    label?: string; // Optional floating label text
+}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, ...props }, ref) => {
-    const radius = 100; // change this to increase the rdaius of the hover effect
-    const [visible, setVisible] = React.useState(false);
-
-    let mouseX = useMotionValue(0);
-    let mouseY = useMotionValue(0);
-
-    function handleMouseMove({ currentTarget, clientX, clientY }: any) {
-      let { left, top } = currentTarget.getBoundingClientRect();
-
-      mouseX.set(clientX - left);
-      mouseY.set(clientY - top);
+    ({ className, type, label, ...props }, ref) => {
+        return (
+            <div className="relative w-full">
+                {/* Floating Label */}
+                {label && (
+                    <label
+                        className="absolute left-3 -mt-4 top-2 text-xs text-gray-400 bg-background px-1 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:top-2 peer-focus:text-xs peer-focus:text-gray-400"
+                    >
+                        {label}
+                    </label>
+                )}
+                
+                {/* Input Field */}
+                <input
+                    type={type}
+                    ref={ref}
+                    className={cn(
+                        "peer flex h-9   w-full rounded-md border bg-transparent px-3 py-2 text-white shadow-sm transition-all placeholder-transparent  focus:border-[#815bf5] focus:outline-none",
+                        className
+                    )}
+                    placeholder={label} // Placeholder needed for peer styles
+                    {...props}
+                />
+            </div>
+        );
     }
-    return (
-      <motion.div
-        style={{
-          background: useMotionTemplate`
-        radial-gradient(
-          ${visible ? radius + "px" : "0px"} circle at ${mouseX}px ${mouseY}px,
-          var(--blue-500),
-          transparent 80%
-        )
-      `,
-        }}
-        onMouseMove={handleMouseMove}
-        onMouseEnter={() => setVisible(true)}
-        onMouseLeave={() => setVisible(false)}
-        className="p-[2px] rounded-lg transition duration-300 group/input"
-      >
-        <input
-          type={type}
-          className={cn(
-            `flex h-10 w-full border-none dark:bg-[#04071F] text-black dark:text-[#ffffff]  shadow-[0px_2px_3px_-1px_rgba(129,91,245,0.1),0px_1px_0px_0px_rgba(252,137,41,0.02),0px_0px_0px_1px_rgba(252,137,41,0.08)] rounded-md px-3 py-2 text-sm file:border-0 file:bg-transparent 
-    file:text-sm file:font-medium placeholder:text-[#787CA5] dark:placeholder-text-neutral-600 
-    focus-visible:outline-none focus-visible:ring-[2px] focus-visible:ring-neutral-400 dark:focus-visible:ring-neutral-600 
-    disabled:cursor-not-allowed disabled:opacity-50 
-    group-hover/input:shadow-none transition duration-400`,
-            className
-          )}
-          ref={ref}
-          {...props}
-        />
-      </motion.div>
-    );
-  }
 );
+
 Input.displayName = "Input";
 
 export { Input };

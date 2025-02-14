@@ -50,6 +50,9 @@ export default function Footer() {
                         <Link href='/pressRelease'>
                             <h1>PRESS RELEASE</h1>
                         </Link>
+                        <Link href='/blog'>
+                            <h1>BLOGS</h1>
+                        </Link>
                     </div>
                     <div className='flex gap-3 mt-6'>
                         <img src="/twitter.png" alt="" className='h-8' />

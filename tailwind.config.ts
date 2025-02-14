@@ -210,7 +210,7 @@ const config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate"), addVariablesForColors, require('tailwind-scrollbar-hide'), require('tailwind-scrollbar'),],
+  plugins: [require("tailwindcss-animate"), addVariablesForColors, require('tailwind-scrollbar-hide'), require('tailwind-scrollbar'), require('@tailwindcss/typography')]
 } satisfies Config
 
 export default config

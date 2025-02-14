@@ -53,9 +53,9 @@ const Layout = (props: Props) => {
 
     if (isAdmin) {
         return (
-            <div className={`flex overflow-hidden dark:bg-[#201124] scrollbar-hide h-full w-full`}>
+            <div className={`flex overflow-hidden bg-background scrollbar-hide h-full w-full`}>
                 <AdminSidebar />
-                <div className='w-full overflow-hidden please h-screen '>
+                <div className='w-full overflow-hidden please h-full '>
                     <InfoBar />
                     <div className='mt-12 ml-12'>
                         {props.children}

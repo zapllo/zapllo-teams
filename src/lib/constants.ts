@@ -33,12 +33,7 @@ export const settingsOptions = [
 ];
 export const adminOptions = [
   { name: "Dashboard", Component: Home, href: "/admin/dashboard" },
-  { name: "Tickets", Component: Ticket, href: "/admin/tickets" },
-  { name: "Users", Component: Category, href: "/admin/users" },
-  { name: "Workspaces", Component: Category, href: "/admin/workspaces" },
-  { name: "Announcements", Component: Megaphone, href: "/admin/dashboard/announcements" },
-  { name: "Admin", Component: Payment, href: "/admin/dashboard/admin" },
-  { name: "Help", Component: Clipboard, href: "/tutorials" },
+  
 ];
 
 
