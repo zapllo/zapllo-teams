@@ -278,31 +278,89 @@ export default function Page() {
                 </div>
                 <div>
                   {/* Industry Dropdown */}
-                  <Select value={industry} onValueChange={(value) => setIndustry(value)}>
+                  <Select
+                    value={industry}
+                    onValueChange={(value) => setIndustry(value)}
+                  >
                     <SelectTrigger className="bg-[#0B0D29] mt-2 text-white outline-none focus:ring-[#815BF5]">
                       <SelectValue placeholder="Select Industry" />
                     </SelectTrigger>
                     <SelectContent className="p-1 bg-[#04061E] text-white rounded-xl shadow-lg">
-                      <SelectItem value="Retail" className="hover:bg-[#815BF5] font-medium">
-                        Retail
+                      {/* 
+      EXACT SAME options:
+      Retail/E-Commerce, Technology, Service Provider, Healthcare(Doctors/Clinics/Physicians/Hospital),
+      Logistics, Financial Consultants, Trading, Education, Manufacturing,
+      Real Estate/Construction/Interior/Architects, Other
+    */}
+                      <SelectItem
+                        value="Retail/E-Commerce"
+                        className="hover:bg-[#815BF5] font-medium"
+                      >
+                        Retail/E-Commerce
                       </SelectItem>
-                      <SelectItem value="Technology" className="hover:bg-[#815BF5] font-medium">
+                      <SelectItem
+                        value="Technology"
+                        className="hover:bg-[#815BF5] font-medium"
+                      >
                         Technology
                       </SelectItem>
-                      <SelectItem value="Healthcare" className="hover:bg-[#815BF5] font-medium">
-                        Healthcare
+                      <SelectItem
+                        value="Service Provider"
+                        className="hover:bg-[#815BF5] font-medium"
+                      >
+                        Service Provider
                       </SelectItem>
-                      <SelectItem value="Finance" className="hover:bg-[#815BF5] font-medium">
-                        Finance
+                      <SelectItem
+                        value="Healthcare(Doctors/Clinics/Physicians/Hospital)"
+                        className="hover:bg-[#815BF5] font-medium"
+                      >
+                        Healthcare(Doctors/Clinics/Physicians/Hospital)
                       </SelectItem>
-                      <SelectItem value="Education" className="hover:bg-[#815BF5] font-medium">
+                      <SelectItem
+                        value="Logistics"
+                        className="hover:bg-[#815BF5] font-medium"
+                      >
+                        Logistics
+                      </SelectItem>
+                      <SelectItem
+                        value="Financial Consultants"
+                        className="hover:bg-[#815BF5] font-medium"
+                      >
+                        Financial Consultants
+                      </SelectItem>
+                      <SelectItem
+                        value="Trading"
+                        className="hover:bg-[#815BF5] font-medium"
+                      >
+                        Trading
+                      </SelectItem>
+                      <SelectItem
+                        value="Education"
+                        className="hover:bg-[#815BF5] font-medium"
+                      >
                         Education
                       </SelectItem>
-                      <SelectItem value="Other" className="hover:bg-[#815BF5] font-medium">
+                      <SelectItem
+                        value="Manufacturing"
+                        className="hover:bg-[#815BF5] font-medium"
+                      >
+                        Manufacturing
+                      </SelectItem>
+                      <SelectItem
+                        value="Real Estate/Construction/Interior/Architects"
+                        className="hover:bg-[#815BF5] font-medium"
+                      >
+                        Real Estate/Construction/Interior/Architects
+                      </SelectItem>
+                      <SelectItem
+                        value="Other"
+                        className="hover:bg-[#815BF5] font-medium"
+                      >
                         Other
                       </SelectItem>
                     </SelectContent>
                   </Select>
+
                 </div>
 
                 <div>

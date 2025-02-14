@@ -238,6 +238,19 @@ export async function POST(request: NextRequest, { params }: { params: { leaveId
                     }
                     return day;
                 });
+                // Determine and set leave status based on counts
+                if (approvedDaysCount === leave.leaveDays.length) {
+                    leave.status = 'Approved';
+                    leave.approvedBy = approvedBy;
+                } else if (rejectedDaysCount === leave.leaveDays.length) {
+                    leave.status = 'Rejected';
+                    leave.rejectedBy = approvedBy;
+                } else if (approvedDaysCount > 0 && rejectedDaysCount > 0) {
+                    leave.status = 'Partially Approved';
+                    leave.approvedBy = approvedBy;
+                    leave.rejectedBy = approvedBy;
+                }
+
                 // **Balance Deduction Logic**
                 if (leave.status === 'Approved' || leave.status === 'Partially Approved') {
                     const leaveBalance = user.leaveBalances.find((b: { leaveType: { _id: { equals: (arg0: mongoose.Types.ObjectId) => any; }; }; }) => {
@@ -268,18 +281,6 @@ export async function POST(request: NextRequest, { params }: { params: { leaveId
             return NextResponse.json({ success: false, error: 'Leave days data is missing or undefined' });
         }
 
-        // Determine and set leave status based on counts
-        if (approvedDaysCount === leave.leaveDays.length) {
-            leave.status = 'Approved';
-            leave.approvedBy = approvedBy;
-        } else if (rejectedDaysCount === leave.leaveDays.length) {
-            leave.status = 'Rejected';
-            leave.rejectedBy = approvedBy;
-        } else if (approvedDaysCount > 0 && rejectedDaysCount > 0) {
-            leave.status = 'Partially Approved';
-            leave.approvedBy = approvedBy;
-            leave.rejectedBy = approvedBy;
-        }
 
         await leave.save();
         console.log('Leave saved after approval. ', approvedFor, '<--- approved for');

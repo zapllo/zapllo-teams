@@ -5,7 +5,7 @@ import axios from "axios";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import { Card, CardTitle } from "@/components/ui/card";
 import Loader from "@/components/ui/loader";
 import { Eye, EyeOff } from "lucide-react"; // Import the icons
@@ -100,7 +100,6 @@ export default function ResetPassword() {
                 <Button className="bg-[#017a5b] hover:bg-[#017a5b]" onClick={onSubmit} disabled={loading}>
                     {loading ? <Loader /> : "Reset Password"}
                 </Button>
-                <Toaster position="top-center" />
             </Card>
         </div>
     );

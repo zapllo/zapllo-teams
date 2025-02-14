@@ -43,8 +43,16 @@ import { Label } from "../ui/label";
 import MainLoader from "../loaders/loader";
 import { ModeToggle2 } from "../globals/mode-toggle2";
 import { FaAndroid, FaApple } from "react-icons/fa";
+import { Badge } from "../ui/badge";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 type Props = {};
+
+interface OrgData {
+  subscribedPlan: string;
+  // ... other organization fields if needed
+}
+
 
 const InfoBar = (props: Props) => {
   const router = useRouter();
@@ -56,6 +64,8 @@ const InfoBar = (props: Props) => {
   const [trialExpires, setTrialExpires] = useState<Date | null>(null);
   const [remainingTime, setRemainingTime] = useState("");
   const [userLoading, setUserLoading] = useState<boolean | null>(false);
+    const [orgData, setOrgData] = useState<OrgData | null>(null);
+    const [subscribedPlan, setSubscribedPlan] = useState<string>("")
 
   useEffect(() => {
     const getUserDetails = async () => {
@@ -88,6 +98,26 @@ const InfoBar = (props: Props) => {
   }, []);
 
   console.log(trialExpires, "trial");
+
+
+   useEffect(() => {
+      const fetchOrgData = async () => {
+        try {
+          const res = await axios.get("/api/organization/getById");
+          const org = res.data.data;
+          // Save the entire org data if needed:
+          setOrgData({
+            subscribedPlan: org.subscribedPlan,
+          });
+          // Also update the individual states so the inputs are prepopulated:
+          setSubscribedPlan(org.subscribedPlan);
+  
+        } catch (error) {
+          console.error("Error fetching organization data", error);
+        }
+      };
+      fetchOrgData();
+    }, []);
 
   useEffect(() => {
     if (trialExpires) {
@@ -197,7 +227,7 @@ const InfoBar = (props: Props) => {
         <div className="gap-6 ml-12 border-b  items-center px-4 py-2 w-[100%] z-[10] flex flex-row  bg-[#04061e]">
           {/* <img src='/icons/ellipse.png' className='absolute h-[50%] z-[10]   opacity-30 -ml-32 ' /> */}
           <div
-            className={`flex   ${pathName === "/dashboard" ? "text-center ml-[42%] w-screen" : ""
+            className={`flex   ${pathName === "/dashboard" ? "text-center ml-[40%] w-" : ""
               }`}
           >
             <h1 className={`text-md mt-1 ml-4 text-white font-bold `}>
@@ -211,6 +241,12 @@ const InfoBar = (props: Props) => {
               <h1>Trial Expired</h1>
             </Label> */}
             {/* <ModeToggle /> */}
+            <Link href='/dashboard/billing'>
+              <Badge className="border flex items-center gap-1 hover:bg-transparent hover:border-white/50 bg-transparent border-muted cursor-pointer text-white py-1 ">
+                <img src="/illustrations/diamond.png" className="h-5" />
+              {subscribedPlan ?"Subscribed" : "Premium Trial"}
+              </Badge>
+            </Link>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button

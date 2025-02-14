@@ -25,7 +25,7 @@ export default function SaveMore({ }: Props) {
                                     "group rounded-full border border-black/5  transition-all ease-in  text-base text-white  hover:cursor-pointer  dark:border-white/5 dark:hover:text-white dark:bg-gradient-to-r from-[#A587FF] to-[#5E29FF] dark:hover:bg-blue-800",
                                 )}
                             >
-                                <Link href='/bookdemo'>
+                                <Link href='https://masterclass.zapllo.com/workshop/'>
                                     <div className="inline-flex text-2xl items-center justify-center px-6 py-2 transition ease-out hover:text-neutral-600 hover:duration-900  hover:dark:text-white">
                                         <span className="flex mt-auto text-xl  font-medium  gap-2">
                                             <div className="m ">

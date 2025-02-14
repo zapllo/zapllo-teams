@@ -86,6 +86,7 @@ export interface IUser extends Document {
     contactNumber: string;
     asset: string; // Editable input field
     branch: string; // Editable input field
+    workFromHomeAllowed: boolean;  // <-- Add this line
     department: string; // Editable input field
     status: string;
     salaryDetails?: Allowance[]; // New field for salary details
@@ -204,6 +205,10 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
     staffType: { type: String, enum: ["Regular Employee", "Contractor", "Work Basis"], default: null }, // Enum for valid options
     asset: { type: String, default: null }, // New optional field
     branch: { type: String, default: null }, // New optional field
+    workFromHomeAllowed: {
+        type: Boolean,
+        default: false,
+    },
     department: { type: String, default: null }, // New optional field
     status: { type: String, enum: ["Active", "Deactivated"], default: "Active" }, // Status field with default
     monthCalculationType: {

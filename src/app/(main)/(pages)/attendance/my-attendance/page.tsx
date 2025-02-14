@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import CustomTimePicker from "@/components/globals/time-picker";
 import {
   BookIcon,
+  Building,
   Calendar,
   CalendarClock,
   Camera,
@@ -43,6 +44,9 @@ import { CrossCircledIcon } from "@radix-ui/react-icons";
 import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
 import { format, parseISO } from "date-fns";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import axios from "axios";
+import { FaHouseUser } from "react-icons/fa";
+import { Tabs3, TabsList3, TabsTrigger3 } from "@/components/ui/tabs3";
 
 const mapContainerStyle = {
   height: "400px",
@@ -63,7 +67,7 @@ interface LoginEntry {
   lat: number;
   lng: number;
   timestamp: string;
-  action: "login" | "logout" | "regularization";
+  action: "login" | "logout" | "regularization" | "break_started" | "break_ended";
   approvalStatus?: "Pending" | "Approved" | "Rejected"; // Add the approvalStatus field
   loginTime: string;
   logoutTime: string;
@@ -92,7 +96,9 @@ const groupEntriesByDay = (
 export default function MyAttendance() {
   const [loginEntries, setLoginEntries] = useState<LoginEntry[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isBreakOpen, setIsBreakOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isBreakModalOpen, setIsBreakModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [attendanceLoading, setAttendanceLoading] = useState(false);
   const [mapModalOpen, setMapModalOpen] = useState(false);
@@ -161,6 +167,7 @@ export default function MyAttendance() {
 
   // For Face Login Modal
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [capturedBreakImage, setCapturedBreakImage] = useState<string | null>(null);
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     null
   );
@@ -180,16 +187,29 @@ export default function MyAttendance() {
   const [expandedDays, setExpandedDays] = useState<{ [date: string]: boolean }>(
     {}
   );
+  // Just below your other states, e.g.:
+  const [isWorkFromHome, setIsWorkFromHome] = useState(false);
+
   const [displayLoader, setDisplayLoader] = useState(false);
   const [isDateSelected, setIsDateSelected] = useState<boolean>(false); // Track whether the user manually selects a date
   const [isDatePickerOpen, setIsDatePickerOpen] = useState<boolean>(false);
   const [isStartPickerOpen, setIsStartPickerOpen] = useState(false); // For triggering the start date picker
   const [isEndPickerOpen, setIsEndPickerOpen] = useState(false); // For triggering the end date picker
+  const [user, setUser] = useState<any>(null);
+
 
   const [mapCoords, setMapCoords] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
+
+  const [orgData, setOrgData] = useState<{
+    location: { lat: number; lng: number };
+    allowGeofencing: boolean;
+    geofenceRadius: number;
+  } | null>(null);
+
+
 
   const handleViewMap = (lat: number, lng: number) => {
     setMapCoords({ lat, lng });
@@ -214,6 +234,51 @@ export default function MyAttendance() {
   //     }
   // }, []);
 
+
+  useEffect(() => {
+    const getUserDetails = async () => {
+      try {
+        const res = await axios.get("/api/users/me");
+        setUser(res.data.data); // Suppose 'res.data.data' includes 'workFromHomeAllowed'
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    getUserDetails();
+  }, []);
+
+  useEffect(() => {
+    const fetchOrgData = async () => {
+      try {
+        const res = await axios.get("/api/organization/getById");
+        setOrgData(res.data.data);
+      } catch (error) {
+        console.error("Error fetching organization data", error);
+      }
+    };
+    fetchOrgData();
+  }, []);
+
+
+  const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ): number => {
+    const R = 6371e3; // Earth’s radius in meters
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+    const a = Math.sin(Δφ / 2) ** 2 +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  console.log(isBreakOpen, 'isBreakOpen?')
+
   useEffect(() => {
     const fetchLoginStatus = async () => {
       try {
@@ -223,6 +288,8 @@ export default function MyAttendance() {
 
         if (data.success) {
           setIsLoggedIn(data.isLoggedIn);
+          setIsBreakOpen(data.isBreakOpen);
+
           setHasRegisteredFaces(data.hasRegisteredFaces);
         } else {
           alert(data.error || "Failed to fetch login status.");
@@ -235,7 +302,7 @@ export default function MyAttendance() {
     };
 
     fetchLoginStatus();
-  }, []);
+  }, [isLoggedIn, isBreakOpen]);
 
   useEffect(() => {
     const fetchLoginEntriesAndStatus = async () => {
@@ -253,7 +320,7 @@ export default function MyAttendance() {
     };
 
     fetchLoginEntriesAndStatus();
-  }, [isLoggedIn]);
+  }, [isLoggedIn, isBreakOpen]);
 
   const handleFaceRegistrationSubmit = async () => {
     if (selectedImages?.length !== 3) {
@@ -315,75 +382,12 @@ export default function MyAttendance() {
     setIsModalOpen(true);
   };
 
-  // Capture image and location
-  // const captureImageAndLocation = () => {
-  //     const imageSrc = webcamRef.current?.getScreenshot();
-  //     if (imageSrc) {
-  //         setCapturedImage(imageSrc);
-  //     }
-  //     if (navigator.geolocation) {
-  //         navigator.geolocation.getCurrentPosition((position) => {
-  //             setLocation({
-  //                 lat: position.coords.latitude,
-  //                 lng: position.coords.longitude,
-  //             });
-  //         });
-  //     }
-  // };
+  const handleBreaks = () => {
+    setIsBreakModalOpen(true);
+    setCapturedBreakImage(null);
+    setLocation(null);
 
-  // Submit face login/logout
-  // const handleSubmitLogin = async () => {
-  //     if (!capturedImage || !location) {
-  //         alert('Please capture an image and allow location access.');
-  //         return;
-  //     }
-  //     setIsLoading(true);
-
-  //     try {
-  //         const formData = new FormData();
-  //         formData.append('files', dataURLtoBlob(capturedImage, 'captured_image.jpg'));
-
-  //         const uploadResponse = await fetch('/api/upload', {
-  //             method: 'POST',
-  //             body: formData,
-  //         });
-
-  //         const uploadData = await uploadResponse.json();
-  //         const imageUrl = uploadData.fileUrls[0];
-
-  //         if (!uploadResponse.ok) {
-  //             throw new Error('Image upload failed.');
-  //         }
-
-  //         const action = isLoggedIn ? 'logout' : 'login'; // Determine login or logout action
-
-  //         const loginResponse = await fetch('/api/face-login', {
-  //             method: 'POST',
-  //             headers: {
-  //                 'Content-Type': 'application/json',
-  //             },
-  //             body: JSON.stringify({
-  //                 imageUrl,
-  //                 lat: location.lat,
-  //                 lng: location.lng,
-  //                 action, // Send the action (login or logout)
-  //             }),
-  //         });
-
-  //         const loginData = await loginResponse.json();
-
-  //         if (loginResponse.ok && loginData.success) {
-  //             setIsLoggedIn(action === 'login');
-  //             setIsModalOpen(false); // Close the modal on successful login/logout
-  //         } else {
-  //             throw new Error(loginData.error || 'Face recognition failed.');
-  //         }
-  //     } catch (err: any) {
-  //         alert(err.message);
-  //     } finally {
-  //         setIsLoading(false);
-  //     }
-  // };
+  }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -620,55 +624,126 @@ export default function MyAttendance() {
   const handleRegisterFaces = () => {
     setIsRegisterFaceModalOpen(true);
   };
-  // Fetch the user's location when the component mounts
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-          });
-        },
-        (error) => {
-          console.error("Error fetching location:", error);
-          toast.error(
-            "Unable to fetch location. Please allow location access."
-          );
-        }
-      );
-    }
-  }, [isModalOpen]);
 
-  console.log(location, "location");
+
+  // Use watchPosition to continuously update location in real time
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation is not supported by your browser.");
+      return;
+    }
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const loc = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        console.log("Updated location:", loc);
+        setLocation(loc);
+      },
+      (error) => {
+        console.error("Error fetching location:", error);
+        toast.error("Unable to fetch location. Please allow location access.");
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 10000,
+      }
+    );
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
+  }, []);
 
   const handleModalChange = (isOpen: boolean) => {
     if (isOpen) {
-      // If location is not already fetched, fetch it when the modal opens
-      if (!location) {
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            (position) => {
-              setLocation({
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
-              });
-            },
-            (error) => {
-              console.error("Error fetching location:", error);
-              toast.error(
-                "Unable to fetch location. Please allow location access."
-              );
-            }
-          );
-        }
-      }
-      setCapturedImage(null); // Reset the captured image when modal opens
-      console.log(location, "location in the modal");
+      setCapturedImage(null);
+      console.log("Modal open - location:", location);
     } else {
       setCapturedImage(null);
     }
-    setIsModalOpen(isOpen); // Handle modal state
+    setIsModalOpen(isOpen);
+  };
+
+  const handleBreakModalChange = (isOpen: boolean) => {
+    if (isOpen) {
+      setCapturedBreakImage(null);
+      console.log("Break modal open - location:", location);
+    } else {
+      setCapturedBreakImage(null);
+    }
+    setIsBreakModalOpen(isOpen);
+  };
+
+
+  // When the user clicks "Take a Break"
+  const captureImageAndSubmitBreakStart = async () => {
+    // Capture image
+    const imageSrc = webcamRef.current?.getScreenshot();
+    if (imageSrc) {
+      setCapturedBreakImage(imageSrc);
+    }
+    if (!imageSrc || !location) {
+      toast.error("Please capture an image and ensure location is available.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("files", dataURLtoBlob(imageSrc, "captured_image.jpg"));
+
+      const uploadResponse = await fetch("/api/upload", { method: "POST", body: formData });
+      const uploadData = await uploadResponse.json();
+      const imageUrl = uploadData.fileUrls[0];
+
+      if (!uploadResponse.ok) {
+        throw new Error("Image upload failed.");
+      }
+
+      // Determine the action based on login state
+      const action = isBreakOpen ? "break_ended" : "break_started";
+
+      const loginResponse = await fetch("/api/face-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageUrl,
+          lat: location.lat,
+          lng: location.lng,
+          action,
+        }),
+      });
+
+      const loginData = await loginResponse.json();
+      if (loginResponse.ok && loginData.success) {
+        // Show appropriate toast message based on the action performed.
+        if (action === "break_started") {
+          toast.success("Break Started.");
+        } else if (action === "break_ended") {
+          toast.success("Break Ended.");
+        }
+        // Close the break modal after success.
+        setIsBreakModalOpen(false);
+        if (action === "break_started") {
+          setIsBreakOpen(true);
+        } else {
+          setIsBreakOpen(false);
+        }
+      } else {
+        if (action === "break_started") {
+          toast.error(loginData.error || "Break start failed.");
+        } else {
+          toast.error(loginData.error || "Break end failed.");
+        }
+      }
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const captureImageAndSubmitLogin = async () => {
@@ -701,7 +776,8 @@ export default function MyAttendance() {
         throw new Error("Image upload failed.");
       }
 
-      const action = isLoggedIn ? "logout" : "login"; // Determine login or logout action
+      // Determine the action based on login state
+      const action = isLoggedIn ? "logout" : "login";
 
       const loginResponse = await fetch("/api/face-login", {
         method: "POST",
@@ -712,7 +788,8 @@ export default function MyAttendance() {
           imageUrl,
           lat: location.lat,
           lng: location.lng,
-          action, // Send the action (login or logout)
+          action,
+          workFromHome: isWorkFromHome,  // <-- Pass it here
         }),
       });
 
@@ -723,8 +800,20 @@ export default function MyAttendance() {
         setIsLoggedIn(action === "login");
         setIsModalOpen(false); // Close the modal on successful login/logout
       } else {
-        // Handle specific errors from the server
-        if (loginData.error === "No matching face found.") {
+        // Check for geofencing error message
+        if (loginData.error === "You are outside the allowed geofencing area.") {
+          toast(<div className=" w-full mb-6 gap-2 m-auto  ">
+            <div className="w-full flex  justify-center">
+              <DotLottieReact
+                src="/lottie/error.lottie"
+                loop
+                autoplay
+              />
+            </div>
+            <h1 className="text-black text-center font-medium text-lg">You are outside the allowed<br /> Geo-Fencing Area</h1>
+            <p className="text-sm text-center text-black font-medium">Please raise a regularization request</p>
+          </div>);
+        } else if (loginData.error === "No matching face found. Please ensure you are facing the camera clearly and retry.") {
           toast.error("Face not recognized. Please try again or contact support.");
         } else {
           throw new Error(loginData.error || "Face recognition failed.");
@@ -736,6 +825,7 @@ export default function MyAttendance() {
       setIsLoading(false);
     }
   };
+
 
 
   const filterDailyReportEntries = (entries: LoginEntry[]) => {
@@ -881,41 +971,52 @@ export default function MyAttendance() {
       : filterRegularizationEntries(filteredEntries);
 
   const calculateHoursBetweenLoginLogout = (entries: LoginEntry[]) => {
+    // Sort the entries by timestamp
+    const sortedEntries = entries.sort(
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
     let totalHours = 0;
-    let lastLoginTime: number | null = null; // For standard login/logout
-    let lastRegularizationLoginTime: number | null = null; // For regularization entries
-
-    const sortedEntries = entries.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    let loginTime: number | null = null;
+    let logoutTime: number | null = null;
+    let totalBreakDuration = 0;
+    let currentBreakStart: number | null = null;
 
     sortedEntries.forEach((entry) => {
       const entryTime = new Date(entry.timestamp).getTime();
 
       if (entry.action === "login") {
-        lastLoginTime = entryTime;
-      } else if (entry.action === "logout" && lastLoginTime !== null) {
-        const hoursBetween = (entryTime - lastLoginTime) / (1000 * 60 * 60);
-        totalHours += hoursBetween;
-        lastLoginTime = null; // Reset after pairing login with logout
-      } else if (entry.action === "regularization") {
-        // Create a date object for loginTime using the entry's timestamp
-        if (entry.loginTime) {
-          const datePart = new Date(entry.timestamp).toISOString().split("T")[0]; // Get date part from timestamp
-          lastRegularizationLoginTime = new Date(`${datePart}T${entry.loginTime}:00Z`).getTime(); // Combine date with loginTime
+        // Start a new session
+        loginTime = entryTime;
+        totalBreakDuration = 0; // reset break duration for this session
+        currentBreakStart = null;
+      } else if (entry.action === "break_started") {
+        // Record when break starts
+        currentBreakStart = entryTime;
+      } else if (entry.action === "break_ended") {
+        // If a break was started, accumulate its duration
+        if (currentBreakStart !== null) {
+          totalBreakDuration += entryTime - currentBreakStart;
+          currentBreakStart = null;
         }
-        // Create a date object for logoutTime
-        if (entry.logoutTime) {
-          const datePart = new Date(entry.timestamp).toISOString().split("T")[0]; // Ensure datePart is defined again
-          const regularizationEntryTime = new Date(`${datePart}T${entry.logoutTime}:00Z`).getTime(); // Combine date with logoutTime
-          if (lastRegularizationLoginTime !== null) {
-            const regularizationHoursBetween = (regularizationEntryTime - lastRegularizationLoginTime) / (1000 * 60 * 60);
-            totalHours += regularizationHoursBetween; // Only add if both times are valid
-          }
+      } else if (entry.action === "logout" && loginTime !== null) {
+        logoutTime = entryTime;
+        // If there was an ongoing break that wasn't ended before logout, count it until logout
+        if (currentBreakStart !== null) {
+          totalBreakDuration += logoutTime - currentBreakStart;
+          currentBreakStart = null;
         }
+        const sessionDuration = logoutTime - loginTime;
+        const netSession = sessionDuration - totalBreakDuration;
+        totalHours += netSession / (1000 * 60 * 60);
+        // Reset for next session
+        loginTime = null;
+        logoutTime = null;
+        totalBreakDuration = 0;
       }
     });
-
-    return totalHours.toFixed(2); // Return total hours rounded to 2 decimal places
+    return totalHours.toFixed(2);
   };
+
 
 
 
@@ -982,7 +1083,12 @@ export default function MyAttendance() {
       // Exclude regularization entries and only include login and logout actions
       return (
         isToday(new Date(entry.timestamp)) &&
-        (entry.action === "login" || entry.action === "logout")
+        (
+          entry.action === "login" ||
+          entry.action === "logout" ||
+          entry.action === "break_started" ||
+          entry.action === "break_ended"
+        )
       );
     });
   };
@@ -1016,6 +1122,7 @@ export default function MyAttendance() {
   const groupedEntries = groupEntriesByDay(
     filterApprovedEntries(filteredEntries)
   );
+
 
 
 
@@ -1054,20 +1161,46 @@ export default function MyAttendance() {
         </div>
       )}
       <div className="login-section   flex justify-center ">
-        <div className=" flex justify-center  m-auto mt-4">
-
+        <div className="flex justify-center m-auto mt-4">
           {hasRegisteredFaces ? (
             <div>
-              <button
-                onClick={handleLoginLogout}
-                className={`bg-${isLoggedIn ? "red-800" : "[#017a5b]"
-                  } -500 text-white py-2 px-4 rounded text-sm`}
-              >
-                {isLoggedIn ? "Logout" : "Login"}
-              </button>
+              {isLoggedIn ? (
+                <div className="flex gap-2">
+                  {isBreakOpen ? (
+                    <button
+                      onClick={() => handleBreaks()}
+                      className="bg-[#FD8928] text-white py-2 px-4 rounded text-sm"
+                    >
+                      End Break
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleBreaks()}
+                      className="bg-yellow-500 text-white py-2 px-4 rounded text-sm"
+                    >
+                      Take a Break
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleLoginLogout()}
+                    className="bg-red-800 text-white py-2 px-4 rounded text-sm"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <button
+                    onClick={handleLoginLogout}
+                    className="bg-[#017a5b] text-white py-2 px-4 rounded text-sm"
+                  >
+                    Login
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
-            <div className="">
+            <div>
               <button
                 onClick={() => setIsRegisterFaceModalOpen(true)}
                 className="bg-[#815BF5] text-white py-2 px-6 rounded text-xs"
@@ -1077,6 +1210,7 @@ export default function MyAttendance() {
             </div>
           )}
         </div>
+
       </div>
       {/* Login/Logout Button */}
       {/* <div className="login-section flex justify-center mb-6">
@@ -1120,6 +1254,14 @@ export default function MyAttendance() {
                 })
                 : null;
 
+              // For break events, always use the entry timestamp.
+              const formattedBreakTime = new Date(entry.timestamp).toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              });
+
+
               return (
                 <div key={index} className="w-full grid grid-cols-3">
                   {entry.loginTime && (
@@ -1132,12 +1274,37 @@ export default function MyAttendance() {
                       <h2 className="text-xs py-1">Logout: {formattedLogoutTime}</h2>
                     </div>
                   )}
+                  {(entry.action === "break_started" || entry.action === "break_ended") && (
+                    <div>
+                      <h1 className="text-xs py-1">
+                        {entry.action === "break_started"
+                          ? "Break start time:"
+                          : "Break end time:"}{" "}
+                        {formattedBreakTime}
+                      </h1>
+                    </div>
+                  )}
                   <div
-                    className={`px-2 py-1 h-6 w-fit flex justify-center text-xs border rounded-xl text-white ${entry.action === "login" ? "bg-green-800 text-xs" : "bg-[#8A3D17] text-xs"
+                    className={`px-2 py-1 h-6 w-fit flex justify-center text-xs border rounded-xl text-white ${entry.action === "login"
+                      ? "bg-green-800"
+                      : entry.action === "logout"
+                        ? "bg-red-800"
+                        : entry.action === "break_started"
+                          ? "bg-yellow-700"
+                          : entry.action === "break_ended"
+                            ? "bg-[#Fd8928]"
+                            : "bg-[#8A3D17]"
                       }`}
                   >
-                    <h1 className="text-xs">{entry.action.toUpperCase()}</h1>
+                    <h1 className="text-xs">
+                      {entry.action === "login" || entry.action === "logout"
+                        ? entry.action.toUpperCase()
+                        : entry.action === "break_started"
+                          ? "Break Started"
+                          : "Break Ended"}
+                    </h1>
                   </div>
+
                   {entry.lat && entry.lng && (
                     <div className="flex justify-end">
                       <button
@@ -1249,7 +1416,7 @@ export default function MyAttendance() {
       </div>
 
       {/* Display login/logout entries */}
-      <div className="entries-list mb-36">
+      <div className="entries-list w-full mb-36">
         {activeAttendanceTab === "dailyReport" ? (
           <>
             {Object.keys(groupedEntries)?.length === 0 ? (
@@ -1313,7 +1480,7 @@ export default function MyAttendance() {
                   </div>
                 </div>
                 {Object.keys(groupedEntries || {}).map((date, index) => (
-                  <div key={index} className="mb-4 ">
+                  <div key={index} className="mb-4  w-full">
                     <div
                       onClick={() => toggleDayExpansion(date)}
                       className="w-full grid cursor-pointer grid-cols-3 gap-2 text-xs text-left border text-white px-4 py-2 rounded rounded-b-none"
@@ -1346,38 +1513,57 @@ export default function MyAttendance() {
                       </div>
                     </div>
                     {expandedDays[date] && (
-                      <div className="p-4 border rounded rounded-t-none">
+                      <div className="p-4 border rounded w-full rounded-t-none">
                         {groupedEntries[date].map((entry, index) => (
                           <div
                             key={index}
-                            className="flex justify-between items-center p-2 text-xs rounded mb-2"
+                            className="flex w-full p-2 justify-between"
                           >
-
-                            <span>
-                              {entry.action === "regularization"
-                                ? `Login: ${formatTimeToAMPM(entry.loginTime)}`
-                                : `${entry.action.charAt(0).toUpperCase() + entry.action.slice(1)}: ${format(new Date(entry.timestamp), 'hh:mm a')}` // Format action timestamp
-                              }
-                            </span>
-                            {entry.action === "regularization" && (
+                            <div>
                               <span>
-                                Logout: {formatTimeToAMPM(entry.logoutTime)}
+                                {entry.action === "regularization"
+                                  ? `Login: ${formatTimeToAMPM(entry.loginTime)}`
+                                  : entry.action === "break_started"
+                                    ? `Break Started` : entry.action === "break_ended"
+                                      ? `Break Ended` : `${entry.action.charAt(0).toUpperCase() + entry.action.slice(1)}: ${format(new Date(entry.timestamp), 'hh:mm a')}` // Format action timestamp
+                                }
                               </span>
-                            )}
-                            <span
-                              className={`text-xs border h-fit w-fit px-2 py-1 rounded-2xl ${entry.action === "login" ? "bg-[#017a5b]" : "bg-[#8a3d17]"
-                                }`}
-                            >
-                              {entry.action.toUpperCase()}
-                            </span>
-                            {entry.lat && entry.lng && (
-                              <button
-                                onClick={() => handleViewMap(entry.lat, entry.lng)}
-                                className="underline text-[#ffffff]"
-                              >
-                                <MapPinIcon />
-                              </button>
-                            )}
+                              {entry.action === "regularization" && (
+                                <span>
+                                  Logout: {formatTimeToAMPM(entry.logoutTime)}
+                                </span>
+                              )}
+                            </div>
+
+                            <div className={`text-xs cursor-pointer border w-fit h-fit flex gap-2 items-center  px-2 py-1  rounded-2xl ${entry.action === "login"
+                              ? "bg-green-800"
+                              : entry.action === "logout"
+                                ? "bg-red-800"
+                                : entry.action === "break_started"
+                                  ? "bg-yellow-700"
+                                  : entry.action === "break_ended"
+                                    ? "bg-[#Fd8928]"
+                                    : "bg-[#8A3D17]"
+                              }`}>
+                              <div className="flex items-center">
+                                {entry.action === "login" || entry.action === "logout"
+                                  ? entry.action.toUpperCase()
+                                  : entry.action === "break_started"
+                                    ? "Break Started"
+                                    : "Break Ended"}
+                              </div>
+                              <div className="flex items-center">
+                                {entry.lat && entry.lng && (
+                                  <button
+                                    onClick={() => handleViewMap(entry.lat, entry.lng)}
+                                    className="underline text-[#ffffff]"
+                                  >
+                                    <MapPinIcon className="h-4" />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+
                           </div>
                         ))}
                       </div>
@@ -1408,12 +1594,28 @@ export default function MyAttendance() {
               </DialogClose>
             </div>
             <Separator className="my-4" />
-            <div className="w-full flex mb-4 justify-between">
+            <div className="w-full flex items-center mb-4 justify-between">
               <h3 className="text-sm text-white text-center ">
                 {isLoggedIn
                   ? `Logout at ${new Date().toLocaleTimeString()}`
                   : `Login at ${new Date().toLocaleTimeString()}`}
               </h3>
+              <Tabs3
+                // If `isWorkFromHome` is true, the active tab is "work-from-home", else "office"
+                value={isWorkFromHome ? "work-from-home" : "office"}
+                onValueChange={(val) => {
+                  setIsWorkFromHome(val === "work-from-home");
+                }}
+              >
+                <TabsList3>
+                  <TabsTrigger3 value="office">Office</TabsTrigger3>
+                  <TabsTrigger3
+                    value="work-from-home"
+                    disabled={!user?.workFromHomeAllowed}
+                  >Work From Home</TabsTrigger3>
+                </TabsList3>
+              </Tabs3>
+
               {/* <Dialog.DialogClose className="">
                   <CrossCircledIcon className="scale-150 -mt-1 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
                 </Dialog.DialogClose> */}
@@ -1470,6 +1672,147 @@ export default function MyAttendance() {
                     : "Fetching location..."}
                 </p>
               </div> */}
+            {orgData && orgData.allowGeofencing && location && (
+              <div className="mt-4 text-center">
+                {calculateDistance(
+                  location.lat,
+                  location.lng,
+                  orgData.location.lat,
+                  orgData.location.lng
+                ) <= orgData.geofenceRadius ? (
+                  <div className="flex justify-center">
+                    <div className="text-white flex gap-2 items-center bg-green-500 rounded-xl w-fit px-2 py-1 text-sm ">
+                      <FaHouseUser className="h-4 text-white" />
+                      You are outside office reach
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex justify-center">
+                    <div className="text-white flex gap-2 items-center bg-red-500 rounded-xl w-fit px-2 py-1 text-sm ">
+                      <FaHouseUser className="h-4 text-white" />
+                      You are outside office reach
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="text-center flex w-full justify-center text-xs text-white -400 mt-4">
+              <div className="bg-[#1E2A38] rounded-lg py-2 px-4 flex items-center gap-2 shadow-lg">
+                <MapPinIcon className="h-4 text-[#FC8929]" />
+                <p className="text-sm text-white font-semibold">
+                  {location
+                    ? `Lat: ${location.lat}, Long: ${location.lng}`
+                    : "Fetching location..."}
+                </p>
+              </div>
+            </div>
+
+            {/* Show Loader if submitting */}
+            {isLoading && <Loader />}
+          </div>
+        </DialogContent>
+      </Dialog>
+      {/* Radix UI Dialog for Face Login */}
+      <Dialog open={isBreakModalOpen} onOpenChange={handleBreakModalChange}>
+        <DialogContent className="z-[100] flex items-center justify-center ">
+          <div className="bg-[#0B0D29] z-[100] p-6 rounded-lg max-w-lg w-full relative">
+            <div className="flex justify-between">
+              <div className="flex gap-2  items-center ">
+                <img src="/branding/AII.png" className="h-10" />
+                <img src="/branding/zapllo ai.png" className="h-5 mt-2" />
+              </div>
+              <DialogClose className=" ">
+                <CrossCircledIcon className="scale-150 -mt-1 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
+              </DialogClose>
+            </div>
+            <Separator className="my-4" />
+            <div className="w-full flex mb-4 justify-between">
+              <h3 className="text-sm text-white text-center ">
+                {isBreakOpen
+                  ? `End Break at ${new Date().toLocaleTimeString()}`
+                  : `Take a Break at ${new Date().toLocaleTimeString()}`}
+              </h3>
+              {/* <Dialog.DialogClose className="">
+                  <CrossCircledIcon className="scale-150 -mt-1 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
+                </Dialog.DialogClose> */}
+            </div>
+            {/* Webcam or Captured Image Display */}
+            <div className="relative w-full h-auto mb-4">
+              {capturedBreakImage ? (
+                <img
+                  src={capturedBreakImage}
+                  alt="Captured"
+                  className="w-full h-auto rounded-lg"
+                />
+              ) : (
+                <Webcam
+                  audio={false}
+                  ref={webcamRef}
+                  screenshotFormat="image/jpeg"
+                  className="w-full h-auto rounded-lg"
+                />
+              )}
+
+              {/* Face Logging Animation (if capturedImage exists) */}
+              {capturedBreakImage && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  {/* Example face detection animtion */}
+                  <div className="face-animation">
+                    <DotLottieReact
+                      src="/lottie/facescan.lottie"
+                      loop
+                      className="h-56"
+                      autoplay
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Single Camera Button to Capture and Submit */}
+            <button
+              onClick={captureImageAndSubmitBreakStart}
+              className="bg-[#017A5B] text-white py-2 px-4 rounded-full flex items-center justify-center mx-auto mb-4"
+            >
+              <Camera className="w-6 h-6" />{" "}
+              {/* Replace with an actual camera icon */}
+            </button>
+
+            {/* Display Lat and Long */}
+
+            {/* <div className="text-center flex w-full justify-center text-xs text-white -400">
+                <p className="flex gap-2 text-sm">
+                  <MapPinIcon className="h-4" />
+                  {location
+                    ? `Lat: ${location.lat}, Long: ${location.lng}`
+                    : "Fetching location..."}
+                </p>
+              </div> */}
+            {orgData && orgData.allowGeofencing && location && (
+              <div className="mt-4 text-center">
+                {calculateDistance(
+                  location.lat,
+                  location.lng,
+                  orgData.location.lat,
+                  orgData.location.lng
+                ) <= orgData.geofenceRadius ? (
+                  <div className="flex justify-center">
+                    <div className="text-white flex gap-2 items-center bg-green-500 rounded-xl w-fit px-2 py-1 text-sm ">
+                      <FaHouseUser className="h-4 text-white" />
+                      You are outside office reach
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex justify-center">
+                    <div className="text-white flex gap-2 items-center bg-red-500 rounded-xl w-fit px-2 py-1 text-sm ">
+                      <FaHouseUser className="h-4 text-white" />
+                      You are outside office reach
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="text-center flex w-full justify-center text-xs text-white -400 mt-4">
               <div className="bg-[#1E2A38] rounded-lg py-2 px-4 flex items-center gap-2 shadow-lg">

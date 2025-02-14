@@ -5,6 +5,7 @@ import axios from "axios";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Loader from "@/components/ui/loader";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
 
 interface UserDetails {
   _id: string;
@@ -31,6 +32,7 @@ interface UserDetails {
   department: string;
   employeeId: string; // EMP1, EMP2, etc.
   gender: string;
+  workFromHomeAllowed: boolean; // <-- Add this line
 }
 
 export default function EmployeeProfile({ userId }: { userId: string }) {
@@ -50,7 +52,7 @@ export default function EmployeeProfile({ userId }: { userId: string }) {
       });
   }, [userId]);
 
-  const handleUpdateField = (field: string, value: string) => {
+  const handleUpdateField = (field: string, value: string | boolean) => {
     if (user) {
       setUser((prevUser) => ({
         ...prevUser!,
@@ -58,6 +60,7 @@ export default function EmployeeProfile({ userId }: { userId: string }) {
       }));
     }
   };
+
 
   const handleUpdateAllFields = async () => {
     if (user) {
@@ -101,7 +104,6 @@ export default function EmployeeProfile({ userId }: { userId: string }) {
             readOnly
           />
         </div>
-
 
 
         {/* Reporting Manager */}
@@ -198,6 +200,19 @@ export default function EmployeeProfile({ userId }: { userId: string }) {
             value={user.branch || ""}
             onChange={(e) => handleUpdateField("branch", e.target.value)}
           />
+        </div>
+        <div className="relative mt-4 flex items-center">
+          <label className=" text-gray-500 bg-[#04061E] px-1 text-sm">
+            Work From Home Allowed
+          </label>
+          <div className=" ml-2">
+            <Switch
+              // Safely convert to boolean if uncertain. 
+              // If your data definitely has a boolean, user.workFromHomeAllowed is fine.
+              checked={Boolean(user.workFromHomeAllowed)}
+              onCheckedChange={(checked) => handleUpdateField("workFromHomeAllowed", checked)}
+            />
+          </div>
         </div>
       </div>
 

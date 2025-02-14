@@ -26,11 +26,13 @@ export async function GET(request: NextRequest) {
         }
 
         // Check if the last action was 'login'
-        const isLoggedIn = lastEntry.action === 'login';
+        const isLoggedIn = lastEntry.action === 'login' || lastEntry.action === 'break_started' || lastEntry.action === 'break_ended';
+        const isBreakOpen = lastEntry.action === 'break_started';
 
         return NextResponse.json({
             success: true,
             isLoggedIn,
+            isBreakOpen,
             hasRegisteredFaces: Boolean(hasApprovedFaceRegistration)
         });
     } catch (error) {

@@ -77,6 +77,30 @@ const organizationSchema = new mongoose.Schema({
   attendanceTrialExpires: {
     type: Date,
   },
+  loginTime: {
+    type: String, // Store as a string like "08:00"
+  },
+  logoutTime: {
+    type: String, // Store as a string like "17:00"
+  },
+  location: {
+    lat: Number,
+    lng: Number
+  },
+  allowGeofencing: {
+    type: Boolean,
+    default: false,
+  },
+  // Store geofence radius in meters
+  geofenceRadius: {
+    type: Number,
+    default: 0,
+  },
+  penaltyOption: { type: String, enum: ["leave", "salary"], default: "leave" },
+  lateLoginThreshold: { type: Number, default: 0 },
+  penaltyLeaveType: { type: String, enum: ["half day", "Full Day", "quarter day"], default: "half day" },
+  penaltySalaryAmount: { type: Number, default: 0 },
+
 }, { timestamps: true });
 
 // Model for organizations

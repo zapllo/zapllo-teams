@@ -13,6 +13,7 @@ import { CrossCircledIcon } from "@radix-ui/react-icons";
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { Button } from "@/components/ui/button";
+import { Tabs3, TabsList3, TabsTrigger3 } from "@/components/ui/tabs3";
 
 interface LeaveFormData {
   leaveType: string;
@@ -332,7 +333,7 @@ const LeaveTypes: React.FC = () => {
           <DialogContent className=" z-[100] m-auto h-full max-h-screen  flex items-center justify-center">
             <div className="bg-[#0b0d29]  overflow-y-scroll scrollbar-hide h-full m-auto max-w-lg  shadow-lg w-full    rounded-lg">
               <div className="flex border-b py-2  w-full justify-between ">
-                <DialogTitle className="text-md   px-6 py-2 font-medium">
+                <DialogTitle className="text-lg   px-6 py-2 font-medium">
                   {" "}
                   {isEdit ? "Edit Leave Type" : "New Leave Type"}
                 </DialogTitle>
@@ -392,44 +393,35 @@ const LeaveTypes: React.FC = () => {
                   </div>
 
                   <div className="flex space-x-4">
-                    <div className="flex gap-4">
-                      <label className="block text-sm mt-2 ">Type</label>
-                      <div className="flex space-x-4">
-                        <button
-                          type="button"
-                          className={clsx(
-                            "px-4 py-1 text-xs h-8 mt-1 rounded  bg-[#815BF5] border border-[#505356]    cursor-pointer",
-                            formData.type === "Paid"
-                              ? "bg-[#017A5B] text-white"
-                              : "bg-transparent  border border-[#505356] "
-                          )}
-                          onClick={() =>
-                            setFormData({ ...formData, type: "Paid" })
-                          }
-                        >
-                          Paid
-                        </button>
-                        <button
-                          type="button"
-                          className={clsx(
-                            "px-4 py-1 text-xs h-8 mt-1 rounded  border bg-[#815BF5] border-[#505356]    cursor-pointer",
-                            formData.type === "Unpaid"
-                              ? "bg-[#017A5B] text-white"
-                              : "bg-transparent  border border-[#505356] "
-                          )}
-                          onClick={() =>
-                            setFormData({ ...formData, type: "Unpaid" })
-                          }
-                        >
-                          Unpaid
-                        </button>
-                      </div>
+                    <div className="flex gap-4 items-center mb-1">
+                      <label className="block text-sm  ">Type</label>
+                      <Tabs3
+                        // Ties the tab value to formData.type => "Paid" or "Unpaid"
+                        value={formData.type}
+                        onValueChange={(val) => setFormData((prev) => ({
+                          ...prev,
+                          type: val as "Paid" | "Unpaid",
+                        }))}
+                      >
+                        <TabsList3>
+                          <TabsTrigger3 value="Paid">Paid</TabsTrigger3>
+                          <TabsTrigger3 value="Unpaid">Unpaid</TabsTrigger3>
+                        </TabsList3>
+
+                        {/* Optional: If you want distinct content under each tab, you can use TabsContent3. */}
+                        {/* <TabsContent3 value="Paid">
+      <p>When the user picks Paid</p>
+    </TabsContent3>
+    <TabsContent3 value="Unpaid">
+      <p>When the user picks Unpaid</p>
+    </TabsContent3> */}
+                      </Tabs3>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-8">
-                    <div className="flex items-center w-full gap-2  bg-[#121212] p-2  rounded">
-                      <label className="block text-xs text-[#787CA5] ">
+                    <div className="flex items-center w-full gap-2  bg-gray-800 p-2  rounded">
+                      <label className="block text-xs text-white ">
                         Backdated Leave Days
                       </label>
                       <div>
@@ -442,8 +434,8 @@ const LeaveTypes: React.FC = () => {
                         />
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 w-full bg-[#121212] p-2 rounded">
-                      <label className="block text-xs  text-[#787CA5]">
+                    <div className="flex items-center gap-2 w-full bg-gray-800 p-2 rounded">
+                      <label className="block text-xs  text-white">
                         Advance Leave Days
                       </label>
                       <div>
@@ -485,19 +477,19 @@ const LeaveTypes: React.FC = () => {
                       />
                     </div>
                   </div>
-                  <div className="bg-[#121212] p-2 rounded">
-                    <div className="flex gap-2 bg-[#121212]  rounded">
-                      <div className="flex gap-2">
-                        <label className="block text-sm mt-1 text-muted-foreground">
+                  <div className="bg-gray-800 p-2 rounded">
+                    <div className="flex gap-2 bg-gray-800  rounded">
+                      <div className="flex items-center gap-2">
+                        <label className="block text-sm  text-white">
                           Unit
                         </label>
-                        <div className="flex space-x-4">
+                        <div className="flex items-center space-x-4">
                           {unitOptions.map((unit) => (
                             <button
                               key={unit}
                               type="button"
                               className={clsx(
-                                "px-4 py-2 text-xs rounded  text-muted-foreground bg-[#815BF5]",
+                                "px-4 py-2 text-xs rounded  text-white bg-[#815BF5]",
                                 formData.unit.includes(unit)
                                   ? "bg-[#017A5B] text-white"
                                   : "bg-transparent border border-[#505356]  "
@@ -510,7 +502,7 @@ const LeaveTypes: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="mt-3 flex gap-1 text-[#787CA5]">
+                    <div className="mt-3 flex gap-1 text-muted-foreground">
                       <Info className="h-5" />
                       <p className=" text-sm ">
                         Deduction (in Days) : Full Day - 1, Half Day - 0.5,
@@ -519,39 +511,37 @@ const LeaveTypes: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex space-x-4">
-                    <div className="flex gap-4">
-                      <label className="block text-sm mt-2 ">Leave Reset</label>
-                      <div className="flex ">
-                        <button
-                          type="button"
-                          className={clsx(
-                            " py-1 text-sm h-8 mt-1 px-2  border-r-0 rounded-l  border border-[#505356]    cursor-pointer",
-                            formData.leaveReset === "Reset"
-                              ? "bg-[#017A5B] text-white"
-                              : "bg-transparent  border border-[#505356] "
-                          )}
-                          onClick={() =>
-                            setFormData({ ...formData, leaveReset: "Reset" })
-                          }
-                        >
-                          Reset
-                        </button>
-                        <button
-                          type="button"
-                          className={clsx(
-                            " py-1 text-sm h-8 mt-1 px-2 border-l-0  rounded-r  border  border-[#505356]    cursor-pointer",
-                            formData.leaveReset === "CarryForward"
-                              ? "bg-[#fc8929] text-white"
-                              : "bg-transparent  border border-[#505356] "
-                          )}
-                          onClick={() =>
-                            setFormData({ ...formData, leaveReset: "CarryForward" })
-                          }
-                        >
-                          Carry Forward
-                        </button>
-                      </div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <label className="block text-sm  ">Leave Reset</label>
+                      <Tabs3
+                        // The 'value' is the current formData.leaveReset
+                        // which can be "Reset" or "CarryForward"
+                        value={formData.leaveReset}
+                        // onValueChange receives the tab's value ("Reset" or "CarryForward")
+                        onValueChange={(val) =>
+                          setFormData((prev) => ({ ...prev, leaveReset: val as "Reset" | "CarryForward" }))
+                        }
+                        // Optional: add a custom className if needed
+                        className="max-w-sm"
+                      >
+                        <TabsList3>
+                          <TabsTrigger3 value="Reset">Reset</TabsTrigger3>
+                          <TabsTrigger3 value="CarryForward">Carry Forward</TabsTrigger3>
+                        </TabsList3>
+
+                        {/* If you want distinct content for each tab, you can include TabsContent3 components here.
+        If you just want a toggle, you can omit them. */}
+                        {/* 
+    <TabsContent3 value="Reset">
+      <p className="text-sm">When 'Reset' is chosen...</p>
+    </TabsContent3>
+    <TabsContent3 value="CarryForward">
+      <p className="text-sm">When 'Carry Forward' is chosen...</p>
+    </TabsContent3>
+    */}
+                      </Tabs3>
                     </div>
+
                   </div>
                   <div className="flex justify-end">
                     <button
@@ -575,7 +565,7 @@ const LeaveTypes: React.FC = () => {
               onClick={handleCreateRecommendedLeaveTypes}
               disabled={loading}
             >
-              {loading ? "Creating..." : "+ Create Recommended Leave Types"}
+              {loading ? "Creating..." : <div className="flex items-center gap-1"><Plus className="h-5" /> Create Recommended Leave Types</div>}
             </button>
           </div>
         ) : (

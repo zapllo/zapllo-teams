@@ -609,12 +609,12 @@ export default function AllLeaves() {
           {filteredLeaves.length === 0 ? (
             <div className="flex w-full justify-center ">
               <div className="mt-8 ml-4">
-              <DotLottieReact
-                                        src="/lottie/empty.lottie"
-                                        loop
-                                        className="h-56"
-                                        autoplay
-                                      />
+                <DotLottieReact
+                  src="/lottie/empty.lottie"
+                  loop
+                  className="h-56"
+                  autoplay
+                />
                 <h1 className="text-center font-bold text-md  ">
                   No Leaves Found
                 </h1>
@@ -685,6 +685,14 @@ export default function AllLeaves() {
                         }`}
                     >
                       {leave.status}
+                    </span>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs ${leave.leaveReason === "Penalty"
+                        ? "bg-red-800 text-white"
+                        : ""
+                        }`}
+                    >
+                      {leave.leaveReason === "Penalty" ? "Penalty" : ""}
                     </span>
                   </div>
 

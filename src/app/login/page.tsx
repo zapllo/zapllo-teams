@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import Home from "@/components/icons/home";
 import Loader from "@/components/ui/loader";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -95,7 +96,33 @@ export default function LoginPage() {
             }
         } catch (error: any) {
             console.log("Login failed", error.message);
-            toast.error("Invalid credentials");
+            setLoading(false);
+            setUserLoading(false);
+            let errorMessage = "An error occurred. Please try again."
+
+            // If we have an error response from the server:
+            if (error.response?.data?.error) {
+                const serverError = error.response.data.error
+
+                // Map serverError to a user-friendly message
+                if (serverError === "User does not exist") {
+                    errorMessage = "No account found with that email. Please sign up!"
+                } else if (serverError === "Invalid password") {
+                    errorMessage = "The password you entered is incorrect. Please try again."
+                }
+            }
+
+            // Display final user-friendly message in a toast
+            toast(<div className=" w-full mb-6 gap-2 m-auto  ">
+                <div className="w-full flex  justify-center">
+                    <DotLottieReact
+                        src="/lottie/error.lottie"
+                        loop
+                        autoplay
+                    />
+                </div>
+                <h1 className="text-black text-center font-medium text-lg">{errorMessage}</h1>
+            </div>);
         } finally {
         }
     };
@@ -207,7 +234,7 @@ export default function LoginPage() {
                             type="submit"
                             onClick={onLogin}
                         >
-                            Login 
+                            Login
                             <BottomGradient />
                         </button>
                         <div className="p-4 flex justify-center">

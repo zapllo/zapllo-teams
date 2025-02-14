@@ -10,9 +10,11 @@ import { formatDistanceToNow, intervalToDuration } from "date-fns";
 import { X, XIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+
 import React, { useEffect, useState } from "react";
 
 type Props = { children: React.ReactNode };
+
 
 const Layout = (props: Props) => {
   const router = useRouter();
@@ -29,6 +31,9 @@ const Layout = (props: Props) => {
   const [isSubscriptionActive, setIsSubscriptionActive] = useState(false);
   const [subscriptionExpires, setSubscriptionExpires] = useState<Date | null>(null);
   const [announcements, setAnnouncements] = useState<any[]>([]);
+
+
+
 
   useEffect(() => {
     const fetchActiveAnnouncements = async () => {
@@ -81,6 +86,10 @@ const Layout = (props: Props) => {
 
     getUserDetails();
   }, []);
+
+
+
+ 
 
   useEffect(() => {
     if (trialExpires) {
@@ -254,7 +263,11 @@ const Layout = (props: Props) => {
         <MenuOptions />
         <div className="w-full overflow-hidden h-screen">
           <InfoBar />
-          <div className="ml-16">{props.children}</div>
+
+
+          <div className="ml-16">
+
+            {props.children}</div>
         </div>
       </div>
     </div>

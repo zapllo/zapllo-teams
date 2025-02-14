@@ -33,6 +33,7 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { FaSearch } from "react-icons/fa";
 import { validateEmail } from "@/helper/emailValidation";
 import { useRouter } from "next/navigation";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 interface User {
   _id: string;
@@ -213,10 +214,8 @@ export default function TeamTabs() {
     getUserDetails();
   }, []);
 
-  const handleReportingManagerChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    setSelectedReportingManager(event.target.value);
+  const handleReportingManagerChange = (value: string) => {
+    setSelectedReportingManager(value);
   };
 
   // Filter users based on search query, active tab, and selected reporting manager
@@ -308,10 +307,13 @@ export default function TeamTabs() {
       }
     } catch (error: any) {
       console.error("Error creating user:", error);
-      if (error.response && error.response.data && error.response.data.error) {
 
-        // Specific handling for subscription limit
-        if (error.response.data.error === "User limit reached for the current plan.") {
+      // First check that we have an error object and a string
+      if (error.response && error.response.data && error.response.data.error) {
+        const msg = error.response.data.error;
+        // Now do a single chain of checks:
+        if (msg === "User limit reached for the current plan.") {
+          // Show user limit toast
           // alert(error.response.data.error);
           toast(<div className=" w-full mb-6 gap-2 m-auto  ">
             <div className="w-full flex  justify-center">
@@ -324,16 +326,29 @@ export default function TeamTabs() {
             <h1 className="text-black text-center font-medium text-lg">You have reached the maximum number of members for your current plan</h1>
           </div>);
           setErrorMessage("You have reached the maximum number of members for your current plan.");
+        } else if (msg === "A user with this email already exists.") {
+          toast(<div className=" w-full mb-6 gap-2 m-auto  ">
+            <div className="w-full flex  justify-center">
+              <DotLottieReact
+                src="/lottie/error.lottie"
+                loop
+                autoplay
+              />
+            </div>
+            <h1 className="text-black text-center font-medium text-lg">An user with this email already exists</h1>
+          </div>);
+          setErrorMessage("Email already exists")
+        } else {
+          setErrorMessage("An unexpected error occurred. Please try again.");
         }
-      } else if (error.response.data.error === "A user with this email already exists.") {
-        setErrorMessage("Email already exists")
       } else {
+        // If there's no `error.response.data.error`, handle unknown error
         setErrorMessage("An unexpected error occurred. Please try again.");
       }
     } finally {
-      setLoading(false); // Stop loader
+      setLoading(false);
     }
-  };
+  }
   // console.log(errorMessage, "errorrr");
 
   const clearFields = () => {
@@ -481,7 +496,7 @@ export default function TeamTabs() {
   return (
     <div className="w-full max-w-5xl overflow-y-scroll  overflow-x-hidden h-screen mb-12 scrollbar-hide mt-16 mx-auto">
       {/* <Toaster /> */}
-      <div className="gap-2 ml-44  mb-6 w-full">
+      <div className="gap-2 ml-44  mb-24 w-full">
         <div className="flex mt-4  gap-2 mb-4">
           <div>
             <Tabs3
@@ -498,19 +513,21 @@ export default function TeamTabs() {
             </Tabs3>
           </div>
 
-          <div className="mt-1 flex">
-            <select
-              value={selectedReportingManager}
-              onChange={handleReportingManagerChange}
-              className="block bg-[#04061E] border-[#] h-8  border-2 w-full px-3 py-1  rounded-md shadow-sm text-xs focus:outline-none focus:ring-primary-500 focus:border-primary-500 "
-            >
-              <option value="">Reporting Manager</option>
-              {users.map((user) => (
-                <option key={user._id} value={user._id}>
-                  {user.firstName} {user.lastName}
-                </option>
-              ))}
-            </select>
+          <div className=" flex">
+            <Select value={selectedReportingManager} onValueChange={handleReportingManagerChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Reporting Manager" />
+              </SelectTrigger>
+              <SelectContent>
+                {/* <SelectItem value="OKAY">Reporting Manager</SelectItem> */}
+                {users.map((user) => (
+                  <SelectItem key={user._id} value={user._id}>
+                    {user.firstName} {user.lastName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
             <Dialog open={isModalOpen} onOpenChange={(isOpen) => {
               setIsModalOpen(isOpen);
               if (!isOpen) {
@@ -742,7 +759,7 @@ export default function TeamTabs() {
             <h1 className="text-sm"> {filteredUsers.length} Members</h1>
           </div>
         </div>
-        <div className="grid  text-sm w-full py-4 -ml-44 gap-4">
+        <div className="grid  text-sm w-full py-4 -ml-44  gap-4">
           {filteredUsers
             .filter((user) => {
               if (activeTab === "all") return true;
@@ -750,7 +767,7 @@ export default function TeamTabs() {
             })
             .map((user) => (
               <div key={user._id}>
-                <Card onClick={() => handleUserClick(user._id)} key={user.firstName} className="flex rounded-xl bg-[#] hover:border-[#815bf5] border cursor-pointer items-center justify-between w-full p-2">
+                <Card onClick={() => handleUserClick(user._id)} key={user.firstName} className="flex  rounded-xl bg-[#] hover:border-[#815bf5] border cursor-pointer items-center justify-between w-full p-2">
                   <div className="items-center flex gap-4">
                     <div className="flex gap-2">
                       <Avatar className="scale-75">

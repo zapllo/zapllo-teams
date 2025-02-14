@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Send notifications in the background
-    sendNotifications(savedTask, assignedUser, taskUser, category);
+    sendNotifications(savedTask, assignedUser, taskUser, category); 
 
     return NextResponse.json({
       message: "Task created successfully",

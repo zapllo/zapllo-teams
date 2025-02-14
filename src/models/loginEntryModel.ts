@@ -5,7 +5,7 @@ import { IUser } from './userModel';
 
 export interface ILoginEntry extends Document {
     userId: IUser | mongoose.Types.ObjectId;
-    action: 'login' | 'logout' | 'regularization';
+    action: 'login' | 'logout' | 'regularization' | 'break_started' | 'break_ended';
     lat?: number;
     lng?: number;
     timestamp: Date;
@@ -25,7 +25,7 @@ export interface ILoginEntry extends Document {
 const loginEntrySchema: Schema<ILoginEntry> = new Schema(
     {
         userId: { type: mongoose.Schema.Types.ObjectId, ref: 'users', required: true },
-        action: { type: String, enum: ['login', 'logout', 'regularization'], required: true },
+        action: { type: String, enum: ['login', 'logout', 'regularization', 'break_started', 'break_ended'], required: true },
         lat: { type: Number },
         lng: { type: Number },
         timestamp: { type: Date, default: Date.now },

@@ -43,6 +43,7 @@ export async function PATCH(request: NextRequest) {
       legalDocuments,
       contactDetails,
       personalInformation,
+      workFromHomeAllowed,
     } = reqBody;
 
     const userToEdit = await User.findById(_id);
@@ -101,7 +102,9 @@ export async function PATCH(request: NextRequest) {
     if (personalInformation) {
       userToEdit.personalInformation = personalInformation;
     }
-
+    if (typeof workFromHomeAllowed !== "undefined") {
+      userToEdit.workFromHomeAllowed = workFromHomeAllowed;
+    }
 
 
     await userToEdit.save();

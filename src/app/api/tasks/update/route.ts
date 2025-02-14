@@ -131,9 +131,6 @@ export async function PATCH(request: NextRequest) {
         setImmediate(async () => {
             try {
                 const backgroundTasks: Promise<any>[] = [];
-
-
-
                 // Notification logic
                 const taskCreator = await User.findById(task.user);
                 const assignedUser = await User.findById(task.assignedUser);
@@ -143,7 +140,6 @@ export async function PATCH(request: NextRequest) {
                     console.error("Creator, assignee, or category not found. Skipping notifications.");
                     return;
                 }
-
                 // Send Email to the task creator
                 if (assignedUser.notifications.email) { // Check if email notifications are enabled
                     const emailOptions: SendEmailOptions = {
@@ -179,7 +175,6 @@ export async function PATCH(request: NextRequest) {
                           </div>
                       </body>`,
                     };
-
                     backgroundTasks.push(sendEmail(emailOptions));
                 }
                 backgroundTasks.push(
