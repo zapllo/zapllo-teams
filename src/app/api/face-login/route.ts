@@ -152,8 +152,9 @@ export async function POST(request: NextRequest) {
       const loginEntry = new LoginEntry(loginEntryData);
       await loginEntry.save();
 
-      // --- Penalty Leave Logic (for login actions) ---
-      if (action === 'login' && organization && organization.penaltyOption === 'leave') {
+      // --- Penalty Logic (for login actions) ---
+      // Only process penalties on login
+      if (action === 'login' && organization) {
         // Construct cutoff time for today using organization's allowed loginTime.
         // Assume organization.loginTime is in "HH:mm" format.
         const todayStr = dayjs(timestamp).format("YYYY-MM-DD");
@@ -182,49 +183,68 @@ export async function POST(request: NextRequest) {
 
           const distinctLateLoginDaysCount = distinctLateDays.size;
 
-          // If the number of distinct late login days exceeds the allowed threshold,
-          // then create a penalty leave request.
+          // If late login days exceed threshold, then process penalty based on organization settings
           if (distinctLateLoginDaysCount > organization.lateLoginThreshold) {
-            // Look up the "Earned Leave" leave type for this organization.
-            const penaltyLeaveTypeDoc = await LeaveType.findOne({
-              leaveType: "Earned Leave",
-              organization: organization._id
-            });
-            if (!penaltyLeaveTypeDoc) {
-              return NextResponse.json(
-                { success: false, error: 'Penalty leave type "Earned Leave" not defined. Please contact admin.' },
-                { status: 400 }
-              );
-            }
+            if (organization.penaltyOption === 'leave') {
+              // Penalty Leave Logic
+              const penaltyLeaveTypeDoc = await LeaveType.findOne({
+                leaveType: "Earned Leave",
+                organization: organization._id
+              });
+              if (!penaltyLeaveTypeDoc) {
+                return NextResponse.json(
+                  { success: false, error: 'Penalty leave type "Earned Leave" not defined. Please contact admin.' },
+                  { status: 400 }
+                );
+              }
 
+              // Map penalty leave type to applied days (e.g., "half day" = 0.5)
+              const unitMapping: Record<string, number> = {
+                "half day": 0.5,
+                "Full Day": 1,
+                "quarter day": 0.25,
+              };
+              const appliedDays = unitMapping[organization.penaltyLeaveType] || 0;
 
-            // Map the organization's penalty leave type (as configured) to applied days.
-            // For example, if organization.penaltyLeaveType is "half day", use 0.5 days.
-            const unitMapping: Record<string, number> = {
-              "half day": 0.5,
-              "Full Day": 1,
-              "quarter day": 0.25,
-            };
-            const appliedDays = unitMapping[organization.penaltyLeaveType] || 0;
-
-            // Create a penalty leave request with the "Earned Leave" leave type.
-            const penaltyLeave = new Leave({
-              user: userId,
-              leaveType: penaltyLeaveTypeDoc._id,  // Use the "Earned Leave" leave type ID
-              fromDate: new Date(), // Penalty leave for today
-              toDate: new Date(),   // Same day leave
-              appliedDays,
-              leaveDays: [
-                {
-                  date: new Date(),
-                  unit: organization.penaltyLeaveType,
-                  status: 'Pending'
+              // Create a penalty leave request.
+              const penaltyLeave = new Leave({
+                user: userId,
+                leaveType: penaltyLeaveTypeDoc._id,  // Use the "Earned Leave" leave type ID
+                fromDate: new Date(), // Penalty leave for today
+                toDate: new Date(),   // Same day leave
+                appliedDays,
+                leaveDays: [
+                  {
+                    date: new Date(),
+                    unit: organization.penaltyLeaveType,
+                    status: 'Pending'
+                  }
+                ],
+                leaveReason: "Penalty", // Tag this leave request as a penalty
+                status: "Pending"
+              });
+              await penaltyLeave.save();
+            } else if (organization.penaltyOption === 'salary') {
+              // Salary Penalty Logic: update the user's deductionDetails.
+              let deductionUpdated = false;
+              if (user.deductionDetails && Array.isArray(user.deductionDetails)) {
+                for (let i = 0; i < user.deductionDetails.length; i++) {
+                  if (user.deductionDetails[i].name === "Penalties") {
+                    user.deductionDetails[i].amount += organization.penaltySalaryAmount;
+                    deductionUpdated = true;
+                    break;
+                  }
                 }
-              ],
-              leaveReason: "Penalty", // Tag this leave request as a penalty
-              status: "Pending"
-            });
-            await penaltyLeave.save();
+              }
+              if (!deductionUpdated) {
+                user.deductionDetails = user.deductionDetails || [];
+                user.deductionDetails.push({
+                  name: "Penalties",
+                  amount: organization.penaltySalaryAmount,
+                });
+              }
+              await user.save();
+            }
           }
         }
       }

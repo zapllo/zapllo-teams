@@ -14,7 +14,7 @@ import Newsletter from './newsletter'
 import { motion } from 'framer-motion'
 
 
-export default function Footer() {
+export default function OtherFooter() {
 
 
     const gearVariant = {
@@ -29,7 +29,7 @@ export default function Footer() {
     };
 
     return (
-        <footer className='max-w-8xl  p-4 w-full overflow-hidden'>
+        <footer className='max-w-8xl bg-black  text-white p-4 w-full overflow-hidden'>
             <div className='flex justify-center'>
                 <Separator className=' w-[95%] flex mt-12' />
 
@@ -73,6 +73,7 @@ export default function Footer() {
                                 </h1>
                             </ShineBorder>
                         </Link> */}
+                        {/* <LetsCall /> */}
                         <Link href='https://masterclass.zapllo.com/workshop/'>
                             <Button className="mt-8 mb-4 relative py-7 w-72 text-xl font-semibold bg-primary text-white rounded-full shadow-lg flex items-center ">
                                 <p className="-ml-8">   Join Live Masterclass</p>
@@ -82,12 +83,8 @@ export default function Footer() {
                     </div>
                 </div>
                 <div className='empty rectangle hidden lg:block '>
-                    <motion.div className='-ml-12' initial="hidden" animate="visible" variants={gearVariant}>
 
-                        <img src='/shards.png' className='absolute -mt-40  h-56' />
-
-                    </motion.div>
-                    <img src='/gear.png' className='h-[100%]' />
+                    <img src='/purple-whatsapp.png' className='mb-4' />
                 </div>
                 <div className=' overflow-visible  my-8  '>
                     <div className='flex md:justify-end gap-6'>

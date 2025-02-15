@@ -27,7 +27,11 @@ interface OrgData {
     lateLoginThreshold: number;
     penaltyLeaveType: "half day" | "full day" | "quarter day";
     penaltySalaryAmount: number;
-    // ... other organization fields if needed
+    // New fields for office location and geofencing:
+    location?: { lat: number; lng: number };
+    allowGeofencing?: boolean;
+    geofenceRadius?: number;
+    geofenceUnit?: "km" | "m";
 }
 
 export default function Settings({ }: Props) {
@@ -83,6 +87,10 @@ export default function Settings({ }: Props) {
                 const org = res.data.data;
                 // Save the entire org data if needed:
                 setOrgData({
+                    location: org.location, // office location
+                    allowGeofencing: org.allowGeofencing,
+                    geofenceRadius: org.geofenceRadius,
+                    geofenceUnit: org.geofenceUnit,
                     penaltyOption: org.penaltyOption,
                     lateLoginThreshold: org.lateLoginThreshold,
                     penaltyLeaveType: org.penaltyLeaveType,
@@ -93,6 +101,19 @@ export default function Settings({ }: Props) {
                 setLateLoginThreshold(org.lateLoginThreshold.toString());
                 setPenaltyLeaveType(org.penaltyLeaveType);
                 setPenaltySalaryAmount(org.penaltySalaryAmount.toString());
+                // Update location and geofencing states if available
+                if (org.location) {
+                    setCurrentLocation(org.location);
+                }
+                if (typeof org.allowGeofencing === "boolean") {
+                    setAllowGeofencing(org.allowGeofencing);
+                }
+                if (org.geofenceRadius) {
+                    setGeofenceInput(org.geofenceRadius.toString());
+                }
+                if (org.geofenceUnit) {
+                    setSelectedUnit(org.geofenceUnit);
+                }
             } catch (error) {
                 console.error("Error fetching organization data", error);
             }
@@ -185,10 +206,11 @@ export default function Settings({ }: Props) {
         // Build the payload based on the penalty option selected
         const payload = {
             penaltyOption,
-            // For leave penalties:
-            lateLoginThreshold: penaltyOption === "leave" ? Number(lateLoginThreshold) : undefined,
+            // Always include lateLoginThreshold for both options
+            lateLoginThreshold: Number(lateLoginThreshold),
+            // Only include penaltyLeaveType if leave penalties are selected
             penaltyLeaveType: penaltyOption === "leave" ? penaltyLeaveType : undefined,
-            // For salary penalties:
+            // Only include penaltySalaryAmount if salary penalties are selected
             penaltySalaryAmount: penaltyOption === "salary" ? Number(penaltySalaryAmount) : undefined,
         };
 
@@ -207,8 +229,11 @@ export default function Settings({ }: Props) {
                     isDifferent = true;
                 }
             } else if (payload.penaltyOption === "salary") {
-                // For salary penalties, check the salary amount
-                if (Number(payload.penaltySalaryAmount) !== orgData.penaltySalaryAmount) {
+                // For salary penalties, check both the threshold and the salary amount
+                if (
+                    Number(payload.lateLoginThreshold) !== orgData.lateLoginThreshold ||
+                    Number(payload.penaltySalaryAmount) !== orgData.penaltySalaryAmount
+                ) {
                     isDifferent = true;
                 }
             }
@@ -527,9 +552,9 @@ export default function Settings({ }: Props) {
                                             <SelectValue placeholder="Select penalty leave type" />
                                         </SelectTrigger>
                                         <SelectContent className="z-[100]">
-                                            <SelectItem value="quarter day">Quarter Day</SelectItem>
-                                            <SelectItem value="half day">Half Day</SelectItem>
-                                            <SelectItem value="Full Day">Full Day</SelectItem>
+                                            <SelectItem className='z-[100] hover:bg-accent' value="quarter day">Quarter Day</SelectItem>
+                                            <SelectItem value="half day" className='hover:bg-accent'>Half Day</SelectItem>
+                                            <SelectItem value="Full Day" className='hover:bg-accent'>Full Day</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>

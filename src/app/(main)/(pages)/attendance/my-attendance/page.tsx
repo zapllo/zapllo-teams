@@ -970,52 +970,66 @@ export default function MyAttendance() {
       ? filterDailyReportEntries(filteredEntries) // Filtered entries passed here
       : filterRegularizationEntries(filteredEntries);
 
-  const calculateHoursBetweenLoginLogout = (entries: LoginEntry[]) => {
-    // Sort the entries by timestamp
-    const sortedEntries = entries.sort(
-      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-    );
-    let totalHours = 0;
-    let loginTime: number | null = null;
-    let logoutTime: number | null = null;
-    let totalBreakDuration = 0;
-    let currentBreakStart: number | null = null;
-
-    sortedEntries.forEach((entry) => {
-      const entryTime = new Date(entry.timestamp).getTime();
-
-      if (entry.action === "login") {
-        // Start a new session
-        loginTime = entryTime;
-        totalBreakDuration = 0; // reset break duration for this session
-        currentBreakStart = null;
-      } else if (entry.action === "break_started") {
-        // Record when break starts
-        currentBreakStart = entryTime;
-      } else if (entry.action === "break_ended") {
-        // If a break was started, accumulate its duration
-        if (currentBreakStart !== null) {
-          totalBreakDuration += entryTime - currentBreakStart;
-          currentBreakStart = null;
+      const calculateHoursBetweenLoginLogout = (entries: LoginEntry[]): string => {
+        // Sort entries by timestamp (ascending)
+        const sortedEntries = entries.sort(
+          (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        );
+        
+        let totalNetMs = 0;
+        let loginTime: number | null = null;
+        let totalBreakMs = 0;
+        let currentBreakStart: number | null = null;
+      
+        sortedEntries.forEach((entry) => {
+          const entryTime = new Date(entry.timestamp).getTime();
+      
+          if (entry.action === 'login') {
+            // Start a new work session
+            loginTime = entryTime;
+            totalBreakMs = 0;
+            currentBreakStart = null;
+          } else if (entry.action === 'break_started') {
+            // Mark the break start time
+            currentBreakStart = entryTime;
+          } else if (entry.action === 'break_ended') {
+            if (currentBreakStart !== null) {
+              // Add break duration
+              totalBreakMs += entryTime - currentBreakStart;
+              currentBreakStart = null;
+            }
+          } else if (entry.action === 'logout') {
+            if (loginTime !== null) {
+              // If a break was ongoing, add break duration until logout.
+              if (currentBreakStart !== null) {
+                totalBreakMs += entryTime - currentBreakStart;
+                currentBreakStart = null;
+              }
+              const sessionDurationMs = entryTime - loginTime;
+              const netSessionMs = sessionDurationMs - totalBreakMs;
+              totalNetMs += netSessionMs;
+              // Reset for the next session.
+              loginTime = null;
+              totalBreakMs = 0;
+            }
+          }
+        });
+      
+        // If the last entry is a break_started (and there was a login), assume the session ended at the break start.
+        if (loginTime !== null && currentBreakStart !== null) {
+          const sessionDurationMs = currentBreakStart - loginTime;
+          const netSessionMs = sessionDurationMs - totalBreakMs;
+          totalNetMs += netSessionMs;
         }
-      } else if (entry.action === "logout" && loginTime !== null) {
-        logoutTime = entryTime;
-        // If there was an ongoing break that wasn't ended before logout, count it until logout
-        if (currentBreakStart !== null) {
-          totalBreakDuration += logoutTime - currentBreakStart;
-          currentBreakStart = null;
-        }
-        const sessionDuration = logoutTime - loginTime;
-        const netSession = sessionDuration - totalBreakDuration;
-        totalHours += netSession / (1000 * 60 * 60);
-        // Reset for next session
-        loginTime = null;
-        logoutTime = null;
-        totalBreakDuration = 0;
-      }
-    });
-    return totalHours.toFixed(2);
-  };
+      
+        // Convert totalNetMs to hours and minutes
+        const hours = Math.floor(totalNetMs / (1000 * 60 * 60));
+        const minutes = Math.floor((totalNetMs % (1000 * 60 * 60)) / (1000 * 60));
+      
+        return `${hours}h ${minutes}m`;
+      };
+      
+
 
 
 
@@ -1209,6 +1223,7 @@ export default function MyAttendance() {
               </button>
             </div>
           )}
+
         </div>
 
       </div>
@@ -1491,7 +1506,7 @@ export default function MyAttendance() {
                       <div className="flex gap-2">
                         <Clock className="h-4" />{" "}
                         {calculateHoursBetweenLoginLogout(groupedEntries[date])}{" "}
-                        hours
+                        
                       </div>
                       <div className="flex justify-end">
                         <span

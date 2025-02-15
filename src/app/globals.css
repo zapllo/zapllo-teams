@@ -158,3 +158,19 @@ html {
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes fade-in-bottom {
+  0% {
+    opacity: 1;
+    transform: translateY(20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-bottom {
+  animation: fade-in-bottom 0.5s ease-in;
+}

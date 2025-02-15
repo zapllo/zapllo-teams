@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
@@ -56,18 +57,10 @@ export default function PayrollTestimonials({ }: Props) {
                         )}
                     >
                         <Link href='https://masterclass.zapllo.com/workshop/'>
-
-                            <div className="inline-flex text-2xl items-center justify-center px-6 py-2 transition ease-out hover:text-neutral-600 hover:duration-900  hover:dark:text-white">
-                                <span className="flex mt-auto text-xl  font-medium  gap-2">
-                                    <div className="m ">
-
-                                    </div>
-                                    <h1 className=" text-md">
-                                        Watch All Reviews
-                                    </h1>
-                                </span>
-
-                            </div>
+                            <Button className="mt-8 mb-4 relative py-7 w-72 text-xl font-semibold bg-primary text-white rounded-full shadow-lg flex items-center ">
+                                <p className="-ml-8">   Join Live Masterclass</p>
+                                <img src="/icons/rocket.png" className="h-20 absolute right-0" />
+                            </Button>
                         </Link>
                     </div>
                 </div>

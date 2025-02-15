@@ -23,6 +23,8 @@ import SaveLanding from "@/components/product-components/landing/savelanding";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import OtherFooter from "@/components/globals/other-footer";
+import CommentSection from "@/components/blog/comment-section";
 
 
 interface Author {
@@ -31,16 +33,25 @@ interface Author {
     profilePic?: string;
 }
 
+interface Comment {
+    _id: string;
+    content: string;
+    user: { firstName: string; lastName: string };
+    createdAt: string;
+}
+
 interface BlogPost {
+    _id: string;
     title: string;
     excerpt: string;
     coverImage?: string;
     content: string;
     categories: string[];
     tags: string[];
-    author: Author | null;  // Author can be null if it's not populated
+    author: Author | null;
     createdAt: string;
     published: boolean;
+    comments: Comment[];
 }
 
 
@@ -85,6 +96,7 @@ export default async function BlogPostPage({
 
     const {
         title,
+        _id,
         excerpt,
         coverImage,
         content,
@@ -119,60 +131,66 @@ export default async function BlogPostPage({
             <div className=" pt-24 bg-[#FEFEFE] pb-12 w-screen px-4 md:px-0">
                 <Card className="overflow-hidden  lg:mx-12 border-muted-foreground bg-[#FEFEFE] text-black  shadow-sm">
                     {/* Cover Image */}
-                    {coverImage && (
+                    {/* {coverImage && (
                         <img
                             src={coverImage}
                             alt={title}
                             className="w-full h-72  object-cover"
                         />
-                    )}
-                    <div className=' bg-gradient-to-r from-[#815BF5] via-[#FC8929] to-[#FC8929] p-4  '>
-                        <CardTitle className="md:text-4xl text-center text-white font-bold ">
-                            {title}
-                        </CardTitle>
+                    )} */}
+                    <div className=' bg-background p-4  h-56 flex items-center m-auto text-center justify-center '>
+                        <div>
+                            <CardTitle className="md:text-4xl text-center text-white font-bold ">
+                                {title}
+                            </CardTitle>
+
+                            <div className="md:flex md:flex-wrap justify-start items-center gap-3   text-muted mt-4">
+                                <p className="flex gap-2 text-xs md:text-sm  text-white items-center">
+                                    {authorProfilePic ? (
+                                        <img
+                                            src={authorProfilePic}
+                                            alt={authorName}
+                                            className="md:w-8 md:h-8 h-6 w-6 rounded-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="w-8 h-8 flex items-center justify-center bg-primary text-white font-semibold rounded-full">
+                                            {authorInitials}
+                                        </div>
+                                    )}
+                                    {authorName}
+                                </p>
+
+                                <Separator orientation="vertical" className="h-4 hidden md:block text-white bg-white" />
+                                <p className="flex gap-2 text-xs mt-2 md:mt-0  md:text-sm text-white items-center"> Published on {publishDate}</p>
+                                <Separator orientation="vertical" className="h-4 bg-white hidden md:block" />
+                                <div className="hidden md:block">
+                                    {published ? (
+                                        <Badge
+                                            variant="outline"
+                                            className="text-white  border-green-300"
+                                        >
+                                            Published
+                                        </Badge>
+                                    ) : (
+                                        <Badge
+                                            variant="outline"
+                                            className="text-orange-700 border-orange-300"
+                                        >
+                                            Draft
+                                        </Badge>
+                                    )}
+                                </div>
+                            </div>
+
+                        </div>
                     </div>
 
 
                     <CardHeader className="space-y-2 pt-6 md:pt-8">
-                        <div className="flex flex-wrap items-center gap-3  text-muted mt-2">
 
-                            <p className="flex gap-2 items-center">
-                                {authorProfilePic ? (
-                                    <img
-                                        src={authorProfilePic}
-                                        alt={authorName}
-                                        className="w-8 h-8 rounded-full object-cover"
-                                    />
-                                ) : (
-                                    <div className="w-8 h-8 flex items-center justify-center bg-primary text-white font-semibold rounded-full">
-                                        {authorInitials}
-                                    </div>
-                                )}
-                                {authorName}
-                            </p>
-                            <Separator orientation="vertical" className="h-4" />
-                            <p className="flex gap-2 items-center"><FaCalendar /> Published on {publishDate}</p>
-                            <Separator orientation="vertical" className="h-4" />
-
-                            {published ? (
-                                <Badge
-                                    variant="outline"
-                                    className="text-green-700 border-green-300"
-                                >
-                                    Published
-                                </Badge>
-                            ) : (
-                                <Badge
-                                    variant="outline"
-                                    className="text-orange-700 border-orange-300"
-                                >
-                                    Draft
-                                </Badge>
-                            )}
-                        </div>
-                        <CardDescription className="">
-                            <div className='border bg-primary mt-4  p-4 rounded-lg '>
-                                {excerpt && <p className="text-white md:text-xl">{excerpt}</p>}
+                        <CardDescription className="md:-mt-20 -mt-14">
+                            <div className='shadow-md  shadow-orange-500 bg-white mt-4  p-4 rounded-lg '>
+                                {excerpt && <p className="text-black     md:text-xl">{excerpt}</p>}
                             </div>
 
                         </CardDescription>
@@ -208,7 +226,7 @@ export default async function BlogPostPage({
               prose-blockquote:flex 
               prose-blockquote:items-center 
               prose-blockquote:border-black -300
-
+prose-a:text-blue-500
               prose-img:my-8
               prose-img:mx-auto
               prose-img:h-auto
@@ -224,76 +242,81 @@ export default async function BlogPostPage({
                             <p>No content available.</p>
                         )}
                     </CardContent>
-                    <Card className=" flex items-center justify-center w-fit px-20 py-10 bg-transparent text-black  m-auto ">
-                        <div className=" flex justify-center  mt-4">
-                            <div className='justify-center   flex '>
-                                <div className='grid md:grid-cols-1  justify-center items-center '>
+                    <div className="relative bg-black text-white py-16 px-6 md:px-12 lg:px-20">
+                        {/* Background Image */}
+                        <div
+                            className="absolute inset-0 bg-cover bg-center rounded-lg opacity-20"
+                            style={{ backgroundImage: "url('/branding/post.png')" }}
+                        ></div>
 
-                                    <div className="max-w-3xl w-full">
-                                        <h1 className="md:text-3xl md:mt-0  text-2xl font-semibold">
-                                            Start saving money and start investing in growth
-                                        </h1>
-                                        <p className="text-sm  text-muted mt-4">
-                                            Unlock the Power of ZAPLLO with WhatsApp Reminders & 10X Team Productivity🚀
-                                        </p>
-                                        <div className=" md:flex gap-4 mt-4 ">
-                                            <div className="z-10 mb-4 items-center ">
-                                                <div
-                                                >
-                                                    <Link href='https://masterclass.zapllo.com/workshop/'>
+                        {/* Content Section */}
+                        <div className="relative flex flex-col md:flex-row items-center justify-between max-w-6xl mx-auto">
+                            {/* Text Content */}
+                            <div className="md:w-1/2 space-y-8">
+                                <h2 className="text-3xl md:text-4xl font-bold leading-tight">
+                                    Automate & Upgrade Your Business to 10X
+                                </h2>
+                                <p className="text-gray-300 text-md md:text-lg">
+                                    We help businesses scale smarter not harder, unleashing
+                                    <span className="font-semibold"> the power of AI & Automation</span> without the need of any technical knowledge
+                                </p>
+                                <Link href='/signup'>
+                                    <Button className=" text-white px-6 py-4 h-12 mt-6  rounded-lg text-lg font-semibold transition-all">
+                                        Let&apos;s Get Started
+                                    </Button>
+                                </Link>
+                            </div>
 
-                                                        <Button className="text-2xl rounded-2xl h-12 w-full">Join Live Masterclass</Button>
-                                                    </Link>
-                                                </div>
-
-                                            </div>
-                                            <div className=''>
-                                                <Link href='/signup'>
-                                                    <Button variant="outline" className="text-2xl bg-transparent rounded-2xl h-12 w-full">Create Your Free Account</Button>
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
+                            {/* Rocket Image */}
+                            <div className="md:w-1/2 flex justify-center mt-6 md:mt-0">
+                                <img src="/icons/Big Rocket.webp" alt="Rocket" className="max-w-xs md:max-w-md lg:max-w-lg" />
                             </div>
                         </div>
-                    </Card>
+                    </div>
 
-                    <CardFooter className="md:flex text-lg mt-12 block  md:gap-24 px-6 pb-6 md:px-8 md:pb-8">
-                        {/* Categories */}
-                        {Array.isArray(categories) && categories.length > 0 && (
-                            <div>
-                                <h2 className="font-semibold mb-2">Categories</h2>
-                                <div className="flex flex-wrap gap-2">
-                                    {categories.map((cat: string, idx: number) => (
-                                        <Badge className="text-md bg-primary" variant="secondary" key={idx}>
-                                            {cat}
-                                        </Badge>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
 
-                        {/* Tags */}
-                        {Array.isArray(tags) && tags.length > 0 && (
-                            <div className="text-black mt-4 md:mt-0">
-                                <h2 className="font-semibold mb-2">Tags</h2>
-                                <div className="flex flex-wrap gap-2">
-                                    {tags.map((tag: string, idx: number) => (
-                                        <Badge className="text-black text-md" variant="outline" key={idx}>
-                                            {tag}
-                                        </Badge>
-                                    ))}
+                    <CardFooter className="mt-12 block px-6 pb-6 md:px-8 md:pb-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                            {/* Categories Section */}
+                            {Array.isArray(categories) && categories.length > 0 && (
+                                <div className="space-y-3">
+                                    <h2 className="text-lg font-semibold text-gray-800">Categories</h2>
+                                    <div className="flex flex-wrap gap-3">
+                                        {categories.map((cat: string, idx: number) => (
+                                            <span
+                                                key={idx}
+                                                className="border border-gray-300 text-gray-700 text-sm px-4 py-2 rounded-full shadow-sm cursor-pointer transition-all hover:bg-gray-200 hover:text-gray-900"
+                                            >
+                                                {cat}
+                                            </span>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
+
+                            {/* Tags Section */}
+                            {Array.isArray(tags) && tags.length > 0 && (
+                                <div className="space-y-3">
+                                    <h2 className="text-lg font-semibold text-gray-800">Tags</h2>
+                                    <div className="flex flex-wrap gap-3">
+                                        {tags.map((tag: string, idx: number) => (
+                                            <span
+                                                key={idx}
+                                                className="border border-gray-300 text-gray-700 text-sm px-4 py-2 rounded-full shadow-sm cursor-pointer transition-all hover:bg-gray-200 hover:text-gray-900"
+                                            >
+                                                #{tag}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </CardFooter>
-
+                    <CommentSection blogId={_id.toString()} />
                 </Card>
 
             </div>
-            <Footer />
+            <OtherFooter />
         </>
     );
 }

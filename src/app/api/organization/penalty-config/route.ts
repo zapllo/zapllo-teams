@@ -20,13 +20,13 @@ export async function PATCH(req: NextRequest) {
     if (user.role !== 'orgAdmin') {
       return NextResponse.json({ success: false, message: 'Not authorized' }, { status: 403 });
     }
-    
+
     // Get the organization ID from the user record
     const organizationId = user.organization;
     if (!organizationId) {
       return NextResponse.json({ success: false, message: 'Organization not found' }, { status: 404 });
     }
-    
+
     // Build the update payload based on the penaltyOption
     let updatePayload: any = { penaltyOption };
 
@@ -52,18 +52,18 @@ export async function PATCH(req: NextRequest) {
       }
       updatePayload.penaltySalaryAmount = Number(penaltySalaryAmount);
       // Reset leave-related fields
-      updatePayload.lateLoginThreshold = 0;
+      updatePayload.lateLoginThreshold = Number(lateLoginThreshold);
       updatePayload.penaltyLeaveType = "";
     } else {
       return NextResponse.json({ success: false, message: 'Invalid penalty option' }, { status: 400 });
     }
-    
+
     // Update the organization document with the new penalty configuration
     const updatedOrg = await Organization.findByIdAndUpdate(organizationId, updatePayload, { new: true });
     if (!updatedOrg) {
       return NextResponse.json({ success: false, message: 'Organization not found' }, { status: 404 });
     }
-    
+
     return NextResponse.json({ success: true, organization: updatedOrg }, { status: 200 });
   } catch (error) {
     console.error('Error updating penalty configuration:', error);

@@ -1,42 +1,70 @@
-export const dynamic = 'force-dynamic'; // Add this line
+// /api/check-login-status.ts
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import LoginEntry from '@/models/loginEntryModel'; // Import LoginEntry model
-import FaceRegistrationRequest from '@/models/faceRegistrationRequest'; // Import FaceRegistrationRequest model
-import { getDataFromToken } from '@/helper/getDataFromToken'; // Extract userId from token
+import LoginEntry from '@/models/loginEntryModel';
+import FaceRegistrationRequest from '@/models/faceRegistrationRequest';
+import { getDataFromToken } from '@/helper/getDataFromToken';
+import dayjs from 'dayjs';
 
 export async function GET(request: NextRequest) {
-    try {
-        // Extract userId from token
-        const userId = await getDataFromToken(request);
+  try {
+    // Extract userId from token
+    const userId = await getDataFromToken(request);
 
-        // Fetch the latest login entry for the user
-        const lastEntry = await LoginEntry.findOne({ userId }).sort({ timestamp: -1 }).exec();
+    // Fetch the latest login entry for the user
+    const lastEntry = await LoginEntry.findOne({ userId }).sort({ timestamp: -1 }).exec();
 
-        // Check if the user has any approved face registration requests
-        const hasApprovedFaceRegistration = await FaceRegistrationRequest.exists({ userId, status: 'approved' });
+    // Check if the user has any approved face registration requests
+    const hasApprovedFaceRegistration = await FaceRegistrationRequest.exists({ userId, status: 'approved' });
 
-        // If no login history, return logged out status and check for face registration
-        if (!lastEntry) {
-            return NextResponse.json({
-                success: true,
-                isLoggedIn: false,
-                hasRegisteredFaces: Boolean(hasApprovedFaceRegistration),
-                message: 'No login history found'
-            });
-        }
-
-        // Check if the last action was 'login'
-        const isLoggedIn = lastEntry.action === 'login' || lastEntry.action === 'break_started' || lastEntry.action === 'break_ended';
-        const isBreakOpen = lastEntry.action === 'break_started';
-
-        return NextResponse.json({
-            success: true,
-            isLoggedIn,
-            isBreakOpen,
-            hasRegisteredFaces: Boolean(hasApprovedFaceRegistration)
-        });
-    } catch (error) {
-        console.error('Error fetching login status:', error);
-        return NextResponse.json({ success: false, error: 'Server error' });
+    // If no login history, return logged-out status
+    if (!lastEntry) {
+      return NextResponse.json({
+        success: true,
+        isLoggedIn: false,
+        hasRegisteredFaces: Boolean(hasApprovedFaceRegistration),
+        message: 'No login history found'
+      });
     }
+
+    // Check if the latest entry is from today.
+    const todayStr = dayjs().format('YYYY-MM-DD');
+    const entryDay = dayjs(lastEntry.timestamp).format('YYYY-MM-DD');
+    if (entryDay !== todayStr) {
+      // Last entry was not made today; treat the user as logged out.
+      return NextResponse.json({
+        success: true,
+        isLoggedIn: false,
+        hasRegisteredFaces: Boolean(hasApprovedFaceRegistration),
+        message: 'Last entry is not from today'
+      });
+    }
+
+    // Determine login/break status based on the latest entry action.
+    let isLoggedIn = false;
+    let isBreakOpen = false;
+
+    if (lastEntry.action === 'login') {
+      isLoggedIn = true;
+    } else if (lastEntry.action === 'logout') {
+      isLoggedIn = false;
+    } else if (lastEntry.action === 'break_started') {
+      // If the user started a break, mark the break as open.
+      isLoggedIn = true;
+      isBreakOpen = true;
+    } else if (lastEntry.action === 'break_ended') {
+      // Break ended means user resumed work (still logged in)
+      isLoggedIn = true;
+    }
+
+    return NextResponse.json({
+      success: true,
+      isLoggedIn,
+      isBreakOpen,
+      hasRegisteredFaces: Boolean(hasApprovedFaceRegistration)
+    });
+  } catch (error) {
+    console.error('Error fetching login status:', error);
+    return NextResponse.json({ success: false, error: 'Server error' });
+  }
 }

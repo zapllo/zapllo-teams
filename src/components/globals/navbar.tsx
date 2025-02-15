@@ -51,6 +51,13 @@ export function FloatingNavbar() {
       ),
     },
     {
+      name: "Blogs",
+      link: "/blog",
+      icon: (
+        <MessageCircle className="h-4 w-4 text-neutral-500 dark:text-white" />
+      ),
+    },
+    {
       name: "Refer Us & Win",
       link: "https://zapllo.notion.site/EXT-Referral-Programme-a18f7fe8ee634bffa917ca0c6f24ad0d?pvs=4",
       icon: (

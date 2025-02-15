@@ -24,11 +24,10 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-
-// Dynamically import ReactQuill to avoid SSR issues
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 import "react-quill/dist/quill.snow.css";
 import QuillWrapper from "@/lib/QuillWrapper";
+import { toast } from "sonner";
+import Loader from "@/components/ui/loader";
 
 // Utility to generate a slug
 function generateSlug(text: string) {
@@ -57,6 +56,9 @@ export default function NewBlogPage() {
 
     // Publish toggle
     const [published, setPublished] = useState(false);
+
+    // Submission state
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Quill reference
     const quillRef = useRef<any>(null);
@@ -91,27 +93,38 @@ export default function NewBlogPage() {
 
             if (!res.ok) {
                 console.error("Upload failed");
+                toast.error("Cover image upload failed.");
                 return;
             }
 
             const data = await res.json();
             if (data.fileUrls && data.fileUrls.length > 0) {
                 setCoverImageUrl(data.fileUrls[0]);
+                toast.success("Cover image uploaded successfully.");
             }
         } catch (error) {
             console.error("Error uploading file:", error);
         }
     };
 
-    // Custom image handler for Quill
     const handleInEditorImageUpload = () => {
-        if (!isClient) return; // Prevents server-side execution
+        // Ensure we are on the client
+        if (!isClient) return;
+
+        // Create a hidden file input and append it to the DOM
         const input = document.createElement("input");
         input.type = "file";
         input.accept = "image/*";
+        input.style.display = "none";
+        document.body.appendChild(input);
+
+        // Trigger the file dialog
         input.click();
 
-        input.onchange = async () => {
+        input.addEventListener("change", async () => {
+            // Remove the input from the DOM after selection
+            document.body.removeChild(input);
+
             const file = input.files?.[0];
             if (!file) return;
 
@@ -126,6 +139,7 @@ export default function NewBlogPage() {
 
                 if (!res.ok) {
                     console.error("Failed to upload image");
+                    toast.error("Failed to upload image");
                     return;
                 }
 
@@ -134,29 +148,30 @@ export default function NewBlogPage() {
                     const imageUrl = data.fileUrls[0];
                     console.log("Image uploaded, URL:", imageUrl);
 
-                    // Insert the image into the editor
+                    // Get the Quill editor instance
                     const editor = quillRef.current?.getEditor();
                     if (!editor) {
                         console.error("Quill editor not found!");
+                        toast.error("Editor not loaded. Please try again.");
                         return;
                     }
 
-                    // Force focus, so we definitely have a selection
+                    // Focus the editor and get the current selection
                     editor.focus();
-
-                    // Attempt to get the current selection
                     let range = editor.getSelection();
                     if (!range) {
-                        // If there's still no selection, insert at the end
                         range = { index: editor.getLength(), length: 0 };
                     }
 
+                    // Insert the image at the current selection
                     editor.insertEmbed(range.index, "image", imageUrl, "user");
+                    toast.success("Image inserted into post.");
                 }
             } catch (err) {
                 console.error(err);
+                toast.error("Error uploading in-editor image.");
             }
-        };
+        });
     };
 
     // Quill modules config
@@ -170,17 +185,39 @@ export default function NewBlogPage() {
                     ["link", "image"],
                     ["clean"],
                 ],
-                handlers: {
-                    image: handleInEditorImageUpload,
+            },
+            imageUploader: {
+                upload: (file: File) => {
+                    return new Promise<string>((resolve, reject) => {
+                        const formData = new FormData();
+                        formData.append("files", file);
+                        fetch("/api/upload", {
+                            method: "POST",
+                            body: formData,
+                        })
+                            .then((response) => response.json())
+                            .then((result) => {
+                                if (result.fileUrls && result.fileUrls.length > 0) {
+                                    resolve(result.fileUrls[0]);
+                                } else {
+                                    reject("Upload failed");
+                                }
+                            })
+                            .catch((error) => {
+                                console.error("Error during image upload:", error);
+                                reject("Upload failed");
+                            });
+                    });
                 },
             },
         };
     }, []);
 
+
     // Submit form
     const handleSubmit = async (event: FormEvent) => {
         event.preventDefault();
-
+        setIsSubmitting(true);
         try {
             const categoriesArr = categories.split(",").map((c) => c.trim()).filter(Boolean);
             const tagsArr = tags.split(",").map((t) => t.trim()).filter(Boolean);
@@ -206,23 +243,28 @@ export default function NewBlogPage() {
 
             if (!res.ok) {
                 console.error("Error creating blog post");
+                toast.error("Error creating blog post.");
+                setIsSubmitting(false);
                 return;
             }
 
+            toast.success("Blog post created successfully, redirecting to the created blog post!");
             router.push(`/blog/${slug}`);
         } catch (error) {
             console.error(error);
+            toast.error("An error occurred while creating the blog post.");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     return (
         <div className="h-full text-white">
-            <Card className="p-8 overflow-y-scroll">
+            <Card className="p-8 shadow-lg bg-background">
                 <CardHeader>
-                    <CardTitle>Create New Blog Post</CardTitle>
+                    <CardTitle className="text-2xl font-bold">Create New Blog Post</CardTitle>
                     <CardDescription>
-                        Add blog details, images, and meta information. Use the in-editor image button
-                        to embed images inline.
+                        Add blog details, images, and meta information. Use the in-editor image button to embed images inline.
                     </CardDescription>
                 </CardHeader>
 
@@ -237,7 +279,7 @@ export default function NewBlogPage() {
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
                                 placeholder="Enter your post title"
-                                className="mt-2"
+                                className="mt-2 placeholder:text-muted-foreground"
                                 required
                             />
                         </div>
@@ -251,7 +293,7 @@ export default function NewBlogPage() {
                                 value={slug}
                                 onChange={(e) => setSlug(e.target.value)}
                                 placeholder="auto-generated from title, or override"
-                                className="mt-2"
+                                className="mt-2 placeholder:text-muted-foreground"
                             />
                         </div>
 
@@ -263,7 +305,7 @@ export default function NewBlogPage() {
                                 value={excerpt}
                                 onChange={(e) => setExcerpt(e.target.value)}
                                 placeholder="Short summary or excerpt"
-                                className="mt-2"
+                                className="mt-2 placeholder:text-muted-foreground"
                             />
                         </div>
 
@@ -302,7 +344,7 @@ export default function NewBlogPage() {
                                     value={metaTitle}
                                     onChange={(e) => setMetaTitle(e.target.value)}
                                     placeholder="Title for SEO"
-                                    className="mt-2"
+                                    className="mt-2 placeholder:text-muted-foreground"
                                 />
                             </div>
                             <div>
@@ -312,7 +354,7 @@ export default function NewBlogPage() {
                                     value={metaDescription}
                                     onChange={(e) => setMetaDescription(e.target.value)}
                                     placeholder="Short description for SEO"
-                                    className="mt-2"
+                                    className="mt-2 placeholder:text-muted-foreground"
                                 />
                             </div>
                         </div>
@@ -327,7 +369,7 @@ export default function NewBlogPage() {
                                     value={categories}
                                     onChange={(e) => setCategories(e.target.value)}
                                     placeholder="e.g. tech, personal (comma-separated)"
-                                    className="mt-2"
+                                    className="mt-2 placeholder:text-muted-foreground"
                                 />
                             </div>
                             <div>
@@ -338,7 +380,7 @@ export default function NewBlogPage() {
                                     value={tags}
                                     onChange={(e) => setTags(e.target.value)}
                                     placeholder="e.g. nextjs, blog, mongodb (comma-separated)"
-                                    className="mt-2"
+                                    className="mt-2 placeholder:text-muted-foreground"
                                 />
                             </div>
                         </div>
@@ -351,11 +393,17 @@ export default function NewBlogPage() {
                             />
                             <Label className="leading-none">Publish Immediately?</Label>
                         </div>
-
-                        {/* Submit Button */}
-                        <Button type="submit" className="mt-4">
-                            Publish
-                        </Button>
+                        {/* Submit Button with Loader */}
+                        <div className="relative">
+                            <Button type="submit" className="mt-4 py-4 text-xl w-full" disabled={isSubmitting}>
+                                {isSubmitting ? "Publishing..." : "Publish"}
+                            </Button>
+                            {isSubmitting && (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <Loader />
+                                </div>
+                            )}
+                        </div>
                     </form>
                 </CardContent>
 

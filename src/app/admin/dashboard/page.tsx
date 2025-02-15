@@ -73,13 +73,9 @@ export default function AdminBlogDashboard() {
 
   return (
     <div className="p-6">
-      <div className="grid grid-cols-3 gap-6">
+      <div className="flex justify-center mt-4">
         <Link href="/admin/blog/new">
-          <Card className="hover:border-white cursor-pointer">
-            <CardHeader>
-              <CardTitle>Write Blog</CardTitle>
-            </CardHeader>
-          </Card>
+          <Button>Write A Blog</Button>
         </Link>
       </div>
 
