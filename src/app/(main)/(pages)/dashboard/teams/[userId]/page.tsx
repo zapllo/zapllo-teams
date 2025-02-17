@@ -407,7 +407,9 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
             });
 
             if (response.data.success) {
-                console.log("User updated successfully:", response.data.user);
+                // Update the user state with the response from the database.
+                setUser(response.data.user);
+                toast.success(`User status changed successfully to ${response.data.user.status}`);
             } else {
                 console.error("Failed to update user:", response.data.error);
                 // Revert the UI update if the API call fails
@@ -455,13 +457,13 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
                     </div>
                     <div className="flex justify-between w-full items-center gap-4">
                         <div>
-                           
+
                         </div>
                     </div>
 
                     <div className="mt-8 text-center">
                         <h1 className="text-xl font-semibold text-red-500">
-                            You&apos;re not authorized to access Employee Details 
+                            You&apos;re not authorized to access Employee Details
                         </h1>
                     </div>
                 </div>
@@ -543,7 +545,7 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
                     </div>
                     <div className="relative">
                         <Select
-                            value={user.status || "Active"}
+                            value={user?.status || "Active"}
                             onValueChange={(value) => handleUpdateField("status", value)}
                         >
                             <SelectTrigger className=" bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white outline-none focus:ring-[#815BF5]">

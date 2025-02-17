@@ -257,7 +257,9 @@ export default function Settings({ }: Props) {
     useEffect(() => {
         const fetchReportTime = async () => {
             try {
-                const response = await fetch('/api/reports/daily-attendance-time');
+                const response = await fetch('/api/reports/daily-attendance-time', {
+                    credentials: 'include'
+                });
                 const data = await response.json();
                 if (data.success) {
                     setSelectedTime(data.dailyAttendanceReportTime);
@@ -299,6 +301,7 @@ export default function Settings({ }: Props) {
             const response = await fetch('/api/reports/daily-attendance-time', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify({ newReportTime: selectedTime }),
             });
             const data = await response.json();

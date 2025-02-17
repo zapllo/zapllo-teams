@@ -195,7 +195,7 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
         dailyReminderTime: { type: String, default: "09:00 AM" }, // Stores time in HH:MM AM/PM format
         email: { type: Boolean, default: false }, // Email reminder toggle
         whatsapp: { type: Boolean, default: false }, // WhatsApp reminder toggle
-        dailyAttendanceReportTime: { type: String, default: "09:00 AM" }, // Time for daily attendance report
+        dailyAttendanceReportTime: { type: String, default: "" }, // Time for daily attendance report
     },
     weeklyOffs: {
         type: [String], // Stores weekly off days as an array of strings (e.g., ["Sun", "Sat"])

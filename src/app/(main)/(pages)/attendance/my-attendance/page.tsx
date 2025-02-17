@@ -47,6 +47,7 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import axios from "axios";
 import { FaHouseUser } from "react-icons/fa";
 import { Tabs3, TabsList3, TabsTrigger3 } from "@/components/ui/tabs3";
+import Cookies from 'js-cookie';
 
 const mapContainerStyle = {
   height: "400px",
@@ -378,14 +379,14 @@ export default function MyAttendance() {
   const handleLoginLogout = () => {
     setIsModalOpen(true);
     setCapturedImage(null);
-    setLocation(null);
+    // setLocation(null);
     setIsModalOpen(true);
   };
 
   const handleBreaks = () => {
     setIsBreakModalOpen(true);
     setCapturedBreakImage(null);
-    setLocation(null);
+    // setLocation(null);
 
   }
 
@@ -626,20 +627,45 @@ export default function MyAttendance() {
   };
 
 
-  // Use watchPosition to continuously update location in real time
-  useEffect(() => {
+  const fetchLocation = () => {
+    // Try to retrieve the stored location from cookies
+    const stored = Cookies.get('userLocation');
+    if (stored) {
+      try {
+        const { location: savedLocation, timestamp } = JSON.parse(stored);
+        const oneHour = 3600 * 1000; // in milliseconds
+        if (Date.now() - timestamp < oneHour) {
+          // Use the stored location if it is less than an hour old
+          setLocation(savedLocation);
+          console.log("Using stored location:", savedLocation);
+          return;
+        } else {
+          // Remove outdated cookie
+          Cookies.remove('userLocation');
+        }
+      } catch (error) {
+        console.error("Error parsing stored location:", error);
+        Cookies.remove('userLocation');
+      }
+    }
+
+    // If no valid cookie, fetch a new location
     if (!navigator.geolocation) {
       toast.error("Geolocation is not supported by your browser.");
       return;
     }
-    const watchId = navigator.geolocation.watchPosition(
+
+    navigator.geolocation.getCurrentPosition(
       (position) => {
         const loc = {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         };
-        console.log("Updated location:", loc);
         setLocation(loc);
+        console.log("Fetched new location:", loc);
+        // Save the location with a timestamp in a cookie that expires in 1 hour
+        // Save the location with a timestamp in a cookie that expires in 1 hour
+      Cookies.set('userLocation', JSON.stringify({ location: loc, timestamp: Date.now() }), { expires: 1 / 24 });
       },
       (error) => {
         console.error("Error fetching location:", error);
@@ -651,14 +677,18 @@ export default function MyAttendance() {
         timeout: 10000,
       }
     );
+  };
 
-    return () => {
-      navigator.geolocation.clearWatch(watchId);
-    };
+  // Call fetchLocation on component mount or when needed.
+  // For example, you can call it inside a useEffect:
+  React.useEffect(() => {
+    fetchLocation();
   }, []);
+
 
   const handleModalChange = (isOpen: boolean) => {
     if (isOpen) {
+      fetchLocation();
       setCapturedImage(null);
       console.log("Modal open - location:", location);
     } else {
@@ -669,6 +699,7 @@ export default function MyAttendance() {
 
   const handleBreakModalChange = (isOpen: boolean) => {
     if (isOpen) {
+      fetchLocation();
       setCapturedBreakImage(null);
       console.log("Break modal open - location:", location);
     } else {
@@ -677,7 +708,7 @@ export default function MyAttendance() {
     setIsBreakModalOpen(isOpen);
   };
 
-
+  console.log(location, 'loc bitch!')
   // When the user clicks "Take a Break"
   const captureImageAndSubmitBreakStart = async () => {
     // Capture image
@@ -970,65 +1001,65 @@ export default function MyAttendance() {
       ? filterDailyReportEntries(filteredEntries) // Filtered entries passed here
       : filterRegularizationEntries(filteredEntries);
 
-      const calculateHoursBetweenLoginLogout = (entries: LoginEntry[]): string => {
-        // Sort entries by timestamp (ascending)
-        const sortedEntries = entries.sort(
-          (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-        );
-        
-        let totalNetMs = 0;
-        let loginTime: number | null = null;
-        let totalBreakMs = 0;
-        let currentBreakStart: number | null = null;
-      
-        sortedEntries.forEach((entry) => {
-          const entryTime = new Date(entry.timestamp).getTime();
-      
-          if (entry.action === 'login') {
-            // Start a new work session
-            loginTime = entryTime;
-            totalBreakMs = 0;
+  const calculateHoursBetweenLoginLogout = (entries: LoginEntry[]): string => {
+    // Sort entries by timestamp (ascending)
+    const sortedEntries = entries.sort(
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
+
+    let totalNetMs = 0;
+    let loginTime: number | null = null;
+    let totalBreakMs = 0;
+    let currentBreakStart: number | null = null;
+
+    sortedEntries.forEach((entry) => {
+      const entryTime = new Date(entry.timestamp).getTime();
+
+      if (entry.action === 'login') {
+        // Start a new work session
+        loginTime = entryTime;
+        totalBreakMs = 0;
+        currentBreakStart = null;
+      } else if (entry.action === 'break_started') {
+        // Mark the break start time
+        currentBreakStart = entryTime;
+      } else if (entry.action === 'break_ended') {
+        if (currentBreakStart !== null) {
+          // Add break duration
+          totalBreakMs += entryTime - currentBreakStart;
+          currentBreakStart = null;
+        }
+      } else if (entry.action === 'logout') {
+        if (loginTime !== null) {
+          // If a break was ongoing, add break duration until logout.
+          if (currentBreakStart !== null) {
+            totalBreakMs += entryTime - currentBreakStart;
             currentBreakStart = null;
-          } else if (entry.action === 'break_started') {
-            // Mark the break start time
-            currentBreakStart = entryTime;
-          } else if (entry.action === 'break_ended') {
-            if (currentBreakStart !== null) {
-              // Add break duration
-              totalBreakMs += entryTime - currentBreakStart;
-              currentBreakStart = null;
-            }
-          } else if (entry.action === 'logout') {
-            if (loginTime !== null) {
-              // If a break was ongoing, add break duration until logout.
-              if (currentBreakStart !== null) {
-                totalBreakMs += entryTime - currentBreakStart;
-                currentBreakStart = null;
-              }
-              const sessionDurationMs = entryTime - loginTime;
-              const netSessionMs = sessionDurationMs - totalBreakMs;
-              totalNetMs += netSessionMs;
-              // Reset for the next session.
-              loginTime = null;
-              totalBreakMs = 0;
-            }
           }
-        });
-      
-        // If the last entry is a break_started (and there was a login), assume the session ended at the break start.
-        if (loginTime !== null && currentBreakStart !== null) {
-          const sessionDurationMs = currentBreakStart - loginTime;
+          const sessionDurationMs = entryTime - loginTime;
           const netSessionMs = sessionDurationMs - totalBreakMs;
           totalNetMs += netSessionMs;
+          // Reset for the next session.
+          loginTime = null;
+          totalBreakMs = 0;
         }
-      
-        // Convert totalNetMs to hours and minutes
-        const hours = Math.floor(totalNetMs / (1000 * 60 * 60));
-        const minutes = Math.floor((totalNetMs % (1000 * 60 * 60)) / (1000 * 60));
-      
-        return `${hours}h ${minutes}m`;
-      };
-      
+      }
+    });
+
+    // If the last entry is a break_started (and there was a login), assume the session ended at the break start.
+    if (loginTime !== null && currentBreakStart !== null) {
+      const sessionDurationMs = currentBreakStart - loginTime;
+      const netSessionMs = sessionDurationMs - totalBreakMs;
+      totalNetMs += netSessionMs;
+    }
+
+    // Convert totalNetMs to hours and minutes
+    const hours = Math.floor(totalNetMs / (1000 * 60 * 60));
+    const minutes = Math.floor((totalNetMs % (1000 * 60 * 60)) / (1000 * 60));
+
+    return `${hours}h ${minutes}m`;
+  };
+
 
 
 
@@ -1506,7 +1537,7 @@ export default function MyAttendance() {
                       <div className="flex gap-2">
                         <Clock className="h-4" />{" "}
                         {calculateHoursBetweenLoginLogout(groupedEntries[date])}{" "}
-                        
+
                       </div>
                       <div className="flex justify-end">
                         <span
@@ -1698,7 +1729,7 @@ export default function MyAttendance() {
                   <div className="flex justify-center">
                     <div className="text-white flex gap-2 items-center bg-green-500 rounded-xl w-fit px-2 py-1 text-sm ">
                       <FaHouseUser className="h-4 text-white" />
-                      You are outside office reach
+                      You are in office reach
                     </div>
                   </div>
                 ) : (

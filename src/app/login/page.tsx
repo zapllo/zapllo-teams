@@ -109,6 +109,8 @@ export default function LoginPage() {
                     errorMessage = "No account found with that email. Please sign up!"
                 } else if (serverError === "Invalid password") {
                     errorMessage = "The password you entered is incorrect. Please try again."
+                } else if (serverError === "Account is disabled. Please contact support.") {
+                    errorMessage = "User account is deactivated";
                 }
             }
 

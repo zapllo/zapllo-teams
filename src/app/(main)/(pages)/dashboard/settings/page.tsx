@@ -133,11 +133,11 @@ export default function Page() {
         toast.success("Organization updated successfully");
         setLoading(false);
       } else {
-        alert("Failed to update organization");
+        toast.error("Failed to update organization");
       }
     } catch (error) {
       console.error("Error updating organization:", error);
-      alert("An error occurred while updating the organization");
+      toast.error("An error occurred while updating the organization");
     }
   };
 
@@ -216,7 +216,7 @@ export default function Page() {
       setSettingsOpen(false);
     } catch (error) {
       console.error("Failed to update settings", error);
-      alert("Failed to update settings");
+      toast.error("Failed to update settings");
     }
   };
 
@@ -234,7 +234,7 @@ export default function Page() {
       setSettingsOpen(false);
     } catch (error) {
       console.error("Failed to update settings", error);
-      alert("Failed to update settings");
+      toast.error("Failed to update settings");
     }
   };
 

@@ -31,17 +31,20 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-        const { newReportTime } = await request.json(); // Get the new report time from the request body
+        const { newReportTime } = await request.json(); // e.g. "09:00" from the custom time picker
         const manager = await User.findById(managerId);
         if (!manager) {
             return NextResponse.json({ success: false, message: 'Manager not found' }, { status: 404 });
         }
 
-        // Update the report time
+        // Make sure the field is stored as a string:
         manager.reminders.dailyAttendanceReportTime = newReportTime;
         await manager.save();
 
-        return NextResponse.json({ success: true, message: 'Report time updated successfully' }, { status: 200 });
+        return NextResponse.json(
+            { success: true, message: 'Report time updated successfully', dailyAttendanceReportTime: newReportTime },
+            { status: 200 }
+        );
     } catch (error) {
         console.error('Error updating report time:', error);
         return NextResponse.json({ success: false, message: 'Error updating report time' }, { status: 500 });

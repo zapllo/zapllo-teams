@@ -19,6 +19,15 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "User does not exist" }, { status: 400 })
         }
 
+
+        // **New Check:** Block login for deactivated accounts
+        if (user.status === "Deactivated") {
+            return NextResponse.json(
+                { error: "Account is disabled. Please contact support." },
+                { status: 403 }
+            );
+        }
+
         if (password !== user.password) {
             return NextResponse.json({ error: "Invalid password" }, { status: 400 });
         }
