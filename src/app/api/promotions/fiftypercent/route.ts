@@ -45,6 +45,7 @@ const sendWebhookNotification = async (admin: IUser) => {
 // Endpoint logic
 export async function GET(request: NextRequest) {
     try {
+        await connectDB();
         const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
         const results = [];
