@@ -30,7 +30,9 @@ export default function SaveMore({ }: Props) {
                         </Link>
 
                         <div className=' '>
-                            <button className='bg-gradient-to-b text-xl from-[#1C1F3E]  w-72 to-[#010313] border px-4 py-2 rounded-3xl text-[#815BF5]'>Create Your Free Account </button>
+                            <Link href='/signup'>
+                                <button className='bg-gradient-to-b text-xl from-[#1C1F3E]  w-72 to-[#010313] border px-4 py-2 rounded-3xl text-[#815BF5]'>Create Your Free Account </button>
+                            </Link>
                         </div>
                     </div>
                 </div>

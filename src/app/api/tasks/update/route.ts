@@ -197,22 +197,18 @@ export async function PATCH(request: NextRequest) {
                         nextDueDate = new Date(task.dueDate);
                         nextDueDate.setDate(nextDueDate.getDate() + 1);
                     } else if (task.repeatType === RepeatType.Weekly && task.days) {
-
                         const currentDayIndex = new Date(task.dueDate).getDay();
                         const dayIndexes = task.days.map(day =>
                             ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].indexOf(day)
                         );
                         // Find the next closest day
                         const nextDayIndex = dayIndexes
-                            .filter(index => index > currentDayIndex) // Days after the current day
-                            .sort((a, b) => a - b)[0] ?? dayIndexes.sort((a, b) => a - b)[0]; // Sort and take the earliest day if no days are after the current day
-
+                            .filter(index => index > currentDayIndex)
+                            .sort((a, b) => a - b)[0] ?? dayIndexes.sort((a, b) => a - b)[0];
                         nextDueDate = new Date(task.dueDate);
-
                         const daysToAdd = nextDayIndex > currentDayIndex
                             ? nextDayIndex - currentDayIndex
-                            : 7 - currentDayIndex + nextDayIndex; // Calculate days to add to reach the next day
-
+                            : 7 - currentDayIndex + nextDayIndex;
                         nextDueDate.setDate(nextDueDate.getDate() + daysToAdd);
                     } else if (task.repeatType === RepeatType.Monthly && task.dates) {
                         const currentDay = new Date(task.dueDate).getDate();
@@ -222,16 +218,22 @@ export async function PATCH(request: NextRequest) {
                             nextDueDate.setMonth(nextDueDate.getMonth() + 1);
                         }
                         nextDueDate.setDate(nextDate);
+                    } else if (task.repeatType === RepeatType.Yearly) {
+                        nextDueDate = new Date(task.dueDate);
+                        nextDueDate.setFullYear(nextDueDate.getFullYear() + 1);
+                    } else if (task.repeatType === RepeatType.Periodically && task.repeatInterval) {
+                        nextDueDate = new Date(task.dueDate);
+                        nextDueDate.setDate(nextDueDate.getDate() + task.repeatInterval);
                     }
 
                     if (nextDueDate) {
                         const newTaskData = {
                             ...task.toObject(),
-                            _id: undefined, // Generate a new ID
+                            _id: undefined, // New ID will be generated
                             dueDate: nextDueDate,
                             completionDate: null,
                             status: Status.Pending,
-                            comments: [], // Reset comments
+                            comments: [], // Reset comments for the new task
                             createdAt: undefined,
                             updatedAt: undefined,
                         };
@@ -243,6 +245,7 @@ export async function PATCH(request: NextRequest) {
                         const taskCreator = await User.findById(task.user);
                         const assignedUser = await User.findById(task.assignedUser);
                         const taskCategory = await Category.findById(task.category);
+
 
                         if (!taskCreator || !assignedUser || !taskCategory) {
                             console.error("Creator, assignee, or category not found for new task. Skipping notifications.");

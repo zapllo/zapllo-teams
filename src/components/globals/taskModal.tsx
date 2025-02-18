@@ -73,6 +73,13 @@ import { toast } from "sonner";
 import Loader from "../ui/loader";
 import { Toggle } from "../ui/toggle";
 import Select, { StylesConfig } from "react-select";
+import {
+  Select as ShadcnSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"; // adjust the path as needed
 import { Switch } from "../ui/switch";
 import { FaTimes, FaUpload } from "react-icons/fa";
 import CustomAudioPlayer from "./customAudioPlayer";
@@ -82,6 +89,8 @@ import { AvatarFallback } from "@radix-ui/react-avatar";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 import axios from "axios";
+import { Tabs3, TabsList3, TabsTrigger3 } from "../ui/tabs3";
+import { Checkbox } from "../ui/checkbox";
 
 interface TaskModalProps {
   closeModal: () => void;
@@ -142,6 +151,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
   const [date, setDate] = React.useState<Date>();
   const [repeatMonthlyDay, setRepeatMonthlyDay] = useState(""); // New state for monthly day
   const [repeatMonthlyDays, setRepeatMonthlyDays] = useState<number[]>([]);
+  const [repeatInterval, setRepeatInterval] = useState<number>();
   const [assignMoreTasks, setAssignMoreTasks] = useState(false); // State for switch
   const [recording, setRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
@@ -727,6 +737,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
       priority,
       repeat,
       repeatType: repeat ? repeatType : "", // Only include repeatType if repeat is true
+      repeatInterval,
       days: repeat ? days : [], // Only include days if repeat is true
       dates: repeatMonthlyDays,
       dueDate: combinedDueDateTime, // Use the combined date and tim
@@ -1009,76 +1020,91 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
               )}
             </div>
           </div>
-          <div className=" flex justify-between">
-            <div className="mb-2  justify-between  rounded-md  flex gap-4 mta">
-              <div className=" gap-2 flex justify-between h-fit border-2 p-4 w-full ">
-                <div className="flex gap-2   text-xs text-white font-bold">
+          <div className=" flex itrc justify-between">
+            <div className="mb-2  justify-between border rounded-md h-14 items-center flex gap-4 mta w-full">
+              <div className=" gap-2 flex justify-between h-fit  items-center p-4 w-full ">
+                <div className="flex g   text-xs text-white font-bold">
                   {/* <FlagIcon className='h-5' /> */}
                   Priority
                 </div>
-                <div className=" rounded-lg  ">
-                  {["High", "Medium", "Low"].map((level) => (
-                    <label
-                      key={level}
-                      className={`px-4 py-1 text-xs   border border-[#505356]   font-semibold cursor-pointer ${priority === level
-                        ? "bg-[#815BF5]  text-white"
-                        : "bg-[#282D32] text-gray-300 hover:bg-gray-600"
-                        }`}
-                    >
-                      <input
-                        type="radio"
-                        name="priority"
-                        value={level}
-                        checked={priority === level}
-                        onChange={() => setPriority(level)}
-                        className="hidden"
-                      />
-                      {level}
-                    </label>
-                  ))}
+                <div className=" rounded-lg w-full ">
+                  <Tabs3 value={priority} onValueChange={setPriority}>
+
+                    <TabsList3 className="rounded-lg flex border w-fit">
+
+                      {["High", "Medium", "Low"].map((level) => (
+                        <TabsTrigger3 className="text-xs" key={level} value={level}>
+                          {level}
+                        </TabsTrigger3>
+                      ))}
+                    </TabsList3>
+                  </Tabs3>
                 </div>
               </div>
             </div>
 
-            <div className="- px-2 sticky right-0 w-1/2  justify-between">
-              <div className="flex gap-2 ml-40 items-center ">
-                <Repeat className="h-4" />
-                <Label htmlFor="repeat" className="font-semibold text-xs ">
-                  Repeat
-                </Label>
-                <input
-                  type="checkbox"
-                  className="custom-checkbox mr-2 h-10"
-                  id="repeat"
-                  checked={repeat}
-                  onChange={(e) => setRepeat(e.target.checked)}
-                />
+
+          </div>
+          <div className="flex mb-2 py-2 items-center">
+            <div className="- px-2  w-1/2  flex">
+              <div className="flex  items-center ">
+                {/* <Repeat className="h-4" /> */}
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="repeat"
+                    checked={repeat}
+                    onCheckedChange={(checked) => setRepeat(Boolean(checked))}
+                    className="mr-2 "
+                  />
+                  <Label htmlFor="repeat" className="font-semibold text-xs ">
+                    Repeat
+                  </Label>
+                </div>
+
+
               </div>
               <div></div>
               {repeat && (
-                <div>
+                <div className="ml-4">
                   <div className="bg-transparent">
                     {/* <Label htmlFor="repeatType" className="block font-semibold">Repeat Type</Label> */}
-                    <select
-                      id="repeatType"
-                      value={repeatType}
-                      onChange={(e) => setRepeatType(e.target.value)}
-                      className="w-48 ml-20 bg-[#292d33] border text-xs outline-none rounded px-3 py-2"
-                    >
-                      <option value="bg-[#292D33]">Select Repeat Type</option>
-                      <option value="Daily">Daily</option>
-                      <option value="Weekly">Weekly</option>
-                      <option value="Monthly">Monthly</option>
-                    </select>
+                    <ShadcnSelect value={repeatType} onValueChange={setRepeatType}>
+                      <SelectTrigger className="w-48 bg-[#292d33] border text-xs h-fit outline-none rounded px-3 ">
+                        <SelectValue placeholder="Select Repeat Type" />
+                      </SelectTrigger>
+                      <SelectContent className="z-[100] text-xs">
+                        <SelectItem value="Daily">Daily</SelectItem>
+                        <SelectItem value="Weekly">Weekly</SelectItem>
+                        <SelectItem value="Monthly">Monthly</SelectItem>
+                        <SelectItem value="Yearly">Yearly</SelectItem>
+                        <SelectItem value="Periodically">Periodically</SelectItem>
+                      </SelectContent>
+                    </ShadcnSelect>
                   </div>
                 </div>
               )}
+              {/* For Periodically, ask for the repeat interval (in days) */}
+              {repeat && repeatType === "Periodically" && (
+                <div className=" ">
+
+                  <input
+                    type="number"
+                    id="repeatInterval"
+                    value={repeatInterval}
+                    onChange={(e) => setRepeatInterval(Number(e.target.value))}
+                    className="w-44 ml-4 bg-[#292d33] border text-xs outline-none rounded px-3 py-2"
+                    placeholder="Enter interval in days"
+                    min={1}
+                  />
+                </div>
+              )}
             </div>
+
           </div>
 
           {repeatType === "Weekly" && repeat && (
-            <div className="mb-4 ">
-              <Label className="block font-semibold mb-2">Select Days</Label>
+            <div className="mb-4 p-2 ">
+              <Label className="block font-semibold  mb-2">Select Days</Label>
               <div className="grid grid-cols-7  p-2 rounded ">
                 {[
                   "Monday",
@@ -1664,7 +1690,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
           </div>
         </form>
       </motion.div>
-    </div>
+    </div >
   );
 };
 

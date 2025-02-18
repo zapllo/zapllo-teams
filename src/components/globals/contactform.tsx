@@ -106,9 +106,9 @@ export default function ContactForm() {
                 <label className="absolute bg-[#05071E] text-[#787CA5] ml-2 text-xs -mt-2 px-1">
                     Your Message
                 </label>
-                <Textarea
+                <textarea
                   
-                    className="w-full text-xs p-2 bg-transparent text-white outline-none border rounded focus:border-[#815BF5] focus:ring-1 focus:ring-[#815BF5] h-32"
+                    className="w-full text-xs  p-2 bg-transparent text-white outline-none border rounded focus:border-[#815BF5] focus:ring-1 focus:ring-[#815BF5] h-32"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                 />

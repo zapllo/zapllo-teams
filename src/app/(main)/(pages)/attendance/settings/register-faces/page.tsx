@@ -556,7 +556,114 @@ export default function RegisterFace() {
         {loading ? (
           <Loader />
         ) : error ? (
-          <p className="text-red-500">{error}</p>
+          <table className="min-w-full table-auto border  text-white">
+            <thead>
+              <tr className="border text-xs text-left bg-[#0A0D28]">
+                <th className="px-4 py-2">User</th>
+                <th className="px-4 py-2">Status</th>
+                <th className="px-4 py-2">Images</th>
+                <th className="px-4 py-2 ">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredByStatus.map((request) => (
+                <tr
+                  key={request._id}
+                  className="border-t text-xs border-gray-600"
+                >
+                  <td className="px-4 py-2">
+                    {request.userId.firstName}
+                    {request.userId.lastName}
+                  </td>
+                  {/* Conditional text color based on status */}
+                  <td
+                    className={`px-4 py-2 uppercase ${request.status === "approved"
+                      ? "text-green-500"
+                      : request.status === "rejected"
+                        ? "text-red-500"
+                        : "text-yellow-500"
+                      }`}
+                  >
+                    {request.status}
+                  </td>
+                  <td className="px-4 py-2">
+                    <div className="grid grid-cols-3 ">
+                      {request.imageUrls.map((url, index) => (
+                        <div key={request._id}>
+                          <img
+                            key={index}
+                            src={url}
+                            alt="Face"
+                            className="w-16 h-12 opacity-30 bg-black object-contain rounded cursor-pointer"
+                            onClick={() => setImageModalUrl(url)} // Set image URL for preview modal
+                          />
+                          <h1
+                            onClick={() => setImageModalUrl(url)}
+                            className=" -mt-8 hover:underline cursor-pointer ml-5 absolute "
+                          >
+                            View
+                          </h1>
+                        </div>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="px-4 py-2 flex text-right">
+                    {request.status === "pending" && (
+                      <div className="space-x-2 flex">
+                        <div>
+                          <button
+                            onClick={() =>
+                              handleStatusChange(request._id, "approved")
+                            }
+                            className="bg-transparent flex gap-2 hover:border-green-600 border text-white py-2 px-4 rounded"
+                            disabled={updating}
+                          >
+                            {request.isApproving ? (
+                              <Loader />
+                            ) : (
+                              <CheckCheck className="text-green-700 h-4" />
+                            )}{" "}
+                            Approve
+                          </button>
+                        </div>
+                        <div>
+                          <button
+                            onClick={() =>
+                              handleStatusChange(request._id, "rejected")
+                            }
+                            className="border flex gap-2 bg-transparent hover:border-red-600 text-white py-2 px-4 rounded"
+                            disabled={updating}
+                          >
+                            {request.isRejecting ? (
+                              <Loader />
+                            ) : (
+                              <Cross1Icon className="text-red-500 h-4" />
+                            )}{" "}
+                            Reject
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {/* Delete Button */}
+                    <button
+                      onClick={() => openDeleteDialog(request._id)}
+                      className=" text-white flex justify-start py-2 px-4 rounded "
+                      disabled={updating}
+                    >
+                      <Trash2 className="text-red-500 h-4" />
+                    </button>
+                    <DeleteConfirmationDialog
+                      isOpen={isDeleteDialogOpen}
+                      onClose={() => setIsDeleteDialogOpen(false)} // Close the modal when canceled
+                      onConfirm={confirmDelete} // Confirm delete action
+                      title="Confirm Delete"
+                      description="Are you sure you want to delete this face registration request? This action cannot be undone."
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         ) : filteredByStatus.length === 0 ? (
           // Display this message when there are no requests based on filters
           <div className="flex w-full justify-center">
@@ -698,7 +805,7 @@ export default function RegisterFace() {
             <DialogContent className=" p-6 ">
               <div className='flex items-center justify-between'>
                 <h1 className='text-white text-md'>Uploaded Face</h1>
-              <CrossCircledIcon onClick={() => setImageModalUrl(null)} className='scale-150 cursor-pointer  hover:bg-[#ffffff]  rounded-full hover:text-[#815BF5]' />
+                <CrossCircledIcon onClick={() => setImageModalUrl(null)} className='scale-150 cursor-pointer  hover:bg-[#ffffff]  rounded-full hover:text-[#815BF5]' />
               </div>
               <div className="bg-[#] object-contain h-64 z-[100] relative p-6 max-w-2xl rounded-lg">
                 <img

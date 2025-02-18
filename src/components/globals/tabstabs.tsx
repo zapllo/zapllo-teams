@@ -564,7 +564,7 @@ export default function TeamTabs() {
                     Add Member </Button>
                 </DialogTrigger>
               )}
-              <DialogContent className="p-6 m-auto h-screen   overflow-y-scroll scrollbar-hide z-[100]">
+              <DialogContent className="p-6 m-auto h-screen 2xl:h-full   overflow-y-scroll scrollbar-hide z-[100]">
                 <div className="flex justify-between w-full h-full items-center">
                   <DialogTitle>
                     <div className="flex gap-2">

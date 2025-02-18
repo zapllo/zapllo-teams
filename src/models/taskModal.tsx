@@ -5,6 +5,8 @@ enum RepeatType {
     Weekly = 'Weekly',
     Monthly = 'Monthly',
     Daily = 'Daily',
+    Yearly = 'Yearly',
+    Periodically = 'Periodically',
 }
 
 enum Status {
@@ -33,6 +35,7 @@ export interface ITask extends Document {
     links?: string[];
     status: Status;
     organization: mongoose.Types.ObjectId;
+    repeatInterval?: number;
     comments: {
         userName: string;
         fileUrl: string[];
@@ -60,6 +63,19 @@ const taskSchema: Schema<ITask> = new mongoose.Schema(
         priority: { type: String, required: true, enum: ['High', 'Medium', 'Low'] },
         repeatType: { type: String, enum: Object.values(RepeatType) },
         repeat: { type: Boolean, default: false },
+        // New field: repeatInterval (required when repeatType is Periodically)
+        repeatInterval: {
+            type: Number,
+            validate: {
+                validator: function (value: number) {
+                    if ((this as ITask).repeatType === RepeatType.Periodically) {
+                        return value != null && value > 0;
+                    }
+                    return true;
+                },
+                message: 'repeatInterval must be provided and greater than 0 when repeatType is Periodically',
+            },
+        },
         days: {
             type: [
                 {
@@ -94,6 +110,7 @@ const taskSchema: Schema<ITask> = new mongoose.Schema(
             default: 'Pending' as Status, // Ensure default value is a valid Status enum type
         },
         organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', required: true },
+
         reminders: [
             {
                 notificationType: { type: String, enum: ['email', 'whatsapp'], required: true },
