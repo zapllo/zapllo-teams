@@ -6,6 +6,8 @@ interface ILead extends Document {
     email: string;
     mobNo: string;
     message: string;
+    // New field
+    subscribedStatus: "Yes, I need Support" | "No, I need a callback for my queries and then subscribe";
 }
 
 const LeadSchema: Schema<ILead> = new Schema({
@@ -29,6 +31,14 @@ const LeadSchema: Schema<ILead> = new Schema({
     },
     message: {
         type: String,
+        required: true,
+    },
+    subscribedStatus: {
+        type: String,
+        enum: [
+            "Yes, I need Support",
+            "No, I need a callback for my queries and then subscribe",
+        ],
         required: true,
     },
 }, { timestamps: { createdAt: true, updatedAt: false } }); // Automatically add `createdAt` field);

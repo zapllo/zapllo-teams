@@ -229,7 +229,8 @@ export default async function BlogPostPage({
 prose-a:text-blue-500
               prose-img:my-8
               prose-img:mx-auto
-              prose-img:h-auto
+              prose-img:h-full
+              prose-img:scale-75
               prose-img:w-full
               prose-img:object-cover
               prose-img:rounded-lg

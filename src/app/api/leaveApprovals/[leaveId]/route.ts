@@ -9,11 +9,12 @@ import { getDataFromToken } from '@/helper/getDataFromToken';
 import { sendEmail, SendEmailOptions } from '@/lib/sendEmail';
 
 const sendLeaveApprovalEmail = async (leave: any, status: 'Approved' | 'Partially Approved' | 'Rejected', approvedFor: number) => {
-    // Fetch the user who approved the leave
-    const approvedByUser = await User.findById(leave.approvedBy).select("firstName");
+    // Determine which approver field to use based on the status
+    const approverField = status === 'Rejected' ? leave.rejectedBy : leave.approvedBy;
+    const approverUser = await User.findById(approverField).select("firstName");
 
-    // Fallback to "N/A" if the user is not found
-    const approvedByName = approvedByUser?.firstName || "N/A";
+    // Fallback to "N/A" if the approver is not found
+    const approverName = approverUser?.firstName || "N/A";
     const user = leave.user;
     const emailSubjectMap = {
         Approved: "Leave Application - Approved",
@@ -36,7 +37,7 @@ const sendLeaveApprovalEmail = async (leave: any, status: 'Approved' | 'Partiall
 </div>
                     <div style="padding: 20px; color:#000000;">
                         <p>Dear ${user.firstName},</p>
-                        <p>Your leave application has been <strong>${status}</strong> by ${approvedByName}, given below are the details:</p>
+                        <p>Your leave application has been <strong>${status}</strong> by ${approverName}, given below are the details:</p>
                           <div style="border-radius:8px; margin-top:4px; color:#000000; padding:10px; background-color:#ECF1F6">
                         <p><strong>Leave Type:</strong> ${leave.leaveType.leaveType}</p>
                         <p><strong>From:</strong> ${formatDate(leave.fromDate)}</p>
@@ -104,14 +105,18 @@ const sendLeaveApprovalWebhookNotification = async (
     approvedFor: number,
     templateName: string // Add this to make it dynamic
 ) => {
-    const approvedByUser = await User.findById(leave.approvedBy).select("firstName");
+    // Use rejectedBy if the leave is rejected, otherwise use approvedBy
+    const approverField = leave.status === 'Rejected' ? leave.rejectedBy : leave.approvedBy;
+    const approverUser = await User.findById(approverField).select("firstName");
+    const approverName = approverUser?.firstName || "N/A";
+
     const payload = {
         phoneNumber,
         country,
         templateName,  // Use the dynamic template name here
         bodyVariables: [
             leave.user.firstName,  // 1. User's first name
-            approvedByUser?.firstName || "N/A", // 2. Approver's first name
+            approverName,
             leave.leaveType.leaveType,  // 3. Leave type
             formatDate(leave.fromDate),  // 4. From date
             formatDate(leave.toDate),    // 5. To date

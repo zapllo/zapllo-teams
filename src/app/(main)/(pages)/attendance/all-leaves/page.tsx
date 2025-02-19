@@ -672,28 +672,32 @@ export default function AllLeaves() {
                         </p>
                       </div>
                     </div>
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs ${leave.status === "Pending"
-                        ? "bg-yellow-800 text-white"
-                        : leave.status === "Approved"
-                          ? "bg-green-800 text-white"
-                          : leave.status === "Rejected"
+                    <div className="flex gap-2 justify-end">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs ${leave.status === "Pending"
+                          ? "bg-yellow-800 text-white"
+                          : leave.status === "Approved"
+                            ? "bg-green-800 text-white"
+                            : leave.status === "Rejected"
+                              ? "bg-red-800 text-white"
+                              : leave.status === "Partially Approved"
+                                ? "bg-red-900 text-white"
+                                : "bg-gray-500 text-white"
+                          }`}
+                      >
+                        {leave.status}
+                      </span>
+                      {leave.leaveReason === "Penalty" && (
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs ${leave.leaveReason === "Penalty"
                             ? "bg-red-800 text-white"
-                            : leave.status === "Partially Approved"
-                              ? "bg-red-900 text-white"
-                              : "bg-gray-500 text-white"
-                        }`}
-                    >
-                      {leave.status}
-                    </span>
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs ${leave.leaveReason === "Penalty"
-                        ? "bg-red-800 text-white"
-                        : ""
-                        }`}
-                    >
-                      {leave.leaveReason === "Penalty" ? "Penalty" : ""}
-                    </span>
+                            : ""
+                            }`}
+                        >
+                          {leave.leaveReason === "Penalty" ? "Penalty" : ""}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Approve/Reject/Delete Buttons */}

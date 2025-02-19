@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import { DialogTitle } from '@radix-ui/react-dialog';
 import { CrossCircledIcon } from '@radix-ui/react-icons';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 type PlanKeys = 'Zapllo Tasks' | 'Money Saver Bundle';
 
@@ -725,23 +726,24 @@ export default function Billing() {
                                                 </div>
                                                 <p className="mt-2">This plan costs ₹{plans[selectedPlan]} per user per year.</p>
                                                 <div className="mt-4 flex gap-4">
+                                                    <Select
+                                                        value={userCount?.toString() || ''}
+                                                        onValueChange={(value) => setUserCount(parseInt(value))}>
+                                                        <SelectTrigger className="w-full bg-[#0b0d29] px-2 py-1 -mt-1 border rounded outline-none">
+                                                            <SelectValue placeholder="Select Number of Users To Add" />
+                                                        </SelectTrigger>
+                                                        <SelectContent className='z-[100]'>
+                                                            {[...Array(20)].map((_, i) => {
+                                                                const count = (i + 1) * 5;
+                                                                return (
+                                                                    <SelectItem className='hover:bg-accent' key={count} value={count.toString()}>
+                                                                        {count}
+                                                                    </SelectItem>
+                                                                );
+                                                            })}
+                                                        </SelectContent>
+                                                    </Select>
 
-                                                    <select
-                                                        id="userCount"
-                                                        className="border outline-none w-full bg-[#0b0d29] px-2 py-1 -mt-1 rounded "
-                                                        value={userCount}
-                                                        onChange={(e) => setUserCount(parseInt(e.target.value))}
-                                                    >
-                                                        <option>Select Number of Users To Add</option>
-                                                        {[...Array(20)].map((_, i) => {
-                                                            const count = (i + 1) * 5;
-                                                            return (
-                                                                <option key={count} value={count}>
-                                                                    {count}
-                                                                </option>
-                                                            );
-                                                        })}
-                                                    </select>
                                                 </div>
                                                 <div className='flex gap-4'>
                                                     <h1>Total Subscribed Users = </h1>
@@ -815,20 +817,28 @@ export default function Billing() {
 
                                                 <div className="mt-4">
 
-                                                    <select
-                                                        id="userCount"
-                                                        className="border p-2 w-full mt-2 outline-none bg-[#0b0d29] rounded"
-                                                        value={additionalUserCount || ""}
-                                                        onChange={handleUserSelection}
+                                                    <Select
+                                                        value={additionalUserCount?.toString() || ""}
+                                                        onValueChange={(value) => {
+                                                            // Create a synthetic event to pass to your handler
+                                                            const syntheticEvent = { target: { value } } as React.ChangeEvent<HTMLSelectElement>;
+                                                            handleUserSelection(syntheticEvent);
+                                                        }}
                                                     >
-                                                        <option>Select Number of Users To Add</option>
-                                                        {[...Array(20)].map((_, i) => {
-                                                            const count = (i + 1) * 5;
-                                                            return (
-                                                                <option key={count} value={count}>{count}</option>
-                                                            );
-                                                        })}
-                                                    </select>
+                                                        <SelectTrigger className="border p-2 w-full mt-2 outline-none bg-[#0b0d29] rounded">
+                                                            <SelectValue placeholder="Select Number of Users To Add" />
+                                                        </SelectTrigger>
+                                                        <SelectContent className='z-[100]'>
+                                                            {[...Array(20)].map((_, i) => {
+                                                                const count = (i + 1) * 5;
+                                                                return (
+                                                                    <SelectItem className='hover:bg-accent' key={count} value={count.toString()}>
+                                                                        {count}
+                                                                    </SelectItem>
+                                                                );
+                                                            })}
+                                                        </SelectContent>
+                                                    </Select>
                                                 </div>
                                                 <div className="mt-4">
                                                     <h3>Total Users: {subscribedUserCount + (additionalUserCount || 0)}</h3>

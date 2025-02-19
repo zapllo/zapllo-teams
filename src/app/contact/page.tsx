@@ -50,7 +50,11 @@ export default function Contact() {
                                 </div>
                             </div>
                             <div className='p-5 mt-12 md:mt-0'>
-                                <h1 className='bg-gradient-to-r mx-4  from-[#815BF5] via-[#FC8929] w-fit px-4 py-1 to-[#FC8929] text-transparent bg-clip-text text-3xl  font-semibold'>Get Priority Support</h1>
+                                <h1 className='bg-gradient-to-r mx-4  from-[#815BF5] via-[#FC8929] w-fit px-4 py-1 to-[#FC8929] text-transparent bg-clip-text text-3xl  font-semibold'> Priority Support</h1>
+                                <h1 className='text-muted-foreground px-4 mx-4 '>Get a Callback in 24 Hours</h1>
+                                <p className='text-[#676B93] text-xs mx-4 px-4 mt-2'>
+                                Thank you for showing Interest in our Apps. Kindly fill the form below so that our Consultant can reach out to you and help you with your queries and get started. 🚀
+                                </p>
                                 <ContactForm />
                             </div>
                         </div>

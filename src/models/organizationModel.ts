@@ -96,9 +96,9 @@ const organizationSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  penaltyOption: { type: String, enum: ["leave", "salary"], default: "leave" },
+  penaltyOption: { type: String, enum: ["","leave", "salary"], default: "leave" },
   lateLoginThreshold: { type: Number, default: 0 },
-  penaltyLeaveType: { type: String, enum: ["half day", "Full Day", "quarter day"], default: "half day" },
+  penaltyLeaveType: { type: String, enum: ["","half day", "Full Day", "quarter day"], default: "half day" },
   penaltySalaryAmount: { type: Number, default: 0 },
 
 }, { timestamps: true });

@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     try {
         await connectDB();
 
-        const { email, firstName, lastName, message, mobNo } = await request.json();
+        const { email, firstName, lastName, message, mobNo, subscribedStatus } = await request.json();
 
         if (!email || !firstName || !lastName || !mobNo || !message) {
             return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Email already subscribed' }, { status: 400 });
         }
 
-        const newLead = new Lead({ email, firstName, lastName, message, mobNo });
+        const newLead = new Lead({ email, firstName, lastName, message, mobNo, subscribedStatus });
         await newLead.save();
 
         const emailOptions: SendEmailOptions = {
@@ -73,6 +73,34 @@ export async function POST(request: NextRequest) {
                </div>`,
         };
         await sendEmail(emailOptions);
+        // Email to support with lead details (first name, last name, and message)
+        const supportEmailOptions: SendEmailOptions = {
+            to: 'support@zapllo.com',
+            subject: 'New Lead Inquiry Received',
+            text: `New Lead Inquiry`,
+            html: `<body style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
+    <div style="background-color: #f0f4f8; padding: 20px;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+            <div style="padding: 20px; text-align: center;">
+                <img src="https://res.cloudinary.com/dndzbt8al/image/upload/v1724000375/orjojzjia7vfiycfzfly.png" alt="Zapllo Logo" style="max-width: 150px; height: auto;">
+            </div>
+          <div style="background: linear-gradient(90deg, #7451F8, #F57E57); color: #ffffff; padding: 20px 40px; font-size: 16px; font-weight: bold; text-align: center; border-radius: 12px; margin: 20px auto; max-width: 80%;">
+            <h1 style="margin: 0; font-size: 20px;">New Lead Inquiry Received</h1>
+          </div>
+           <div style="padding: 20px; color:#000000;">
+             <p><strong>First Name:</strong> ${firstName}</p>
+             <p><strong>Last Name:</strong> ${lastName}</p>
+             <p><strong>Message:</strong></p>
+             <p>${message}</p>
+               <p><strong>Subscribed Status:</strong></p>
+             <p>${subscribedStatus}</p>
+           </div>
+        </div>
+    </div>
+  </body>`,
+        };
+        await sendEmail(supportEmailOptions);
+
         const mediaUrl = "https://res.cloudinary.com/dndzbt8al/image/upload/v1732650791/50_t0ypt5.png";
         const templateName = 'leadenquirycontactus';
         try {

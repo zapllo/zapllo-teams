@@ -4,6 +4,7 @@ import CustomTimePicker from "@/components/globals/time-picker";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import Loader from "@/components/ui/loader";
@@ -557,14 +558,10 @@ export default function Page() {
                 </h1>
                 <div className="grid grid-cols-7 py-4 gap-4">
                   {daysOfWeek.map((day) => (
-                    <label
-                      key={day}
-                      className="flex items-center text-gray-700 dark:text-gray-300"
-                    >
-                      <input
-                        type="checkbox"
+                    <label key={day} className="flex items-center text-gray-700 dark:text-gray-300">
+                      <Checkbox
                         checked={selectedDays.includes(day)}
-                        onChange={() => handleCheckboxChange(day)}
+                        onCheckedChange={(checked) => handleCheckboxChange(day)}
                         className="mr-2 mt-1"
                       />
                       {day}

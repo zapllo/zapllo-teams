@@ -50,7 +50,10 @@ export async function GET(request: NextRequest) {
                     model: 'users', // Ensure the correct model is populated
                     select: 'firstName lastName', // Select firstName and lastName only
                 },
-            });
+            }).populate({
+                path: 'approvedBy',
+                select: 'firstName lastName', // Populate approver details
+            });;
 
         // Respond with success and the pending regularizations data
         return NextResponse.json(

@@ -138,12 +138,12 @@ export default function BlogsPage() {
                     ) : (
                         filteredBlogs.map((blog) => (
                             <Link key={blog._id} href={`/blog/${blog.slug}`}>
-                                <Card className="cursor-pointer hover:shadow-lg fade-in-bottom h-[360px] bg-white border-none text-black transition-all duration-500">
+                                <Card className="cursor-pointer hover:shadow-lg fade-in-bottom h-full bg-white border-none text-black transition-all duration-500">
                                     {blog.coverImage && (
                                         <img
                                             src={blog.coverImage}
                                             alt={blog.title}
-                                            className="rounded-t-lg w-full h-48 object-cover"
+                                            className="rounded-t-lg w-full h-fit object-fill"
                                         />
                                     )}
                                     <CardHeader>

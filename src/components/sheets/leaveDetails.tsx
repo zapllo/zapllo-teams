@@ -8,13 +8,13 @@ import CustomAudioPlayer from '../globals/customAudioPlayer'; // Import your aud
 interface LeaveDay {
   date: string;
   unit:
-    | "Full Day"
-    | "1st Half"
-    | "2nd Half"
-    | "1st Quarter"
-    | "2nd Quarter"
-    | "3rd Quarter"
-    | "4th Quarter";
+  | "Full Day"
+  | "1st Half"
+  | "2nd Half"
+  | "1st Quarter"
+  | "2nd Quarter"
+  | "3rd Quarter"
+  | "4th Quarter";
   status: "Pending" | "Approved" | "Rejected";
 }
 
@@ -59,19 +59,31 @@ interface LeaveDetailsProps {
 }
 
 const LeaveDetails: React.FC<LeaveDetailsProps> = ({ selectedLeave, onClose }) => {
-    if (!selectedLeave) return null;
-    console.log(selectedLeave, 'selected leave!')
-    return (
-        <Sheet open={!!selectedLeave} onOpenChange={onClose}>
-            <SheetContent className="max-w-4xl z-[100]  w-full">
-                <SheetHeader>
-                    <div className="flex gap-2">
-                        <ArrowLeft className="cursor-pointer h-7 w-7 bg-[#121212] border hover:bg-white hover:text-[#121212] border-white rounded-full" onClick={onClose} />
-                        <SheetTitle className="text-white mb-4">Leave Details</SheetTitle>
-                    </div>
-                </SheetHeader>
-                <div className="border overflow-y-scroll scrollbar-hide h-10/11 p-4 rounded-lg">
-                    <h1 className="font-bold text-sm px-2">{selectedLeave.leaveType?.leaveType}</h1>
+  if (!selectedLeave) return null;
+
+  // Determine which manager info to display based on leave status.
+  const manager =
+    selectedLeave.status === "Rejected" ? selectedLeave.rejectedBy : selectedLeave.approvedBy;
+  const managerLabel =
+    selectedLeave.status === "Rejected" ? "Rejected By" : "Approved By";
+  // Use a red background for rejected and green for approved/partially approved.
+  const managerBgColor =
+    selectedLeave.status === "Rejected" ? "bg-red-400" : "bg-green-400";
+
+  return (
+    <Sheet open={!!selectedLeave} onOpenChange={onClose}>
+      <SheetContent className="max-w-4xl z-[100] w-full">
+        <SheetHeader>
+          <div className="flex gap-2">
+            <ArrowLeft
+              className="cursor-pointer h-7 w-7 bg-[#121212] border hover:bg-white hover:text-[#121212] border-white rounded-full"
+              onClick={onClose}
+            />
+            <SheetTitle className="text-white mb-4">Leave Details</SheetTitle>
+          </div>
+        </SheetHeader>
+        <div className="border overflow-y-scroll scrollbar-hide h-10/11 p-4 rounded-lg">
+          <h1 className="font-bold text-sm px-2">{selectedLeave.leaveType?.leaveType}</h1>
 
           <div className="flex mt-4 justify-start space-x-12 text-start items-center gap-6 px-2">
             {/* Requested By */}
@@ -87,33 +99,29 @@ const LeaveDetails: React.FC<LeaveDetailsProps> = ({ selectedLeave, onClose }) =
                       {selectedLeave.user.lastName[0]}
                     </h1>
                   </div>
-                  <h1
-                    id="userName"
-                    className="col-span-3 text-sm"
-                  >{`${selectedLeave.user.firstName} ${selectedLeave.user.lastName}`}</h1>
+                  <h1 id="userName" className="col-span-3 text-sm">
+                    {`${selectedLeave.user.firstName} ${selectedLeave.user.lastName}`}
+                  </h1>
                 </div>
               )}
             </div>
             {/* Approved/Rejection Manager */}
-            {selectedLeave.approvedBy && (
+            {manager && manager.firstName && (
               <div className="flex items-center gap-4">
-                <Label htmlFor="approvedBy" className="text-right text-xs">
-                  Approved By{" "}
+                <Label htmlFor="manager" className="text-right text-xs">
+                  {managerLabel}
                 </Label>
-                {selectedLeave.approvedBy.firstName && (
-                  <div className="flex gap-2 justify-start">
-                    <div className="h-6 w-6 rounded-full bg-green-400">
-                      <h1 className="text-center uppercase text-xs mt-1">
-                        {selectedLeave.approvedBy.firstName[0]}
-                        {selectedLeave.approvedBy.lastName[0]}
-                      </h1>
-                    </div>
-                    <h1
-                      id="approvedBy"
-                      className="col-span-3 text-sm"
-                    >{`${selectedLeave.approvedBy.firstName} ${selectedLeave.approvedBy.lastName}`}</h1>
+                <div className="flex gap-2 justify-start">
+                  <div className={`h-6 w-6 rounded-full ${managerBgColor}`}>
+                    <h1 className="text-center uppercase text-xs mt-1">
+                      {manager.firstName[0]}
+                      {manager.lastName[0]}
+                    </h1>
                   </div>
-                )}
+                  <h1 id="manager" className="col-span-3 text-sm">
+                    {`${manager.firstName} ${manager.lastName}`}
+                  </h1>
+                </div>
               </div>
             )}
           </div>
@@ -147,12 +155,8 @@ const LeaveDetails: React.FC<LeaveDetailsProps> = ({ selectedLeave, onClose }) =
 
           {/* Status */}
           <div className="flex items-center gap-1 mt-4">
-            {selectedLeave.status === "Pending" && (
-              <Circle className="h-4 text-red-500" />
-            )}
-            {selectedLeave.status === "Approved" && (
-              <CheckCircle className="h-4 text-green-500" />
-            )}
+            {selectedLeave.status === "Pending" && <Circle className="h-4 text-red-500" />}
+            {selectedLeave.status === "Approved" && <CheckCircle className="h-4 text-green-500" />}
             <Label htmlFor="status" className="text-right text-sm">
               Status
             </Label>
@@ -182,7 +186,6 @@ const LeaveDetails: React.FC<LeaveDetailsProps> = ({ selectedLeave, onClose }) =
             </Label>
             <div className="flex ml-5 justify-start">
               <h1 id="leaveType" className="col-span-3 text-xs">
-                {" "}
                 {selectedLeave.appliedDays} Day(s)
               </h1>
             </div>
@@ -195,9 +198,7 @@ const LeaveDetails: React.FC<LeaveDetailsProps> = ({ selectedLeave, onClose }) =
             <div className="flex ml-2 justify-start">
               <h1 id="leaveType" className="col-span-3 text-xs">
                 {
-                  selectedLeave.leaveDays.filter(
-                    (day) => day.status === "Approved"
-                  ).length
+                  selectedLeave.leaveDays.filter((day) => day.status === "Approved").length
                 }{" "}
                 Day(s)
               </h1>
@@ -220,70 +221,82 @@ const LeaveDetails: React.FC<LeaveDetailsProps> = ({ selectedLeave, onClose }) =
           {/* Audio Player */}
           {selectedLeave.audioUrl && (
             <div className="mt-6 w-[43.33%]">
-              {/* <Label htmlFor="audio" className="text-right text-sm">Audio Recording</Label> */}
               <CustomAudioPlayer audioUrl={selectedLeave.audioUrl} />
             </div>
           )}
 
-                    {/* File Attachments */}
-                    {selectedLeave.attachment && selectedLeave.attachment.length > 0 && (
-                        <div className="mt-6">
-                            <Label htmlFor="attachments" className="text-right text-sm">Attachments</Label>
-                            <ul className="flex gap-6 text-xs mt-2">
-                                {selectedLeave.attachment.map((fileUrl, index) => (
-                                    <h1 key={index}>
-                                        <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
-                                            {`Attachment ${index + 1}`}
-                                        </a>
-                                    </h1>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-                    {/* Remarks and Updates */}
-                    <Separator className='mt-4' />
-                    <div className="rounded-xl bg-[#] p-4 mb-4">
-                        <div className="mb-4 gap-2 flex justify-start">
-                            <CheckCheck className="h-5" />
-                            <Label className=" text-md mt-auto">Updates</Label>
-                        </div>
-                        <div className="mt-2 border bg-[#121212] p-2 py-8 rounded">
-                            {selectedLeave.remarks ? (
-                                <div className="flex justify-between items-center p-2 rounded">
-                                    {/* Display remark and approvedBy user */}
-                                    {selectedLeave.approvedBy && (
-                                        <div className="flex gap-2 items-start">
-                                            <div className="h-6 w-6 rounded-full bg-primary">
-                                                <h1 className="text-center uppercase text-xs mt-1">{selectedLeave.approvedBy?.firstName[0]}{selectedLeave.approvedBy?.lastName[0]}</h1>
-                                            </div>
-                                            <div>
-                                                <h1 className="text-sm font-semibold">{`${selectedLeave.approvedBy?.firstName} ${selectedLeave.approvedBy?.lastName}`}</h1>
-                                                <p className="text-xs text-gray-500">{new Date(selectedLeave.updatedAt).toLocaleString()}</p>
-                                                <p className="text-xs max-w-[600px]">{selectedLeave.remarks}</p>
-                                            </div>
-                                        </div>
-                                    )}
-                                    <div className='bg-[#017a5b] rounded px-2 py-1'>
-                                        <p className="text-xs">{selectedLeave.status}</p>
-                                    </div>
-                                </div>
-                            ) : (
-                                <div className='flex justify-center'>
-                                    <div>
-                                        <Bell />
-                                        <p className="text-xs mt-2 -ml-10 text-white -500">
-                                            No remarks provided.
-                                        </p>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+          {/* File Attachments */}
+          {selectedLeave.attachment && selectedLeave.attachment.length > 0 && (
+            <div className="mt-6">
+              <Label htmlFor="attachments" className="text-right text-sm">
+                Attachments
+              </Label>
+              <ul className="flex gap-6 text-xs mt-2">
+                {selectedLeave.attachment.map((fileUrl, index) => (
+                  <h1 key={index}>
+                    <a
+                      href={fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 underline"
+                    >
+                      {`Attachment ${index + 1}`}
+                    </a>
+                  </h1>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Remarks and Updates */}
+          <Separator className="mt-4" />
+          <div className="rounded-xl  p-4 mb-4">
+            <div className="mb-4 gap-2 flex justify-start">
+              <CheckCheck className="h-5" />
+              <Label className="text-md mt-auto">Updates</Label>
+            </div>
+            <div className="mt-2 border bg-[#121212] p-2 py-8 rounded">
+              {manager && manager.firstName ? (
+                <div className="flex justify-between items-center p-2 rounded">
+                  {/* Display remark and manager details */}
+                  <div className="flex gap-2 items-start">
+                    <div className="h-6 w-6 rounded-full bg-primary">
+                      <h1 className="text-center uppercase text-xs mt-1">
+                        {manager.firstName[0]}
+                        {manager.lastName[0]}
+                      </h1>
                     </div>
+                    <div>
+                      <h1 className="text-sm font-semibold">
+                        {`${manager.firstName} ${manager.lastName}`}
+                      </h1>
+                      <p className="text-xs text-gray-500">
+                        {new Date(selectedLeave.updatedAt).toLocaleString()}
+                      </p>
+                      <p className="text-xs max-w-[600px]">{selectedLeave.remarks}</p>
+                    </div>
+                  </div>
+                  <div className={` rounded px-2 py-1  ${selectedLeave.status === "Rejected" ? "bg-red-500" :"bg-[#017a5b]"}`}>
+                    <p className="text-xs">{selectedLeave.status}</p>
+                  </div>
                 </div>
-                <SheetFooter />
-            </SheetContent>
-        </Sheet>
-    );
+              ) : (
+                <div className="flex justify-center">
+                  <div>
+                    <Bell />
+                    <p className="text-xs mt-2 -ml-10 text-white">
+                      No remarks provided.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        <SheetFooter />
+      </SheetContent>
+    </Sheet>
+  );
 };
 
 export default LeaveDetails;
