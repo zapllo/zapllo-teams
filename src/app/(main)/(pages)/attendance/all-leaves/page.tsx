@@ -208,20 +208,20 @@ export default function AllLeaves() {
     }
   };
 
-  useEffect(() => {
-    const fetchAllLeaves = async () => {
-      try {
-        // setLoading(true);
-        const response = await axios.get("/api/leaves/all");
-        if (response.data.success) {
-          setLeaves(response.data.leaves);
-          // setLoading(false);
-        }
-      } catch (error) {
-        console.error("Error fetching leaves:", error);
-      }
-    };
 
+  const fetchAllLeaves = async () => {
+    try {
+      // setLoading(true);
+      const response = await axios.get("/api/leaves/all");
+      if (response.data.success) {
+        setLeaves(response.data.leaves);
+        // setLoading(false);
+      }
+    } catch (error) {
+      console.error("Error fetching leaves:", error);
+    }
+  };
+  useEffect(() => {
     fetchAllLeaves();
   }, []);
 
@@ -768,6 +768,7 @@ export default function AllLeaves() {
               user={selectedLeave.user}
               manager={selectedLeave.user.reportingManager}
               onClose={handleModalClose}
+              onUpdate={fetchAllLeaves}
             />
           )}
 
