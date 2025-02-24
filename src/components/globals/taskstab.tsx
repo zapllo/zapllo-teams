@@ -880,7 +880,11 @@ export default function TasksTab({
   };
 
   const getUserTaskStats = (userId: any) => {
-    const userTasks = tasks.filter((task) => task.assignedUser?._id === userId);
+    // Use the already date-filtered tasks
+    const userTasks = allTasksByDate.filter(
+      (task) => task.assignedUser?._id === userId
+    );
+
     const overdueTasks = userTasks.filter(
       (task) =>
         new Date(task.dueDate) < new Date() && task.status !== "Completed"
@@ -898,13 +902,13 @@ export default function TasksTab({
     return { overdueTasks, completedTasks, inProgressTasks, pendingTasks };
   };
 
+
   const getCategoryTaskStats = (categoryId: string) => {
-    // Filter tasks where the category._id matches the given categoryId
-    const categoryTasks = tasks.filter(
+    // Use the already date‑filtered tasks
+    const categoryTasks = allTasksByDate.filter(
       (task) => task?.category?._id === categoryId
     );
 
-    // Calculate task stats
     const overdueTasks = categoryTasks.filter(
       (task) =>
         new Date(task.dueDate) < new Date() && task.status !== "Completed"
@@ -921,6 +925,7 @@ export default function TasksTab({
 
     return { overdueTasks, completedTasks, inProgressTasks, pendingTasks };
   };
+
 
   const getTotalTaskStats = () => {
     const overdueTasks = tasks.filter(
@@ -1623,6 +1628,41 @@ export default function TasksTab({
                                         inProgressTasks,
                                         pendingTasks,
                                       } = getCategoryTaskStats(category._id);
+                                      const totalTasks =
+                                        overdueTasks +
+                                        completedTasks +
+                                        inProgressTasks +
+                                        pendingTasks;
+
+                                      const getCompletionPercentage = (
+                                        completedTasks: any,
+                                        totalTasks: any
+                                      ) => {
+                                        return totalTasks === 0
+                                          ? 0
+                                          : (completedTasks / totalTasks) * 100;
+                                      };
+
+                                      const completionPercentage =
+                                        getCompletionPercentage(
+                                          completedTasks,
+                                          totalTasks
+                                        );
+
+                                      // Determine the color based on the traffic light logic
+                                      let pathColor;
+                                      if (totalTasks === 0) {
+                                        pathColor = "#6C636E"; // Grey color for users with no tasks
+                                      } else if (completionPercentage < 50) {
+                                        pathColor = "#FF0000"; // Red for less than 50%
+                                      } else if (
+                                        completionPercentage >= 50 &&
+                                        completionPercentage < 80
+                                      ) {
+                                        pathColor = "#FFA500"; // Orange for 50%-79%
+                                      } else {
+                                        pathColor = "#008000"; // Green for 80% and above
+                                      }
                                       return (
                                         <Card
                                           key={category._id}
@@ -1662,6 +1702,26 @@ export default function TasksTab({
                                               <p className="text-xs">
                                                 Completed: {completedTasks}
                                               </p>
+                                            </div>
+                                          </div>
+                                          <div
+                                            className="ml-auto  -mt-12"
+                                            style={{ width: 40, height: 40 }}
+                                          >
+                                            <div className="">
+                                              <CircularProgressbar
+                                                value={completionPercentage}
+                                                text={`${Math.round(
+                                                  completionPercentage
+                                                )}%`}
+                                                styles={buildStyles({
+                                                  textSize: "24px",
+                                                  pathColor: pathColor, // Dynamic path color
+                                                  textColor: "#ffffff",
+                                                  trailColor: "#6C636E", // Trail color should be lighter for better contrast
+                                                  backgroundColor: "#3e98c7",
+                                                })}
+                                              />
                                             </div>
                                           </div>
                                         </Card>
@@ -1716,6 +1776,41 @@ export default function TasksTab({
                                           pendingTasks,
                                         } = getCategoryTaskStats(category._id);
 
+                                        const totalTasks =
+                                          overdueTasks +
+                                          completedTasks +
+                                          inProgressTasks +
+                                          pendingTasks;
+
+                                        const getCompletionPercentage = (
+                                          completedTasks: any,
+                                          totalTasks: any
+                                        ) => {
+                                          return totalTasks === 0
+                                            ? 0
+                                            : (completedTasks / totalTasks) * 100;
+                                        };
+
+                                        const completionPercentage =
+                                          getCompletionPercentage(
+                                            completedTasks,
+                                            totalTasks
+                                          );
+
+                                        // Determine the color based on the traffic light logic
+                                        let pathColor;
+                                        if (totalTasks === 0) {
+                                          pathColor = "#6C636E"; // Grey color for users with no tasks
+                                        } else if (completionPercentage < 50) {
+                                          pathColor = "#FF0000"; // Red for less than 50%
+                                        } else if (
+                                          completionPercentage >= 50 &&
+                                          completionPercentage < 80
+                                        ) {
+                                          pathColor = "#FFA500"; // Orange for 50%-79%
+                                        } else {
+                                          pathColor = "#008000"; // Green for 80% and above
+                                        }
                                         return (
                                           <Card
                                             key={category._id}
@@ -1755,6 +1850,26 @@ export default function TasksTab({
                                                 <p className="text-xs">
                                                   Completed: {completedTasks}
                                                 </p>
+                                              </div>
+                                            </div>
+                                            <div
+                                              className="ml-auto  -mt-12"
+                                              style={{ width: 40, height: 40 }}
+                                            >
+                                              <div className="">
+                                                <CircularProgressbar
+                                                  value={completionPercentage}
+                                                  text={`${Math.round(
+                                                    completionPercentage
+                                                  )}%`}
+                                                  styles={buildStyles({
+                                                    textSize: "24px",
+                                                    pathColor: pathColor, // Dynamic path color
+                                                    textColor: "#ffffff",
+                                                    trailColor: "#6C636E", // Trail color should be lighter for better contrast
+                                                    backgroundColor: "#3e98c7",
+                                                  })}
+                                                />
                                               </div>
                                             </div>
                                           </Card>

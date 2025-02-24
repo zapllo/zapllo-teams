@@ -140,41 +140,45 @@ export async function PATCH(request: NextRequest) {
                     console.error("Creator, assignee, or category not found. Skipping notifications.");
                     return;
                 }
-                // Send Email to the task creator
                 if (assignedUser.notifications.email) { // Check if email notifications are enabled
                     const emailOptions: SendEmailOptions = {
-                        to: assignedUser.email,
-                        subject: "New Task Assigned",
-                        text: "Zapllo",
+                        to: taskCreator.email,
+                        subject: "Task Status Updates",
+                        text: `Task '${task.title}' has been updated.`,
                         html: `<body style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
-                          <div style="background-color: #f0f4f8; padding: 20px;">
-                              <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-                                  <div style="padding: 20px; text-align: center;">
-                                      <img src="https://res.cloudinary.com/dndzbt8al/image/upload/v1724000375/orjojzjia7vfiycfzfly.png" alt="Zapllo Logo" style="max-width: 150px; height: auto;">
-                                  </div>
-                                  <div style="background: linear-gradient(90deg, #7451F8, #F57E57); color: #ffffff; padding: 20px 40px; font-size: 16px; font-weight: bold; text-align: center; border-radius: 12px; margin: 20px auto; max-width: 80%;">
-                                      <h1 style="margin: 0; font-size: 20px;">New Task Assigned</h1>
-                                  </div>
-                                  <div style="padding: 20px;">
-                                      <p><strong>Dear ${assignedUser.firstName},</strong></p>
-                                      <p>A new task has been assigned to you. Below are the details:</p>
-                                      <div style="border-radius:8px; margin-top:4px; color:#000000; padding:10px; background-color:#ECF1F6">
-                                          <p><strong>Title:</strong> ${task.title}</p>
-                                          <p><strong>Description:</strong> ${task.description}</p>
-                                          <p><strong>Due Date:</strong> ${formatDate(task.dueDate)}</p>
-                                          <p><strong>Assigned By:</strong> ${taskCreator.firstName}</p>
-                                          <p><strong>Category:</strong> ${taskCategory.name}</p>
-                                          <p><strong>Priority:</strong> ${task.priority}</p>
-                                      </div>
-                                      <div style="text-align: center; margin-top: 20px;">
-                                          <a href="https://zapllo.com/dashboard/tasks" style="background-color: #0C874B; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Open Task App</a>
-                                      </div>
-                                      <p style="margin-top: 20px; text-align: center; font-size: 12px; color: #888888;">This is an automated notification. Please do not reply.</p>
-                                  </div>
-                              </div>
-                          </div>
-                      </body>`,
+<div style="background-color: #f0f4f8; padding: 20px;">
+<div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+<div style="padding: 20px; text-align: center;">
+<img src="https://res.cloudinary.com/dndzbt8al/image/upload/v1724000375/orjojzjia7vfiycfzfly.png" alt="Zapllo Logo" style="max-width: 150px; height: auto;">
+</div>
+<div style="background: linear-gradient(90deg, #7451F8, #F57E57); color: #ffffff; padding: 20px 40px; font-size: 16px; font-weight: bold; text-align: center; border-radius: 12px; margin: 20px auto; max-width: 80%;">
+<h1 style="margin: 0; font-size: 20px;">Task Status ${status}</h1>
+</div>
+            <div style="padding: 20px;">
+                <p><strong>Dear ${taskCreator.firstName},</strong></p>
+                <p>${userName} has updated the task status to ${status} for a task assigned by you.</p>
+                <p>Update Remarks - ${comment}</p>
+                <div style="border-radius:8px; margin-top:4px; color:#000000; padding:10px; background-color:#ECF1F6">
+                <p>Task Details:</p>
+                <p><strong>Title:</strong> ${task.title}</p>
+                <p><strong>Description:</strong> ${task.description}</p>
+                <p><strong>Due Date:</strong> ${formatDate(task.dueDate)}</p>
+                <p><strong>Assigned To:</strong> ${assignedUser.firstName}</p>
+                <p><strong>Category:</strong> ${taskCategory.name}</p>
+                <p><strong>Priority:</strong> ${task.priority}</p>
+                </div>
+            <div style="text-align: center; margin-top: 30px;">
+                <a href="https://zapllo.com/dashboard/tasks" style="background-color: #0C874B; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Open Task App</a>
+            </div>
+                <p style="margin-top: 20px; text-align: center; font-size: 12px; color: #888888;">This is an automated notification. Please do not reply.</p>
+         </div>
+    </div>
+</div>
+</body>
+`,
                     };
+
+
                     backgroundTasks.push(sendEmail(emailOptions));
                 }
                 backgroundTasks.push(
@@ -250,45 +254,41 @@ export async function PATCH(request: NextRequest) {
                         if (!taskCreator || !assignedUser || !taskCategory) {
                             console.error("Creator, assignee, or category not found for new task. Skipping notifications.");
                         } else {
+                            // Send Email to the task creator
                             if (assignedUser.notifications.email) { // Check if email notifications are enabled
                                 const emailOptions: SendEmailOptions = {
-                                    to: taskCreator.email,
-                                    subject: "Task Status Updates",
-                                    text: `Task '${task.title}' has been updated.`,
+                                    to: assignedUser.email,
+                                    subject: "New Task Assigned",
+                                    text: "Zapllo",
                                     html: `<body style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
-<div style="background-color: #f0f4f8; padding: 20px;">
-    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-        <div style="padding: 20px; text-align: center;">
-            <img src="https://res.cloudinary.com/dndzbt8al/image/upload/v1724000375/orjojzjia7vfiycfzfly.png" alt="Zapllo Logo" style="max-width: 150px; height: auto;">
-        </div>
-      <div style="background: linear-gradient(90deg, #7451F8, #F57E57); color: #ffffff; padding: 20px 40px; font-size: 16px; font-weight: bold; text-align: center; border-radius: 12px; margin: 20px auto; max-width: 80%;">
-<h1 style="margin: 0; font-size: 20px;">Task Status ${status}</h1>
-</div>
-                        <div style="padding: 20px;">
-                            <p><strong>Dear ${taskCreator.firstName},</strong></p>
-                            <p>${userName} has updated the task status to ${status} for a task assigned by you.</p>
-                            <p>Update Remarks - ${comment}</p>
-                            <div style="border-radius:8px; margin-top:4px; color:#000000; padding:10px; background-color:#ECF1F6">
-                            <p>Task Details:</p>
-                            <p><strong>Title:</strong> ${task.title}</p>
-                            <p><strong>Description:</strong> ${task.description}</p>
-                            <p><strong>Due Date:</strong> ${formatDate(nextDueDate)}</p>
-                            <p><strong>Assigned To:</strong> ${assignedUser.firstName}</p>
-                            <p><strong>Category:</strong> ${taskCategory.name}</p>
-                            <p><strong>Priority:</strong> ${task.priority}</p>
-                            </div>
-                        <div style="text-align: center; margin-top: 30px;">
-                            <a href="https://zapllo.com/dashboard/tasks" style="background-color: #0C874B; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Open Task App</a>
-                        </div>
-                            <p style="margin-top: 20px; text-align: center; font-size: 12px; color: #888888;">This is an automated notification. Please do not reply.</p>
-                     </div>
-                </div>
-            </div>
-        </body>
-            `,
+                          <div style="background-color: #f0f4f8; padding: 20px;">
+                              <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                                  <div style="padding: 20px; text-align: center;">
+                                      <img src="https://res.cloudinary.com/dndzbt8al/image/upload/v1724000375/orjojzjia7vfiycfzfly.png" alt="Zapllo Logo" style="max-width: 150px; height: auto;">
+                                  </div>
+                                  <div style="background: linear-gradient(90deg, #7451F8, #F57E57); color: #ffffff; padding: 20px 40px; font-size: 16px; font-weight: bold; text-align: center; border-radius: 12px; margin: 20px auto; max-width: 80%;">
+                                      <h1 style="margin: 0; font-size: 20px;">New Task Assigned</h1>
+                                  </div>
+                                  <div style="padding: 20px;">
+                                      <p><strong>Dear ${assignedUser.firstName},</strong></p>
+                                      <p>A new task has been assigned to you. Below are the details:</p>
+                                      <div style="border-radius:8px; margin-top:4px; color:#000000; padding:10px; background-color:#ECF1F6">
+                                          <p><strong>Title:</strong> ${task.title}</p>
+                                          <p><strong>Description:</strong> ${task.description}</p>
+                                          <p><strong>Due Date:</strong> ${formatDate(task.dueDate)}</p>
+                                          <p><strong>Assigned By:</strong> ${taskCreator.firstName}</p>
+                                          <p><strong>Category:</strong> ${taskCategory.name}</p>
+                                          <p><strong>Priority:</strong> ${task.priority}</p>
+                                      </div>
+                                      <div style="text-align: center; margin-top: 20px;">
+                                          <a href="https://zapllo.com/dashboard/tasks" style="background-color: #0C874B; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Open Task App</a>
+                                      </div>
+                                      <p style="margin-top: 20px; text-align: center; font-size: 12px; color: #888888;">This is an automated notification. Please do not reply.</p>
+                                  </div>
+                              </div>
+                          </div>
+                      </body>`,
                                 };
-
-
                                 backgroundTasks.push(sendEmail(emailOptions));
                             }
                             // Send webhook notification for the new task

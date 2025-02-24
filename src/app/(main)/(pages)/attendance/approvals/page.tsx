@@ -343,6 +343,44 @@ export default function Approvals() {
     fetchApprovals();
   }, [filter]);
 
+  const refetchApprovals = async () => {
+    try {
+      setLoading(true);
+      if (filter === "Leave") {
+        let response;
+        // For members, use the personal leaves endpoint
+        if (currentUserRole === "member") {
+          response = await axios.get("/api/leaves");
+        } else if (currentUserRole === "orgAdmin" || currentUserRole === "manager") {
+          // For orgAdmin and reporting managers, use the organization-wide endpoint
+          response = await axios.get("/api/leaves/all");
+        } else {
+          // Fallback to approvals endpoint if needed
+          response = await axios.get("/api/leaveApprovals/get");
+        }
+        if (response.data.success) {
+          setLeaves(response.data.leaves);
+        } else {
+          console.error(response.data.error);
+        }
+      } else if (filter === "Regularization") {
+        const response = await axios.get("/api/regularization-approvals");
+        if (response.data.success) {
+          setRegularizations(response.data.regularizations);
+        } else {
+          console.error(response.data.error);
+        }
+      }
+    } catch (error: any) {
+      console.error(
+        `Error fetching ${filter} approvals:`,
+        error.response?.data || error.message
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   // Separate filter functions for Leave and Regularization to maintain type integrity
   const filterLeavesByDate = (leaves: Leave[]): Leave[] => {
     const today = new Date();
@@ -1192,6 +1230,7 @@ export default function Approvals() {
               user={selectedEntry.user}
               manager={selectedEntry.user.reportingManager}
               onClose={handleModalClose}
+              onUpdate={refetchApprovals}
             />
           ) : (
             <RegularizationApprovalModal
@@ -1204,7 +1243,8 @@ export default function Approvals() {
               onSubmit={() => {
                 setIsModalOpen(false);
                 setSelectedEntry(null);
-                handleModalSubmit(); // Refresh data
+                refetchApprovals();
+                // handleModalSubmit(); // Refresh data
               }}
             />
           )}

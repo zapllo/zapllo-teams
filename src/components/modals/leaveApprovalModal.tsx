@@ -32,6 +32,7 @@ interface LeaveApprovalModalProps {
   user: { firstName: string; lastName: string };
   manager: { firstName: string; lastName: string };
   onClose: () => void;
+  onUpdate: () => void;
 }
 
 const LeaveApprovalModal: React.FC<LeaveApprovalModalProps> = ({
@@ -45,6 +46,7 @@ const LeaveApprovalModal: React.FC<LeaveApprovalModalProps> = ({
   user,
   manager,
   onClose,
+  onUpdate,
 }) => {
   const [approvalData, setApprovalData] = useState<LeaveDay[]>(
     leaveDays.map((day) => ({
@@ -101,6 +103,7 @@ const LeaveApprovalModal: React.FC<LeaveApprovalModalProps> = ({
           </div>
           <h1 className="text-black text-center font-medium text-lg">Leave Approved successfully</h1>
         </div>);
+        onUpdate(); // Call the parent update callback here!
         onClose();
         setLoading(false);
       } else {

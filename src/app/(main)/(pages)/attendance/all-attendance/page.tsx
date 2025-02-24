@@ -505,7 +505,7 @@ export default function AllAttendance() {
             </div>
           ) : (
             Object.keys(groupedEntries).map((userId) => (
-              <AccordionItem2 className="h-10" key={userId} value={userId}>
+              <AccordionItem2  key={userId} value={userId}>
                 <div className="border h-10  px-4">
                   <AccordionTrigger2 className="-mt-2">
                     <div className="flex items-center gap-4">
