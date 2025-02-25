@@ -31,7 +31,7 @@ const TabsTrigger3 = React.forwardRef<
     className={cn(
       "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
       // Default background and text for light mode with dark mode overrides on hover
-      "bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700",
+      "bg-transparent text-gray-700 dark:text-gray-300  dark:hover:bg-gray-700",
       // Active state styling (assuming global classes for bg-primary/text-foreground)
       "data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow",
       className

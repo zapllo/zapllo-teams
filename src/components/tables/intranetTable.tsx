@@ -125,13 +125,13 @@ const IntranetTable: React.FC<IntranetTableProps> = ({
           <table className="w-full">
             <thead className="dark:bg-[#0B0D29] ">
               <tr className=" ">
-                <th className="text-left py-3 px-4 text-gray-400 font-normal">
+                <th className="text-left py-3 px-4 dark;text-gray-400 font-normal">
                   LINK NAME
                 </th>
-                <th className="text-left py-3 px-4 text-gray-400 font-normal">
+                <th className="text-left py-3 px-4 dark:text-gray-400 font-normal">
                   CATEGORY
                 </th>
-                <th className="text-left py-3 px-4 text-gray-400 font-normal">
+                <th className="text-left py-3 px-4 dark:text-gray-400 font-normal">
                   ACTION
                 </th>
               </tr>

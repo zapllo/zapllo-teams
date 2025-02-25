@@ -24,6 +24,16 @@ const config = {
         "2xl": "1400px",
       },
     },
+    fontSize: {
+      xs: '0.9rem',    // Increased from 0.75rem
+      sm: '1rem',      // Increased from 0.875rem
+      base: '1.2rem',  // Increased from 1rem
+      lg: '1.35rem',   // Increased from 1.125rem
+      xl: '1.5rem',    // Increased from 1.25rem
+      '2xl': '1.8rem', // Increased from 1.5rem
+      '5xl':'2.35rem'
+      // add or modify other sizes as needed
+    },
     extend: {
       boxShadow: {
         input: `0px 2px 3px -1px rgba(129, 91, 245, 0.1), 0px 1px 0px 0px rgba(252, 137, 41, 0.02), 0px 0px 0px 1px rgba(252, 137, 41, 0.08)`,

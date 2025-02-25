@@ -213,7 +213,7 @@ export default function SalaryMenu({ userId }: SalaryDetailsProps) {
                 className="hidden"
               />
               <h3 className="font-semibold">{option.method}</h3>
-              <p className="text-xs text-gray-300">{option.description}</p>
+              <p className="text-xs dark:text-gray-300">{option.description}</p>
             </label>
           ))}
         </div>

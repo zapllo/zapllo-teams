@@ -275,7 +275,19 @@ export default function PayslipPage({
         );
     }
 
-    if (!payslipLogData || !userData || !payslipData) return <div className="ml-24 text-2xl font-bold mt-12">No data available</div>;
+    if (!payslipLogData || !userData || !payslipData) return (
+        <div className="h-screen w-screen items-center flex justify-center m-auto">
+            <div className="">
+                <DotLottieReact
+                    src="/lottie/empty.lottie"
+                    loop
+                    className="h-56"
+                    autoplay
+                />
+                <h1 className="text-center text-lg">No Data Available</h1>
+            </div>
+        </div>
+    );
 
     return (
         <div className="mt-16  mb-12 h-screen mx-4 flex overflow-y-scroll scrollbar-hide">

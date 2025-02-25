@@ -215,10 +215,10 @@ export default function Profile({ }: Props) {
 
 
   return (
-    <div className="mt-16 h-full overflow-y-scroll scrollbar-thin scrollbar-thumb-[#815BF5] hover:scrollbar-thumb-[#815BF5] active:scrollbar-thumb-[#815BF5] scrollbar-track-gray-800  ">
-      <div className="flex justify-center  w-full p-2">
+    <div className="mt-16 h-full overflow-y-scroll scrollbar-hide  ">
+      <div className="flex justify-center items-center  w-full p-2">
         <div className="flex cursor-pointer bg-transparent border border-lg  w-fit rounded-xl text-xs px-4 py-2 items-center justify-center">
-          <div className="flex items-center text-[#E0E0E0] gap-4">
+          <div className="flex items-center dark:text-[#E0E0E0] gap-4">
             {/* Dialog to open Modal */}
             {/* <Toaster /> */}
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -237,14 +237,14 @@ export default function Profile({ }: Props) {
 
               {/* Fullscreen Modal */}
               <DialogContent className="   z-[100]">
-                <div className="bg-[#0b0d29] overflow-y-scroll max- scrollbar-hide h-fit   shadow-lg w-full   max-w-lg  rounded-lg">
+                <div className="dark:bg-[#0b0d29] overflow-y-scroll max- scrollbar-hide h-fit   shadow-lg w-full   max-w-lg  rounded-lg">
                   <div className="flex border-b py-2  w-full justify-between ">
                     <DialogTitle className="text-lg   px-6 py-2 font-medium">Update Profile Pic</DialogTitle>
                     <DialogClose className=" px-6 py-2">
                       <CrossCircledIcon className='scale-150 mt-1 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]' />
                     </DialogClose>
                   </div>
-                  <div className="bg-[#0b0d29] p-8 flex flex-col items-center">
+                  <div className="dark:bg-[#0b0d29] p-8 flex flex-col items-center">
                     {previewUrl || userProfile ? (
                       <div className="relative">
                         <img
@@ -308,13 +308,13 @@ export default function Profile({ }: Props) {
               </p>
             </div>
             <h1>|</h1>
-            <div className="flex text-xs gap-1">
+            <div className="flex items-center text-xs gap-1">
               <Mail className="h-4" />
               <p className="">{email}</p>
             </div>
             <h1>|</h1>
 
-            <p className="flex gap-2 text-xs">
+            <p className="flex items-center gap-2 text-xs">
               <Phone className="h-4" />
               {whatsappNo}
             </p>
@@ -323,11 +323,11 @@ export default function Profile({ }: Props) {
       </div>
 
       {/* Other UI Content */}
-      <div className="p-4">
+      <div className="p-4 mb-12">
         {/* Account Information */}
         <div>
-          <div className="border bg-[#0A0D28] rounded-lg p-2 mt-2 h-10">
-            <h1 className="text-sm text-muted-foreground">My Account Information</h1>
+          <div className="border dark:bg-[#0A0D28] rounded-lg p-2 mt-2 h-10">
+            <h1 className="text-sm font-semibold dark:text-muted-foreground"> Account Information</h1>
           </div>
           <Link href="/dashboard/settings/changePassword">
             <div className="border-b p-2 mt-2 h-10">
@@ -338,8 +338,8 @@ export default function Profile({ }: Props) {
 
         {/* Support and Logout */}
         <div className="py-4">
-          <div className="border bg-[#0A0D28] rounded-lg p-2 mt-2 h-10">
-            <h1 className="text-sm text-muted-foreground">Support</h1>
+          <div className="border dark:bg-[#0A0D28] rounded-lg p-2 mt-2 h-10">
+            <h1 className="text-sm font-semibold dark:text-muted-foreground">Support</h1>
           </div>
           <Link href="/help/tutorials">
             <div className="border-b p-2 mt-2 h-10">
@@ -422,7 +422,7 @@ export default function Profile({ }: Props) {
               onClick={logout}
               className="border cursor-pointer w-fit bg-red-700 hover:bg-red-900 px-8 mt-4 py-2 rounded-lg"
             >
-              <h1 className="text-sm">Logout</h1>
+              <h1 className="text-sm text-white">Logout</h1>
             </div>
           </div>
         </div>

@@ -298,11 +298,11 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
                     {/* Lock Overlay */}
                     {isLocked && (
                         <div
-                            className="absolute inset-0 flex  items-center justify-start bg-black bg-opacity-80 rounded-2xl"
+                            className="absolute inset-0 flex  items-center justify-start bg-black/60 bg-opacity-80 rounded-2xl"
                             style={{ pointerEvents: "auto" }}
                         >
                             <FaLock
-                                className="text-gray-400 ml-4 text-lg cursor-pointer"
+                                className="text-white dark:text-gray-400 ml-4 text-lg cursor-pointer"
                                 onClick={(e) => {
                                     e.stopPropagation(); // Prevent tab click
                                     toast.error("Purchase Money Saver Bundle to unlock");
@@ -492,7 +492,7 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
                             <img src='/branding/badge.png' className="absolute -bottom-2 scale-90  left-6   z-[40]  h-6" />
 
                             <div className='p-[2px] scale-90  rounded-full bg-gradient-to-r from-[#815BF5] to-[#FC8929]'>
-                                <div className='p-1 rounded-full bg-[#04061e] '>
+                                <div className='p-1 rounded-full bg-white dark:bg-[#04061e] '>
                                     <Avatar className="rounded-full h-16 w-16 flex bg-[#815BF5] items-center ">
 
                                         {user.profilePic ? (
@@ -503,7 +503,7 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
                                             />
                                         ) : (
                                             <AvatarFallback className="">
-                                                <h1 className="text-2xl text-white">
+                                                <h1 className="text-2xl dark:text-white">
                                                     {`${user.firstName}`.slice(0, 1)}
                                                     {`${user.lastName}`.slice(0, 1)}
                                                 </h1>

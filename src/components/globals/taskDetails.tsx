@@ -121,7 +121,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ selectedTask,
                                 </Label>
                                 {selectedTask?.assignedUser?.firstName ? (
                                     <div className="flex gap-2  justify-start">
-                                        <div className="h-6 w-6  rounded-full bg-primary -400">
+                                        <div className="h-7 w-7  rounded-full bg-primary -400">
                                             <h1 className="text-center uppercase text-white text-xs mt-1">
                                                 {`${selectedTask?.assignedUser?.firstName?.slice(0, 1)}`}
                                                 {`${selectedTask?.assignedUser?.lastName?.slice(0, 1)}`}
@@ -138,7 +138,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ selectedTask,
                                 </Label>
                                 {selectedTask?.user?.firstName ? (
                                     <div className="flex gap-2 justify-start">
-                                        <div className="h-6 w-6 rounded-full bg-[#4F2A2B]">
+                                        <div className="h-7 w-7 rounded-full bg-[#4F2A2B]">
                                             <h1 className="text-center text-xs mt-1 text-white uppercase">
                                                 {selectedTask.user.firstName.slice(0, 1)}
                                                 {selectedTask.user.lastName.slice(0, 1)}
@@ -464,7 +464,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ selectedTask,
                                 sortedComments.map((commentObj, index) => (
                                     <div key={index} className="relative border dark:bg-[#121212] rounded-lg p-2">
                                         <div className="flex gap-2 items-center">
-                                            <div className="h-6 w-6 text-xs  text-center rounded-full bg-red-700">
+                                            <div className="h-7 w-7 text-xs  text-center rounded-full bg-red-700">
 
                                                 <h1 className='mt-1 text-white'>
                                                     {commentObj.userName.slice(0, 1)}

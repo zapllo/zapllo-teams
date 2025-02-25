@@ -276,13 +276,11 @@ export default function Tickets() {
                                   onChange={(e) =>
                                     setCategory(e.target.value)
                                   }
-                                  className="w-full text-xs p-2  outline-none border rounded bg-transparent"
-                                  style={{
-                                    color: category ? "white" : "#787CA5",
-                                  }}
+                                  className="w-full text-xs p-2 dark:text-white   outline-none border rounded bg-transparent"
+                                 
                                 >
                                   <option
-                                    className="dark:bg-[#1A1C20]  text-[#787CA5] -mt-1"
+                                    className="dark:bg-[#1A1C20]  dark:text-[#787CA5] -mt-1"
                                     disabled
                                     value=""
                                   >
@@ -326,10 +324,8 @@ export default function Tickets() {
                                   onChange={(e) =>
                                     setSubcategory(e.target.value)
                                   }
-                                  className="w-full text-xs p-2 border   bg-transparent outline-none rounded"
-                                  style={{
-                                    color: subcategory ? "white" : "#787CA5",
-                                  }}
+                                  className="w-full text-xs p-2 border dark:text-white    bg-transparent outline-none rounded"
+                         
                                 >
                                   <option
                                     disabled
@@ -382,7 +378,7 @@ export default function Tickets() {
                               <div className="relative">
                                 <label
                                   htmlFor="subject"
-                                  className="absolute bg-white dark:bg-[#0b0d29] text-[#787CA5] ml-2 text-xs -mt-2 px-1"
+                                  className="absolute bg-white dark:bg-[#0b0d29] dark:text-[#787CA5] ml-2 text-xs -mt-2 px-1"
                                 >
                                   Subject
                                 </label>
@@ -489,25 +485,25 @@ export default function Tickets() {
                                                     </th> */}
                             <th
                               scope="col"
-                              className="px-6 py-3 text-left text-xs font-medium text-gray-400 -500 uppercase tracking-wider"
+                              className="px-6 py-3 text-left text-xs font-medium dark:dark:text-gray-400 -500 uppercase tracking-wider"
                             >
                               Subject
                             </th>
                             <th
                               scope="col"
-                              className="px-6 py-3 text-left text-xs font-medium text-gray-400 -500 uppercase tracking-wider"
+                              className="px-6 py-3 text-left text-xs font-medium dark:text-gray-400 -500 uppercase tracking-wider"
                             >
                               Status
                             </th>
                             <th
                               scope="col"
-                              className="px-6 py-3 text-left text-xs font-medium text-gray-400 -500 uppercase tracking-wider"
+                              className="px-6 py-3 text-left text-xs font-medium dark:text-gray-400 -500 uppercase tracking-wider"
                             >
                               Created At
                             </th>
                             <th
                               scope="col"
-                              className="px-6 py-3 text-left text-xs font-medium text-gray-400 -500 uppercase tracking-wider"
+                              className="px-6 py-3 text-left text-xs font-medium dark:text-gray-400 -500 uppercase tracking-wider"
                             >
                               Action
                             </th>

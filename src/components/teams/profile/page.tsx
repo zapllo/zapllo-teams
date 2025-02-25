@@ -87,9 +87,9 @@ export default function EmployeeProfile({ userId }: { userId: string }) {
       <div className="grid grid-cols-2 gap-4">
         {/* Name */}
         <div className="relative mt-4">
-          <label className="absolute text-gray-500 bg-white dark:bg-[#04061E] px-1 -top-2 left-2 text-sm">Name</label>
+          <label className="absolute text-gray-500 bg-white dark:bg-[#04061E] text-xs px-1 -top-2 left-2">Name</label>
           <input
-            className="border outline-none dark:bg-[#04061E] rounded-2xl text-muted-foreground focus:border-[#815bf5] px-2 py-2 w-full"
+            className="border outline-none dark:bg-[#04061E] rounded-xl text-muted-foreground focus:border-[#815bf5] px-2 py-2 w-full"
             value={`${user.firstName} ${user.lastName}`}
             readOnly
           />
@@ -97,9 +97,9 @@ export default function EmployeeProfile({ userId }: { userId: string }) {
 
         {/* Contact Number */}
         <div className="relative mt-4">
-          <label className="absolute text-gray-500 bg-white dark:bg-[#04061E] px-1 -top-2 left-2 text-sm">Contact Number</label>
+          <label className="absolute text-gray-500 bg-white dark:bg-[#04061E] px-1 -top-2 left-2 text-xs">Contact Number</label>
           <input
-            className="border outline-none dark:bg-[#04061E] rounded-2xl text-muted-foreground focus:border-[#815bf5] px-2 py-2 w-full"
+            className="border outline-none dark:bg-[#04061E] rounded-xl text-muted-foreground focus:border-[#815bf5] px-2 py-2 w-full"
             value={user.whatsappNo || ""}
             readOnly
           />
@@ -108,9 +108,9 @@ export default function EmployeeProfile({ userId }: { userId: string }) {
 
         {/* Reporting Manager */}
         <div className="relative mt-4">
-          <label className="absolute text-gray-500 bg-white dark:bg-[#04061E] px-1 -top-2 left-2 text-sm">Reporting Manager</label>
+          <label className="absolute text-gray-500 bg-white dark:bg-[#04061E] px-1 -top-2 left-2 text-xs">Reporting Manager</label>
           <input
-            className="border outline-none dark:bg-[#04061E] rounded-2xl text-muted-foreground focus:border-[#815bf5] px-2 py-2 w-full"
+            className="border outline-none dark:bg-[#04061E] rounded-xl text-muted-foreground focus:border-[#815bf5] px-2 py-2 w-full"
             value={
               user.reportingManager
                 ? `${user.reportingManager.firstName} ${user.reportingManager.lastName}`
@@ -121,7 +121,7 @@ export default function EmployeeProfile({ userId }: { userId: string }) {
         </div>
 
         <div className="relative   mt-4">
-          <label className="absolute text-gray-500 bg-white dark:bg-[#04061E] px-1 -top-2 left-2 text-sm">Gender</label>
+          <label className="absolute text-gray-500 bg-white dark:bg-[#04061E] px-1 -top-2 left-2 text-xs">Gender</label>
           <div className="flex gap-4 ml-4 mt-4">
             {["Male", "Female", "Other"].map((gender) => (
               <label key={gender} className="flex items-center cursor-pointer">
@@ -136,7 +136,7 @@ export default function EmployeeProfile({ userId }: { userId: string }) {
                 <span
                   className={`relative w-4 h-4 rounded-full border-[3px] flex-shrink-0 mr-2 ${user.gender === gender
                     ? "bg-[#FC8929] border-transparent "
-                    : "bg-[#37384b] border-gray-400"
+                    : "dark:bg-[#37384b] border-gray-400"
                     }`}
                 >
                   {user.gender === gender && (
@@ -151,18 +151,18 @@ export default function EmployeeProfile({ userId }: { userId: string }) {
 
         {/* Designation */}
         <div className="relative mt-4">
-          <label className="absolute text-gray-500 bg-white dark:bg-[#04061E] px-1 -top-2 left-2 text-sm">Designation</label>
+          <label className="absolute text-gray-500 bg-white dark:bg-[#04061E] px-1 -top-2 left-2 text-xs">Designation</label>
           <input
-            className="border outline-none dark:bg-[#04061E] rounded-2xl focus:border-[#815bf5] px-2 py-2 w-full"
+            className="border outline-none dark:bg-[#04061E] rounded-xl focus:border-[#815bf5] px-2 py-2 w-full"
             value={user.designation || ""}
             onChange={(e) => handleUpdateField("designation", e.target.value)}
           />
         </div>
 
         <div className="relative mt-4">
-          <label className="absolute text-gray-500 bg-white dark:bg-[#04061E] px-1 -top-2 left-2 text-sm">Department</label>
+          <label className="absolute text-gray-500 bg-white dark:bg-[#04061E] px-1 -top-2 left-2 text-xs">Department</label>
           <input
-            className="border outline-none dark:bg-[#04061E] rounded-2xl focus:border-[#815bf5] px-2 py-2 w-full"
+            className="border outline-none dark:bg-[#04061E] rounded-xl focus:border-[#815bf5] px-2 py-2 w-full"
             value={user.department || ""}
             onChange={(e) => handleUpdateField("department", e.target.value)}
           />
@@ -170,9 +170,9 @@ export default function EmployeeProfile({ userId }: { userId: string }) {
 
         {/* Staff Type */}
         <div className="relative mt-4">
-          <label className="absolute text-gray-500 bg-white dark:bg-[#04061E] px-1 -top-2 left-2 text-sm">Staff Type</label>
+          <label className="absolute text-gray-500 bg-white dark:bg-[#04061E] px-1 -top-2 left-2 text-xs">Staff Type</label>
           <select
-            className="border outline-none dark:bg-[#04061E] rounded-2xl focus:border-[#815bf5] px-2 py-2 w-full"
+            className="border outline-none dark:bg-[#04061E] rounded-xl focus:border-[#815bf5] px-2 py-2 w-full"
             value={user.staffType || ""}
             onChange={(e) => handleUpdateField("staffType", e.target.value)}
           >
@@ -184,9 +184,9 @@ export default function EmployeeProfile({ userId }: { userId: string }) {
 
         {/* Asset */}
         <div className="relative mt-4">
-          <label className="absolute text-gray-500 bg-white dark:bg-[#04061E] px-1 -top-2 left-2 text-sm">Asset</label>
+          <label className="absolute text-gray-500 bg-white dark:bg-[#04061E] px-1 -top-2 left-2 text-xs">Asset</label>
           <input
-            className="border outline-none dark:bg-[#04061E] rounded-2xl focus:border-[#815bf5] px-2 py-2 w-full"
+            className="border outline-none dark:bg-[#04061E] rounded-xl focus:border-[#815bf5] px-2 py-2 w-full"
             value={user.asset || ""}
             onChange={(e) => handleUpdateField("asset", e.target.value)}
           />
@@ -194,9 +194,9 @@ export default function EmployeeProfile({ userId }: { userId: string }) {
 
         {/* Branch */}
         <div className="relative mt-4">
-          <label className="absolute text-gray-500 bg-white dark:bg-[#04061E] px-1 -top-2 left-2 text-sm">Branch</label>
+          <label className="absolute text-gray-500 bg-white dark:bg-[#04061E] px-1 -top-2 left-2 text-xs">Branch</label>
           <input
-            className="border outline-none dark:bg-[#04061E] rounded-2xl focus:border-[#815bf5] px-2 py-2 w-full"
+            className="border outline-none dark:bg-[#04061E] rounded-xl focus:border-[#815bf5] px-2 py-2 w-full"
             value={user.branch || ""}
             onChange={(e) => handleUpdateField("branch", e.target.value)}
           />

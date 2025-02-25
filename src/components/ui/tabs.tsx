@@ -34,7 +34,7 @@ const TabsTrigger = React.forwardRef<
       // Hover background colors for light and dark modes
       "hover:bg-gray-100 dark:hover:bg-[#37384B]",
       // Active state backgrounds for light and dark modes
-      "data-[state=active]:bg-indigo-500 dark:data-[state=active]:bg-[#815BF5]",
+      "data-[state=active]:bg-[#815bf5] data-[state=active]:hover:bg-primary -500 dark:data-[state=active]:bg-[#815BF5]",
       // Active text colors for light and dark modes
       "data-[state=active]:text-gray-900 dark:data-[state=active]:text-foreground",
       className

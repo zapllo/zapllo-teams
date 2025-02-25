@@ -975,14 +975,14 @@ export default function Billing() {
                                     {/* Tabs */}
                                     <button
                                         onClick={() => setPlanTab("Zapllo Teams")}
-                                        className={`relative w-1/2  text-center z-10  font-medium py-2 transition-colors duration-300 ${planTab === "Zapllo Teams" ? "text-white" : "text-gray-400"
+                                        className={`relative w-1/2  text-center z-10  font-medium py-2 transition-colors duration-300 ${planTab === "Zapllo Teams" ? "text-white" : "text-black dark:text-gray-400"
                                             }`}
                                     >
                                         Zapllo Teams
                                     </button>
                                     <button
                                         onClick={() => setPlanTab("Zapllo Sales")}
-                                        className={`relative w-1/2 text-center z-10  font-medium py-2 transition-colors duration-300 ${planTab === "Zapllo Sales" ? "text-white" : "text-gray-400"
+                                        className={`relative w-1/2 text-center z-10  font-medium py-2 transition-colors duration-300 ${planTab === "Zapllo Sales" ? "text-white" : "text-black dark:text-gray-400"
                                             }`}
                                     >
                                         Zapllo Sales
@@ -1217,13 +1217,13 @@ export default function Billing() {
                                                         </div>
                                                     )}
                                                     <div className=''>
-                                                        <h1 className='mt-4 text-[#9296bf]'>Manage your Tasks like a pro</h1>
+                                                        <h1 className='mt-4 dark:text-[#9296bf]'>Manage your Tasks like a pro</h1>
                                                     </div>
                                                     <div className="flex justify-center py-2 w-full">
 
                                                         {displayedPlan === 'Zapllo Tasks' ? (
                                                             <Button
-                                                                className="w-full border-[#A58DE8] dark:text-white border bg-transparent hover:bg-[#815BF5] rounded-2xl px-6"
+                                                                className="w-full border-[#A58DE8] dark:text-white border bg-transparent hover:bg-[#815BF5] hover:text-white rounded-2xl px-6"
                                                                 onClick={() => {
                                                                     setSelectedPlan("Zapllo Tasks"); // Set the selected 
                                                                     setIsAddUserOpen(true); // Open the dialog to add more users
@@ -1232,7 +1232,7 @@ export default function Billing() {
                                                                 <UserPlus2 className='h-4' />  Add Users
                                                             </Button>
                                                         ) : (
-                                                            <Button className="w-full h-10 mt-2 dark:text-white text-black hover:bg-[#815BF5] border-[#A58DE8] border bg-transparent  rounded-2xl " onClick={() => handleSubscribeClick("Zapllo Tasks")}>Subscribe</Button>
+                                                            <Button className="w-full h-10 mt-2 dark:text-white hover:text-white  text-black hover:bg-[#815BF5] border-[#A58DE8] border bg-transparent  rounded-2xl " onClick={() => handleSubscribeClick("Zapllo Tasks")}>Subscribe</Button>
                                                         )}
                                                     </div>
                                                 </CardHeader>
@@ -1272,8 +1272,8 @@ export default function Billing() {
                                                 <CardFooter />
                                             </Card>
                                         </div>
-                                        <div className={` p-[1px]  h-fit   rounded-3xl ${displayedPlan === 'Money Saver Bundle' ? "bg-gradient-to-r from-[#815BF5] to-[#FC8929]" : "bg-[#]"}`}>
-                                            <Card className={`w-[400px] border-none   ] h-fit px-4  rounded-3xl ${displayedPlan === 'Money Saver Bundle' ? "" : "dark:bg-[#0B0D26]"}`}>
+                                        <div className={` p-[1px]  h-fit   rounded-3xl ${displayedPlan === 'Money Saver Bundle' ? "bg-gradient-to-r from-[#815BF5] to-[#FC8929] " : "bg-[#]"}`}>
+                                            <Card className={`w-[400px] border-none   ] h-fit px-4  rounded-3xl ${displayedPlan === 'Money Saver Bundle' ? "shadow-lg shadow-black" : "dark:bg-[#0B0D26]"}`}>
                                                 <CardHeader className=" rounded border-b text-">
                                                     <CardTitle className="text-md font-thin">Money Saver Bundle</CardTitle>
                                                     <CardDescription className="text- w-64 relative flex items-center gap-1 dark:text-white text-sm ">
@@ -1281,7 +1281,7 @@ export default function Billing() {
                                                         <h1 className="text-md absolute right-0 bottom-0 text-[#646783] italic">/ Per User Per Year</h1>
                                                     </CardDescription>
                                                     <div>
-                                                        <h1 className='mt-4 text-[#9296bf]'>10X Your Team&apos;s Productivity</h1>
+                                                        <h1 className='mt-4 dark:text-[#9296bf]'>10X Your Team&apos;s Productivity</h1>
                                                     </div>
                                                     {displayedPlan === 'Money Saver Bundle' && (
                                                         <div>
@@ -1304,7 +1304,7 @@ export default function Billing() {
                                                     <div className="flex justify-center py-2 w-full">
                                                         {displayedPlan === 'Money Saver Bundle' ? (
                                                             <Button
-                                                                className="border-[#A58DE8] dark:text-white text-black hover:bg-[#815BF5] bg-transparent border  w-full rounded-2xl h-10 px-6"
+                                                                className="border-[#A58DE8] dark:text-white hover:text-white  text-black hover:bg-[#815BF5] bg-transparent border  w-full rounded-2xl h-10 px-6"
                                                                 onClick={() => {
                                                                     setSelectedPlan("Money Saver Bundle"); // Set the selected 
                                                                     setIsAddUserOpen(true); // Open the dialog to add more users
@@ -1313,13 +1313,13 @@ export default function Billing() {
                                                                 <UserPlus2 className='h-4' />     Add Users
                                                             </Button>
                                                         ) : (
-                                                            <Button className="w-full h-10 mt-2 dark:text-white text-black hover:bg-[#815BF5] border-[#A58DE8] border bg-transparent  rounded-2xl " onClick={() => handleSubscribeClick("Money Saver Bundle")}>Subscribe</Button>
+                                                            <Button className="w-full h-10 mt-2 dark:text-white text-black hover:bg-[#815BF5] border-[#A58DE8] hover:text-white  border bg-transparent  rounded-2xl " onClick={() => handleSubscribeClick("Money Saver Bundle")}>Subscribe</Button>
                                                         )}
                                                     </div>
                                                 </CardHeader>
                                                 <div className=" mt-4">
                                                     <CardContent className="bg-transparent">
-                                                        <h1 className='p-4 text-blue-400 text-lg whitespace-nowrap'>Zapllo Payroll (Leave & Attendance App)</h1>
+                                                        <h1 className='p-4 text-blue-400 text-lg whitespace-nowrap'>Zapllo Payroll <br /> (Leave & Attendance App)</h1>
                                                         <ul className="list-disc space-y-2  w-full items-center text-sm">
                                                             {[
                                                                 "Easy Attendance Marking using Geo location & Face recognition feature",
@@ -1347,7 +1347,7 @@ export default function Billing() {
                                                                 </li>
                                                             ))}
                                                         </ul>
-                                                        <h1 className='p-4 text-blue-400 text-lg whitespace-nowrap'>Zapllo Payslip & Salary Tracking App</h1>
+                                                        <h1 className='p-4 text-blue-400 text-lg whitespace-nowrap'>Zapllo Payslip &<br /> Salary Tracking App</h1>
                                                         <ul className="list-disc space-y-2  w-full items-center text-sm">
                                                             {[
                                                                 "Update Salary Details",

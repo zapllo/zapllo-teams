@@ -67,13 +67,13 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ options, selectedValue,
                 )}
             </button>
             {isOpen && (
-                <div className="absolute bg-black border rounded w-full max-h-60 scrollbar-hide overflow-auto">
+                <div className="absolute dark:bg-black bg-white border rounded w-full max-h-60 scrollbar-hide overflow-auto">
                     <input
                         type="text"
                         placeholder="Search country..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="block w-full p-2 outline-none border-b bg-[#121212] text-sm text-white"
+                        className="block w-full p-2 outline-none border-b dark:bg-[#121212] text-sm dark:text-white"
                     />
                     {filteredOptions.length > 0 ? (
                         filteredOptions.map((option) => (
@@ -84,7 +84,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({ options, selectedValue,
                                     handleSelect(option);
                                 }}
 
-                                className="cursor-pointer text-sm p-2 hover:bg-[#04061E] flex items-center"
+                                className="cursor-pointer text-sm p-2 hover:bg-accent dark:hover:bg-[#04061E] flex items-center"
                             >
                                 {option.code && (
                                     <Flag code={option.code} style={{ width: '24px', height: '16px', marginRight: '8px' }} />

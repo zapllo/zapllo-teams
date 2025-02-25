@@ -224,7 +224,7 @@ const InfoBar = (props: Props) => {
         <MainLoader />
       )}
       <div className="  fixed  w-[100%]  z-[10]">
-        <div className="gap-6 ml-12 border-b  items-center px-4 py-2 w-[100%] z-[10] flex flex-row  dark:bg-[#04061e]">
+        <div className="gap-6 ml-12 border-b  items-center px-4 py-2 w-[100%] z-[10] flex flex-row  bg-white dark:bg-[#04061e]">
           {/* <img src='/icons/ellipse.png' className='absolute h-[50%] z-[10]   opacity-30 -ml-32 ' /> */}
           <div
             className={`flex   ${pathName === "/dashboard" ? "text-center ml-[40%] w-" : ""
@@ -242,7 +242,7 @@ const InfoBar = (props: Props) => {
             </Label> */}
             {/* <ModeToggle /> */}
             <Link href='/dashboard/billing'>
-              <Badge className="border flex items-center gap-1 hover:bg-transparent hover:border-white/50 bg-transparent border-muted cursor-pointer dark:text-white py-1 ">
+              <Badge className="border flex items-center gap-1 shadow-sm  hover:bg-transparent hover:border-white/50 bg-transparent border-muted cursor-pointer dark:text-white py-1 ">
                 <img src="/illustrations/diamond.png" className="h-5" />
               {subscribedPlan ?"Subscribed" : "Premium Trial"}
               </Badge>

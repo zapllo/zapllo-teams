@@ -35,7 +35,7 @@ const DialogOverlay = React.forwardRef<
     ref={ref}
     className={cn(
       // Light: white semi-transparent overlay, Dark: black semi-transparent overlay
-      "fixed inset-0 z-[100] bg-white/80 dark:bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out",
+      "fixed inset-0 z-[100] bg-black/40 dark:bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out",
       className
     )}
     {...props}
@@ -49,7 +49,7 @@ const DialogContent = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
-    <div className="fixed inset-0 z-[100] flex justify-center w-screen items-center backdrop-blur-sm">
+    <div className="fixed inset-0 z-[100] flex justify-center w-screen items-center backdrop-blur-[1px]">
       <motion.div
         variants={modalVariants}
         initial="hidden"

@@ -381,7 +381,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
               analyserRef.current.getByteFrequencyData(dataArray);
 
               // Clear the canvas before rendering bars
-              canvasCtx.fillStyle = "rgb(0, 0, 0)";
+              canvasCtx.fillStyle = "rgb(255, 255, 255)";
               canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
               const bars = 40;
@@ -920,7 +920,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
         animate={controls}
       >
         <div className="flex justify-between   items-center  px-8 py-3 border-b dark:border-gray-700 w-full">
-          <h2 className="text-lg font-bold   ">Assign New Task</h2>
+          <h2 className="dark:text-lg  dark:font-bold   ">Assign New Task</h2>
 
           <CrossCircledIcon
             onClick={closeModal}
@@ -960,7 +960,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
             <div>
               <button
                 type="button"
-                className="p-2 flex text-xs justify-between dark:border-gray-500 dark:border-border  border-2 bg-transparent w-full text-start  rounded"
+                className="p-2 flex text-xs justify-between dark:border-gray-500 dark:border-border  dark:border-2 border bg-transparent w-full text-start  rounded"
                 onClick={handleOpen}
               >
                 {popoverInputValue ? (
@@ -990,7 +990,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
               <div>
                 <button
                   type="button"
-                  className="p-2 text-xs flex border-2 dark:border-gray-500 dark:border-border   bg-transparent justify-between w-full text-start  rounded"
+                  className="p-2 text-xs flex border items-center dark:border-2 dark:border-gray-500 dark:border-border   bg-transparent justify-between w-full text-start  rounded"
                   onClick={handleCategoryOpen}
                 >
                   {popoverCategoryInputValue ? (
@@ -1023,14 +1023,14 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
           <div className=" flex itrc justify-between">
             <div className="mb-2  justify-between border dark:border-gray-500 dark:border-border  rounded-md h-14 items-center flex gap-4 mta w-full">
               <div className=" gap-2 flex justify-between h-fit  items-center p-4 w-full ">
-                <div className="flex g   text-xs dark:text-white font-bold">
+                <div className="flex g   text-xs dark:text-white dark:font-bold">
                   {/* <FlagIcon className='h-5' /> */}
                   Priority
                 </div>
                 <div className=" rounded-lg w-full ">
                   <Tabs3 value={priority} onValueChange={setPriority}>
 
-                    <TabsList3 className="rounded-lg text- flex border-gray-500 dark:border-border border w-fit">
+                    <TabsList3 className="rounded-lg text- flex  dark:border-border border w-fit">
 
                       {["High", "Medium", "Low"].map((level) => (
                         <TabsTrigger3 className="text-xs" key={level} value={level}>
@@ -1056,7 +1056,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
                     onCheckedChange={(checked) => setRepeat(Boolean(checked))}
                     className="mr-2 "
                   />
-                  <Label htmlFor="repeat" className="font-semibold dark:text-white  text-xs ">
+                  <Label htmlFor="repeat" className="dark:font-semibold dark:text-white  text-xs ">
                     Repeat
                   </Label>
                 </div>
@@ -1104,7 +1104,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
 
           {repeatType === "Weekly" && repeat && (
             <div className="mb-4 p-2 ">
-              <Label className="block font-semibold  mb-2">Select Days</Label>
+              <Label className="block dark:font-semibold  mb-2">Select Days</Label>
               <div className="grid grid-cols-7  p-2 rounded ">
                 {[
                   "Monday",
@@ -1126,12 +1126,12 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
                       className={
                         days.includes(day)
                           ? " text-white cursor-pointer"
-                          : "text-black cursor-pointer"
+                          : "dark:text-black text-white cursor-pointer"
                       }
                     >
                       <Label
                         htmlFor={day}
-                        className="font-semibold cursor-pointer "
+                        className="dark:font-semibold cursor-pointer "
                       >
                         {day.slice(0, 1)}
                       </Label>
@@ -1158,7 +1158,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
             <Button
               type="button"
               onClick={handleOpenDatePicker}
-              className=" border-2 dark:border-gray-500 dark:border-border  bg-background
+              className=" dark:border-2 border dark:border-gray-500 dark:border-border  bg-background
               text-black dark:text-white rounded dark:bg-[#282D32] hover:bg-transparent px-3 flex gap-1  py-2"
             >
               <Calendar className="h-5 text-sm" />
@@ -1231,7 +1231,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
                 onClick={() => {
                   setIsLinkModalOpen(true);
                 }}
-                className={`h-8 w-8 rounded-full items-center text-center  border cursor-pointer hover:shadow-white shadow-sm  bg-[#282D32] ${links.filter((link) => link).length > 0
+                className={`h-8 w-8 rounded-full items-center text-center  border cursor-pointer hover:shadow-white shadow-sm bg-primary dark:bg-[#282D32] ${links.filter((link) => link).length > 0
                   ? "border-[#815BF5]"
                   : ""
                   }`}
@@ -1250,7 +1250,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
                 onClick={() => {
                   setIsAttachmentModalOpen(true);
                 }}
-                className={`h-8 w-8 rounded-full items-center text-center border cursor-pointer hover:shadow-white shadow-sm bg-[#282D32] ${files.length > 0 ? "border-[#815BF5]" : ""
+                className={`h-8 w-8 rounded-full items-center text-center border cursor-pointer hover:shadow-white shadow-sm bg-primary dark:bg-[#282D32] ${files.length > 0 ? "border-[#815BF5]" : ""
                   }`}
               >
                 <Paperclip className="h-5 text-white text-center m-auto mt-1" />
@@ -1268,7 +1268,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
                   onClick={() => {
                     setIsReminderModalOpen(true);
                   }}
-                  className={`h-8 w-8 rounded-full items-center text-center border cursor-pointer hover:shadow-white shadow-sm bg-[#282D32] ${reminders.length > 0 ? "border-[#815BF5]" : ""}`}
+                  className={`h-8 w-8 rounded-full items-center text-center border cursor-pointer hover:shadow-white shadow-sm bg-primary dark:bg-[#282D32] ${reminders.length > 0 ? "border-[#815BF5]" : ""}`}
                 >
                   <Clock className="h-5 text-white text-center m-auto mt-1" />
                 </div>
@@ -1293,7 +1293,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
             ) : (
               <div
                 onClick={startRecording}
-                className="h-8 mt-4 w-8 rounded-full items-center text-center  border cursor-pointer hover:shadow-white shadow-sm  bg-[#282D32]"
+                className="h-8 mt-4 w-8 rounded-full items-center text-center  border cursor-pointer hover:shadow-white shadow-sm  bg-primary dark:bg-[#282D32]"
               >
                 <Mic className="h-5 text-center text-white m-auto mt-1" />
               </div>
@@ -1301,7 +1301,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
           </div>
           <div
             className={` ${recording ? `w-full ` : "hidden"
-              } border rounded border-dashed border-[#815BF5] px-4 py-2  bg-black flex justify-center`}
+              } border rounded border-dashed border-[#815BF5] px-4 py-2 bg-white dark:bg-white flex justify-center`}
           >
             <canvas
               ref={canvasRef}

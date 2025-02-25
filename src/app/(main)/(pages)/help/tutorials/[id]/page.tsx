@@ -2,6 +2,7 @@
 
 import ChecklistSidebar from '@/components/sidebar/checklistSidebar';
 import { Button } from '@/components/ui/button';
+import Loader from '@/components/ui/loader';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import axios from 'axios';
 import { ArrowLeft } from 'lucide-react';
@@ -32,7 +33,13 @@ export default function Tutorials() {
     }, [id]);
 
     if (loading) {
-        return <p>Loading...</p>;
+        return (
+            <div className='flex -mt-12 -ml-24 items-center justify-center h-screen' >
+                <div>
+                    <Loader />
+                </div>
+            </div>
+        );
     }
 
     if (error) {
@@ -45,7 +52,7 @@ export default function Tutorials() {
 
     return (
         <div className="   h-fit max-h-screen   scrollbar-hide overflow-y-scroll ">
-            <div className="ml-28 bg-[#04061e] text-white">
+            <div className="ml-28 dark:bg-[#04061e] dark:text-white">
                 <div className='flex gap-2 mb-4 mt-8 items-center'>
                     <Link href='/help/tutorials'>
                         <div className='h-7 w-7 flex items-center hover:bg-[#ffffff] hover:text-black cursor-pointer border rounded-full'>
@@ -56,7 +63,7 @@ export default function Tutorials() {
                 </div>
 
                 <div className="w-full border rounded max-w-4xl mt-4 aspect-video">
-                    <iframe className='rounded w-full h-full'  src={tutorial.link} title="Zapllo Tutorials" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen ></iframe>
+                    <iframe className='rounded w-full h-full' src={tutorial.link} title="Zapllo Tutorials" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen ></iframe>
                 </div>
             </div>
         </div>

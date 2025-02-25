@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import axios from "axios";
 import { toast } from "sonner";
 import Link from "next/link";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 interface PayslipLogData {
     _id: string;
@@ -95,22 +96,35 @@ export default function UserLogs({ userId }: { userId: string }) {
                         Payslip Logs
                     </AccordionTrigger2>
                     <AccordionContent2>
-                        <div className="grid grid-cols-1 gap-4">
-                            {payslipLogData?.map((payslips, index) => (
-                                <div key={payslips._id}>
-                                    <Link href={payslips.publicLink}>
-                                        <h1 className="hover:underline text-blue-500 cursor-pointer">
-                                            {new Date(payslips.year, payslips.month - 1).toLocaleString('default', { month: 'short', year: 'numeric' })}
-                                        </h1>
-                                        {/* <h1 className="hover:underline text-blue-500 cursor-pointer"> {payslips.month}-{payslips.year}</h1> */}
-                                    </Link>
+                        {payslipLogData && payslipLogData.length > 0 ? (
+                            <div className="grid grid-cols-1 gap-4">
+                                {payslipLogData.map((payslips) => (
+                                    <div key={payslips._id}>
+                                        <Link href={payslips.publicLink}>
+                                            <h1 className="hover:underline text-blue-500 cursor-pointer">
+                                                {new Date(
+                                                    payslips.year,
+                                                    payslips.month - 1
+                                                ).toLocaleString("default", { month: "short", year: "numeric" })}
+                                            </h1>
+                                        </Link>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div>
+                                <div className="flex justify-center items-center">
+                                    <DotLottieReact
+                                        src="/lottie/empty.lottie"
+                                        loop
+                                        className="h-56"
+                                        autoplay
+                                    />
                                 </div>
-                            ))}
+                                <h1 className="text-center">No Payslips Generated</h1>
 
-
-
-                        </div>
-
+                            </div>
+                        )}
                     </AccordionContent2>
                 </AccordionItem2>
 

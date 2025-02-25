@@ -1261,14 +1261,14 @@ export default function TasksTab({
                             { label: "Next Week", value: "nextWeek" },
                             { label: "This Month", value: "thisMonth" },
                             { label: "Last Month", value: "lastMonth" },
-                            { label: "Next Month", value: "nextMonth" },
+                            // { label: "Next Month", value: "nextMonth" },
                             { label: "This Year", value: "thisYear" },
                             { label: "All Time", value: "allTime" },
                           ].map(({ label, value }) => (
                             <button
                               key={value}
                               onClick={() => handleButtonClick(value as DateFilter)}
-                              className={`text-xs h-7 px-3 whitespace-nowrap  border py-1 rounded ${activeDateFilter === value ? "bg-[#815BF5] text-white" : "bg-"
+                              className={`text-xs  px-3 whitespace-nowrap  border py-1 rounded ${activeDateFilter === value ? "bg-[#815BF5] text-white" : "bg-"
                                 }`}
                             >
                               {label}
@@ -1516,7 +1516,7 @@ export default function TasksTab({
                                           className="p-4 flex bg-[#] hover:border-[#815BF5]  cursor-pointer flex-col gap-2"
                                         >
                                           <div className="flex gap-2 justify-start">
-                                            <div className="h-7 w-7 rounded-full bg-[#815BF5] -400">
+                                            <div className="h-8 w-8 rounded-full bg-[#815BF5] -400">
                                               {user.profilePic ? (
                                                 <img
                                                   src={user.profilePic}
@@ -1542,8 +1542,8 @@ export default function TasksTab({
                                             </h2>
                                           </div>
                                           {/* <p className="text-xs"> {user.email}</p> */}
-                                          <div className="flex gap-2 ] text-xs mt-1">
-                                            <div className="flex font-medium ">
+                                          <div className="flex items-center gap-2 ] text-xs mt-1">
+                                            <div className="flex items-center font-medium ">
                                               <CircleAlert className="text-red-500 h-4" />
                                               <p className="text-xs">
                                                 Overdue: {overdueTasks}
@@ -1553,7 +1553,7 @@ export default function TasksTab({
                                               |
                                             </h1>
 
-                                            <div className="flex gap-2  font-medium">
+                                            <div className="flex items-center gap-2  font-medium">
                                               <Circle className="text-red-400 h-4" />
                                               <p className="text-xs">
                                                 Pending: {pendingTasks}
@@ -1563,7 +1563,7 @@ export default function TasksTab({
                                               |
                                             </h1>
 
-                                            <div className="flex gap-2 font-medium">
+                                            <div className="flex items-center gap-2 font-medium">
                                               <IconProgress className="text-orange-600 h-4" />
                                               <p className="text-xs">
                                                 In Progress: {inProgressTasks}
@@ -1572,7 +1572,7 @@ export default function TasksTab({
                                             <h1 className="text-[#6C636E] text-xs">
                                               |
                                             </h1>
-                                            <div className="flex gap-2 font-medium">
+                                            <div className="flex items-center gap-2 font-medium">
                                               <CheckCircle className="text-green-600 h-4" />
                                               <p className="text-xs">
                                                 Completed: {completedTasks}
@@ -1668,6 +1668,7 @@ export default function TasksTab({
                                       } else {
                                         pathColor = "#008000"; // Green for 80% and above
                                       }
+                                      const textColor = theme === "dark" ? "#ffffff" : "#000000";
                                       return (
                                         <Card
                                           key={category._id}
@@ -1677,32 +1678,32 @@ export default function TasksTab({
                                           }}
                                           className="p-4 flex hover:border-[#815BF5] cursor-pointer bg-transparent flex-col gap-2"
                                         >
-                                          <div className="flex gap-2">
+                                          <div className="flex items-center gap-2">
                                             <TagsIcon className="h-5" />
                                             <h2 className="text-sm font-medium">
                                               {category?.name}
                                             </h2>
                                           </div>
-                                          <div className="flex gap-4 mt-2">
-                                            <div className="flex gap-1 font-">
+                                          <div className="flex items-center gap-4 mt-2">
+                                            <div className="flex items-center gap-1 font-">
                                               <CircleAlert className="text-red-500 h-4" />
                                               <p className="text-xs">
                                                 Overdue: {overdueTasks}
                                               </p>
                                             </div>
-                                            <div className="flex gap-1 font-">
+                                            <div className="flex items-center gap-1 font-">
                                               <Circle className="text-red-400 h-4" />
                                               <p className="text-xs">
                                                 Pending: {pendingTasks}
                                               </p>
                                             </div>
-                                            <div className="flex gap-1 font-">
+                                            <div className="flex items-center gap-1 font-">
                                               <IconProgress className="text-orange-600 h-4" />
                                               <p className="text-xs">
                                                 In Progress: {inProgressTasks}
                                               </p>
                                             </div>
-                                            <div className="flex gap-1 font-">
+                                            <div className="flex items-center gap-1 font-">
                                               <CheckCircle className="text-green-600 h-4" />
                                               <p className="text-xs">
                                                 Completed: {completedTasks}
@@ -1713,7 +1714,7 @@ export default function TasksTab({
                                             className="ml-auto  -mt-12"
                                             style={{ width: 40, height: 40 }}
                                           >
-                                            <div className=" bg-black dark:bg-transparent rounded-full">
+                                               <div className="  dark:bg-transparent rounded-full">
                                               <CircularProgressbar
                                                 value={completionPercentage}
                                                 text={`${Math.round(
@@ -1722,7 +1723,7 @@ export default function TasksTab({
                                                 styles={buildStyles({
                                                   textSize: "24px",
                                                   pathColor: pathColor, // Dynamic path color
-                                                  textColor: "#ffffff",
+                                                  textColor: textColor,
                                                   trailColor: "#6C636E", // Trail color should be lighter for better contrast
                                                   backgroundColor: "#3e98c7",
                                                 })}
@@ -1816,6 +1817,7 @@ export default function TasksTab({
                                         } else {
                                           pathColor = "#008000"; // Green for 80% and above
                                         }
+                                        const textColor = theme === "dark" ? "#ffffff" : "#000000";
                                         return (
                                           <Card
                                             key={category._id}
@@ -1825,32 +1827,32 @@ export default function TasksTab({
                                             }}
                                             className="p-4 cursor-pointer hover:border-[#815BF5] flex bg-transparent flex-col gap-2"
                                           >
-                                            <div className="flex gap-2">
+                                            <div className="flex items-center gap-2">
                                               <TagsIcon className="h-5" />
                                               <h2 className="text-sm font-medium">
                                                 {category?.name}
                                               </h2>
                                             </div>
-                                            <div className="flex gap-4 mt-2">
-                                              <div className="flex gap-1 font-medium">
+                                            <div className="flex items-center gap-4 mt-2">
+                                              <div className="flex items-center gap-1 font-medium">
                                                 <CircleAlert className="text-red-500 h-4" />
                                                 <p className="text-xs">
                                                   Overdue: {overdueTasks}
                                                 </p>
                                               </div>
-                                              <div className="flex gap-1 font-medium">
+                                              <div className="flex items-center gap-1 font-medium">
                                                 <Circle className="text-red-400 h-4" />
                                                 <p className="text-xs">
                                                   Pending: {pendingTasks}
                                                 </p>
                                               </div>
-                                              <div className="flex gap-1 font-medium">
+                                              <div className="flex items-center gap-1 font-medium">
                                                 <IconProgress className="text-orange-600 h-4" />
                                                 <p className="text-xs">
                                                   In Progress: {inProgressTasks}
                                                 </p>
                                               </div>
-                                              <div className="flex gap-1 font-medium">
+                                              <div className="flex items-center gap-1 font-medium">
                                                 <CheckCircle className="text-green-600 h-4" />
                                                 <p className="text-xs">
                                                   Completed: {completedTasks}
@@ -1861,7 +1863,7 @@ export default function TasksTab({
                                               className="ml-auto  -mt-12"
                                               style={{ width: 40, height: 40 }}
                                             >
-                                              <div className=" bg-black dark:bg-transparent rounded-full">
+                                                <div className="  dark:bg-transparent rounded-full">
                                                 <CircularProgressbar
                                                   value={completionPercentage}
                                                   text={`${Math.round(
@@ -1870,7 +1872,7 @@ export default function TasksTab({
                                                   styles={buildStyles({
                                                     textSize: "24px",
                                                     pathColor: pathColor, // Dynamic path color
-                                                    textColor: "#ffffff",
+                                                    textColor: textColor,
                                                     trailColor: "#6C636E", // Trail color should be lighter for better contrast
                                                     backgroundColor: "#3e98c7",
                                                   })}
@@ -1966,6 +1968,7 @@ export default function TasksTab({
                                       } else {
                                         pathColor = "#008000"; // Green for 80% and above
                                       }
+                                      const textColor = theme === "dark" ? "#ffffff" : "#000000";
 
                                       return (
                                         <Card
@@ -1976,8 +1979,8 @@ export default function TasksTab({
                                           }}
                                           className="p-4 cursor-pointer hover:border-[#815BF5] flex bg-[#] flex-col  gap-2"
                                         >
-                                          <div className="flex gap-2 justify-start">
-                                            <div className="h-7 w-7 rounded-full bg-[#815BF5] -400">
+                                          <div className="flex items-center gap-2 justify-start">
+                                            <div className="h-8 w-8 rounded-full bg-[#815BF5] -400">
                                               <h1 className="text-center text-sm mt-1 text-white uppercase">
                                                 {`${user?.firstName?.slice(
                                                   0,
@@ -1995,8 +1998,8 @@ export default function TasksTab({
                                           </div>
 
                                           {/* <p className="text-xs"> {user.email}</p> */}
-                                          <div className="flex gap-2 ] text-xs mt-1">
-                                            <div className="flex font-medium ">
+                                          <div className="flex items-center gap-2 ] text-xs mt-1">
+                                            <div className="flex items-center font-medium ">
                                               <CircleAlert className="text-red-500 h-4" />
                                               <p className="text-xs">
                                                 Overdue: {overdueTasks}
@@ -2006,7 +2009,7 @@ export default function TasksTab({
                                               |
                                             </h1>
 
-                                            <div className="flex gap-2  font-medium">
+                                            <div className="flex items-center gap-2  font-medium">
                                               <Circle className="text-red-400 h-4" />
                                               <p className="text-xs">
                                                 Pending: {pendingTasks}
@@ -2016,7 +2019,7 @@ export default function TasksTab({
                                               |
                                             </h1>
 
-                                            <div className="flex gap-2 font-medium">
+                                            <div className="flex items-center gap-2 font-medium">
                                               <IconProgress className="text-orange-600 h-4" />
                                               <p className="text-xs">
                                                 In Progress: {inProgressTasks}
@@ -2026,7 +2029,7 @@ export default function TasksTab({
                                               |
                                             </h1>
 
-                                            <div className="flex gap-2 font-medium">
+                                            <div className="flex items-center gap-2 font-medium">
                                               <CheckCircle className="text-green-600 h-4" />
                                               <p className="text-xs">
                                                 Completed: {completedTasks}
@@ -2037,7 +2040,7 @@ export default function TasksTab({
                                             className="ml-auto  -mt-12"
                                             style={{ width: 40, height: 40 }}
                                           >
-                                            <div className=" bg-black dark:bg-transparent rounded-full">
+                                              <div className="  dark:bg-transparent rounded-full">
                                               <CircularProgressbar
                                                 value={completionPercentage}
                                                 text={`${Math.round(
@@ -2046,7 +2049,7 @@ export default function TasksTab({
                                                 styles={buildStyles({
                                                   textSize: "24px",
                                                   pathColor: pathColor, // Dynamic path color
-                                                  textColor: "#ffffff",
+                                                  textColor: textColor,
                                                   trailColor: "#6C636E", // Trail color should be lighter for better contrast
                                                   backgroundColor: "#3e98c7",
                                                 })}
@@ -2171,19 +2174,19 @@ export default function TasksTab({
                                   </div>
                                 )}
                               </div>
-                              <div className="flex gap-4  mb-4    w-full justify-center">
-                                <div className="w-fit  border-b-2 ">
+                              <div className="flex items-center gap-4  mb-4    w-full justify-center">
+                                <div className="w-fit  dark:border-b-2 ">
                                   {/* Overdue Filter */}
                                   <Tabs2
                                     defaultValue={taskStatusFilter}
                                     onValueChange={setTaskStatusFilter}
                                     className="gap-2"
                                   >
-                                    <TabsList2 className="flex gap-2 justify-center mt-2">
+                                    <TabsList2 className="flex items-center gap-2 justify-center mt-2">
                                       {/* Overdue Filter */}
                                       <TabsTrigger2
                                         value="overdue"
-                                        className={`h-6 w-fit flex gap-1 text-xs ${taskStatusFilter === "overdue"
+                                        className={`h-6 w-fit flex items-center gap-1 text-xs ${taskStatusFilter === "overdue"
                                           ? "bg-[#] hover:bg-[#]  borde]"
                                           : "bg-[#] hover:bg-[#] "
                                           }`}
@@ -2195,7 +2198,7 @@ export default function TasksTab({
                                       {/* Pending Filter */}
                                       <TabsTrigger2
                                         value="pending"
-                                        className={`h-6 w-fit flex gap-1 text-xs ${taskStatusFilter === "pending"
+                                        className={`h-6 w-fit flex items-center gap-1 text-xs ${taskStatusFilter === "pending"
                                           ? ""
                                           : ""
                                           }`}
@@ -2207,7 +2210,7 @@ export default function TasksTab({
                                       {/* In Progress Filter */}
                                       <TabsTrigger2
                                         value="inProgress"
-                                        className={`h-6 w-fit flex gap-1 text-xs ${taskStatusFilter === "inProgress"
+                                        className={`h-6 w-fit flex items-center gap-1 text-xs ${taskStatusFilter === "inProgress"
                                           ? ""
                                           : ""
                                           }`}
@@ -2219,7 +2222,7 @@ export default function TasksTab({
                                       {/* Completed Filter */}
                                       <TabsTrigger2
                                         value="completed"
-                                        className={`h-6 w-fit flex gap-1 text-xs ${taskStatusFilter === "completed"
+                                        className={`h-6 w-fit flex items-center gap-1 text-xs ${taskStatusFilter === "completed"
                                           ? ""
                                           : ""
                                           }`}
@@ -2231,7 +2234,7 @@ export default function TasksTab({
                                       {/* In Time Filter */}
                                       <TabsTrigger2
                                         value="inTime"
-                                        className={`h-6 w-fit flex gap-1 text-xs ${taskStatusFilter === "inTime"
+                                        className={`h-6 w-fit flex items-center gap-1 text-xs ${taskStatusFilter === "inTime"
                                           ? ""
                                           : ""
                                           }`}
@@ -2243,7 +2246,7 @@ export default function TasksTab({
                                       {/* Delayed Filter */}
                                       <TabsTrigger2
                                         value="delayed"
-                                        className={`h-6 w-fit flex gap-1 text-xs ${taskStatusFilter === "delayed"
+                                        className={`h-6 w-fit flex items-center gap-1 text-xs ${taskStatusFilter === "delayed"
                                           ? ""
                                           : ""
                                           }`}
@@ -2275,8 +2278,8 @@ export default function TasksTab({
                                             </span>
                                           </p>
                                         </div>
-                                        <div className="flex gap-2">
-                                          <div className="flex -ml-1  text-xs mt-2">
+                                        <div className="flex items-center gap-2">
+                                          <div className="flex -ml-1 items-center text-xs mt-2">
                                             <IconClock className="h-5" />
                                             <h1
                                               className={`mt-[1.5px]  ${new Date(task.dueDate) < new Date()
@@ -2290,7 +2293,7 @@ export default function TasksTab({
                                           <h1 className="mt-auto  text-[#E0E0E066] ">
                                             |
                                           </h1>
-                                          <div className="flex text-xs mt-[10px]">
+                                          <div className="flex items-center text-xs mt-[10px]">
                                             <User2 className="h-4" />
                                             {task.assignedUser.firstName}
                                           </div>
@@ -2298,19 +2301,19 @@ export default function TasksTab({
                                             |
                                           </h1>
 
-                                          <div className="flex text-xs mt-[11px]">
+                                          <div className="flex items-center text-xs mt-[11px]">
                                             <TagIcon className="h-4" />
                                             {task.category?.name}
                                           </div>
 
                                           {task.repeat ? (
-                                            <div className="flex items-center">
+                                            <div className="flex  items-center">
                                               <h1 className="mt-auto text-[#E0E0E066] mx-2">
                                                 |
                                               </h1>
 
                                               {task.repeatType && (
-                                                <h1 className="flex mt-[11px] text-xs">
+                                                <h1 className="flex items-center mt-[11px] text-xs">
                                                   <Repeat className="h-4 " />{" "}
                                                   {task.repeatType}
                                                 </h1>
@@ -2325,7 +2328,7 @@ export default function TasksTab({
                                             |
                                           </h1>
 
-                                          <div className="flex text-xs">
+                                          <div className="flex items-center text-xs">
                                             <div className="mt-[11px]">
                                               <IconProgressBolt className="h-4  " />
                                             </div>
@@ -2336,7 +2339,7 @@ export default function TasksTab({
                                         </div>
                                       </div>
                                       <div className="">
-                                        <div className="flex ">
+                                        <div className="flex  ">
                                           <div className="relative">
                                             {(() => {
                                               if (task.completionDate && task.status !== "Pending") {
@@ -2376,7 +2379,7 @@ export default function TasksTab({
                                                   className="gap-2 border mt-4 h-6 py-3 px-2 bg-transparent hover:border-blue-500 hover:bg-transparent rounded border-gray-600 w-fit"
                                                 >
                                                   <Repeat className="h-4 w-4 text-blue-400" />
-                                                  <h1 className="text-xs">
+                                                  <h1 className="text-xs text-black dark:text-white">
                                                     Reopen
                                                   </h1>
                                                 </Button>
@@ -2386,10 +2389,10 @@ export default function TasksTab({
 
                                                     handleDeleteClick(task._id);
                                                   }}
-                                                  className="border mt-4 px-2 hover:bg-transparent py-3 bg-transparent h-6 rounded hover:border-red-500 border-gray-600 w-fit"
+                                                  className="border mt-4 px-2 hover:bg-transparent py-3 bg-transparent h-6 rounded hover:border-red-500 dark:border-gray-600 w-fit"
                                                 >
                                                   <Trash className="h-4 rounded-full text-red-500" />
-                                                  <h1 className="text-xs">
+                                                  <h1 className="text-xs text-black dark:text-white">
                                                     Delete
                                                   </h1>
                                                 </Button>
@@ -2403,7 +2406,7 @@ export default function TasksTab({
                                                     setStatusToUpdate("In Progress");
                                                     setIsDialogOpen(true);
                                                   }}
-                                                  className="gap-2 border mt-4 h-6 py-3 px-2 bg-transparent hover:bg-transparent hover:border-orange-400 rounded border-gray-600 w-fit"
+                                                  className="gap-2 border mt-4 h-6 py-3 px-2 bg-transparent hover:bg-transparent hover:border-orange-400 rounded dark:border-gray-600 w-fit"
                                                 >
                                                   <Play className="h-4 w-4 text-orange-400" />
                                                   <h1 className="text-xs text-black dark:text-white">
@@ -2417,7 +2420,7 @@ export default function TasksTab({
                                                     setStatusToUpdate("Completed");
                                                     setIsCompleteDialogOpen(true);
                                                   }}
-                                                  className="border mt-4 px-2 py-3 bg-transparent hover:bg-transparent h-6 rounded hover:border-[#007A5A] border-gray-600 w-fit"
+                                                  className="border mt-4 px-2 py-3 bg-transparent hover:bg-transparent h-6 rounded hover:border-[#007A5A] dark:border-gray-600 w-fit"
                                                 >
                                                   <CheckCircle className="h-4 rounded-full text-green-400" />
                                                   <h1 className="text-xs text-black dark:text-white">
@@ -2514,7 +2517,7 @@ export default function TasksTab({
                         ) : activeTab === "delegatedTasks" ? (
                           <div className="flex    flex-col ">
                             {customStartDate && customEndDate && (
-                              <div className="flex gap-8 p-2 justify-center w-full">
+                              <div className="flex  gap-8 p-2 justify-center w-full">
                                 <h1 className="text-xs  text-center dark:text-white">
                                   Start Date:{" "}
                                   {customStartDate.toLocaleDateString()}
@@ -2623,19 +2626,19 @@ export default function TasksTab({
                                   </div>
                                 )}
                               </div>
-                              <div className="flex gap-4  mb-4 ml-24    w-full justify-center">
-                                <div className="w-fit ml-4  border-b-2 ">
+                              <div className="flex gap-4 items-center  mb-4 ml-24    w-full justify-center">
+                                <div className="w-fit ml-4  dark:border-b-2 ">
                                   {/* Overdue Filter */}
                                   <Tabs2
                                     defaultValue={taskStatusFilter}
                                     onValueChange={setTaskStatusFilter}
                                     className="gap-2"
                                   >
-                                    <TabsList2 className="flex gap-2 justify-center mt-2">
+                                    <TabsList2 className="flex items-center gap-2 justify-center mt-2">
                                       {/* Overdue Filter */}
                                       <TabsTrigger2
                                         value="overdue"
-                                        className={`h-6 w-fit flex gap-1 text-xs ${taskStatusFilter === "overdue"
+                                        className={`h-6 w-fit flex items-center gap-1 text-xs ${taskStatusFilter === "overdue"
                                           ? "bg-[#] hover:bg-[#]  borde]"
                                           : "bg-[#] hover:bg-[#] "
                                           }`}
@@ -2647,7 +2650,7 @@ export default function TasksTab({
                                       {/* Pending Filter */}
                                       <TabsTrigger2
                                         value="pending"
-                                        className={`h-6 w-fit flex gap-1 text-xs ${taskStatusFilter === "pending"
+                                        className={`h-6 w-fit flex items-center gap-1 text-xs ${taskStatusFilter === "pending"
                                           ? ""
                                           : ""
                                           }`}
@@ -2659,7 +2662,7 @@ export default function TasksTab({
                                       {/* In Progress Filter */}
                                       <TabsTrigger2
                                         value="inProgress"
-                                        className={`h-6 w-fit flex gap-1 text-xs ${taskStatusFilter === "inProgress"
+                                        className={`h-6 w-fit flex items-center gap-1 text-xs ${taskStatusFilter === "inProgress"
                                           ? ""
                                           : ""
                                           }`}
@@ -2671,7 +2674,7 @@ export default function TasksTab({
                                       {/* Completed Filter */}
                                       <TabsTrigger2
                                         value="completed"
-                                        className={`h-6 w-fit flex gap-1 text-xs ${taskStatusFilter === "completed"
+                                        className={`h-6 w-fit flex items-center gap-1 text-xs ${taskStatusFilter === "completed"
                                           ? ""
                                           : ""
                                           }`}
@@ -2683,7 +2686,7 @@ export default function TasksTab({
                                       {/* In Time Filter */}
                                       <TabsTrigger2
                                         value="inTime"
-                                        className={`h-6 w-fit flex gap-1 text-xs ${taskStatusFilter === "inTime"
+                                        className={`h-6 w-fit flex items-center gap-1 text-xs ${taskStatusFilter === "inTime"
                                           ? ""
                                           : ""
                                           }`}
@@ -2695,7 +2698,7 @@ export default function TasksTab({
                                       {/* Delayed Filter */}
                                       <TabsTrigger2
                                         value="delayed"
-                                        className={`h-6 w-fit flex gap-1 text-xs ${taskStatusFilter === "delayed"
+                                        className={`h-6 w-fit flex items-center gap-1 text-xs ${taskStatusFilter === "delayed"
                                           ? ""
                                           : ""
                                           }`}
@@ -2727,8 +2730,8 @@ export default function TasksTab({
                                             </span>
                                           </p>
                                         </div>
-                                        <div className="flex gap-2">
-                                          <div className="flex -ml-1  text-xs mt-2">
+                                        <div className="flex items-center gap-2">
+                                          <div className="flex items-center -ml-1  text-xs mt-2">
                                             <IconClock className="h-5" />
                                             <h1
                                               className={`mt-[1.5px] ${new Date(task.dueDate) < new Date()
@@ -2742,7 +2745,7 @@ export default function TasksTab({
                                           <h1 className="mt-auto  text-[#E0E0E066] ">
                                             |
                                           </h1>
-                                          <div className="flex text-xs mt-[10px]">
+                                          <div className="flex items-center text-xs mt-[10px]">
                                             <User2 className="h-4" />
                                             {task?.assignedUser?.firstName}
                                           </div>
@@ -2750,7 +2753,7 @@ export default function TasksTab({
                                             |
                                           </h1>
 
-                                          <div className="flex text-xs mt-[11px]">
+                                          <div className="flex items-center text-xs mt-[11px]">
                                             <TagIcon className="h-4" />
                                             {task?.category?.name}
                                           </div>
@@ -2762,7 +2765,7 @@ export default function TasksTab({
                                               </h1>
 
                                               {task.repeatType && (
-                                                <h1 className="flex mt-[11px] text-xs">
+                                                <h1 className="flex items-center mt-[11px] text-xs">
                                                   <Repeat className="h-4 " />{" "}
                                                   {task.repeatType}
                                                 </h1>
@@ -2777,7 +2780,7 @@ export default function TasksTab({
                                             |
                                           </h1>
 
-                                          <div className="flex text-xs">
+                                          <div className="flex items-center text-xs">
                                             <div className="mt-[11px]">
                                               <IconProgressBolt className="h-4  " />
                                             </div>
@@ -2824,10 +2827,10 @@ export default function TasksTab({
                                                     setStatusToUpdate("Reopen");
                                                     setIsReopenDialogOpen(true);
                                                   }}
-                                                  className="gap-2 border mt-4 h-6 py-3 px-2 bg-transparent hover:border-blue-500 hover:bg-transparent rounded border-gray-600 w-fit"
+                                                  className="gap-2 border mt-4 h-6 py-3 px-2 bg-transparent hover:border-blue-500 hover:bg-transparent rounded dark:border-gray-600 w-fit"
                                                 >
                                                   <Repeat className="h-4 w-4 text-blue-400" />
-                                                  <h1 className="text-xs">
+                                                  <h1 className="text-xs text-black dark:text-white">
                                                     Reopen
                                                   </h1>
                                                 </Button>
@@ -2836,10 +2839,10 @@ export default function TasksTab({
                                                   onClick={(e) => {
                                                     handleDeleteClick(task._id)
                                                   }}
-                                                  className="border mt-4 px-2 py-3 bg-transparent h-6 rounded hover:border-red-500 hover:bg-transparent border-gray-600 w-fit"
+                                                  className="border mt-4 px-2 py-3 bg-transparent h-6 rounded hover:border-red-500 hover:bg-transparent dark:border-gray-600 w-fit"
                                                 >
                                                   <Trash className="h-4 rounded-full text-red-500" />
-                                                  <h1 className="text-xs">
+                                                  <h1 className="text-xs text-black dark:text-white">
                                                     Delete
                                                   </h1>
                                                 </Button>
@@ -2855,7 +2858,7 @@ export default function TasksTab({
                                                     );
                                                     setIsDialogOpen(true);
                                                   }}
-                                                  className="gap-2 border mt-4 text-black dark:text-white h-6 py-3 px-2 hover:bg-transparent bg-transparent hover:border-orange-400 rounded border-gray-600 w-fit"
+                                                  className="gap-2 border mt-4 text-black dark:text-white h-6 py-3 px-2 hover:bg-transparent bg-transparent hover:border-orange-400 rounded dark:border-gray-600 w-fit"
                                                 >
                                                   <Play className="h-4 w-4 text-orange-400" />
                                                   <h1 className="text-xs">
@@ -2873,7 +2876,7 @@ export default function TasksTab({
                                                       true
                                                     );
                                                   }}
-                                                  className="border mt-4 px-2 py-3 hover:bg-transparent bg-transparent h-6 rounded hover:border-[#007A5A] border-gray-600 w-fit"
+                                                  className="border mt-4 px-2 py-3 hover:bg-transparent bg-transparent h-6 rounded hover:border-[#007A5A] dark:border-gray-600 w-fit"
                                                 >
                                                   <CheckCircle className="h-4 rounded-full text-green-400" />
                                                   <h1 className="text-xs text-black dark:text-white">
@@ -3105,19 +3108,19 @@ export default function TasksTab({
                                   </div>
                                 )}
                               </div>
-                              <div className="flex gap-4  mb-4 ml-24   w-full justify-center">
-                                <div className="w-fit ml-4  border-b-2 ">
+                              <div className="flex gap-4  items-center mb-4 ml-24   w-full justify-center">
+                                <div className="w-fit ml-4   dark:border-b-2 ">
                                   {/* Overdue Filter */}
                                   <Tabs2
                                     defaultValue={taskStatusFilter}
                                     onValueChange={setTaskStatusFilter}
                                     className="gap-2"
                                   >
-                                    <TabsList2 className="flex gap-2 justify-center mt-2">
+                                    <TabsList2 className="flex items-center gap-2 justify-center mt-2">
                                       {/* Overdue Filter */}
                                       <TabsTrigger2
                                         value="overdue"
-                                        className={`h-6 w-fit flex gap-1 text-xs ${taskStatusFilter === "overdue"
+                                        className={`h-6 w-fit items-center flex gap-1 text-xs ${taskStatusFilter === "overdue"
                                           ? "bg-[#] hover:bg-[#]  borde]"
                                           : "bg-[#] hover:bg-[#] "
                                           }`}
@@ -3129,7 +3132,7 @@ export default function TasksTab({
                                       {/* Pending Filter */}
                                       <TabsTrigger2
                                         value="pending"
-                                        className={`h-6 w-fit flex gap-1 text-xs ${taskStatusFilter === "pending"
+                                        className={`h-6 w-fit flex items-center gap-1 text-xs ${taskStatusFilter === "pending"
                                           ? ""
                                           : ""
                                           }`}
@@ -3141,7 +3144,7 @@ export default function TasksTab({
                                       {/* In Progress Filter */}
                                       <TabsTrigger2
                                         value="inProgress"
-                                        className={`h-6 w-fit flex gap-1 text-xs ${taskStatusFilter === "inProgress"
+                                        className={`h-6 w-fit flex items-center gap-1 text-xs ${taskStatusFilter === "inProgress"
                                           ? ""
                                           : ""
                                           }`}
@@ -3153,7 +3156,7 @@ export default function TasksTab({
                                       {/* Completed Filter */}
                                       <TabsTrigger2
                                         value="completed"
-                                        className={`h-6 w-fit flex gap-1 text-xs ${taskStatusFilter === "completed"
+                                        className={`h-6 w-fit flex items-center gap-1 text-xs ${taskStatusFilter === "completed"
                                           ? ""
                                           : ""
                                           }`}
@@ -3165,7 +3168,7 @@ export default function TasksTab({
                                       {/* In Time Filter */}
                                       <TabsTrigger2
                                         value="inTime"
-                                        className={`h-6 w-fit flex gap-1 text-xs ${taskStatusFilter === "inTime"
+                                        className={`h-6 w-fit flex items-center gap-1 text-xs ${taskStatusFilter === "inTime"
                                           ? ""
                                           : ""
                                           }`}
@@ -3177,7 +3180,7 @@ export default function TasksTab({
                                       {/* Delayed Filter */}
                                       <TabsTrigger2
                                         value="delayed"
-                                        className={`h-6 w-fit flex gap-1 text-xs ${taskStatusFilter === "delayed"
+                                        className={`h-6 w-fit flex items-center gap-1 text-xs ${taskStatusFilter === "delayed"
                                           ? ""
                                           : ""
                                           }`}
@@ -3209,8 +3212,8 @@ export default function TasksTab({
                                             </span>
                                           </p>
                                         </div>
-                                        <div className="flex gap-2">
-                                          <div className="flex -ml-1  text-xs mt-2">
+                                        <div className="flex items-center gap-2">
+                                          <div className="flex items-center -ml-1  text-xs mt-2">
                                             <IconClock className="h-5" />
                                             <h1
                                               className={`mt-[1.5px] ${new Date(task.dueDate) < new Date()
@@ -3224,7 +3227,7 @@ export default function TasksTab({
                                           <h1 className="mt-auto  text-[#E0E0E066] ">
                                             |
                                           </h1>
-                                          <div className="flex text-xs mt-[10px]">
+                                          <div className="flex items-center text-xs mt-[10px]">
                                             <User2 className="h-4" />
                                             {task?.assignedUser?.firstName}
                                           </div>
@@ -3232,7 +3235,7 @@ export default function TasksTab({
                                             |
                                           </h1>
 
-                                          <div className="flex text-xs mt-[11px]">
+                                          <div className="flex items-center text-xs mt-[11px]">
                                             <TagIcon className="h-4" />
                                             {task?.category?.name}
                                           </div>
@@ -3244,7 +3247,7 @@ export default function TasksTab({
                                               </h1>
 
                                               {task?.repeatType && (
-                                                <h1 className="flex mt-[11px] text-xs">
+                                                <h1 className="flex items-center mt-[11px] text-xs">
                                                   <Repeat className="h-4 " />{" "}
                                                   {task?.repeatType}
                                                 </h1>
@@ -3259,7 +3262,7 @@ export default function TasksTab({
                                             |
                                           </h1>
 
-                                          <div className="flex text-xs">
+                                          <div className="flex items-center text-xs">
                                             <div className="mt-[11px]">
                                               <IconProgressBolt className="h-4  " />
                                             </div>
@@ -3306,10 +3309,10 @@ export default function TasksTab({
                                                     setStatusToUpdate("Reopen");
                                                     setIsReopenDialogOpen(true);
                                                   }}
-                                                  className="gap-2 border mt-4 h-6 py-3 px-2 bg-transparent hover:border-blue-500 hover:bg-transparent rounded border-gray-600 w-fit"
+                                                  className="gap-2 border mt-4 h-6 py-3 px-2 bg-transparent hover:border-blue-500 hover:bg-transparent rounded dark:border-gray-600 w-fit"
                                                 >
                                                   <Repeat className="h-4 w-4 text-blue-400" />
-                                                  <h1 className="text-xs">
+                                                  <h1 className="text-xs text-black dark:text-white">
                                                     Reopen
                                                   </h1>
                                                 </Button>
@@ -3319,10 +3322,10 @@ export default function TasksTab({
 
                                                     handleDeleteClick(task._id);
                                                   }}
-                                                  className="border mt-4 px-2 py-3 bg-transparent h-6 rounded hover:border-red-500 hover:bg-transparent border-gray-600 w-fit"
+                                                  className="border mt-4 px-2 py-3 bg-transparent h-6 rounded hover:border-red-500 hover:bg-transparent dark:border-gray-600 w-fit"
                                                 >
                                                   <Trash className="h-4 rounded-full text-red-500" />
-                                                  <h1 className="text-xs">
+                                                  <h1 className="text-xs text-black dark:text-white">
                                                     Delete
                                                   </h1>
                                                 </Button>
@@ -3338,7 +3341,7 @@ export default function TasksTab({
                                                     );
                                                     setIsDialogOpen(true);
                                                   }}
-                                                  className="gap-2 border mt-4 h-6 py-3 px-2 hover:bg-transparent bg-transparent hover:border-orange-400 rounded border-gray-600 w-fit"
+                                                  className="gap-2 border mt-4 h-6 py-3 px-2 hover:bg-transparent bg-transparent hover:border-orange-400 rounded dark:border-gray-600 w-fit"
                                                 >
                                                   <Play className="h-4 w-4 text-orange-400" />
                                                   <h1 className="text-xs text-black dark:text-white">
@@ -3356,7 +3359,7 @@ export default function TasksTab({
                                                       true
                                                     );
                                                   }}
-                                                  className="border mt-4 px-2 py-3 hover:bg-transparent bg-transparent h-6 rounded hover:border-[#017a5b] border-gray-600 w-fit"
+                                                  className="border mt-4 px-2 py-3 hover:bg-transparent bg-transparent h-6 rounded hover:border-[#017a5b] dark:border-gray-600 w-fit"
                                                 >
                                                   <CheckCircle className="h-4 rounded-full text-green-400" />
                                                   <h1 className="text-xs text-black dark:text-white">
@@ -3711,7 +3714,7 @@ export default function TasksTab({
                             </p>
                             <div className="mt-2">
                               <div className="relative">
-                                <Label className="absolute bg-[#0b0d29] !text-muted-foreground ml-2 text-xs -mt-2 px-1">Comment</Label>
+                                <Label className="absolute bg-white dark:bg-[#0b0d29] !text-muted-foreground ml-2 text-xs -mt-2 px-1">Comment</Label>
                                 <textarea
                                   value={comment}
                                   onChange={(e) => {
@@ -3733,7 +3736,7 @@ export default function TasksTab({
                                   className="h-8 w-8 rounded-full items-center text-center border cursor-pointer hover:shadow-white shadow-sm bg-[#282D32]"
                                   onClick={triggerImageOrVideoUpload}
                                 >
-                                  <Files className="h-5 text-center m-auto mt-1" />
+                                  <Files className="h-5 text-white text-center m-auto mt-1" />
                                 </div>
                                 <h1 className="text-xs mt-2">
                                   Attach a File (All File Types Accepted)
