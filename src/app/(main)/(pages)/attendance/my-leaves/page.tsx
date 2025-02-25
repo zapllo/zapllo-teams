@@ -406,7 +406,7 @@ const MyLeaves: React.FC = () => {
       <div key={leaveType._id} className="w-60 relative flex-shrink-0 border px-4 py-3">
         {/* Circular Progress Bar */}
         <Info
-            className="h-4 absolute ml-48  text-blue-200 cursor-pointer"
+            className="h-4 absolute ml-48 text-muted-foreground dark:text-blue-200 cursor-pointer"
             onClick={() => handleInfoClick(leaveType.leaveType)}
           />
         <div className="flex justify-center ">

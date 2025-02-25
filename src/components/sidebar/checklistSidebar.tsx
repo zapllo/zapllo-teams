@@ -22,7 +22,7 @@ const ChecklistSidebar: React.FC = () => {
                 <div className='flex justify-center'>
                     <Button
                         variant={isActive('/dashboard/checklist') ? 'default' : 'default'}
-                        className={`w-[90%] rounded-lg mt-6 gap-2 px-4 hover:bg-accent  py-1 justify-start hover:rounded-lg dark:hover:bg-[#37384B] bg-transparent mb-2 ${isActive('/dashboard/checklist') ? 'bg-[#815BF5] py-1 dark:hover:bg-[#37384B] hover:bg-primary rounded-lg text-white' : 'text-gray-400'}`}
+                        className={`w-[90%] rounded-lg shadow-none mt-6 gap-2 px-4 hover:bg-accent  py-1 justify-start hover:rounded-lg dark:hover:bg-[#37384B] bg-transparent mb-2 ${isActive('/dashboard/checklist') ? 'bg-[#815BF5] py-1 dark:hover:bg-[#37384B] hover:bg-primary rounded-lg text-white' : 'text-black dark:text-gray-400'}`}
                         onClick={() => handleNavigation('/dashboard/checklist')}
                     >
                         <CheckCircleIcon className='h-5' /> Checklist
@@ -31,7 +31,7 @@ const ChecklistSidebar: React.FC = () => {
                 <div className='flex justify-center'>
                     <Button
                         variant={isActive('/help/mobile-app') ? 'default' : 'default'}
-                        className={`w-[90%] rounded-lg  gap-2 px-4 hover:bg-accent  py-1 justify-start hover:rounded-lg dark:hover:bg-[#37384B] bg-transparent mb-2 ${isActive('/help/mobile-app') ? 'bg-[#815BF5] py-1 dark:hover:bg-[#37384B] hover:bg-primary rounded-lg text-white' : 'text-gray-400'}`}
+                        className={`w-[90%] rounded-lg  shadow-none gap-2 px-4 hover:bg-accent  py-1 justify-start hover:rounded-lg dark:hover:bg-[#37384B] bg-transparent mb-2 ${isActive('/help/mobile-app') ? 'bg-[#815BF5] py-1 dark:hover:bg-[#37384B] hover:bg-primary rounded-lg text-white' : 'text-black dark:text-gray-400'}`}
                         onClick={() => handleNavigation('/help/mobile-app')}
                     >
                         <Download className='h-5' /> Mobile App
@@ -40,7 +40,7 @@ const ChecklistSidebar: React.FC = () => {
                 <div className='flex justify-center'>
                     <Button
                         variant={isActive('/help/tutorials') ? 'default' : 'default'}
-                        className={`w-[90%] rounded-lg  gap-2 px-4 hover:bg-accent  py-1 justify-start hover:rounded-lg dark:hover:bg-[#37384B] bg-transparent mb-2 ${isActive('/help/tutorials') ? 'bg-[#815BF5] py-1 dark:hover:bg-[#37384B] hover:bg-primary rounded-lg text-white' : 'text-gray-400'}`}
+                        className={`w-[90%] rounded-lg  gap-2 shadow-none px-4 hover:bg-accent  py-1 justify-start hover:rounded-lg dark:hover:bg-[#37384B] bg-transparent mb-2 ${isActive('/help/tutorials') ? 'bg-[#815BF5] py-1 dark:hover:bg-[#37384B] hover:bg-primary rounded-lg text-white' : 'text-black dark:text-gray-400'}`}
                         onClick={() => handleNavigation('/help/tutorials')}
                     >
                         <Video className='h-5' /> Tutorials
@@ -49,7 +49,7 @@ const ChecklistSidebar: React.FC = () => {
                 <div className='flex justify-center'>
                     <Button
                         variant={isActive('/help/events') ? 'default' : 'default'}
-                        className={`w-[90%] rounded-lg  gap-2 px-4 hover:bg-accent  py-1 justify-start hover:rounded-lg dark:hover:bg-[#37384B] bg-transparent mb-2 ${isActive('/help/events') ? 'bg-[#815BF5] py-1 dark:hover:bg-[#37384B] hover:bg-primary rounded-lg text-white' : 'text-gray-400'}`}
+                        className={`w-[90%] rounded-lg shadow-none gap-2 px-4 hover:bg-accent  py-1 justify-start hover:rounded-lg dark:hover:bg-[#37384B] bg-transparent mb-2 ${isActive('/help/events') ? 'bg-[#815BF5] py-1 dark:hover:bg-[#37384B] hover:bg-primary rounded-lg text-white' : 'text-black dark:text-gray-400'}`}
                         onClick={() => handleNavigation('/help/events')}
                     >
                         <Calendar className='h-5' /> Events
@@ -58,7 +58,7 @@ const ChecklistSidebar: React.FC = () => {
                 <div className='flex justify-center'>
                     <Button
                         variant={isActive('/help/tickets') ? 'default' : 'default'}
-                        className={`w-[90%] rounded-lg  gap-2 px-4 hover:bg-accent  py-1 justify-start hover:rounded-lg dark:hover:bg-[#37384B] bg-transparent mb-2 ${isActive('/help/tickets') ? 'bg-[#815BF5] py-1 dark:hover:bg-[#37384B] hover:bg-primary rounded-lg text-white' : 'text-gray-400'}`}
+                        className={`w-[90%] rounded-lg shadow-none gap-2 px-4 hover:bg-accent  py-1 justify-start hover:rounded-lg dark:hover:bg-[#37384B] bg-transparent mb-2 ${isActive('/help/tickets') ? 'bg-[#815BF5] py-1 dark:hover:bg-[#37384B] hover:bg-primary rounded-lg text-white' : 'text-black dark:text-gray-400'}`}
                         onClick={() => handleNavigation('/help/tickets')}
                     >
                         <Ticket className='h-5' /> Tickets

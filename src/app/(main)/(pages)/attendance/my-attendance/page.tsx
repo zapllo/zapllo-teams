@@ -940,7 +940,7 @@ export default function MyAttendance() {
               >
                 {entry.userId && (
                   <div className="flex gap-2 justify-start">
-                    <div className="h-6 w-6 rounded-full bg-[#815BF5]">
+                    <div className="h-6 w-6 rounded-full text-white bg-[#815BF5]">
                       <h1 className="text-center uppercase text-xs mt-1">
                         {entry.userId.firstName[0]}
                         {entry.userId.lastName[0]}
@@ -969,7 +969,7 @@ export default function MyAttendance() {
                   }
                 >
                   {/* {`Approval Status: `} */}
-                  <strong>{entry.approvalStatus}</strong>
+                  <strong className="text-white">{entry.approvalStatus}</strong>
                 </span>
 
                 {/* If lat and lng are present, render the map icon */}
@@ -1762,7 +1762,7 @@ export default function MyAttendance() {
       {/* Radix UI Dialog for Face Login */}
       <Dialog open={isBreakModalOpen} onOpenChange={handleBreakModalChange}>
         <DialogContent className="z-[100] flex items-center justify-center ">
-          <div className="bg-[#0B0D29] z-[100] p-6 rounded-lg max-w-lg w-full relative">
+          <div className=" z-[100] p-6 rounded-lg max-w-lg w-full relative">
             <div className="flex justify-between">
               <div className="flex gap-2  items-center ">
                 <img src="/branding/AII.png" className="h-10" />
@@ -1774,7 +1774,7 @@ export default function MyAttendance() {
             </div>
             <Separator className="my-4" />
             <div className="w-full flex mb-4 justify-between">
-              <h3 className="text-sm text-white text-center ">
+              <h3 className="text-sm dark:text-white text-center ">
                 {isBreakOpen
                   ? `End Break at ${new Date().toLocaleTimeString()}`
                   : `Take a Break at ${new Date().toLocaleTimeString()}`}
@@ -2065,9 +2065,9 @@ export default function MyAttendance() {
       >
 
         <DialogContent className=" z-[100]  flex  w-full  ">
-          <div className="bg-[#0b0d29] overflow-y-scroll scrollbar-hide h-fit max-h-[600px]  shadow-lg w-full   max-w-lg  rounded-lg">
+          <div className=" overflow-y-scroll scrollbar-hide h-fit max-h-[600px]  shadow-lg w-full   max-w-lg  rounded-lg">
             <div className="flex border-b py-2  w-full justify-between">
-              <DialogTitle className="text-md   px-6 py-2 font-medium">
+              <DialogTitle className="text-md  dark:text-white px-6 py-2 font-medium">
                 Apply Regularization
               </DialogTitle>
               <DialogClose className="px-6 py-2">
@@ -2098,13 +2098,13 @@ export default function MyAttendance() {
                           {format(parseISO(String(regularizationDate)), "dd-MM-yyyy")}
                         </h1>
                       ) : (
-                        <h1 className="text-xs mt-1  bg-[#0b0d29] text-[#787CA5]">
+                        <h1 className="text-xs mt-1  dark:bg-[#0b0d29] text-[#787CA5]">
                           Select Date
                         </h1>
                       )}
                     </button>
                   </DialogTrigger>
-                  <DialogContent className=" z-[100]  scale-[80%]  flex justify-center ">
+                  <DialogContent className=" z-[100] bg-[#0a0d28] scale-[80%]  flex justify-center ">
                     <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
                       <div className="w-full flex mb-4 justify-between">
                         <CustomDatePicker
@@ -2149,13 +2149,13 @@ export default function MyAttendance() {
                           {formatTimeForDisplay(regularizationLoginTime)}
                         </h1>
                       ) : (
-                        <h1 className="text-xs mt-1 bg-[#0b0d29] text-[#787CA5]">
+                        <h1 className="text-xs mt-1 dark:bg-[#0b0d29] text-[#787CA5]">
                           Login Time
                         </h1>
                       )}
                     </button>
                   </DialogTrigger>
-                  <DialogContent className="scale-75 p-6 ">
+                  <DialogContent className="scale-75 bg-[#0a0d28] p-6 ">
 
                     <CustomTimePicker
                       selectedTime={regularizationLoginTime}
@@ -2191,14 +2191,14 @@ export default function MyAttendance() {
                           {formatTimeForDisplay(regularizationLogoutTime)}
                         </h1>
                       ) : (
-                        <h1 className="text-xs mt-1 bg-[#0b0d29] text-[#787CA5]">
+                        <h1 className="text-xs mt-1 dark:bg-[#0b0d29] text-[#787CA5]">
                           Logout Time
                         </h1>
                       )}
                     </button>
                   </DialogTrigger>
 
-                  <DialogContent className="scale-75 p-6">
+                  <DialogContent className="scale-75 bg-[#0a0d28] p-6">
 
                     <CustomTimePicker
                       selectedTime={regularizationLogoutTime}
@@ -2218,7 +2218,7 @@ export default function MyAttendance() {
               <div className="relative">
                 <label
                   htmlFor="remarks"
-                  className="absolute bg-[#0b0d29] text-[#787CA5] ml-2 text-xs -mt-2 px-1"
+                  className="absolute bg-white dark:bg-[#0b0d29] text-[#787CA5] ml-2 text-xs -mt-2 px-1"
                 >
                   Remarks
                 </label>

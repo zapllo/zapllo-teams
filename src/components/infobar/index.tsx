@@ -271,7 +271,7 @@ const InfoBar = (props: Props) => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <div className="flex gap-2 ">
-                  <div className="h-9 w-9 text-xs items-center cursor-pointer flex justify-center border bg-[#815BF5] rounded-full">
+                  <div className="h-9 w-9 text-xs items-center cursor-pointer text-white flex justify-center border bg-[#815BF5] rounded-full">
                     {profilePic ? (
                       <img src={profilePic} alt="Profile" className="h-full w-full rounded-full object-cover" />
                     ) : (

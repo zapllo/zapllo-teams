@@ -8,7 +8,7 @@ type Props = {
 
 const Leaves = ({ selected }: Props) => {
     return (
-        <CalendarDays  className='h-3' />
+        <CalendarDays  className='h-3 text-white' />
 
     )
 }

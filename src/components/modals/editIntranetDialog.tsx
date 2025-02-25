@@ -124,7 +124,7 @@ const EditIntranetDialog: React.FC<EditIntranetDialogProps> = ({ entry, onClose,
             </DialogTitle>
                 <form className="px-6 mb-4" onSubmit={handleSubmit}>
                     <div className="mb-4">
-                        <label className="text-[10px] text-[#787CA5] absolute -mt-2 bg-[#0B0D29]  ml-2">Link URL</label>
+                        <label className="text-[10px] text-[#787CA5] absolute -mt-2 bg-white dark:bg-[#0B0D29]  ml-2">Link URL</label>
                         <input
                             type="url"
                             value={linkUrl}
@@ -134,7 +134,7 @@ const EditIntranetDialog: React.FC<EditIntranetDialogProps> = ({ entry, onClose,
                         />
                     </div>
                     <div className="mb-4">
-                        <label className="text-[10px] text-[#787CA5] absolute -mt-2 bg-[#0B0D29]   ml-2">Description</label>
+                        <label className="text-[10px] text-[#787CA5] absolute -mt-2 bg-white dark:bg-[#0B0D29]   ml-2">Description</label>
                         <textarea
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
@@ -143,7 +143,7 @@ const EditIntranetDialog: React.FC<EditIntranetDialogProps> = ({ entry, onClose,
                         />
                     </div>
                     <div className="mb-4">
-                        <label className="text-[10px] text-[#787CA5] absolute -mt-2 bg-[#0B0D29]   ml-2">Link Name</label>
+                        <label className="text-[10px] text-[#787CA5] absolute -mt-2 bg-white dark:bg-[#0B0D29]   ml-2">Link Name</label>
                         <input
                             type="text"
                             value={linkName}
@@ -153,14 +153,14 @@ const EditIntranetDialog: React.FC<EditIntranetDialogProps> = ({ entry, onClose,
                         />
                     </div>
                     <div className="mb-4">
-                        <label className="text-[10px] text-[#787CA5] absolute -mt-2 bg-[#0B0D29]   ml-2">Category</label>
+                        <label className="text-[10px] text-[#787CA5] absolute -mt-2 bg-white dark:bg-[#0B0D29]   ml-2">Category</label>
                         <select
                             value={category._id}
                             onChange={(e) =>
                                 setCategory(categories.find(cat => cat._id === e.target.value) || category)
                             }
                             required
-                            className="block bg-[#0B0D29] w-full outline-none text-xs p-2 border rounded"
+                            className="block dark:bg-[#0B0D29] w-full outline-none text-xs p-2 border rounded"
                         >
                             <option value="" disabled>Select a category</option>
                             {categories.map((cat) => (

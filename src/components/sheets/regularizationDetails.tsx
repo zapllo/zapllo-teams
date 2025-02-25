@@ -231,13 +231,13 @@ const RegularizationDetails: React.FC<RegularizationDetailsProps> = ({
               <CheckCheck className="h-5" />
               <Label className=" text-md mt-auto">Updates</Label>
             </div>
-            <div className="mt-2 border bg-[#121212] p-2 py-8 rounded">
+            <div className="mt-2 border dark:bg-[#121212] p-2 py-8 rounded">
               {selectedRegularization.notes ? (
                 <div className="flex justify-between items-center p-2 rounded">
                   {/* Display remark and approvedBy user */}
                   <div className="flex gap-2 items-start">
                     <div className="h-6 w-6 rounded-full bg-primary">
-                      <h1 className="text-center uppercase text-xs mt-1">
+                      <h1 className="text-center text-white uppercase text-xs mt-1">
                         {
                           selectedRegularization.approvedBy
                             ?.firstName[0]
@@ -263,7 +263,7 @@ const RegularizationDetails: React.FC<RegularizationDetailsProps> = ({
                       </p>
                     </div>
                   </div>
-                  <div className="bg-[#017a5b] rounded px-2 py-1">
+                  <div className="bg-[#017a5b] text-white rounded px-2 py-1">
                     <p className="text-xs">
                       {selectedRegularization.approvalStatus}
                     </p>

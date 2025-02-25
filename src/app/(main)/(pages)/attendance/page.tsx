@@ -475,7 +475,7 @@ const AttendanceDashboard: React.FC = () => {
                         {/* <h1 className="text-xs">Select Date & Time</h1> */}
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="z-[100] scale-90  flex justify-center ">
+                    <DialogContent className="z-[100] scale-90 bg-[#0a0d28] flex justify-center ">
                       <div className="z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
                         <div className="w-full flex mb-4 justify-between">
                           <CustomDatePicker
