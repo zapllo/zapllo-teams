@@ -65,7 +65,7 @@ const HolidayForm: React.FC<HolidayFormProps> = ({ onHolidayCreated }) => {
                   {/* <Toaster /> */}
       <form onSubmit={handleSubmit} className="space-y-4 p-6">
         <div className="relative">
-          <label className="absolute bg-[#0b0d29] text-[#787CA5] ml-2 text-xs -mt-2 px-1">
+          <label className="absolute bg-white dark:bg-[#0b0d29] text-[#787CA5] ml-2 text-xs -mt-2 px-1">
             Holiday Name
           </label>
           <input
@@ -101,7 +101,7 @@ const HolidayForm: React.FC<HolidayFormProps> = ({ onHolidayCreated }) => {
                 ) : (
                   <div className="flex gap-1">
                     <Calendar className="h-5" />
-                    <h1 className="text-xs mt-0.5 bg-[#0b0d29] text-[#787CA5]  ">
+                    <h1 className="text-xs mt-0.5 dark:bg-[#0b0d29] text-[#787CA5]  ">
                       Select Date
                     </h1>
                   </div>
@@ -109,7 +109,7 @@ const HolidayForm: React.FC<HolidayFormProps> = ({ onHolidayCreated }) => {
               </button>
             </DialogTrigger>
 
-            <DialogContent className=" z-[100]  scale-90 flex justify-center ">
+            <DialogContent className=" z-[100] bg-black dark:bg-[#0a0d28] scale-90 flex justify-center ">
               <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
                 <div className="w-full flex mb-4 justify-between">
                   <CustomDatePicker

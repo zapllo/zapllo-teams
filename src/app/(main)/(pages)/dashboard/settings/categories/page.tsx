@@ -246,7 +246,7 @@ const Categories: React.FC = () => {
                 placeholder="Add New Category"
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
-                className="w-full focus-within:border-[#815BF5] outline-none text-xs text-white bg-[#0A0D28] border rounded px-3 py-2"
+                className="w-full focus-within:border-[#815BF5] outline-none text-xs text-white dark:bg-[#0A0D28] border rounded px-3 py-2"
               />
             </div>
             <div className="mt-4">
@@ -330,13 +330,13 @@ const Categories: React.FC = () => {
                     }}
                     className={`cursor-pointer border-2 text-xs rounded-lg p-2 hover:shadow-lg transition-all ${selectedCategories.includes(category)
                       ? "bg-gradient-to-l from-[#815BF5] to-purple-900 text-white border-transparent"
-                      : "border text-white -700 "
+                      : "border dark:text-white -700 "
                       }`}
                   >
                     <h3 className="font-medium">
                       {typeof category === "string" ? category : category.name}
                     </h3>
-                    <p className="text-xs mt-1 text-muted-foreground">
+                    <p className="text-xs mt-1 text-gray-400 dark:text-muted-foreground">
                       Tap to select
                     </p>
                   </div>
@@ -364,7 +364,7 @@ const Categories: React.FC = () => {
         {loading ? <Loader /> : ""}
       </div>
 
-      <div className="flex justify-start rounded items-center border bg-[#0A0D28] w-full mt-4">
+      <div className="flex justify-start rounded items-center border dark:bg-[#0A0D28] w-full mt-4">
         {/* <Label>Search Categories</Label> */}
         <h1 className="text-start text- font-medium  p-4">Categories</h1>
         <div className=" ml-auto">
@@ -373,7 +373,7 @@ const Categories: React.FC = () => {
             placeholder="Search Categories"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className=" outline-none focus-within:border-[#815BF5] text-xs text-white bg-[#0B0D29] border rounded px-4 py-2 mx-4"
+            className=" outline-none focus-within:border-[#815BF5] text-xs dark:text-white dark:bg-[#0B0D29] border rounded px-4 py-2 mx-4"
           />
         </div>
       </div>
@@ -404,7 +404,7 @@ const Categories: React.FC = () => {
                       type="text"
                       value={editCategoryName}
                       onChange={(e) => setEditCategoryName(e.target.value)}
-                      className="w-full text-sm focus-within:border-[#815BF5] text-white outline-none bg-transparent border rounded px-3 py-2"
+                      className="w-full text-sm focus-within:border-[#815BF5] dark:text-white outline-none bg-transparent border rounded px-3 py-2"
                     />
                     <div className="flex gap-2 mt-4">
                       <button

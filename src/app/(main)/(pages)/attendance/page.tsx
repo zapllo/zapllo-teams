@@ -401,7 +401,7 @@ const AttendanceDashboard: React.FC = () => {
   return (
     <div className="p-6 h-screen overflow-y-scroll scrollbar-hide">
       {attendanceLoading && (
-        <div className="absolute w-screen h-screen z-[100]  inset-0 bg-[#04061e] -900  bg-opacity-90 rounded-xl flex justify-center items-center">
+        <div className="absolute w-screen h-screen z-[100]  inset-0 dark:bg-[#04061e] bg-[#FEFEFE] -900  bg-opacity-90 rounded-xl flex justify-center items-center">
           <div
             className=" z-[100]  max-h-screen max-w-screen text-[#D0D3D3] w-[100%] rounded-lg ">
             <div className="">
@@ -421,7 +421,7 @@ const AttendanceDashboard: React.FC = () => {
             <div className="mb-4 flex gap-2 justify-center w-full">
 
               <select
-                className="border rounded text-xs border-[] bg-[#04061E]  outline-none p-2"
+                className="border rounded text-xs border-[] dark:bg-[#04061E]  outline-none p-2"
                 onChange={(e) => setManagerId(e.target.value)}
               >
                 <option value="">Select Manager</option>
@@ -433,7 +433,7 @@ const AttendanceDashboard: React.FC = () => {
               </select>
               {/* <label htmlFor="employee" className="mr-2">Employee:</label> */}
               <select
-                className="border-[#] border outline-none bg-[#04061E] text-xs  rounded p-2"
+                className="border-[#] border outline-none dark:bg-[#04061E] text-xs  rounded p-2"
                 id="employee"
                 onChange={(e) => setEmployeeId(e.target.value)} // Update selected employee
               >
@@ -466,7 +466,7 @@ const AttendanceDashboard: React.FC = () => {
                       <Button
                         type="button"
                         onClick={() => setIsDatePickerOpen(true)}
-                        className=" rounded  border border-[#] bg-[#] hover:bg-[#37384B] px-3 flex gap-1 py-2"
+                        className=" rounded  border border-[#] bg-[#] hover:bg-primary hover:text-white dark:hover:bg-[#37384B] text-black dark:text-white px-3 flex gap-1 py-2"
                       >
                         <Calendar className="h-5 text-sm" />
                         {/* // Show the selected date if the user has interacted */}
@@ -490,21 +490,21 @@ const AttendanceDashboard: React.FC = () => {
                 </div>
               </div>
               <div className="flex justify-center space-x-4 mb-4">
-                <div className="flex gap-2 items-center  text-white border p-2 text-xs  rounded">
+                <div className="flex gap-2 items-center  dark:text-white border p-2 text-xs  rounded">
                   All: {dailytotalCount}
                 </div>
-                <div className="flex flex-col items-center text-green-400 border p-2 text-xs  rounded">
+                <div className="flex flex-col items-center text-green-500 dark:text-green-400 border p-2 text-xs  rounded">
                   Present : {dailypresentCount}
                 </div>
-                <div className="flex flex-col items-center text-yellow-400   border p-2 text-xs  rounded">
+                <div className="flex flex-col items-center text-yellow-500  dark:text-yellow-400   border p-2 text-xs  rounded">
                   On Leave : {dailyonLeaveCount}
                 </div>
-                <div className="flex flex-col items-center text-red-500 border p-2 text-xs  rounded">
+                <div className="flex flex-col items-center dark:text-red-500 text-red-400  border p-2 text-xs  rounded">
                   Absent : {dailyabsentCount}
                 </div>
               </div>
               <div className=' border rounded-xl w-full '>
-                <table className="table- bg-[#0A0D28] rounded-xl w-full ">
+                <table className="table- dark:bg-[#0A0D28] rounded-xl w-full ">
                   <thead className=' rounded-xl'>
                     <tr className="text-xs   rounded-xl ">
                       <th className=" px-4 text-muted-foreground py-2 text-left">Name</th>
@@ -553,7 +553,7 @@ const AttendanceDashboard: React.FC = () => {
 
                 <div>
                   <select
-                    className="border-[#] bg-[#04061E] border-2 outline-none text-xs rounded p-2"
+                    className="border-[#] dark:bg-[#04061E] border-2 outline-none text-xs rounded p-2"
                     onChange={(e) => setPeriod(e.target.value)}
                   >
                     <option value="thisWeek">This Week</option>
@@ -569,7 +569,7 @@ const AttendanceDashboard: React.FC = () => {
                 <span className="border text-xs text-green-400  p-2 rounded">Week Offs: {weekOffs}</span>
                 <span className="border text-xs text-red-500  p-2 rounded">Holidays: {holidaysCumulative}</span>
               </div>
-              <div className=' border bg-[#0A0D28] rounded-xl w-full '>
+              <div className=' border dark:bg-[#0A0D28] rounded-xl w-full '>
                 <table className="table-  rounded-xl w-full ">
                   <thead className=' rounded'>
                     <tr className="text-muted-foreground text-xs">
@@ -609,7 +609,7 @@ const AttendanceDashboard: React.FC = () => {
       {disallowedRoles.includes(role) && (
         <div className="relative mt-2 mb-12">
           <div className="h-full rounded-md">
-            <div className='bg-[#0A0D28] border rounded-xl w-full '>
+            <div className='dark:bg-[#0A0D28] border rounded-xl w-full '>
               <table className="table-  rounded-xl w-full ">
                 <thead className='border-b text-muted-foreground'>
                   <tr>
@@ -654,7 +654,7 @@ const AttendanceDashboard: React.FC = () => {
             <div className="flex items-center  ">
               {/* Month selector */}
               <select
-                className="p-2 text-sm border-2 outline-none w-24 border-[#] bg-[#04061E] rounded"
+                className="p-2 text-sm border-2 outline-none w-24 border-[#] dark:bg-[#04061E] rounded"
                 value={selectedAttendanceDate}
                 onChange={(e) => setSelectedAttendanceDate(e.target.value)}
               >
@@ -698,7 +698,7 @@ const AttendanceDashboard: React.FC = () => {
       {allowedRoles.includes(role) && (
         <div className="relative mt-2 mb-12">
           <div className="h-full  rounded-md">
-            <div className='bg-[#0A0D28] border rounded-xl w-full '>
+            <div className='dark:bg-[#0A0D28] border rounded-xl w-full '>
               <table className="table-  rounded-xl w-full ">
                 <thead className='border-b text-muted-foreground'>
                   <th className="rounded-l text-sm font-medium text-end p-2 w-24 px-4">Date</th>

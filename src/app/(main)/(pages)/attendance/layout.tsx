@@ -21,6 +21,7 @@ type Props = { children: React.ReactNode };
 const Layout = (props: Props) => {
   const [isTrialExpired, setIsTrialExpired] = useState(false);
   const [isLeaveAccess, setIsLeaveAccess] = useState<boolean | undefined>();
+  const [isPlanEligible, setIsPlanEligible] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -33,7 +34,15 @@ const Layout = (props: Props) => {
         ]);
 
         const user = userResponse.data.data;
+        if (!user.isLeaveAccess) {
+          router.push('/dashboard');
+          return;
+        }
         const organization = organizationResponse.data.data;
+        // Define eligible plans
+        const eligiblePlans = ['Money Saver Bundle'];
+
+
 
         setIsLeaveAccess(user.isLeaveAccess);
 
@@ -46,6 +55,48 @@ const Layout = (props: Props) => {
         const subscriptionValid =
           organization.subscriptionExpires &&
           new Date(organization.subscriptionExpires) > new Date();
+
+        // Redirect if trial has expired and there is no valid subscription or subscribed plan
+        if (trialExpired && (!organization.subscribedPlan || !subscriptionValid)) {
+          router.push('/dashboard');
+        }
+
+        if (trialExpired) {
+          // If the trial has expired, check for eligible plans
+          const isPlanEligible = eligiblePlans.includes(organization.subscribedPlan);
+          setIsPlanEligible(isPlanEligible);
+
+          // Redirect if no eligible plan
+          if (!isPlanEligible) {
+            router.push('/dashboard');
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user or organization details:', error);
+      }
+    };
+
+    checkAccess();
+  }, [router]);
+
+
+  useEffect(() => {
+    const checkAccess = async () => {
+      try {
+        const [userResponse, organizationResponse] = await Promise.all([
+          axios.get('/api/users/me'),
+          axios.get('/api/organization/getById'),
+        ]);
+
+        const user = userResponse.data.data;
+        const organization = organizationResponse.data.data;
+
+        // Determine if the trial has expired
+        const trialExpired = organization.trialExpires && new Date(organization.trialExpires) <= new Date();
+
+        // Determine if the subscription is valid
+        const subscriptionValid = organization.subscriptionExpires && new Date(organization.subscriptionExpires) > new Date();
 
         // Redirect if trial has expired and there is no valid subscription or subscribed plan
         if (trialExpired && (!organization.subscribedPlan || !subscriptionValid)) {
@@ -73,7 +124,7 @@ const Layout = (props: Props) => {
   });
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#04061e]">
+    <div className="flex h-screen overflow-hidden dark:bg-[#04061e]">
       {/* Sidebar */}
       <div className="w-48 shrink-0">
         <LeavesSidebar />

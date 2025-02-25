@@ -423,7 +423,7 @@ export default function AllLeaves() {
           onClick={() => setDateFilter("Today")}
           className={`px-4 text-xs h-8 rounded ${dateFilter === "Today"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           Today
@@ -432,7 +432,7 @@ export default function AllLeaves() {
           onClick={() => setDateFilter("Yesterday")}
           className={`px-4 text-xs h-8 rounded ${dateFilter === "Yesterday"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           Yesterday
@@ -441,7 +441,7 @@ export default function AllLeaves() {
           onClick={() => setDateFilter("ThisWeek")}
           className={`px-4 text-xs h-8 rounded ${dateFilter === "ThisWeek"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           This Week
@@ -450,7 +450,7 @@ export default function AllLeaves() {
           onClick={() => setDateFilter("ThisMonth")}
           className={`px-4 text-xs h-8 rounded ${dateFilter === "ThisMonth"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           This Month
@@ -459,7 +459,7 @@ export default function AllLeaves() {
           onClick={() => setDateFilter("LastMonth")}
           className={`px-4 text-xs h-8 rounded ${dateFilter === "LastMonth"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           Last Month
@@ -468,7 +468,7 @@ export default function AllLeaves() {
           onClick={() => setDateFilter("AllTime")}
           className={`px-4 text-xs h-8 rounded ${dateFilter === "AllTime"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           All Time
@@ -477,7 +477,7 @@ export default function AllLeaves() {
           onClick={() => setIsCustomModalOpen(true)}
           className={`px-4 text-xs h-8 rounded ${dateFilter === "Custom"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           Custom
@@ -490,7 +490,7 @@ export default function AllLeaves() {
           onClick={() => setTab("balances")}
           className={`px-4 text-xs py-2 flex  rounded ${tab === "balances"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           <WalletCards className="h-4" />
@@ -500,7 +500,7 @@ export default function AllLeaves() {
           onClick={() => setTab("applications")}
           className={`px-4 text-xs py-2 flex  rounded ${tab === "applications"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           <Calendar className="h-4" />
@@ -567,7 +567,7 @@ export default function AllLeaves() {
                 }
                 className={`px-4 text-xs h-8 flex items-center  gap-2 rounded border ${filter === status
                   ? "bg-[#815BF5] text-white"
-                  : "bg-[#] border text-white"
+                  : "bg-[#] border dark:text-white"
                   } ${status === "Approved" && filter !== status
                     ? "hover:border-green-500 border"
                     : ""
@@ -637,31 +637,31 @@ export default function AllLeaves() {
                       <div className="h-6 w-6 rounded-full bg-[#7c3987] flex items-center justify-center text-white text-sm">
                         {leave.user.firstName[0]}
                       </div>
-                      <h3 className="text-md text-white">
+                      <h3 className="text-md dark:text-white">
                         {leave.user.firstName}
                       </h3>
                       <div className="flex gap-4">
                         <p className="text-sm text-gray-400">
                           From:{" "}
-                          <span className="text-white">
+                          <span className="dark:text-white">
                             {format(new Date(leave.fromDate), "MMM d, yyyy")}
                           </span>
                         </p>
                         <p className="text-sm text-gray-400 ml-4">
                           To:{" "}
-                          <span className="text-white">
+                          <span className="dark:text-white">
                             {format(new Date(leave.toDate), "MMM d, yyyy")}
                           </span>
                         </p>
                         <p className="text-sm text-gray-400 ml-4">
                           Applied:{" "}
-                          <span className="text-white">
+                          <span className="dark:text-white">
                             {leave.appliedDays} Day(s)
                           </span>
                         </p>
                         <p className="text-sm text-gray-400 ml-4">
                           Approved:{" "}
-                          <span className="text-white">
+                          <span className="dark:text-white">
                             {
                               leave.leaveDays.filter(
                                 (day) => day.status === "Approved"
@@ -706,7 +706,7 @@ export default function AllLeaves() {
                       leave.status === "Pending" && (
                         <div className="flex gap-2">
                           <button
-                            className="bg-transparent py-2 flex gap-2 border  text-xs text-white px-4 rounded hover:border-green-500"
+                            className="bg-transparent py-2 flex gap-2 border  text-xs dark:text-white px-4 rounded hover:border-green-500"
                             onClick={(e) => {
                               e.stopPropagation(); // Prevent triggering sheet
                               handleApproval(leave, e)
@@ -717,7 +717,7 @@ export default function AllLeaves() {
                           </button>
 
                           <button
-                            className="bg-transparent border  flex gap-2 text-white px-4 py-2 text-xs rounded hover:border-red-500"
+                            className="bg-transparent border  flex gap-2 dark:text-white px-4 py-2 text-xs rounded hover:border-red-500"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleReject(leave, e)
@@ -784,9 +784,9 @@ export default function AllLeaves() {
           )}
 
           <Dialog open={isCustomModalOpen} onOpenChange={setIsCustomModalOpen}>
-            <DialogContent className="w-96 p-6 ml-12 bg-[#0B0D29] z-[100]">
+            <DialogContent className="w-96 p-6 ml-12  z-[100]">
               <div className="flex justify-between">
-                <DialogTitle className="text-md  font-medium text-white">
+                <DialogTitle className="text-md  font-medium dark:text-white">
                   Select Custom Date Range
                 </DialogTitle>
                 <DialogClose className="" onClick={handleClose}>
@@ -879,7 +879,7 @@ export default function AllLeaves() {
           {/* Start Date Picker Modal */}
           <Dialog open={isStartPickerOpen} onOpenChange={setIsStartPickerOpen}>
 
-            <DialogContent className=" z-[100]  scale-90 flex justify-center ">
+            <DialogContent className=" z-[100] bg-black dark:bg-[#0a0d28] scale-90 flex justify-center ">
               <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
                 <div className="w-full flex mb-4 justify-between">
                   <CustomDatePicker
@@ -898,7 +898,7 @@ export default function AllLeaves() {
           {/* End Date Picker Modal */}
           <Dialog open={isEndPickerOpen} onOpenChange={setIsEndPickerOpen}>
 
-            <DialogContent className=" z-[100]  scale-90 flex justify-center ">
+            <DialogContent className=" z-[100] bg-black dark:bg-[#0a0d28] scale-90 flex justify-center ">
               <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
                 <div className="w-full flex mb-4 justify-between">
                   <CustomDatePicker
@@ -917,7 +917,7 @@ export default function AllLeaves() {
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full border  border-collapse table-auto">
-            <thead className="bg-[#0A0D28] text-left text-xs">
+            <thead className="dark:bg-[#0A0D28] text-left text-xs">
               <tr>
                 <th className="px-4  py-2">User</th>
                 {leaveTypes.map((leaveType) => (

@@ -445,7 +445,7 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
     <Dialog open onOpenChange={onClose}>
       {/* <Toaster /> */}
       <DialogContent className="z-[100]  overflow-y-scroll h-full max-h-screen m-auto flex w-full max-w-lg  ">
-        <div className="bg-[#0b0d29] scrollbar-hide    shadow-lg w-full   max-w-lg  rounded-lg">
+        <div className=" scrollbar-hide    shadow-lg w-full   max-w-lg  rounded-lg">
           <div className="flex border-b py-2  w-full justify-between ">
             <DialogTitle className="text-md   px-6 py-2 font-medium">
               Submit Leave Request
@@ -457,22 +457,22 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
 
           <form onSubmit={handleSubmit} className="space-y-4 p-6 h-full">
             <div className="relative">
-              <label className="absolute bg-[#0b0d29] ml-2 text-xs text-[#787CA5] -mt-2 px-1">
+              <label className="absolute bg-white dark:bg-[#0b0d29] ml-2 text-xs text-[#787CA5] -mt-2 px-1">
                 Leave Type
               </label>
               <select
                 name="leaveType"
                 value={formData.leaveType}
                 onChange={handleInputChange}
-                className="w-full text-xs p-2 bg-[#1A1C20] outline-none border rounded bg-transparent"
+                className="w-full text-xs p-2  outline-none border rounded bg-transparent"
               >
-                <option className="bg-[#1A1C20]" value="">
+                <option className="dark:bg-[#1A1C20]" value="">
                   Select Leave Type
                 </option>
                 {leaveTypes.map((type) => (
                   <option
                     key={type._id}
-                    className="bg-[#1A1C20]"
+                    className="dark:bg-[#1A1C20]"
                     value={type._id}
                   >
                     {type.leaveType}
@@ -483,7 +483,7 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
 
             {/* Display Allotted Leaves and Balance */}
             {allotedLeaves !== null && userLeaveBalance !== null && (
-              <div className="mt-2 flex justify-between text-xs text-white bg-[#252738] p-3 rounded">
+              <div className="mt-2 flex justify-between text-xs dark:text-white border dark:border-none dark:bg-[#252738] p-3 rounded">
                 <p>Total Allotted Leaves: {allotedLeaves}</p>
                 <p>Remaining Balance: {userLeaveBalance}</p>
               </div>
@@ -530,7 +530,7 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
                     open={isFromDatePickerOpen}
                     onOpenChange={setIsFromDatePickerOpen}
                   >
-                    <DialogContent className=" z-[100] scale-90  flex justify-center ">
+                    <DialogContent className=" z-[100] bg-black dark:bg-[#0a0d28] scale-90  flex justify-center ">
                       <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
                         <div className="w-full flex mb-4 justify-between">
                           <CustomDatePicker
@@ -598,7 +598,7 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
                   >
                     <DialogPortal>
 
-                      <DialogContent className=" z-[100]  scale-90 flex justify-center ">
+                      <DialogContent className=" z-[100] bg-black dark:bg-[#0a0d28] scale-90 flex justify-center ">
                         <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
                           <div className="w-full flex mb-4 justify-between">
                             <CustomDatePicker
@@ -652,7 +652,7 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
                       {availableUnits.map((unit) => (
                         <option
                           key={unit}
-                          className="bg-[#1A1C20]"
+                          className="dark:bg-[#1A1C20]"
                           value={unit}
                         >
                           {unit}
@@ -662,7 +662,7 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
                   </div>
                 ))}
             </div>
-            <div className="mt-2  text-xs text-white bg-[#252738] p-3 rounded">
+            <div className="mt-2  text-xs dark:text-white border dark:border-none dark:bg-[#252738] p-3 rounded">
               <p className="text-right">Leave Application for : {totalAppliedDays} day(s)</p>
               <div>
               {error && <p className="text-[#787CA5] text-xs">{error}</p>}
@@ -670,7 +670,7 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
             </div>
             <div>
               <div className="relative">
-                <label className="absolute bg-[#0b0d29] text-[#787CA5] ml-2 text-xs -mt-2 px-1">
+                <label className="absolute bg-white dark:bg-[#0b0d29] text-[#787CA5] ml-2 text-xs -mt-2 px-1">
                   Leave Reason
                 </label>
               </div>
@@ -689,14 +689,14 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
               {recording ? (
                 <div
                   onClick={stopRecording}
-                  className="h-8  w-8 rounded-full items-center text-center  border cursor-pointer hover:shadow-white shadow-sm   bg-red-500"
+                  className="h-8  w-8 rounded-full text-white items-center text-center  border cursor-pointer hover:shadow-white shadow-sm   bg-red-500"
                 >
                   <Mic className="h-5 text-center m-auto mt-1" />
                 </div>
               ) : (
                 <div
                   onClick={startRecording}
-                  className="h-8  w-8 rounded-full items-center text-center  border cursor-pointer hover:shadow-white shadow-sm  bg-[#815BF5]"
+                  className="h-8  w-8 rounded-full text-white items-center text-center  border cursor-pointer hover:shadow-white shadow-sm  bg-[#815BF5]"
                 >
                   <Mic className="h-5 text-center m-auto mt-1" />
                 </div>

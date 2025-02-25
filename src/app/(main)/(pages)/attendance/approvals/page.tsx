@@ -380,7 +380,7 @@ export default function Approvals() {
       setLoading(false);
     }
   };
-  
+
   // Separate filter functions for Leave and Regularization to maintain type integrity
   const filterLeavesByDate = (leaves: Leave[]): Leave[] => {
     const today = new Date();
@@ -728,7 +728,7 @@ export default function Approvals() {
           onClick={() => setDateFilter("Today")}
           className={`px-4 text-xs h-8 rounded ${dateFilter === "Today"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           Today
@@ -737,7 +737,7 @@ export default function Approvals() {
           onClick={() => setDateFilter("Yesterday")}
           className={`px-4 text-xs h-8 rounded ${dateFilter === "Yesterday"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           Yesterday
@@ -746,7 +746,7 @@ export default function Approvals() {
           onClick={() => setDateFilter("ThisWeek")}
           className={`px-4 text-xs h-8 rounded ${dateFilter === "ThisWeek"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           This Week
@@ -755,7 +755,7 @@ export default function Approvals() {
           onClick={() => setDateFilter("ThisMonth")}
           className={`px-4 text-xs h-8 rounded ${dateFilter === "ThisMonth"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           This Month
@@ -764,7 +764,7 @@ export default function Approvals() {
           onClick={() => setDateFilter("LastMonth")}
           className={`px-4 text-xs h-8 rounded ${dateFilter === "LastMonth"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           Last Month
@@ -773,7 +773,7 @@ export default function Approvals() {
           onClick={() => setDateFilter("AllTime")}
           className={`px-4 text-xs h-8 rounded ${dateFilter === "AllTime"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           All Time
@@ -782,7 +782,7 @@ export default function Approvals() {
           onClick={() => setIsCustomModalOpen(true)}
           className={`px-4 text-xs h-8 rounded ${dateFilter === "Custom"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           Custom
@@ -795,7 +795,7 @@ export default function Approvals() {
           onClick={() => setFilter("Leave")}
           className={`px-4 text-xs py-2 rounded flex ${filter === "Leave"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           <Calendar className="h-4" />
@@ -805,7 +805,7 @@ export default function Approvals() {
           onClick={() => setFilter("Regularization")}
           className={`px-4 text-xs py-2 rounded flex ${filter === "Regularization"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           <Users2 className="h-4" />
@@ -821,7 +821,7 @@ export default function Approvals() {
               onClick={() => setStatusFilter("All")}
               className={`px-4 py-2 flex gap-2 rounded text-xs ${statusFilter === "All"
                 ? "bg-[#815BF5] text-white"
-                : "bg-[#] border text-white"
+                : "bg-[#] border dark:text-white"
                 }`}
             >
               <HamburgerMenuIcon />
@@ -831,11 +831,11 @@ export default function Approvals() {
               onClick={() => setStatusFilter("Pending")}
               className={`px-4 py-2 flex gap-2 rounded text-xs ${statusFilter === "Pending"
                 ? "bg-[#815BF5] text-white"
-                : "bg-[#] border hover:border-orange-400 text-white"
+                : "bg-[#] border hover:border-orange-400 dark:text-white"
                 }`}
             >
               <Circle
-                className={`h-4 text-red-500 ${statusFilter === "Pending" ? "text-white" : ""
+                className={`h-4 text-red-500 ${statusFilter === "Pending" ? "dark:text-white" : ""
                   } `}
               />
               Pending
@@ -867,7 +867,7 @@ export default function Approvals() {
                 onClick={() => setStatusFilter("Approved")}
                 className={`px-4 py-2 flex gap-2 rounded text-xs border ${statusFilter === "Approved"
                   ? "bg-[#815BF5] text-white border-transparent hover:border-green-500"
-                  : "bg-[#] border text-white  hover:border-green-500"
+                  : "bg-[#] border dark:text-white  hover:border-green-500"
                   }`}
               >
                 <CheckCircle
@@ -880,7 +880,7 @@ export default function Approvals() {
                 onClick={() => setStatusFilter("Rejected")}
                 className={`px-4 py-2 flex gap-2 ml-4 rounded text-xs border ${statusFilter === "Rejected"
                   ? "bg-[#815BF5] text-white border-transparent hover:border-red-500"
-                  : "bg-[#] text-white border hover:border-red-500"
+                  : "bg-[#] dark:text-white border hover:border-red-500"
                   }`}
               >
                 <Cross1Icon
@@ -898,7 +898,7 @@ export default function Approvals() {
               onClick={() => setStatusFilter("All")}
               className={`px-4 py-2 flex gap-2 rounded text-xs ${statusFilter === "All"
                 ? "bg-[#815BF5] text-white"
-                : "bg-[#] border text-white"
+                : "bg-[#] border dark:text-white"
                 }`}
             >
               <HamburgerMenuIcon />
@@ -908,7 +908,7 @@ export default function Approvals() {
               onClick={() => setStatusFilter("Pending")}
               className={`px-4 py-2 flex gap-2 rounded text-xs ${statusFilter === "Pending"
                 ? "bg-[#815BF5] text-white"
-                : "bg-[#] border hover:border-orange-400 text-white"
+                : "bg-[#] border hover:border-orange-400 dark:text-white"
                 }`}
             >
               <Circle
@@ -941,7 +941,7 @@ export default function Approvals() {
               onClick={() => setStatusFilter("Approved")}
               className={`px-4 py-2 flex gap-2 rounded text-xs border ${statusFilter === "Approved"
                 ? "bg-[#815BF5] text-white border"
-                : "bg-[#] border text-white "
+                : "bg-[#] border dark:text-white "
                 } hover:border-green-500`}
             >
               <CheckCircle
@@ -974,7 +974,7 @@ export default function Approvals() {
               onClick={() => setStatusFilter("Rejected")}
               className={`px-4 py-2 flex gap-2 rounded text-xs border ${statusFilter === "Rejected"
                 ? "bg-[#815BF5] text-white border-transparent"
-                : "bg-[#] border text-white border-"
+                : "bg-[#] border dark:text-white border-"
                 } hover:border-red-500`}
             >
               <Cross1Icon
@@ -1020,31 +1020,31 @@ export default function Approvals() {
                     <div className="h-6 w-6 rounded-full bg-[#815BF5] flex items-center justify-center text-white text-sm">
                       {leave.user.firstName[0]}
                     </div>
-                    <h3 className="text-md text-white">
+                    <h3 className="text-md dark:text-white">
                       {leave.user.firstName}
                     </h3>
                     <div className="flex gap-4">
                       <p className="text-sm text-gray-400">
                         From:{" "}
-                        <span className="text-white">
+                        <span className="dark:text-white">
                           {format(new Date(leave.fromDate), "MMM d, yyyy")}
                         </span>
                       </p>
                       <p className="text-sm text-gray-400 ml-4">
                         To:{" "}
-                        <span className="text-white">
+                        <span className="dark:text-white">
                           {format(new Date(leave.toDate), "MMM d, yyyy")}
                         </span>
                       </p>
                       <p className="text-sm text-gray-400 ml-4">
                         Applied:{" "}
-                        <span className="text-white">
+                        <span className="dark:text-white">
                           {leave.appliedDays} Day(s)
                         </span>
                       </p>
                       <p className="text-sm text-gray-400 ml-4">
                         Approved:{" "}
-                        <span className="text-white">
+                        <span className="dark:text-white">
                           {
                             leave.leaveDays.filter(
                               (day) => day.status === "Approved"
@@ -1087,14 +1087,14 @@ export default function Approvals() {
                   leave.status === "Pending" && (
                     <div className="flex gap-2 ml-4 w-full mb-4 justify-start">
                       <button
-                        className="bg-transparent py-2 flex gap-2 border text-xs text-white hover:border-green-500 px-4 rounded"
+                        className="bg-transparent py-2 flex gap-2 border text-xs dark:text-white hover:border-green-500 px-4 rounded"
                         onClick={(e) => handleApproval(leave, e)}
                       >
                         <CheckCheck className="w-4 h-4 text-[#017a5b]" />
                         Approve
                       </button>
                       <button
-                        className="bg-transparent border flex gap-2  hover:border-red-500 text-white px-4 py-2 text-xs rounded"
+                        className="bg-transparent border flex gap-2  hover:border-red-500 dark:text-white px-4 py-2 text-xs rounded"
                         onClick={(e) => handleReject(leave, e)}
                       >
                         <X className="w-4 h-4 text-red-500" />
@@ -1147,12 +1147,12 @@ export default function Approvals() {
                     <div className="h-6 w-6 rounded-full bg-[#7c3987] flex items-center justify-center text-white text-sm">
                       {reg?.userId?.firstName[0]}
                     </div>
-                    <h3 className="text-md text-white">
+                    <h3 className="text-md dark:text-white">
                       {reg?.userId?.firstName}
                     </h3>
                     <p className="text-sm text-gray-400">
                       Date:{" "}
-                      <span className="text-white">
+                      <span className="dark:text-white">
                         {format(new Date(reg?.timestamp), "MMM d, yyyy")}
                       </span>
                     </p>
@@ -1176,7 +1176,7 @@ export default function Approvals() {
                       reg.approvalStatus === "Pending" && (
                         <div className="flex gap-2 ml-4 w-full mb-4 justify-start">
                           <button
-                            className="bg-transparent py-2 flex gap-2 hover:border-green-600 border text-xs text-white px-4 rounded"
+                            className="bg-transparent py-2 flex gap-2 hover:border-green-600 border text-xs dark:text-white px-4 rounded"
                             onClick={(e) => {
                               e.stopPropagation(); // Prevent triggering sheet
                               handleApproval(reg, e);
@@ -1186,7 +1186,7 @@ export default function Approvals() {
                             Approve
                           </button>
                           <button
-                            className="bg-transparent border flex gap-2 hover:border-red-600 text-white px-4 py-2 text-xs rounded"
+                            className="bg-transparent border flex gap-2 hover:border-red-600 dark:text-white px-4 py-2 text-xs rounded"
                             onClick={(e) => {
                               e.stopPropagation(); // Prevent triggering sheet
                               handleReject(reg, e);
@@ -1196,7 +1196,7 @@ export default function Approvals() {
                             Reject
                           </button>
                           <button
-                            className="bg-transparent flex gap-2 text-white px-4 py-2 text-xs rounded"
+                            className="bg-transparent flex gap-2 dark:text-white px-4 py-2 text-xs rounded"
                             onClick={(e) => {
                               e.stopPropagation(); // Prevent triggering sheet
                               openRegularizationDeleteDialog(reg._id); // Open delete confirmation for Regularization
@@ -1293,9 +1293,9 @@ export default function Approvals() {
 
       {/* Custom Date Range Modal */}
       <Dialog open={isCustomModalOpen} onOpenChange={setIsCustomModalOpen}>
-        <DialogContent className="w-96 z-[100] p-6 ml-12 bg-[#0B0D29]">
+        <DialogContent className="w-96 z-[100] p-6 ml-12 ">
           <div className="flex justify-between">
-            <DialogTitle className="text-md  font-medium text-white">
+            <DialogTitle className="text-md  font-medium dark:text-white">
               Select Custom Date Range
             </DialogTitle>
             <DialogClose className="" onClick={handleClose}>
@@ -1388,7 +1388,7 @@ export default function Approvals() {
       {/* Start Date Picker Modal */}
       <Dialog open={isStartPickerOpen} onOpenChange={setIsStartPickerOpen}>
 
-        <DialogContent className=" z-[100]  scale-90 flex justify-center ">
+        <DialogContent className=" z-[100] bg-black dark:bg-[#0a0d28]  scale-90 flex justify-center ">
           <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
             <div className="w-full flex mb-4 justify-between">
               <CustomDatePicker
@@ -1407,7 +1407,7 @@ export default function Approvals() {
       {/* End Date Picker Modal */}
       <Dialog open={isEndPickerOpen} onOpenChange={setIsEndPickerOpen}>
 
-        <DialogContent className=" z-[100]  scale-90 flex justify-center ">
+        <DialogContent className=" z-[100]  bg-black dark:bg-[#0a0d28] scale-90 flex justify-center ">
           <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
             <div className="w-full flex mb-4 justify-between">
               <CustomDatePicker

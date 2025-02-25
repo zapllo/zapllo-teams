@@ -19,7 +19,7 @@ export const TaskSummary: React.FC<TaskSummaryProps> = ({
     inTimeTasks
 }) => {
     return (
-        <div className=" grid grid-cols-6 w-[80%]  gap-4 mb-8 rounded-lg shadow-md">
+        <div className=" grid grid-cols-6 w-[80%]  gap-4 mb-8 rounded-lg dark:shadow-md">
             {/* <h2 className="text-lg font-medium mb-4">Task Summary</h2> */}
 
             <div className="border shadow-[5px_5px_0px_0px_rgba(131,92,221)]  px-4 py-1 h-fit flex gap-4 rounded-xl">

@@ -910,16 +910,16 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
   };
 
   return (
-    <div className="absolute overflow-y-scroll scrollbar-hide z-[100] h-screen max-h-screen inset-0 bg-black backdrop-blur-sm -900  bg-opacity-50 rounded-xl flex justify-center items-center">
+    <div className="absolute overflow-y-scroll scrollbar-hide z-[100] h-screen max-h-screen inset-0 dark:bg-black bg-white backdrop-blur-sm -900  bg-opacity-50 rounded-xl flex justify-center items-center">
 
 
       <motion.div
-        className="bg-[#0B0D29] z-[100] h-fit m-auto   scrollbar-hide  text-[#D0D3D3] w-[50%] rounded-lg "
+        className="dark:bg-[#0B0D29] bg-white z-[100] h-fit m-auto   scrollbar-hide text-[#000000] border  dark:text-[#D0D3D3] w-[50%] rounded-lg "
         variants={modalVariants}
         initial="hidden"
         animate={controls}
       >
-        <div className="flex justify-between   items-center  px-8 py-3 border-b w-full">
+        <div className="flex justify-between   items-center  px-8 py-3 border-b dark:border-gray-700 w-full">
           <h2 className="text-lg font-bold   ">Assign New Task</h2>
 
           <CrossCircledIcon
@@ -931,7 +931,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
         <form className="text-sm space-y-2 overflow-y-scroll px-8 py-4 scrollbar-hide h-full max-h-4xl">
           <div className="grid grid-cols-1 gap-2">
             <div className="">
-              <h1 className="block absolute bg-[#0B0D29] px-1 ml-2 -mt-1 bg- text-muted-foreground text-xs font-semibold">Task Title</h1>
+              <h1 className="block absolute dark:bg-[#0B0D29] bg-white text-gray-500 px-1 ml-2 -mt-1 bg- dark:text-muted-foreground dark:text-gray-300 text-xs dark:font-semibold">Task Title</h1>
               <input
                 type="text"
                 // placeholder="Task Title"
@@ -940,11 +940,11 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
                 onFocus={() => setFocusedInput({ ...focusedInput, title: true })}
                 onBlur={() => setFocusedInput({ ...focusedInput, title: false })}
                 onChange={(e) => handleInputChange("title", e.target.value)}
-                className={cn(errors.title ? "border-red-500" : "", "w-full text-xs  outline-none focus-within:border-[#815BF5] bg-transparent border mt-1 rounded px-3 py-2")}
+                className={cn(errors.title ? "border-red-500" : "", "w-full text-xs  outline-none focus-within:border-[#815BF5] bg-transparent border dark:border-gray-500 dark:border-border  mt-1 rounded px-3 py-2")}
               />
             </div>
             <div className="mt-1">
-              <h1 className="block absolute bg-[#0B0D29] px-1 ml-2 -mt-1 bg- text-muted-foreground text-xs font-semibold"> Description</h1>
+              <h1 className="block absolute dark:bg-[#0B0D29] bg-white text-gray-500 px-1 ml-2 -mt-1 bg- dark:text-muted-foreground dark:text-gray-300 text-xs dark:font-semibold"> Description</h1>
               <textarea
                 id="description"
                 // placeholder="Task Description"
@@ -952,7 +952,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
                 onFocus={() => setFocusedInput({ ...focusedInput, description: true })}
                 onBlur={() => setFocusedInput({ ...focusedInput, description: false })}
                 onChange={(e) => handleInputChange("description", e.target.value)}
-                className={cn(errors.description ? "border-red-500" : "", "text-xs w-full focus-within:border-[#815BF5]  outline-none  bg-transparent border    mt-1 rounded px-3 py-3")}
+                className={cn(errors.description ? "border-red-500" : "", "text-xs w-full focus-within:border-[#815BF5]  outline-none  bg-transparent dark:border-gray-500 border dark:border-border     mt-1 rounded px-3 py-3")}
               ></textarea>
             </div>
           </div>
@@ -960,7 +960,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
             <div>
               <button
                 type="button"
-                className="p-2 flex text-xs justify-between border-2  bg-transparent w-full text-start  rounded"
+                className="p-2 flex text-xs justify-between dark:border-gray-500 dark:border-border  border-2 bg-transparent w-full text-start  rounded"
                 onClick={handleOpen}
               >
                 {popoverInputValue ? (
@@ -990,7 +990,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
               <div>
                 <button
                   type="button"
-                  className="p-2 text-xs flex border-2   bg-transparent justify-between w-full text-start  rounded"
+                  className="p-2 text-xs flex border-2 dark:border-gray-500 dark:border-border   bg-transparent justify-between w-full text-start  rounded"
                   onClick={handleCategoryOpen}
                 >
                   {popoverCategoryInputValue ? (
@@ -1021,16 +1021,16 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
             </div>
           </div>
           <div className=" flex itrc justify-between">
-            <div className="mb-2  justify-between border rounded-md h-14 items-center flex gap-4 mta w-full">
+            <div className="mb-2  justify-between border dark:border-gray-500 dark:border-border  rounded-md h-14 items-center flex gap-4 mta w-full">
               <div className=" gap-2 flex justify-between h-fit  items-center p-4 w-full ">
-                <div className="flex g   text-xs text-white font-bold">
+                <div className="flex g   text-xs dark:text-white font-bold">
                   {/* <FlagIcon className='h-5' /> */}
                   Priority
                 </div>
                 <div className=" rounded-lg w-full ">
                   <Tabs3 value={priority} onValueChange={setPriority}>
 
-                    <TabsList3 className="rounded-lg flex border w-fit">
+                    <TabsList3 className="rounded-lg text- flex border-gray-500 dark:border-border border w-fit">
 
                       {["High", "Medium", "Low"].map((level) => (
                         <TabsTrigger3 className="text-xs" key={level} value={level}>
@@ -1056,7 +1056,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
                     onCheckedChange={(checked) => setRepeat(Boolean(checked))}
                     className="mr-2 "
                   />
-                  <Label htmlFor="repeat" className="font-semibold text-xs ">
+                  <Label htmlFor="repeat" className="font-semibold dark:text-white  text-xs ">
                     Repeat
                   </Label>
                 </div>
@@ -1069,7 +1069,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
                   <div className="bg-transparent">
                     {/* <Label htmlFor="repeatType" className="block font-semibold">Repeat Type</Label> */}
                     <ShadcnSelect value={repeatType} onValueChange={setRepeatType}>
-                      <SelectTrigger className="w-48 bg-[#292d33] border text-xs h-fit outline-none rounded px-3 ">
+                      <SelectTrigger className="w-48 dark:bg-[#292d33] border text-xs h-fit outline-none rounded px-3 ">
                         <SelectValue placeholder="Select Repeat Type" />
                       </SelectTrigger>
                       <SelectContent className="z-[100] text-xs">
@@ -1092,7 +1092,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
                     id="repeatInterval"
                     value={repeatInterval}
                     onChange={(e) => setRepeatInterval(Number(e.target.value))}
-                    className="w-44 ml-4 bg-[#292d33] border text-xs outline-none rounded px-3 py-2"
+                    className="w-44 ml-4 dark:bg-[#292d33] border text-xs outline-none rounded px-3 py-2"
                     placeholder="Enter interval in days"
                     min={1}
                   />
@@ -1158,7 +1158,8 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
             <Button
               type="button"
               onClick={handleOpenDatePicker}
-              className=" border-2 rounded bg-[#282D32] hover:bg-transparent px-3 flex gap-1  py-2"
+              className=" border-2 dark:border-gray-500 dark:border-border  bg-background
+              text-black dark:text-white rounded dark:bg-[#282D32] hover:bg-transparent px-3 flex gap-1  py-2"
             >
               <Calendar className="h-5 text-sm" />
               {dueDate && dueTime ? (
@@ -1184,9 +1185,9 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
                 onOpenChange={setIsDatePickerOpen}
               >
 
-                <DialogContent className=" z-[100]  scale-90 flex justify-center ">
+                <DialogContent className=" z-[100] bg-[#0a0d28] scale-90 flex justify-center ">
                   <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
-                    <div className="w-full flex mb-4 justify-between">
+                    <div className="w-full flex mb-4  justify-between">
                       <CustomDatePicker
                         selectedDate={dueDate ?? new Date()}
                         onDateChange={handleDateChange}
@@ -1204,7 +1205,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
                 open={isTimePickerOpen}
                 onOpenChange={setIsTimePickerOpen}
               >
-                <DialogContent className="z-[100] scale-90 flex justify-center ">
+                <DialogContent className="z-[100] scale-90 bg-[#0a0d28] flex justify-center ">
                   <div className="z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
                     <div className="w-full flex mb-4 justify-between">
                       <CustomTimePicker
@@ -1235,7 +1236,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
                   : ""
                   }`}
               >
-                <Link className="h-5 text-center m-auto mt-1" />
+                <Link className="h-5 text-center text-white m-auto mt-1" />
               </div>
               {links.filter((link) => link).length > 0 && (
                 <span className="text-xs mt-2 text">
@@ -1252,7 +1253,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
                 className={`h-8 w-8 rounded-full items-center text-center border cursor-pointer hover:shadow-white shadow-sm bg-[#282D32] ${files.length > 0 ? "border-[#815BF5]" : ""
                   }`}
               >
-                <Paperclip className="h-5 text-center m-auto mt-1" />
+                <Paperclip className="h-5 text-white text-center m-auto mt-1" />
               </div>
               {files.length > 0 && (
                 <span className="text-xs mt-2 text">
@@ -1269,7 +1270,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
                   }}
                   className={`h-8 w-8 rounded-full items-center text-center border cursor-pointer hover:shadow-white shadow-sm bg-[#282D32] ${reminders.length > 0 ? "border-[#815BF5]" : ""}`}
                 >
-                  <Clock className="h-5 text-center m-auto mt-1" />
+                  <Clock className="h-5 text-white text-center m-auto mt-1" />
                 </div>
                 {reminders.length > 0 && (
                   <span className="text-xs mt-2">
@@ -1287,14 +1288,14 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
                 onClick={stopRecording}
                 className="h-8 mt-4 w-8 rounded-full items-center text-center  border cursor-pointer hover:shadow-white shadow-sm   bg-red-500"
               >
-                <Mic className="h-5 text-center  m-auto mt-1" />
+                <Mic className="h-5 text-white text-center  m-auto mt-1" />
               </div>
             ) : (
               <div
                 onClick={startRecording}
                 className="h-8 mt-4 w-8 rounded-full items-center text-center  border cursor-pointer hover:shadow-white shadow-sm  bg-[#282D32]"
               >
-                <Mic className="h-5 text-center m-auto mt-1" />
+                <Mic className="h-5 text-center text-white m-auto mt-1" />
               </div>
             )}
           </div>
@@ -1334,7 +1335,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
               checked={assignMoreTasks}
               onCheckedChange={handleCheckboxChange}
             />
-            <Label htmlFor="assign-more-tasks ">Assign More Tasks</Label>
+            <Label htmlFor="assign-more-tasks " className="dark:text-white">Assign More Tasks</Label>
           </div>
           <Dialog open={isLinkModalOpen} onOpenChange={setIsLinkModalOpen}>
             <DialogContent className="z-[100] p-6">
@@ -1373,7 +1374,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
                   <Button
                     type="button"
                     onClick={addLinkField}
-                    className="bg-transparent border border-[#505356] text-white hover:bg-[#815BF5] px-4 py-2 flex gap-2 rounded"
+                    className="bg-transparent border border-[#505356] dark:text-white text-black hover:text-white  hover:bg-[#815BF5] px-4 py-2 flex gap-2 rounded"
                   >
                     Add Link
                     <Plus />
@@ -1847,11 +1848,11 @@ const UserSelectPopup: React.FC<UserSelectPopupProps> = ({
   return (
     <div
       ref={popupRef}
-      className="absolute bg-[#0B0D29]  text-white border mt-10 border-gray-700 rounded shadow-md p-4 w-[45%] z-50"
+      className="absolute dark:bg-[#0B0D29] bg-white dark:text-white border mt-10 dark:border-gray-700 rounded shadow-md p-4 w-[45%] z-50"
     >
       <input
         placeholder="Search user"
-        className="h-8 text-xs px-4 focus:border-[#815bf5] text-white w-full bg-[#292d33] gray-600 border rounded outline-none mb-2"
+        className="h-8 text-xs px-4 focus:border-[#815bf5] dark:text-white w-full dark:bg-[#292d33] gray-600 border border-gray-500 dark:border-border  rounded outline-none mb-2"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
       />
@@ -1877,7 +1878,7 @@ const UserSelectPopup: React.FC<UserSelectPopupProps> = ({
                     ) : (
                       <AvatarFallback className="ml-2">
 
-                        <h1 className="text-sm">
+                        <h1 className="text-sm text-white">
                           {`${user.firstName}`.slice(0, 1)}
                           {`${user.lastName}`.slice(0, 1)}
                         </h1>
@@ -2025,17 +2026,17 @@ const CategorySelectPopup: React.FC<CategorySelectPopupProps> = ({
   return (
     <div
       ref={popupRef}
-      className="absolute bg-[#0B0D29] text-black border mt-2 rounded shadow-md p-4 w-[45%] z-50"
+      className="absolute dark:bg-[#0B0D29] bg-white text-black dark:border-gray-500 dark:border-border border mt-2 rounded shadow-md p-4 w-[45%] z-50"
     >
       <input
         placeholder=" Search Categories"
-        className="h-8 text-xs px-4 text-white focus:border-[#815bf5] w-full bg-[#282D32] -800 border rounded outline-none mb-2"
+        className="h-8 text-xs px-4 dark:text-white focus:border-[#815bf5] w-full dark:bg-[#282D32] -800 border-gray-500 dark:border-border  border rounded outline-none mb-2"
         value={searchCategoryQuery}
         onChange={(e) => setSearchCategoryQuery(e.target.value)}
       />
       <div>
         {categories.length === 0 ? (
-          <div className="text-white p-2">No categories found</div>
+          <div className="dark:text-white p-2">No categories found</div>
         ) : (
           <div className="w-full text-sm text-white max-h-40 overflow-y-scroll scrollbar-hide">
             {filteredCategories.map((categorys) => (
@@ -2055,13 +2056,13 @@ const CategorySelectPopup: React.FC<CategorySelectPopupProps> = ({
                     <FallbackImage name={categorys.name} />
                   )}
                 </div>
-                <span className="px-4 text-xs">{categorys.name}</span>
+                <span className="px-4 dark:text-white text-black text-xs">{categorys.name}</span>
 
                 {category === categorys._id && (
                   <input
                     type="radio"
                     name="category"
-                    className="bg-primary ml-auto"
+                    className="bg-primary ml-auto "
                     checked={category === categorys._id}
                     onChange={() => handleSelectCategory(categorys._id)}
                   />
@@ -2086,7 +2087,7 @@ const CategorySelectPopup: React.FC<CategorySelectPopupProps> = ({
                 placeholder="Create Category"
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
-                className="px-4 outline-none focus:border-[#815bf5] py-2 border text-white rounded w-full"
+                className="px-4 outline-none focus:border-[#815bf5] py-2 border dark:text-white rounded w-full"
               />
 
               <div

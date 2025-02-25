@@ -253,7 +253,7 @@ export default function Tickets() {
                         <Separator className="bg-[#0A0D28]" />
 
                         <DialogContent className="z-[100]">
-                          <div className="bg-[#0b0d29]    shadow-lg w-full   max-w-lg  rounded-lg">
+                          <div className="   shadow-lg w-full   max-w-lg  rounded-lg">
                             <div className="flex border-b py-2  w-full justify-between">
                               <DialogTitle className="text-md   px-6 py-2 font-medium">
                                 Raise a Ticket
@@ -276,38 +276,38 @@ export default function Tickets() {
                                   onChange={(e) =>
                                     setCategory(e.target.value)
                                   }
-                                  className="w-full text-xs p-2 bg-[#1A1C20] outline-none border rounded bg-transparent"
+                                  className="w-full text-xs p-2  outline-none border rounded bg-transparent"
                                   style={{
                                     color: category ? "white" : "#787CA5",
                                   }}
                                 >
                                   <option
-                                    className="bg-[#1A1C20]  text-[#787CA5] -mt-1"
+                                    className="dark:bg-[#1A1C20]  text-[#787CA5] -mt-1"
                                     disabled
                                     value=""
                                   >
                                     Select a category
                                   </option>
                                   <option
-                                    className="bg-[#1A1C20]"
+                                    className="dark:bg-[#1A1C20]"
                                     value="Report An Error"
                                   >
                                     Report An Error
                                   </option>
                                   <option
-                                    className="bg-[#1A1C20]"
+                                    className="dark:bg-[#1A1C20]"
                                     value="Provide Feedback"
                                   >
                                     Provide Feedback
                                   </option>
                                   <option
-                                    className="bg-[#1A1C20]"
+                                    className="dark:bg-[#1A1C20]"
                                     value="Payment/Subscription Issue"
                                   >
                                     Payment/Subscription Issue
                                   </option>
                                   <option
-                                    className="bg-[#1A1C20]"
+                                    className="dark:bg-[#1A1C20]"
                                     value="Delete My Account"
                                   >
                                     Delete My Account
@@ -326,50 +326,50 @@ export default function Tickets() {
                                   onChange={(e) =>
                                     setSubcategory(e.target.value)
                                   }
-                                  className="w-full text-xs p-2 border  bg-[#1A1C20] bg-transparent outline-none rounded"
+                                  className="w-full text-xs p-2 border   bg-transparent outline-none rounded"
                                   style={{
                                     color: subcategory ? "white" : "#787CA5",
                                   }}
                                 >
                                   <option
                                     disabled
-                                    className="bg-[#1A1C20]"
+                                    className="dark:bg-[#1A1C20]"
                                     value=""
                                   >
                                     Select a subcategory
                                   </option>
                                   <option
-                                    className="bg-[#1A1C20]"
+                                    className="dark:bg-[#1A1C20]"
                                     value="Task Delegation"
                                   >
                                     Task Delegation
                                   </option>
                                   <option
-                                    className="bg-[#1A1C20]"
+                                    className="dark:bg-[#1A1C20]"
                                     value="My Team"
                                   >
                                     My Team
                                   </option>
                                   <option
-                                    className="bg-[#1A1C20]"
+                                    className="dark:bg-[#1A1C20]"
                                     value="Intranet"
                                   >
                                     Intranet
                                   </option>
                                   <option
-                                    className="bg-[#1A1C20]"
+                                    className="dark:bg-[#1A1C20]"
                                     value="Leaves"
                                   >
                                     Leaves
                                   </option>
                                   <option
-                                    className="bg-[#1A1C20]"
+                                    className="dark:bg-[#1A1C20]"
                                     value="Attendance"
                                   >
                                     Attendance
                                   </option>
                                   <option
-                                    className="bg-[#1A1C20]"
+                                    className="dark:bg-[#1A1C20]"
                                     value="Other"
                                   >
                                     Other
@@ -382,7 +382,7 @@ export default function Tickets() {
                               <div className="relative">
                                 <label
                                   htmlFor="subject"
-                                  className="absolute bg-[#0b0d29] text-[#787CA5] ml-2 text-xs -mt-2 px-1"
+                                  className="absolute bg-white dark:bg-[#0b0d29] text-[#787CA5] ml-2 text-xs -mt-2 px-1"
                                 >
                                   Subject
                                 </label>
@@ -399,7 +399,7 @@ export default function Tickets() {
                               <div className="relative">
                                 <label
                                   htmlFor="subject"
-                                  className="absolute bg-[#0b0d29] text-[#787CA5] ml-2 text-xs -mt-2 px-1"
+                                  className="absolute bg-white dark:bg-[#0b0d29] text-[#787CA5] ml-2 text-xs -mt-2 px-1"
                                 >
                                   Description
                                 </label>
@@ -480,9 +480,9 @@ export default function Tickets() {
                         </DialogContent>
                       </Dialog>
                     </div>
-                    <div className="bg-[#0B0D29] text-sm w-full rounded-2xl  border overflow-hidden">
+                    <div className="dark:bg-[#0B0D29] text-sm w-full rounded-2xl  border overflow-hidden">
                       <table className="w-full">
-                        <thead className="bg-[#0B0D29] ">
+                        <thead className="dark:bg-[#0B0D29] ">
                           <tr className=" ">
                             {/* <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-white -500 uppercase tracking-wider'>
                                                         Category
@@ -513,13 +513,13 @@ export default function Tickets() {
                             </th>
                           </tr>
                         </thead>
-                        <tbody className="bg-[#0B0D29] divide-y">
+                        <tbody className="dark:bg-[#0B0D29] divide-y">
                           {tickets.map((ticket) => (
                             <tr key={ticket._id}>
                               {/* <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-white -900'>
                                                             {ticket.category}
                                                         </td> */}
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-white -500">
+                              <td className="px-6 py-4 whitespace-nowrap text-sm dark:text-white -500">
                                 {ticket.subject}
                               </td>
                               <td
@@ -532,12 +532,12 @@ export default function Tickets() {
                                       : "text-yellow-500"
                                   }`}
                               >
-                                <div className="border w-fit px-2 bg-gray-800 rounded-full flex items-center">
+                                <div className="border w-fit px-2 dark:bg-gray-800 rounded-full flex items-center">
                                   {ticket.status}
 
                                 </div>
                               </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-white -500">
+                              <td className="px-6 py-4 whitespace-nowrap text-sm dark:text-white -500">
                                 {new Date(ticket.createdAt).toLocaleDateString()}
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

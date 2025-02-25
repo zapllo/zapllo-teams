@@ -187,7 +187,7 @@ const DashboardPage = () => {
       <div className="w-full mb-2 mt-12 flex">
         {calculateProgress() < 100 && (
           <div className=' w-[50.33%] flex justify-start gap-4'>
-            <div className='p-4  w-full mx-4 rounded-xl  border border-[#E0E0E066]'>
+            <div className='p-4  w-full mx-4 rounded-xl  border dark:border-[#E0E0E066]'>
               <div className='w-full'>
                 <h1>Checklist </h1>
                 <Progress value={calculateProgress()} className="" />
@@ -203,19 +203,19 @@ const DashboardPage = () => {
           </div>
         )}
         <div className=' w-full h-48 flex justify-start gap-4'>
-          <div className='p-4  w-full mx-4 rounded-xl  border border-[#E0E0E066]'>
+          <div className='p-4  w-full mx-4 rounded-xl  border dark:border-[#E0E0E066]'>
             <div className='w-full p'>
               <h1 className='px-4 text-lg font-medium'>Tutorials </h1>
               <h1 className='px-4 py-4 text-sm text-muted-foreground'>Learn how to to get best out of our business workspace </h1>
               <Link href='/help/tutorials'>
-                <Button className='bg-white hover:bg-gray-300 text-black ml-4   mt-6' >Go To Tutorials</Button></Link>
+                <Button className='bg-white border hover:bg-gray-300 text-black ml-4   mt-6' >Go To Tutorials</Button></Link>
               <img src='/animations/tutorials.png' className='absolute h-48 ml-[45%] -mt-[150px]' />
             </div>
           </div>
         </div>
         {calculateProgress() == 100 && (
           <div className=' w-[50.33%] flex justify-start h-48 gap-4'>
-            <div className='p-4  w-full mx-4 rounded-xl  border border-[#E0E0E066]'>
+            <div className='p-4  w-full mx-4 rounded-xl  border dark:border-[#E0E0E066]'>
               <div className='w-full m'>
                 <h1 className='text-lg font-medium flex gap-2'><Megaphone /> Events </h1>
                 <p className='text-sm py-2 text-muted-foreground'>We are bringing Live Classes to help you grow your business. Check out all our events to get the best out of our business workspace. </p>
@@ -234,9 +234,9 @@ const DashboardPage = () => {
       </div>
       <div className='grid grid-cols-3  '>
         <div className='flex items-center  gap-4 '>
-          <div className='p-4 w-full border border-[#E0E0E066] bg-[#]   m-4  text-white items-center flex justify-start rounded-xl '>
+          <div className='p-4 w-full border dark:border-[#E0E0E066] bg-[#]   m-4  dark:text-white items-center flex justify-start rounded-xl '>
             <div className=' font-bold text-xl space-y-1'>
-              <div className='rounded-full flex items-center justify-items-center h-12 border-[#E0E0E066] border w-12'>
+              <div className='rounded-full flex items-center justify-items-center h-12 dark:border-[#E0E0E066] border w-12'>
                 <img src='/icons/atask.png' className=' h-6  ml-[10px]   object-cover' />
               </div>
               <h1 className='text-lg font-medium'>Zapllo Tasks</h1>
@@ -249,7 +249,7 @@ const DashboardPage = () => {
                     </Button>
                   </Link>
                 ) : (
-                  <Button className="bg-[#815BF5] flex text-white gap-1 py-1 text-xs opacity-80">
+                  <Button className="bg-[#815BF5] flex dark:text-white gap-1 py-1 text-xs opacity-80">
                     <Lock className="h-4" />
                     <h1>Locked</h1>
                   </Button>
@@ -259,9 +259,9 @@ const DashboardPage = () => {
           </div>
         </div>
         <div className='flex items-center w-full  gap-4 '>
-          <div className='p-4 w-full border border-[#E0E0E066] bg-[#]  m-4  text-white items-center flex justify-start rounded-xl '>
+          <div className='p-4 w-full border dark:border-[#E0E0E066] bg-[#]  m-4  dark:text-white items-center flex justify-start rounded-xl '>
             <div className=' font-bold text-xl space-y-1'>
-              <div className='rounded-full h-12 flex items-center border-[#E0E0E066] border w-12'>
+              <div className='rounded-full h-12 flex items-center dark:border-[#E0E0E066] border w-12'>
                 <img src='/icons/Zapllo Intranet.png' className=' h-6  ml-[10px]   object-cover' />
               </div>
               <h1 className='text-lg font-medium'>Zapllo Intranet</h1>
@@ -275,9 +275,9 @@ const DashboardPage = () => {
           </div>
         </div>
         <div className="flex  gap-4 ">
-          <div className="p-4 w-full border border-[#E0E0E066] bg-[#] m-4  text-white items-center relative flex justify-start rounded-xl ">
+          <div className="p-4 w-full border dark:border-[#E0E0E066] bg-[#] m-4  dark:text-white items-center relative flex justify-start rounded-xl ">
             <div className=" font-bold text-xl space-y-1">
-              <div className="rounded-full flex items-center h-12 border-[#E0E0E066] border w-12">
+              <div className="rounded-full flex items-center h-12 dark:border-[#E0E0E066] border w-12">
                 <img src='/icons/Zapllo Leaves.png' className=' h-6  ml-[10px]   object-cover' />
               </div>
               <h1 className="text-lg font-medium">Zapllo Leaves</h1>
@@ -318,7 +318,7 @@ const DashboardPage = () => {
                     </Button>
                   )
                 ) : role !== "orgAdmin" && !leavesTrialExpires || !isLeaveAcess ? (
-                  <Button className="bg-[#815BF5] flex text-white gap-1 py-1 text-xs opacity-80" >
+                  <Button className="bg-[#815BF5] flex dark:text-white gap-1 py-1 text-xs opacity-80" >
                     <Lock className='h-4' />
                     <h1>
                       Locked
@@ -342,9 +342,9 @@ const DashboardPage = () => {
 
       <div className='grid grid-cols-3 mb-12 '>
         <div className='flex  gap-4 '>
-          <div className='p-4 w-full border border-[#E0E0E066] bg-[#]  m-4  text-white items-center flex justify-start rounded-xl '>
+          <div className='p-4 w-full border dark:border-[#E0E0E066] bg-[#]  m-4  dark:text-white items-center flex justify-start rounded-xl '>
             <div className=' font-bold text-xl space-y-1'>
-              <div className='rounded-full flex items-center h-12 border-[#E0E0E066] border w-12'>
+              <div className='rounded-full flex items-center h-12 dark:border-[#E0E0E066] border w-12'>
                 <img src='/icons/Zapllo attendance.png' className=' h-6  ml-[10px]   object-cover' />
 
               </div>
@@ -386,7 +386,7 @@ const DashboardPage = () => {
                     </Button>
                   )
                 ) : role !== "orgAdmin" && !leavesTrialExpires || !isLeaveAcess ? (
-                  <Button className="bg-[#815BF5] flex text-white gap-1 py-1 text-xs opacity-80" >
+                  <Button className="bg-[#815BF5] flex dark:text-white gap-1 py-1 text-xs opacity-80" >
                     <Lock className='h-4' />
                     <h1>
                       Locked
@@ -404,9 +404,9 @@ const DashboardPage = () => {
           </div>
         </div>
         <div className='flex  gap-4 '>
-          <div className='p-4 w-full border border-[#E0E0E066] bg-[]  m-4  text-white items-center flex justify-start rounded-xl '>
+          <div className='p-4 w-full border dark:border-[#E0E0E066] bg-[]  m-4  dark:text-white items-center flex justify-start rounded-xl '>
             <div className=' font-bold text-xl space-y-1'>
-              <div className='rounded-full flex items-center h-12 border-[#E0E0E066] border w-12'>
+              <div className='rounded-full flex items-center h-12 dark:border-[#E0E0E066] border w-12'>
                 <img src='/icons/Group.png' className=' h-6  ml-[10px]   object-cover' />
 
               </div>
@@ -421,9 +421,9 @@ const DashboardPage = () => {
           </div>
         </div>
         <div className='flex  gap-4 '>
-          <div className='p-4 w-full border border-[#E0E0E066] bg-[]  m-4  text-white items-center flex justify-start rounded-xl '>
+          <div className='p-4 w-full border dark:border-[#E0E0E066] bg-[]  m-4  dark:text-white items-center flex justify-start rounded-xl '>
             <div className=' font-bold text-xl space-y-1'>
-              <div className='rounded-full flex items-center h-12 border-[#E0E0E066] border w-12'>
+              <div className='rounded-full flex items-center h-12 dark:border-[#E0E0E066] border w-12'>
                 <img src='/icons/crm.png' className=' h-6  ml-[10px]   object-cover' />
 
               </div>
@@ -437,9 +437,9 @@ const DashboardPage = () => {
           </div>
         </div>
         <div className='flex  gap-4 '>
-          <div className='p-4 w-full border border-[#E0E0E066] bg-[]  m-4  text-white items-center flex justify-start rounded-xl '>
+          <div className='p-4 w-full border dark:border-[#E0E0E066] bg-[]  m-4  dark:text-white items-center flex justify-start rounded-xl '>
             <div className=' font-bold text-xl space-y-1'>
-              <div className='rounded-full flex items-center h-12 border-[#E0E0E066] border w-12'>
+              <div className='rounded-full flex items-center h-12 dark:border-[#E0E0E066] border w-12'>
                 <img src='/icons/events.png' className=' h-6  ml-[12px]   object-cover' />
 
               </div>
@@ -453,9 +453,9 @@ const DashboardPage = () => {
           </div>
         </div>
         <div className='flex  gap-4 '>
-          <div className='p-4 w-full border border-[#E0E0E066] bg-[]  m-4  text-white items-center flex justify-start rounded-xl '>
+          <div className='p-4 w-full border dark:border-[#E0E0E066] bg-[]  m-4  dark:text-white items-center flex justify-start rounded-xl '>
             <div className=' font-bold text-xl space-y-1'>
-              <div className='rounded-full flex items-center h-12 border-[#E0E0E066] border w-12'>
+              <div className='rounded-full flex items-center h-12 dark:border-[#E0E0E066] border w-12'>
                 <img src='/branding/teamsicon.png' className=' h-6  ml-[10px]   object-cover' />
 
               </div>
@@ -469,9 +469,9 @@ const DashboardPage = () => {
           </div>
         </div>
         <div className='flex  gap-4 '>
-          <div className='p-4 w-full border border-[#E0E0E066] bg-[]  m-4  text-white items-center flex justify-start rounded-xl '>
+          <div className='p-4 w-full border dark:border-[#E0E0E066] bg-[]  m-4  dark:text-white items-center flex justify-start rounded-xl '>
             <div className=' font-bold text-xl space-y-1'>
-              <div className='rounded-full flex items-center h-12 border-[#E0E0E066] border w-12'>
+              <div className='rounded-full flex items-center h-12 dark:border-[#E0E0E066] border w-12'>
                 <img src='/branding/AII.png' className=' h-6  ml-[10px]   object-cover' />
 
               </div>

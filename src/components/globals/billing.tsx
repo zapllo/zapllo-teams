@@ -656,7 +656,7 @@ export default function Billing() {
                                                     <div className="flex justify-between w-[420px]">
                                                         <div className="flex gap-2">
                                                             <div className="h-12 bg-gradient-to-r from-[#815BF5] to-[#FC8929] w-12 rounded-full border items-center justify-center flex ">
-                                                                <Wallet />
+                                                                <Wallet className='dark:text-white text-white' />
                                                             </div>
                                                             <div>
                                                                 <CardTitle className="text-xl font-medium">                                                                <h1>₹{orgCredits}</h1>
@@ -667,7 +667,7 @@ export default function Billing() {
                                                         <div className="flex items-center gap-2">
                                                             <Button
                                                                 size="sm"
-                                                                className="w-full hover:bg-gradient-to-r from-[#815BF5] to-[#FC8929] hover:border-none border-[#A58DE8] border bg-transparent  rounded-2xl px-6"
+                                                                className="w-full text-black dark:text-white  hover:bg-gradient-to-r from-[#815BF5] to-[#FC8929] hover:border-none hover:text-white border-[#A58DE8] border bg-transparent  rounded-2xl px-6"
                                                                 onClick={handleRechargeClick}
                                                             >
                                                                 Recharge Now
@@ -686,8 +686,8 @@ export default function Billing() {
                                                 <CardHeader>
                                                     <div className="flex justify-between w-[380px]">
                                                         <div className="flex gap-2">
-                                                            <div className="h-12 w-12 rounded-full border items-center justify-center flex border-white">
-                                                                <img src='/icons/whatsapp.png' className='h-6' />
+                                                            <div className="h-12 w-12 rounded-full border items-center justify-center flex dark:border-white">
+                                                                <img src='/icons/whatsapp.png' className='h-6 dark:invert-0 invert-[100]' />
                                                             </div>
                                                             <div>
                                                                 <CardTitle className="text-lg">Sales</CardTitle>
@@ -697,7 +697,7 @@ export default function Billing() {
                                                         <div className="flex items-center gap-2">
                                                             <Button
                                                                 size="sm"
-                                                                className="w-full hover:bg-gradient-to-r from-[#815BF5] to-[#FC8929] hover:border-none border-[#A58DE8] border bg-transparent  rounded-2xl px-6"
+                                                                className="w-full hover:bg-gradient-to-r from-[#815BF5] to-[#FC8929] hover:border-none dark:text-white hover:text-white text-black border-[#A58DE8] border bg-transparent  rounded-2xl px-6"
                                                                 onClick={() => window.open('https://wa.me/+918910748670?text=Hello, I would like to connect.', '_blank')}
                                                             >
                                                                 Connect Now
@@ -729,7 +729,7 @@ export default function Billing() {
                                                     <Select
                                                         value={userCount?.toString() || ''}
                                                         onValueChange={(value) => setUserCount(parseInt(value))}>
-                                                        <SelectTrigger className="w-full bg-[#0b0d29] px-2 py-1 -mt-1 border rounded outline-none">
+                                                        <SelectTrigger className="w-full dark:bg-[#0b0d29] px-2 py-1 -mt-1 border rounded outline-none">
                                                             <SelectValue placeholder="Select Number of Users To Add" />
                                                         </SelectTrigger>
                                                         <SelectContent className='z-[100]'>
@@ -825,7 +825,7 @@ export default function Billing() {
                                                             handleUserSelection(syntheticEvent);
                                                         }}
                                                     >
-                                                        <SelectTrigger className="border p-2 w-full mt-2 outline-none bg-[#0b0d29] rounded">
+                                                        <SelectTrigger className="border p-2 w-full mt-2 outline-none dark:bg-[#0b0d29] rounded">
                                                             <SelectValue placeholder="Select Number of Users To Add" />
                                                         </SelectTrigger>
                                                         <SelectContent className='z-[100]'>
@@ -962,7 +962,7 @@ export default function Billing() {
                         <div className='flex justify-center mb-8 '>
                             <div className="flex justify-center  w-80">
                                 {/* Sliding Tabs */}
-                                <div className="relative border h-12 flex bg-[#0A0D28] rounded-full w-full">
+                                <div className="relative border h-12 flex dark:bg-[#0A0D28] rounded-full w-full">
                                     {/* Active Tab Indicator */}
                                     <div
                                         className={`absolute  scale-[85%]  top-0 bottom-0 left-0 w-1/2 transform rounded-full transition-all duration-300 ${planTab === "Zapllo Sales" ? "translate-x-full" : "translate-x-0"
@@ -996,10 +996,10 @@ export default function Billing() {
 
                                 {planTab === "Zapllo Sales" ? (
                                     <div className='grid grid-cols-3 gap-4'>
-                                        <Card className="w-full  border-none bg-[#0B0D26] h-fit px-4  rounded-3xl">
+                                        <Card className="w-full  border-none dark:bg-[#0B0D26] h-fit px-4  rounded-3xl">
                                             <CardHeader className=" rounded border-b text-">
                                                 <CardTitle className="text-md font-thin">Zapllo CRM</CardTitle>
-                                                <CardDescription className="text- w-64 relative flex items-center gap-1 text-white text-sm ">
+                                                <CardDescription className="text- w-64 relative flex items-center gap-1 dark:text-white text-sm ">
                                                     <h1 className='text-5xl font-extrabold'>  ₹ 2999</h1>
                                                     <h1 className="text-md absolute right-0 bottom-0 text-[#646783] italic">/Per User Per Year</h1>
                                                 </CardDescription>
@@ -1026,7 +1026,7 @@ export default function Billing() {
 
                                                     {displayedPlan === 'Zapllo Tasks' ? (
                                                         <Button
-                                                            className="w-full hover:bg-[#815BF5] border-[#A58DE8] border bg-transparent opacity-70  rounded-2xl px-6"
+                                                            className="w-full hover:bg-[#815BF5] text-black dark:text-white border-[#A58DE8] border bg-transparent opacity-70  rounded-2xl px-6"
                                                         // onClick={() => {
                                                         //     setSelectedPlan(planTab); // Set the selected 
                                                         //     setIsAddUserOpen(true); // Open the dialog to add more users
@@ -1035,7 +1035,7 @@ export default function Billing() {
                                                             Coming Soon
                                                         </Button>
                                                     ) : (
-                                                        <Button className="w-full h-10 mt-2 hover:bg-[#815BF5] border-[#A58DE8] border bg-transparent  rounded-2xl " >Coming Soon</Button>
+                                                        <Button className="w-full h-10 mt-2 hover:bg-[#815BF5] text-black dark:text-white border-[#A58DE8] border bg-transparent  rounded-2xl " >Coming Soon</Button>
                                                     )}
                                                 </div>
                                             </CardHeader>
@@ -1060,10 +1060,10 @@ export default function Billing() {
                                             </div>
                                             <CardFooter />
                                         </Card>
-                                        <Card className="w-full  border-none bg-[#0B0D26] h-fit px-4  rounded-3xl">
+                                        <Card className="w-full  border-none dark:bg-[#0B0D26] h-fit px-4  rounded-3xl">
                                             <CardHeader className=" rounded border-b text-">
                                                 <CardTitle className="text-md font-thin">Zapllo Invoice</CardTitle>
-                                                <CardDescription className="text- w-64 relative flex items-center gap-1 text-white text-sm ">
+                                                <CardDescription className="text- w-64 relative flex items-center gap-1 dark:text-white text-sm ">
                                                     <h1 className='text-5xl font-extrabold'>  ₹ 1999</h1>
                                                     <h1 className="text-md absolute right-0 bottom-0 text-[#646783] italic">/Per User Per Year</h1>
                                                 </CardDescription>
@@ -1090,7 +1090,7 @@ export default function Billing() {
 
                                                     {displayedPlan === 'Zapllo Tasks' ? (
                                                         <Button
-                                                            className="w-full border-[#A58DE8] border bg-transparent opacity-70 hover:bg-[#815BF5] rounded-2xl px-6"
+                                                            className="w-full border-[#A58DE8] text-black dark:text-white border bg-transparent opacity-70 hover:bg-[#815BF5] rounded-2xl px-6"
                                                         // onClick={() => {
                                                         //     setSelectedPlan(planTab); // Set the selected 
                                                         //     setIsAddUserOpen(true); // Open the dialog to add more users
@@ -1099,7 +1099,7 @@ export default function Billing() {
                                                             Coming Soon
                                                         </Button>
                                                     ) : (
-                                                        <Button className="w-full h-10 mt-2 hover:bg-[#815BF5] border-[#A58DE8] border bg-transparent  rounded-2xl " >Coming Soon</Button>
+                                                        <Button className="w-full h-10 mt-2 hover:bg-[#815BF5]  text-black dark:text-white border-[#A58DE8] border bg-transparent  rounded-2xl " >Coming Soon</Button>
                                                     )}
                                                 </div>
                                             </CardHeader>
@@ -1124,10 +1124,10 @@ export default function Billing() {
                                             </div>
                                             <CardFooter />
                                         </Card>
-                                        <Card className="w-full border-none bg-[#0B0D26] h-fit px-4  rounded-3xl">
+                                        <Card className="w-full border-none dark:bg-[#0B0D26] h-fit px-4  rounded-3xl">
                                             <CardHeader className=" rounded border-b text-">
                                                 <CardTitle className="text-md font-thin">Zapllo Quotation</CardTitle>
-                                                <CardDescription className="text- w-64 relative flex items-center gap-1 text-white text-sm ">
+                                                <CardDescription className="text- w-64 relative flex items-center gap-1 dark:text-white text-sm ">
                                                     <h1 className='text-5xl font-extrabold'>  ₹ 1999</h1>
                                                     <h1 className="text-md absolute right-0 bottom-0 text-[#646783] italic">/Per User Per Year</h1>
                                                 </CardDescription>
@@ -1163,7 +1163,7 @@ export default function Billing() {
                                                             Coming Soon
                                                         </Button>
                                                     ) : (
-                                                        <Button className="w-full h-10 mt-2 hover:bg-[#815BF5] border-[#A58DE8] border bg-transparent  rounded-2xl " >Coming Soon</Button>
+                                                        <Button className="w-full h-10 mt-2  text-black dark:text-white hover:bg-[#815BF5] border-[#A58DE8] border bg-transparent  rounded-2xl " >Coming Soon</Button>
                                                     )}
                                                 </div>
                                             </CardHeader>
@@ -1193,10 +1193,10 @@ export default function Billing() {
                                     <div className='grid grid-cols-2 mb-24 gap-4'>
 
                                         <div className={` p-[1px]  h-fit   rounded-3xl ${displayedPlan === 'Zapllo Tasks' ? "bg-gradient-to-r from-[#815BF5] to-[#FC8929]" : "bg-[#]"}`}>
-                                            <Card className={`w-[400px] border-none h-fit px-4  rounded-3xl ${displayedPlan === 'Zapllo Tasks' ? "" : "bg-[#0B0D26]"}`}>
+                                            <Card className={`w-[400px] border-none h-fit px-4  rounded-3xl ${displayedPlan === 'Zapllo Tasks' ? "" : "dark:bg-[#0B0D26] bg-white"}`}>
                                                 <CardHeader className=" rounded border-b text-">
                                                     <CardTitle className="text-md font-thin">Zapllo Tasks</CardTitle>
-                                                    <CardDescription className="text- w-64 relative flex items-center gap-1 text-white text-sm ">
+                                                    <CardDescription className="text- w-64 relative flex items-center gap-1 dark:text-white text-sm ">
                                                         <h1 className='text-5xl font-extrabold'>  ₹ {plans["Zapllo Tasks"]}</h1>
                                                         <h1 className="text-md absolute right-0 bottom-0 text-[#646783] italic">/Per User Per Year</h1>
                                                     </CardDescription>
@@ -1223,7 +1223,7 @@ export default function Billing() {
 
                                                         {displayedPlan === 'Zapllo Tasks' ? (
                                                             <Button
-                                                                className="w-full border-[#A58DE8] border bg-transparent hover:bg-[#815BF5] rounded-2xl px-6"
+                                                                className="w-full border-[#A58DE8] dark:text-white border bg-transparent hover:bg-[#815BF5] rounded-2xl px-6"
                                                                 onClick={() => {
                                                                     setSelectedPlan("Zapllo Tasks"); // Set the selected 
                                                                     setIsAddUserOpen(true); // Open the dialog to add more users
@@ -1232,7 +1232,7 @@ export default function Billing() {
                                                                 <UserPlus2 className='h-4' />  Add Users
                                                             </Button>
                                                         ) : (
-                                                            <Button className="w-full h-10 mt-2 hover:bg-[#815BF5] border-[#A58DE8] border bg-transparent  rounded-2xl " onClick={() => handleSubscribeClick("Zapllo Tasks")}>Subscribe</Button>
+                                                            <Button className="w-full h-10 mt-2 dark:text-white text-black hover:bg-[#815BF5] border-[#A58DE8] border bg-transparent  rounded-2xl " onClick={() => handleSubscribeClick("Zapllo Tasks")}>Subscribe</Button>
                                                         )}
                                                     </div>
                                                 </CardHeader>
@@ -1273,10 +1273,10 @@ export default function Billing() {
                                             </Card>
                                         </div>
                                         <div className={` p-[1px]  h-fit   rounded-3xl ${displayedPlan === 'Money Saver Bundle' ? "bg-gradient-to-r from-[#815BF5] to-[#FC8929]" : "bg-[#]"}`}>
-                                            <Card className={`w-[400px] border-none   ] h-fit px-4  rounded-3xl ${displayedPlan === 'Money Saver Bundle' ? "" : "bg-[#0B0D26]"}`}>
+                                            <Card className={`w-[400px] border-none   ] h-fit px-4  rounded-3xl ${displayedPlan === 'Money Saver Bundle' ? "" : "dark:bg-[#0B0D26]"}`}>
                                                 <CardHeader className=" rounded border-b text-">
                                                     <CardTitle className="text-md font-thin">Money Saver Bundle</CardTitle>
-                                                    <CardDescription className="text- w-64 relative flex items-center gap-1 text-white text-sm ">
+                                                    <CardDescription className="text- w-64 relative flex items-center gap-1 dark:text-white text-sm ">
                                                         <h1 className='text-5xl font-extrabold'>  ₹ {plans["Money Saver Bundle"]}</h1>
                                                         <h1 className="text-md absolute right-0 bottom-0 text-[#646783] italic">/ Per User Per Year</h1>
                                                     </CardDescription>
@@ -1304,7 +1304,7 @@ export default function Billing() {
                                                     <div className="flex justify-center py-2 w-full">
                                                         {displayedPlan === 'Money Saver Bundle' ? (
                                                             <Button
-                                                                className="border-[#A58DE8] hover:bg-[#815BF5] bg-transparent border  w-full rounded-2xl h-10 px-6"
+                                                                className="border-[#A58DE8] dark:text-white text-black hover:bg-[#815BF5] bg-transparent border  w-full rounded-2xl h-10 px-6"
                                                                 onClick={() => {
                                                                     setSelectedPlan("Money Saver Bundle"); // Set the selected 
                                                                     setIsAddUserOpen(true); // Open the dialog to add more users
@@ -1313,7 +1313,7 @@ export default function Billing() {
                                                                 <UserPlus2 className='h-4' />     Add Users
                                                             </Button>
                                                         ) : (
-                                                            <Button className="w-full h-10 mt-2 hover:bg-[#815BF5] border-[#A58DE8] border bg-transparent  rounded-2xl " onClick={() => handleSubscribeClick("Money Saver Bundle")}>Subscribe</Button>
+                                                            <Button className="w-full h-10 mt-2 dark:text-white text-black hover:bg-[#815BF5] border-[#A58DE8] border bg-transparent  rounded-2xl " onClick={() => handleSubscribeClick("Money Saver Bundle")}>Subscribe</Button>
                                                         )}
                                                     </div>
                                                 </CardHeader>

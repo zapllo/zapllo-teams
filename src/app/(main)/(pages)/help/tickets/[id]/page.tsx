@@ -202,7 +202,7 @@ export default function TicketDetails({ params }: { params: { id: string } }) {
                                                                     </div>
                                                                 </div>
                                                                 <div className='px-2 ml-6'>
-                                                                    <p className='text-xs text-gray-200'>{new Date(c.createdAt).toLocaleString()}</p>
+                                                                    <p className='text-xs dark:text-gray-200'>{new Date(c.createdAt).toLocaleString()}</p>
                                                                 </div>
                                                                 <div className='ml-6 max-w-2xl break-words'>
                                                                     <h1 className='p-2 text-xs w-full'>{c.content}</h1>
@@ -245,7 +245,7 @@ export default function TicketDetails({ params }: { params: { id: string } }) {
                                                             onChange={handleCommentChange}
                                                             placeholder='Type your comment here'
                                                             rows={4}
-                                                            className='w-full focus:border-[#815bf5] p-2 border bg-[#0B0D29] outline-none  rounded'
+                                                            className='w-full focus:border-[#815bf5] p-2 border dark:bg-[#0B0D29] outline-none  rounded'
                                                         />
 
                                                         <input

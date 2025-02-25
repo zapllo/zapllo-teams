@@ -45,6 +45,7 @@ export interface Task {
   repeatType: string;
   repeat: boolean;
   days?: string[];
+  repeatInterval: number;
   audioUrl?: string;
   dates?: number[];
   categories?: string[];
@@ -97,26 +98,26 @@ export interface TaskStatusCounts {
 
 
 export interface TaskDetailsProps {
-    selectedTask: Task;
-    onTaskUpdate: (updatedTask: Task) => void;
-    onClose: () => void;
-    handleUpdateTaskStatus: () => Promise<void>;
-    handleDelete: (taskId: string) => Promise<void>;
-    handleEditClick: () => void;
-    handleDeleteClick: (taskId: string) => void;
-    handleDeleteConfirm: () => void;
-    handleCopy: (link: string) => void;
-    setSelectedTask: (task: Task | null) => void;
-    setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
-    setIsReopenDialogOpen: Dispatch<SetStateAction<boolean>>;
-    isEditDialogOpen: boolean;
-    setIsEditDialogOpen: Dispatch<SetStateAction<boolean>>;
-    setIsCompleteDialogOpen: Dispatch<SetStateAction<boolean>>;
-    setStatusToUpdate: Dispatch<SetStateAction<string | null>>; // Update the type here
-    formatTaskDate: (dateTimeString: string | Date) => string;
-    users: User[];
-    sortedComments?: Comment[];
-    categories: Category[];
-    formatDate: (dateTimeString: string) => string;
+  selectedTask: Task;
+  onTaskUpdate: (updatedTask: Task) => void;
+  onClose: () => void;
+  handleUpdateTaskStatus: () => Promise<void>;
+  handleDelete: (taskId: string) => Promise<void>;
+  handleEditClick: () => void;
+  handleDeleteClick: (taskId: string) => void;
+  handleDeleteConfirm: () => void;
+  handleCopy: (link: string) => void;
+  setSelectedTask: (task: Task | null) => void;
+  setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
+  setIsReopenDialogOpen: Dispatch<SetStateAction<boolean>>;
+  isEditDialogOpen: boolean;
+  setIsEditDialogOpen: Dispatch<SetStateAction<boolean>>;
+  setIsCompleteDialogOpen: Dispatch<SetStateAction<boolean>>;
+  setStatusToUpdate: Dispatch<SetStateAction<string | null>>; // Update the type here
+  formatTaskDate: (dateTimeString: string | Date) => string;
+  users: User[];
+  sortedComments?: Comment[];
+  categories: Category[];
+  formatDate: (dateTimeString: string) => string;
 }
 

@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { Golos_Text } from "next/font/google";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import OtherFooter from "@/components/globals/other-footer";
 const golos = Golos_Text({ subsets: ["latin"] });
 
 
@@ -99,6 +100,8 @@ export default function SpecialOfferCheckout() {
 
 
     useEffect(() => {
+        // Only show toast notifications on non-mobile screens
+        if (window.innerWidth < 768) return;
         let index = 0;
         const interval = setInterval(() => {
             const data = mockData[index];
@@ -155,23 +158,25 @@ export default function SpecialOfferCheckout() {
     };
 
     return (
-        <main className="bg-[#05071E] w-full  mx-auto h-full overflow-hidden">
+        <main className="bg-[#fefefe] w-full  mx-auto h-full overflow-hidden">
             <FloatingNavbar />
             {/* Freedom Code */}
 
-            <div className="w-full py-2 bg-gradient-to-r from-[#815BF5] via-[#9D5DF0] to-[#FC8929] flex items-center justify-center mt-32 ">
-                <p className="text-white text-lg font-medium mr-4">
+            <div className="w-full text-center py-2 bg-gradient-to-r from-[#815BF5] via-[#9D5DF0] to-[#FC8929] md:flex items-center justify-center mt-32 ">
+                <p className="text-white md:text-lg font-medium mr-4">
                     Limited Time Offer Just For Today. Grab the Deal!
                 </p>
-                <div className="bg-white items-center text-[#05071E] flex gap-1 font-semibold px-4 py-1 rounded-md">
-                    {countdown} Seats Left
+                <div className="flex justify-center">
+                    <div className="bg-white w-fit items-center text-[#05071E] flex gap-1 font-semibold px-4 py-1 text-sm rounded-md">
+                        {countdown} Seats Left
+                    </div>
                 </div>
             </div>
 
             {/* Run Your Business */}
 
-            <div className="  bg-[#05071E]">
-                <div className="absolute 2xl:right-36 mt-4 right-16 ">
+            <div className="  bg-[#fefefe]">
+                <div className="md:absolute md:scale-100 scale-75 2xl:right-36 md:mt-16 right-16 ">
                     <img src="/icons/offer.png" />
                     <h1 className="text-white text-xl -mt-28 ml-20 ">Use Code</h1>
                     <span className="font-bold text-white text-3xl -mt-28 ml-12">&quot;REPUBLIC&quot;</span>
@@ -200,7 +205,7 @@ export default function SpecialOfferCheckout() {
 
 
                 <div className="flex justify-center">
-                    <h1 className="text-center   bg-clip-text  font-extrabold  md:text-5xl mt-4   mx-4 md:max-w-[1000px]">
+                    <h1 className="text-center text-black   bg-clip-text  font-extrabold  md:text-5xl mt-4   mx-4 md:max-w-[1000px]">
                         Business Workspace for MSMEs
                     </h1>
                 </div>
@@ -249,7 +254,7 @@ export default function SpecialOfferCheckout() {
                 <MultiStepForm selectedPlan={selectedPlan as PlanKeys} />
             </div>
             <div className="flex justify-center mb-24 w-full">
-                <div className="grid grid-cols-3 mx-12 gap-8">
+                <div className="grid md:grid-cols-3 mx-12 gap-8">
                     <TaskDelegationCard
                         title="Zapllo Tasks"
                         features={[
@@ -303,8 +308,10 @@ export default function SpecialOfferCheckout() {
                     />
                 </div>
             </div>
-            <Testimonials2 />
-            <Footer />
+            <div className="text-black">
+                <Testimonials2 />
+            </div>
+            <OtherFooter />
         </main>
     );
 }

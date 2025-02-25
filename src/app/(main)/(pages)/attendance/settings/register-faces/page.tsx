@@ -401,7 +401,7 @@ export default function RegisterFace() {
         <DialogContent className="flex justify-center items-center">
           <div className="w-full max-w-lg p-6">
             <div className="flex w-full justify-between max-w-">
-              <h3 className="text-md text-white ">
+              <h3 className="text-md dark:text-white ">
                 Register Faces - Upload 3 Images of Employee
               </h3>
               <DialogClose>
@@ -418,7 +418,7 @@ export default function RegisterFace() {
             ) : (
               <div className="mb-4 mt-4">
                 <select
-                  className="w-full border text-white py-2 px-4 text-sm rounded outline-none"
+                  className="w-full border dark:text-white py-2 px-4 text-sm rounded outline-none"
                   onChange={(e) => setSelectedUser(e.target.value)}
                 >
                   <option value="text-sm">Select User</option>
@@ -441,7 +441,7 @@ export default function RegisterFace() {
                 multiple
                 accept="image/*"
                 onChange={handleImageUpload}
-                className="w-full text-white py-2  text-sm outline-none rounded focus:outline-none focus:ring focus:border-blue-300"
+                className="w-full dark:text-white py-2  text-sm outline-none rounded focus:outline-none focus:ring focus:border-blue-300"
               />
               {error && <p className="text-red-500 mt-2">{error}</p>}
             </div>
@@ -556,9 +556,9 @@ export default function RegisterFace() {
         {loading ? (
           <Loader />
         ) : error ? (
-          <table className="min-w-full table-auto border  text-white">
+          <table className="min-w-full table-auto border  dark:text-white">
             <thead>
-              <tr className="border text-xs text-left bg-[#0A0D28]">
+              <tr className="border text-xs text-left dark:bg-[#0A0D28]">
                 <th className="px-4 py-2">User</th>
                 <th className="px-4 py-2">Status</th>
                 <th className="px-4 py-2">Images</th>
@@ -571,7 +571,7 @@ export default function RegisterFace() {
                   key={request._id}
                   className="border-t text-xs border-gray-600"
                 >
-                  <td className="px-4 py-2">
+                  <td className="px-4 py-2 text-black dark:Text-white">
                     {request.userId.firstName}
                     {request.userId.lastName}
                   </td>
@@ -683,9 +683,9 @@ export default function RegisterFace() {
             </div>
           </div>
         ) : (
-          <table className="min-w-full table-auto border  text-white">
+          <table className="min-w-full table-auto border  dark:text-white">
             <thead>
-              <tr className="border text-xs text-left bg-[#0A0D28]">
+              <tr className="border text-xs text-left dark:bg-[#0A0D28]">
                 <th className="px-4 py-2">User</th>
                 <th className="px-4 py-2">Status</th>
                 <th className="px-4 py-2">Images</th>
@@ -698,7 +698,7 @@ export default function RegisterFace() {
                   key={request._id}
                   className="border-t text-xs border-gray-600"
                 >
-                  <td className="px-4 py-2">
+                  <td className="px-4 py-2 dark:text-white">
                     {request.userId.firstName}
                     {request.userId.lastName}
                   </td>
@@ -804,7 +804,7 @@ export default function RegisterFace() {
 
             <DialogContent className=" p-6 ">
               <div className='flex items-center justify-between'>
-                <h1 className='text-white text-md'>Uploaded Face</h1>
+                <h1 className='dark:text-white text-md'>Uploaded Face</h1>
                 <CrossCircledIcon onClick={() => setImageModalUrl(null)} className='scale-150 cursor-pointer  hover:bg-[#ffffff]  rounded-full hover:text-[#815BF5]' />
               </div>
               <div className="bg-[#] object-contain h-64 z-[100] relative p-6 max-w-2xl rounded-lg">

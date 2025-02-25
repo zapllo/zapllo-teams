@@ -162,7 +162,7 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
                 {/* Date Selection and Fetch Button */}
                 <div className="flex gap-4 mb-4">
                     <button
-                        className="px-4 py-2 flex items-center text-sm gap-2 bg-transparent border text-white rounded"
+                        className="px-4 py-2 flex items-center text-sm gap-2 bg-transparent border dark:text-white rounded"
                         onClick={() => {
                             setDatePickerTarget("start");
                             setIsDateDialogOpen(true);
@@ -171,7 +171,7 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
                         <Calendar className="h-5" /> {startDate ? startDate.toDateString() : "Select Start Date"}
                     </button>
                     <button
-                        className="px-4 py-2 flex text-sm items-center gap-2 bg-transparent border text-white rounded"
+                        className="px-4 py-2 flex text-sm items-center gap-2 bg-transparent border dark:text-white rounded"
                         onClick={() => {
                             setDatePickerTarget("end");
                             setIsDateDialogOpen(true);
@@ -334,7 +334,7 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
                     <div className="flex gap-4 mb-4">
                         {/* Month Dropdown */}
                         <select
-                            className="p-2 border bg-[#04061E] outline-none rounded"
+                            className="p-2 border dark:bg-[#04061E] outline-none rounded"
                             value={month}
                             onChange={(e) => setMonth(parseInt(e.target.value))}
                         >
@@ -347,7 +347,7 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
 
                         {/* Year Dropdown */}
                         <select
-                            className="p-2 border outline-none bg-[#04061E] rounded"
+                            className="p-2 border outline-none dark:bg-[#04061E] rounded"
                             value={year}
                             onChange={(e) => setYear(parseInt(e.target.value))}
                         >
@@ -503,7 +503,7 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
                                             />
                                         ) : (
                                             <AvatarFallback className="">
-                                                <h1 className="text-2xl">
+                                                <h1 className="text-2xl text-white">
                                                     {`${user.firstName}`.slice(0, 1)}
                                                     {`${user.lastName}`.slice(0, 1)}
                                                 </h1>
@@ -517,7 +517,7 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
                                 <h1 className="text-lg font-semibold">{`${user.firstName} ${user.lastName}`}</h1>
                                 <div className="flex items-center gap-2  ">
                                     <div
-                                        className={`w-fit px-4 py-1 rounded text-xs ${user.role === "orgAdmin"
+                                        className={`w-fit px-4 py-1 rounded text-white text-xs ${user.role === "orgAdmin"
                                             ? "bg-[#B4173B]"
                                             : user.role === "manager"
                                                 ? "bg-blue-600"
@@ -551,7 +551,7 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
                             <SelectTrigger className=" bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white outline-none focus:ring-[#815BF5]">
                                 <SelectValue placeholder="Select status" />
                             </SelectTrigger>
-                            <SelectContent className="p-1 bg-[#04061E] text-white rounded-xl shadow-lg">
+                            <SelectContent className="p-1 dark:bg-[#04061E] dark:text-white rounded-xl shadow-lg">
                                 <SelectItem value="Active" className="hover:bg-[#815BF5] font-medium">
                                     Active
                                 </SelectItem>
@@ -582,7 +582,7 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
                     <div className="border p-6 rounded-xl shadow-md">{renderActiveSection()}</div>
                 </div>
                 <Dialog open={isDateDialogOpen} onOpenChange={setIsDateDialogOpen}>
-                    <DialogContent className="z-[100] scale-90  flex justify-center ">
+                    <DialogContent className="z-[100] bg-black scale-90  flex justify-center ">
                         <div className="z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
                             <div className="w-full flex mb-4 justify-between">
                                 <CustomDatePicker

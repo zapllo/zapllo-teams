@@ -8,6 +8,7 @@ import { Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { Button } from '../ui/button';
 
 type PlanKeys = 'Zapllo Tasks' | 'Zapllo Money Saver Bundle';
 
@@ -305,30 +306,30 @@ const MultiStepForm = ({ selectedPlan }: { selectedPlan: PlanKeys }) => {
 
 
             </div>}
-            <div className="bg-[#0A0D28]  text-white p-8 rounded-2xl w-full max-w-4xl mx-auto">
+            <div className="bg-[#0A0D28]  text-white p-8 rounded-2xl w-full md:max-w-4xl mx-auto">
                 <h1 className="text-2xl font-medium mb-8">Contact Form</h1>
 
                 {/* Step Progress Bar */}
                 <div className="flex items-center mb-8">
-                    <div className="flex w-1/2 items-center">
+                    <div className="flex md:w-1/2 w-full items-center">
                         <div className={`w-4 h-4 rounded-full ${step >= 1 ? 'border-2 border-white' : 'bg-gray-600'}`}></div>
                         <div className={`flex-1 h-[1px]  ${step >= 2 ? 'border  border-gray-600' : 'bg-gray-600'}`}></div>
                         <div className={`w-4 h-4 rounded-full ${step === 2 ? 'border-2 border-white' : 'bg-gray-600'}`}></div>
                     </div>
                 </div>
-                <div className="flex justify-between w-1/2 mb-1">
+                <div className="flex justify-between w-full md:w-1/2 mb-1">
                     <p className="text-sm font-semibold text-gray-400">Step 1</p>
                     <p className="text-sm font-semibold text-gray-400">Step 2</p>
                 </div>
-                <div className='flex justify-between w-[53.9%]'>
+                <div className='flex justify-between w-full md:w-[53.9%]'>
                     <h2 className={`text-lg font-semibold mb-4 ${step === 1 ? "text-white" : "text-gray-400"}  `}>Contact Details</h2>
                     <h2 className={`text-lg font-semibold mb-4  ${step === 2 ? "text-white" : "text-gray-400"}  `}>Checkout</h2>
                 </div>
                 {/* Step 1: Contact Details */}
                 {
                     step === 1 && (
-                        <div>
-                            <div className="grid grid-cols-2 gap-4 mb-8">
+                        <div className='w-full'>
+                            <div className="grid md:grid-cols-2 gap-4 mb-8">
                                 {/* Input fields for Contact Details */}
                                 <input
                                     type="text"
@@ -336,7 +337,7 @@ const MultiStepForm = ({ selectedPlan }: { selectedPlan: PlanKeys }) => {
                                     placeholder="First Name"
                                     value={formData.firstName}
                                     onChange={handleChange}
-                                    className="p-3 bg-transparent focus:border-[#815bf5] border-[#424882]  border rounded-2xl placeholder:text-[#676B93] text-[#ffffff] focus:outline-none"
+                                    className="p-3 bg-transparent w-72 md:w-full focus:border-[#815bf5] border-[#424882]  border rounded-2xl placeholder:text-[#676B93] text-[#ffffff] focus:outline-none"
                                 />
                                 <input
                                     type="text"
@@ -344,7 +345,7 @@ const MultiStepForm = ({ selectedPlan }: { selectedPlan: PlanKeys }) => {
                                     placeholder="Last Name"
                                     value={formData.lastName}
                                     onChange={handleChange}
-                                    className="p-3 bg-transparent focus:border-[#815bf5] border-[#424882]  border rounded-2xl placeholder:text-[#676B93] text-[#ffffff] focus:outline-none"
+                                    className="p-3 bg-transparent w-72 md:w-full  focus:border-[#815bf5] border-[#424882]  border rounded-2xl placeholder:text-[#676B93] text-[#ffffff] focus:outline-none"
                                 />
                                 <input
                                     type="text"
@@ -352,13 +353,13 @@ const MultiStepForm = ({ selectedPlan }: { selectedPlan: PlanKeys }) => {
                                     placeholder="Company Name"
                                     value={formData.companyName}
                                     onChange={handleChange}
-                                    className="p-3 bg-transparent focus:border-[#815bf5] border-[#424882]  border rounded-2xl placeholder:text-[#676B93] text-[#ffffff] focus:outline-none"
+                                    className="p-3 bg-transparent w-72 md:w-full  focus:border-[#815bf5] border-[#424882]  border rounded-2xl placeholder:text-[#676B93] text-[#ffffff] focus:outline-none"
                                 />
                                 <select
                                     name="industry"
                                     value={formData.industry}
                                     onChange={handleChange}
-                                    className="p-3 bg-[#0A0D28] border-[#424882]  border rounded-2xl placeholder:text-[#676B93] text-[#ffffff] focus:outline-none"
+                                    className="p-3 bg-[#0A0D28] w-72 md:w-full  border-[#424882]  border rounded-2xl placeholder:text-[#676B93] text-[#ffffff] focus:outline-none"
                                 >
                                     <option value="" disabled>Select your Industry</option>
                                     <option value="Retail/E-Commerce">Retail/E-Commerce</option>
@@ -382,7 +383,7 @@ const MultiStepForm = ({ selectedPlan }: { selectedPlan: PlanKeys }) => {
                                     placeholder="Email ID"
                                     value={formData.email}
                                     onChange={handleChange}
-                                    className="p-3 bg-transparent focus:border-[#815bf5] border-[#424882]  border rounded-2xl placeholder:text-[#676B93] text-[#ffffff] focus:outline-none"
+                                    className="p-3 bg-transparent w-72 md:w-full  focus:border-[#815bf5] border-[#424882]  border rounded-2xl placeholder:text-[#676B93] text-[#ffffff] focus:outline-none"
                                 />
                                 <div className="flex relative">
                                     <div className="flex w-36  items-center border-[#424882] border border-r-0 rounded-2xl rounded-r-none p-3 relative">
@@ -451,7 +452,7 @@ const MultiStepForm = ({ selectedPlan }: { selectedPlan: PlanKeys }) => {
                 {
                     step === 2 && (
                         <div>
-                            <div className="grid grid-cols-2 gap-4 mb-6">
+                            <div className="grid md:grid-cols-2 gap-4 mb-6">
                                 {Object.keys(plans).map((plan) => (
                                     <label
                                         key={plan}
@@ -576,7 +577,7 @@ const MultiStepForm = ({ selectedPlan }: { selectedPlan: PlanKeys }) => {
                                 ))}
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4 mb-4">
+                            <div className="grid md:grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <h1 className='mb-2'>Select No. of Users</h1>
                                     <select
@@ -603,17 +604,8 @@ const MultiStepForm = ({ selectedPlan }: { selectedPlan: PlanKeys }) => {
                                     />
                                 </div>
                             </div>
-                            {(formData.selectedPlan === 'Zapllo Tasks' && formData.subscribedUserCount >= 20) ||
-                                (formData.selectedPlan === 'Zapllo Money Saver Bundle' && formData.subscribedUserCount >= 20) ? (
-                                <div className='p-4 border mb-4 rounded-2xl'>
-                                    <div className='flex items-center mb-2 gap-2'>
-                                        🎉<h1 className='text-xl '>Congratulations, you&apos;ve unlocked the WhatsApp Marketing Software FREE of cost!</h1>
-                                    </div>
-                                    <h1 className='text-sm text-muted-foreground'>The onboarding team will contact you and set this up for absolutely <span className='text-orange-400'>free of cost</span> with 3 done-for-you custom chatbots!</h1>
-                                    {/* <p className='mt-2 text-sm text-start'>Your Wallet Bonus: ₹ 10,000</p> */}
-                                </div>
-                            ) : null}
-                            <div className='border p-3 grid grid-cols-2 w-full gap-2 rounded-2xl'>
+
+                            <div className='border p-3 grid md:grid-cols-2 w-full gap-2 rounded-2xl'>
                                 <div className='p-2 space-y-6'>
                                     <p>Total Price: ₹{(plans[formData.selectedPlan] * 2).toLocaleString()} X {formData.subscribedUserCount} employees = ₹{totalPrice.toLocaleString()}</p>
                                     <p>Discount Applied: 50% OFF - ₹{discount.toLocaleString()}</p>
@@ -628,28 +620,38 @@ const MultiStepForm = ({ selectedPlan }: { selectedPlan: PlanKeys }) => {
                                     <p>Your Wallet Bonus: ₹{formData.subscribedUserCount >= 20 ? walletBonus.toLocaleString() : 0}</p>
                                 </div>
                             </div>
-                            <div className='flex items-center mt-4'>
-                                <div className=''>
+                            <div className='md:flex items-center mt-4'>
+                                <div className="w-full flex cursor-pointer justify-center md:hidden  ">
+
+
+                                    <Button
+                                        onClick={handlePayment}
+                                        className='rounded-full w-full text-base'
+                                    >
+                                        Payable Amount ₹{Math.round(payableAmount * 1.18).toLocaleString()}
+                                    </Button>
+
+
+                                </div>
+                                <div className='mt-2'>
                                     <button onClick={prevStep} className="bg-[#121212] hover:border-white border border-primary w-full px-24 py-2  rounded-full text-white font-semibold ">
                                         Back
                                     </button>
+                                  
                                 </div>
-                                <div className="w-full flex cursor-pointer  justify-end ">
+                                <div className="w-full md:flex cursor-pointer justify-end m
+                                     hidden  ">
 
-                                    <div
-                                        onClick={handlePayment}
-                                        className={cn(
-                                            "group rounded-full border border-black/5  transition-all ease-in  text-base w-fit px-24 hover: py-2 text-white  cursor-pointer  dark:border-white/5 dark:hover:text-white hover:bg-primary bg-[#815bf5]",
-                                        )}
-                                    >
 
-                                        <button
+                                        <Button
+                                            onClick={handlePayment}
+                                            className='rounded-full w-72 text-base'
                                         >
                                             Payable Amount ₹{Math.round(payableAmount * 1.18).toLocaleString()}
-                                        </button>
-                                    </div>
+                                        </Button>
 
-                                </div>
+
+                                    </div>
                             </div>
                         </div>
                     )

@@ -136,19 +136,19 @@ export default function PersonalDetails({ userId }: { userId: string }) {
                     <AccordionContent2 className="border rounded-xl p-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="relative mt-4">
-                                <label className="absolute text-gray-500 bg-[#04061E] px-1 -top-2 left-2 text-xs">Bank Name</label>
+                                <label className="absolute text-gray-500 dark:dark:bg-[#04061E] bg-white bg-white px-1 -top-2 left-2 text-xs">Bank Name</label>
                                 <input
                                     type="text"
                                     value={bankDetails.bankName}
                                     onChange={(e) =>
                                         setBankDetails({ ...bankDetails, bankName: e.target.value })
                                     }
-                                    className="border outline-none bg-[#04061E] rounded-2xl text-white focus:border-[#815bf5] px-2 py-2 w-full"
+                                    className="border outline-none dark:dark:bg-[#04061E] bg-white rounded-2xl dark:text-white focus:border-[#815bf5] px-2 py-2 w-full"
                                 />
                             </div>
 
                             <div className="relative mt-4">
-                                <label className="absolute text-gray-500 bg-[#04061E] px-1 -top-2 left-2 text-xs">Branch Name</label>
+                                <label className="absolute text-gray-500 dark:bg-[#04061E] bg-white px-1 -top-2 left-2 text-xs">Branch Name</label>
                                 <input
                                     type="text"
                                     value={bankDetails.branchName}
@@ -158,12 +158,12 @@ export default function PersonalDetails({ userId }: { userId: string }) {
                                             branchName: e.target.value,
                                         })
                                     }
-                                    className="border outline-none bg-[#04061E] rounded-2xl text-white focus:border-[#815bf5] px-2 py-2 w-full"
+                                    className="border outline-none dark:bg-[#04061E] bg-white rounded-2xl dark:text-white focus:border-[#815bf5] px-2 py-2 w-full"
                                 />
                             </div>
 
                             <div className="relative mt-4">
-                                <label className="absolute text-gray-500 bg-[#04061E] px-1 -top-2 left-2 text-xs">Account No</label>
+                                <label className="absolute text-gray-500 dark:bg-[#04061E] bg-white px-1 -top-2 left-2 text-xs">Account No</label>
                                 <input
                                     type="text"
                                     value={bankDetails.accountNumber}
@@ -173,19 +173,19 @@ export default function PersonalDetails({ userId }: { userId: string }) {
                                             accountNumber: e.target.value,
                                         })
                                     }
-                                    className="border outline-none bg-[#04061E] rounded-2xl text-white focus:border-[#815bf5] px-2 py-2 w-full"
+                                    className="border outline-none dark:bg-[#04061E] bg-white rounded-2xl dark:text-white focus:border-[#815bf5] px-2 py-2 w-full"
                                 />
                             </div>
 
                             <div className="relative mt-4">
-                                <label className="absolute text-gray-500 bg-[#04061E] px-1 -top-2 left-2 text-xs">IFSC Code</label>
+                                <label className="absolute text-gray-500 dark:bg-[#04061E] bg-white px-1 -top-2 left-2 text-xs">IFSC Code</label>
                                 <input
                                     type="text"
                                     value={bankDetails.ifscCode}
                                     onChange={(e) =>
                                         setBankDetails({ ...bankDetails, ifscCode: e.target.value })
                                     }
-                                    className="border outline-none bg-[#04061E] rounded-2xl text-white focus:border-[#815bf5] px-2 py-2 w-full"
+                                    className="border outline-none dark:bg-[#04061E] bg-white rounded-2xl dark:text-white focus:border-[#815bf5] px-2 py-2 w-full"
                                 />
                             </div>
                         </div>
@@ -218,19 +218,19 @@ export default function PersonalDetails({ userId }: { userId: string }) {
                     <AccordionContent2 className="border p-4 rounded-xl">
                         <div className="grid grid-cols-1 gap-4">
                             <div className="relative mt-4">
-                                <label className="absolute text-gray-500 bg-[#04061E] px-1 -top-2 left-2 text-xs">Emergency Contact</label>
+                                <label className="absolute text-gray-500 dark:bg-[#04061E] bg-white px-1 -top-2 left-2 text-xs">Emergency Contact</label>
                                 <input
                                     type="text"
                                     value={contactDetails.emergencyContact}
                                     onChange={(e) =>
                                         setContactDetails({ ...contactDetails, emergencyContact: e.target.value })
                                     }
-                                    className="border outline-none bg-[#04061E] rounded-2xl text-white focus:border-[#815bf5] px-2 py-2 w-72"
+                                    className="border outline-none dark:bg-[#04061E] bg-white rounded-2xl dark:text-white focus:border-[#815bf5] px-2 py-2 w-72"
                                 />
                             </div>
 
                             <div className="relative mt-4">
-                                <label className="absolute text-gray-500 bg-[#04061E] px-1 -top-2 left-2 text-xs">Contact Person Name</label>
+                                <label className="absolute text-gray-500 dark:bg-[#04061E] bg-white px-1 -top-2 left-2 text-xs">Contact Person Name</label>
                                 <input
                                     type="text"
                                     value={contactDetails.contactPersonName}
@@ -240,30 +240,30 @@ export default function PersonalDetails({ userId }: { userId: string }) {
                                             contactPersonName: e.target.value,
                                         })
                                     }
-                                    className="border outline-none bg-[#04061E] rounded-2xl text-white focus:border-[#815bf5] px-2 py-2 w-72"
+                                    className="border outline-none dark:bg-[#04061E] bg-white rounded-2xl dark:text-white focus:border-[#815bf5] px-2 py-2 w-72"
                                 />
                             </div>
 
                             <div className="relative mt-4">
-                                <label className="absolute text-gray-500 bg-[#04061E] px-1 -top-2 left-2 text-xs">Relation</label>
+                                <label className="absolute text-gray-500 dark:bg-[#04061E] bg-white px-1 -top-2 left-2 text-xs">Relation</label>
                                 <input
                                     type="text"
                                     value={contactDetails.relation}
                                     onChange={(e) =>
                                         setContactDetails({ ...contactDetails, relation: e.target.value })
                                     }
-                                    className="border outline-none bg-[#04061E] rounded-2xl text-white focus:border-[#815bf5] px-2 py-2 w-72"
+                                    className="border outline-none dark:bg-[#04061E] bg-white rounded-2xl dark:text-white focus:border-[#815bf5] px-2 py-2 w-72"
                                 />
                             </div>
 
                             <div className="relative mt-4">
-                                <label className="absolute text-gray-500 bg-[#04061E] px-1 -top-2 left-2 text-xs">Address</label>
+                                <label className="absolute text-gray-500 dark:bg-[#04061E] bg-white px-1 -top-2 left-2 text-xs">Address</label>
                                 <textarea
                                     value={contactDetails.address}
                                     onChange={(e) =>
                                         setContactDetails({ ...contactDetails, address: e.target.value })
                                     }
-                                    className="border outline-none bg-[#04061E] rounded-2xl text-white focus:border-[#815bf5] px-2 py-2 w-72"
+                                    className="border outline-none dark:bg-[#04061E] bg-white rounded-2xl dark:text-white focus:border-[#815bf5] px-2 py-2 w-72"
                                 />
                             </div>
                         </div>
@@ -290,7 +290,7 @@ export default function PersonalDetails({ userId }: { userId: string }) {
                                 <label className="block text-muted-foreground  text-xs">Date of Birth</label>
                                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                                     <DialogTrigger onClick={() => setDatePickerTarget("dateOfBirth")}>
-                                        <button className="px-2 mt-2 gap-1 hover:border-muted-foreground py-2 border bg-transparent  text-white text-sm flex items-center rounded">
+                                        <button className="px-2 mt-2 gap-1 hover:border-muted-foreground py-2 border bg-transparent  dark:text-white text-sm flex items-center rounded">
                                             <Calendar className="h-4" />
                                             {personalInfo.dateOfBirth
                                                 ? new Date(personalInfo.dateOfBirth).toDateString()
@@ -315,14 +315,14 @@ export default function PersonalDetails({ userId }: { userId: string }) {
 
                                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                                     <DialogTrigger onClick={() => setDatePickerTarget("dateOfJoining")}>
-                                        <button className="px-2 mt-2 py-2 text-sm border  gap-1 hover:border-muted-foreground bg-transparent  text-white flex items-center rounded">
+                                        <button className="px-2 mt-2 py-2 text-sm border  gap-1 hover:border-muted-foreground bg-transparent  dark:text-white text-black flex items-center rounded">
                                             <Calendar className="h-4" />
                                             {personalInfo.dateOfJoining
                                                 ? new Date(personalInfo.dateOfJoining).toDateString()
                                                 : "Select Date"}
                                         </button>
                                     </DialogTrigger>
-                                    <DialogContent className="z-[100] scale-90  flex justify-center ">
+                                    <DialogContent className="z-[100] bg-black scale-90  flex justify-center ">
                                         <div className="z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
                                             <div className="w-full flex mb-4 justify-between">
                                                 <CustomDatePicker

@@ -398,7 +398,7 @@ export default function AllAttendance() {
           onClick={() => setDateFilter("Today")}
           className={`px-4 text-xs h-8 rounded ${dateFilter === "Today"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           Today
@@ -407,7 +407,7 @@ export default function AllAttendance() {
           onClick={() => setDateFilter("Yesterday")}
           className={`px-4 text-xs h-8 rounded ${dateFilter === "Yesterday"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           Yesterday
@@ -416,7 +416,7 @@ export default function AllAttendance() {
           onClick={() => setDateFilter("ThisWeek")}
           className={`px-4 text-xs h-8 rounded ${dateFilter === "ThisWeek"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           This Week
@@ -425,7 +425,7 @@ export default function AllAttendance() {
           onClick={() => setDateFilter("ThisMonth")}
           className={`px-4 text-xs h-8 rounded ${dateFilter === "ThisMonth"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           This Month
@@ -434,7 +434,7 @@ export default function AllAttendance() {
           onClick={() => setDateFilter("LastMonth")}
           className={`px-4 text-xs h-8 rounded ${dateFilter === "LastMonth"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           Last Month
@@ -443,7 +443,7 @@ export default function AllAttendance() {
           onClick={() => setDateFilter("AllTime")}
           className={`px-4 text-xs h-8 rounded ${dateFilter === "AllTime"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           All Time
@@ -452,7 +452,7 @@ export default function AllAttendance() {
           onClick={() => setIsCustomModalOpen(true)}
           className={`px-4 text-xs h-8 rounded ${dateFilter === "Custom"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           Custom
@@ -465,7 +465,7 @@ export default function AllAttendance() {
           onClick={() => setFilter("Attendance")}
           className={`px-4 text-xs flex py-2 rounded ${filter === "Attendance"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           <CalendarDays className="h-4" />
@@ -475,7 +475,7 @@ export default function AllAttendance() {
           onClick={() => setFilter("Regularization")}
           className={`px-4 text-xs flex py-2 rounded ${filter === "Regularization"
             ? "bg-[#815BF5] text-white"
-            : "bg-[#] border text-white"
+            : "bg-[#] border dark:text-white"
             }`}
         >
           <Users2 className="h-4" />
@@ -530,7 +530,7 @@ export default function AllAttendance() {
                                 key={entry._id}
                                 className="flex justify-between items-center border-b py-2"
                               >
-                                <span className="text-white">
+                                <span className="dark:text-white">
                                   {entry.action === "login"
                                     ? "Login"
                                     : "Logout"}{" "}
@@ -585,12 +585,12 @@ export default function AllAttendance() {
                     <div className="h-6 w-6 rounded-full bg-[#815BF5] flex items-center justify-center text-white text-sm">
                       {entry.userId.firstName[0]}
                     </div>
-                    <h3 className="text-md text-white">
+                    <h3 className="text-md dark:text-white">
                       {entry.userId.firstName}
                     </h3>
                     <p className="text-sm text-gray-400">
                       Date:{" "}
-                      <span className="text-white">
+                      <span className="dark:text-white">
                         {format(new Date(entry.timestamp), "MMM d, yyyy")}
                       </span>
                     </p>
@@ -609,7 +609,7 @@ export default function AllAttendance() {
                 {entry.approvalStatus === "Pending" && (
                   <div className="flex gap-2 ml-4 w-full mb-4 justify-start">
                     <button
-                      className="bg-transparent py-2 flex gap-2 border border-transparent text-xs text-white px-4 rounded hover:border-green-500"
+                      className="bg-transparent py-2 flex gap-2 border  text-xs dark:text-white px-4 rounded hover:border-green-500"
                       onClick={(e) => handleApproval(entry, e)}
                     >
                       <CheckCheck className="w-4 h-4 text-[#017a5b]" />
@@ -617,7 +617,7 @@ export default function AllAttendance() {
                     </button>
 
                     <button
-                      className="bg-transparent border border-transparent flex gap-2 text-white px-4 py-2 text-xs rounded hover:border-red-500"
+                      className="bg-transparent border  flex gap-2 dark:text-white px-4 py-2 text-xs rounded hover:border-red-500"
                       onClick={(e) => handleReject(entry, e)}
                     >
                       <X className="w-4 h-4 text-red-500" />
@@ -625,7 +625,7 @@ export default function AllAttendance() {
                     </button>
 
                     <button
-                      className="bg-transparent flex gap-2 text-white px-4 py-2 text-xs rounded"
+                      className="bg-transparent flex gap-2 dark:text-white px-4 py-2 text-xs rounded"
                       onClick={(e) => openDeleteDialog(entry._id, e)} // Trigger confirmation dialog
                     >
                       <Trash2 className="w-4 h-4 text-red-500" />
@@ -647,9 +647,9 @@ export default function AllAttendance() {
       )}
 
       <Dialog open={isCustomModalOpen} onOpenChange={setIsCustomModalOpen}>
-        <DialogContent className="w-96 p-6 ml-12 bg-[#0B0D29] z-[100]">
+        <DialogContent className="w-96 p-6 ml-12  z-[100]">
           <div className="flex justify-between">
-            <DialogTitle className="text-md font-medium text-white">
+            <DialogTitle className="text-md font-medium dark:text-white">
               Select Custom Date Range
             </DialogTitle>
             <DialogClose className="" onClick={handleClose}>
@@ -742,7 +742,7 @@ export default function AllAttendance() {
       {/* Start Picker Modal */}
       <Dialog open={isStartPickerOpen} onOpenChange={setIsStartPickerOpen}>
 
-        <DialogContent className=" z-[100]  scale-90 flex justify-center ">
+        <DialogContent className=" z-[100]  bg-black dark:bg-[#0a0d28] scale-90 flex justify-center ">
           <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
             <div className="w-full flex mb-4 justify-between">
               <CustomDatePicker
@@ -761,7 +761,7 @@ export default function AllAttendance() {
       {/* End Date Picker Modal */}
       <Dialog open={isEndPickerOpen} onOpenChange={setIsEndPickerOpen}>
 
-        <DialogContent className=" z-[100]  scale-90 flex justify-center ">
+        <DialogContent className=" z-[100] bg-black dark:bg-[#0a0d28]  scale-90 flex justify-center ">
           <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
             <div className="w-full flex mb-4 justify-between">
               <CustomDatePicker

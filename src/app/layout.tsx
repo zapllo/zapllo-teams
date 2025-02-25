@@ -6,6 +6,7 @@ import NextTopLoader from 'nextjs-toploader';
 import Script from "next/script";
 import { Toaster } from "sonner";
 import { TrialStatusProvider } from "@/providers/trial-status-provider";
+import ClientThemeProvider from "@/providers/client-theme-provider";
 
 const inter = Lato({ weight: "400", subsets: ['latin'] });
 
@@ -51,18 +52,13 @@ export default function RootLayout({
             },
           }}
           position="bottom-center" />
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <ClientThemeProvider>
           {/* <FloatingNavbar /> */}
           <body className={inter.className}>
             <NextTopLoader />
             {children}
           </body>
-        </ThemeProvider>
+        </ClientThemeProvider>
       </TrialStatusProvider>
     </html>
   );

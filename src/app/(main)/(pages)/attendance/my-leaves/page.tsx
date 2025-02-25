@@ -410,7 +410,7 @@ const MyLeaves: React.FC = () => {
             onClick={() => handleInfoClick(leaveType.leaveType)}
           />
         <div className="flex justify-center ">
-          <div className="scale-75" style={{ width: 100, height: 100 }}>
+          <div className="scale-75 bg-black dark:bg-transparent rounded-full" style={{ width: 100, height: 100 }}>
             <CircularProgressbar
               value={percentage}
               text={`Consumed ${consumedLeaves}`}
@@ -450,7 +450,7 @@ const MyLeaves: React.FC = () => {
         <select
           value={selectedYear}
           onChange={(e) => setSelectedYear(Number(e.target.value))}
-          className=" border bg-[#04061E] rounded px-3 border-[#] outline-none text-xs py-2"
+          className=" border dark:bg-[#04061E] rounded px-3 border-[#] outline-none text-xs py-2"
         >
           {[2022, 2023, 2024, 2025].map((year) => (
             <option key={year} value={year}>
@@ -462,7 +462,7 @@ const MyLeaves: React.FC = () => {
         <select
           value={selectedMonth}
           onChange={(e) => setSelectedMonth(Number(e.target.value))}
-          className="border bg-[#04061E] rounded px-3 outline-none text-xs py-2"
+          className="border dark:bg-[#04061E] rounded px-3 outline-none text-xs py-2"
         >
           {months.map((month) => (
             <option key={month.value} value={month.value}>
@@ -493,35 +493,35 @@ const MyLeaves: React.FC = () => {
       <div className="tabs mb-6 flex flex-wrap justify-center space-x-2">
         <button
           onClick={() => setActiveTab("today")}
-          className={`px-4 h-fit py-2 text-xs rounded ${activeTab === "today" ? "bg-[#815BF5]" : "bg-[#] border"
+          className={`px-4 h-fit py-2 text-xs rounded ${activeTab === "today" ? "bg-[#815BF5] text-white" : "bg-[#] border"
             }`}
         >
           Today
         </button>
         <button
           onClick={() => setActiveTab("thisWeek")}
-          className={`px-4 py-2 h-fit text-xs rounded ${activeTab === "thisWeek" ? "bg-[#815BF5]" : "bg-[#] border"
+          className={`px-4 py-2 h-fit text-xs rounded ${activeTab === "thisWeek" ? "bg-[#815BF5] text-white" : "bg-[#] border"
             }`}
         >
           This Week
         </button>
         <button
           onClick={() => setActiveTab("thisMonth")}
-          className={`px-4 py-2 text-xs h-fit rounded ${activeTab === "thisMonth" ? "bg-[#815BF5]" : "bg-[#] border"
+          className={`px-4 py-2 text-xs h-fit rounded ${activeTab === "thisMonth" ? "bg-[#815BF5] text-white" : "bg-[#] border"
             }`}
         >
           This Month
         </button>
         <button
           onClick={() => setActiveTab("lastMonth")}
-          className={`px-4 py-2 text-xs h-fit rounded ${activeTab === "lastMonth" ? "bg-[#815BF5]" : "bg-[#] border"
+          className={`px-4 py-2 text-xs h-fit rounded ${activeTab === "lastMonth" ? "bg-[#815BF5] text-white" : "bg-[#] border"
             }`}
         >
           Last Month
         </button>
         <button
           onClick={openCustomModal}
-          className={`px-4 py-2 text-xs h-fit rounded ${activeTab === "custom" ? "bg-[#815BF5]" : "bg-[#] border"
+          className={`px-4 py-2 text-xs h-fit rounded ${activeTab === "custom" ? "bg-[#815BF5] text-white" : "bg-[#] border"
             }`}
         >
           Custom
@@ -553,7 +553,7 @@ const MyLeaves: React.FC = () => {
 
       {infoModalContent && (
         <Dialog open={isInfoModalOpen} onOpenChange={setIsInfoModalOpen}>
-          <DialogContent className="w-96 p-6 z-[100] bg-[#0b0d29]">
+          <DialogContent className="w-96 p-6 z-[100] ">
             <div className="flex w-full justify-between">
               <div className="flex gap-2">
                 <Info className="h-5 mt-1 " />
@@ -610,23 +610,23 @@ const MyLeaves: React.FC = () => {
                   </h3>
                   <p className="text-sm flex gap-1 mt-1 text-gray-400">
                     From:{" "}
-                    <span className="text-white">
+                    <span className="dark:text-white">
                       {new Date(leave?.fromDate).toLocaleDateString()}
                     </span>
                     <h1 className="gap-1 ml-4 flex">
                       To:
-                      <span className="text-white">
+                      <span className="dark:text-white">
                         {new Date(leave?.toDate).toLocaleDateString()}
                       </span>
                     </h1>
                   </p>
                   <p className="text-sm flex gap-1 mt-1 text-gray-400">
                     Applied For:
-                    <span className="text-white">
+                    <span className="dark:text-white">
                       {leave.appliedDays} Day(s)
                     </span>
                     |<span className="ml-1">Approved For:</span>
-                    <span className="text-white">
+                    <span className="dark:text-white">
                       {
                         leave.leaveDays.filter(
                           (day) => day.status === "Approved"
@@ -682,9 +682,9 @@ const MyLeaves: React.FC = () => {
 
       {/* Custom Date Range Modal */}
       <Dialog open={isCustomModalOpen} onOpenChange={setIsCustomModalOpen}>
-        <DialogContent className="w-96 p-6 ml-12 z-[100] bg-[#0B0D29]">
+        <DialogContent className="w-96 p-6 ml-12 z-[100] ">
           <div className="flex justify-between">
-            <DialogTitle className="text-md  font-medium text-white">
+            <DialogTitle className="text-md  font-medium dark:text-white">
               Select Custom Date Range
             </DialogTitle>
             <DialogClose className="" onClick={handleClose}>
@@ -776,7 +776,7 @@ const MyLeaves: React.FC = () => {
       {/* Start Date Picker Modal */}
       <Dialog open={isStartPickerOpen} onOpenChange={setIsStartPickerOpen}>
 
-        <DialogContent className=" z-[100]  scale-90 flex justify-center ">
+        <DialogContent className=" z-[100]  bg-black dark:bg-[#0a0d28] scale-90 flex justify-center ">
           <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
             <div className="w-full flex mb-4 justify-between">
               <CustomDatePicker
@@ -795,7 +795,7 @@ const MyLeaves: React.FC = () => {
       {/* End Date Picker Modal */}
       <Dialog open={isEndPickerOpen} onOpenChange={setIsEndPickerOpen}>
 
-        <DialogContent className=" z-[100]  scale-90 flex justify-center ">
+        <DialogContent className=" z-[100]  bg-black dark:bg-[#0a0d28] scale-90 flex justify-center ">
           <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
             <div className="w-full flex mb-4 justify-between">
               <CustomDatePicker

@@ -257,7 +257,7 @@ export default function Page() {
 
       {role === "orgAdmin" && (
         <div>
-          <div className=" mt-2 bg- p-2 px-4 border bg-[#0A0D28] text-lg rounded-xl ">
+          <div className=" mt-2 bg- p-2 px-4 border dark:bg-[#0A0D28] text-lg rounded-xl ">
             <h1 className="text-md text-muted-foreground">Organization Details</h1>
           </div>
           <div className=" text-sm grid grid-cols-1 text- p-2 gap-2 py-2">
@@ -272,7 +272,7 @@ export default function Page() {
                 <div>
                   <input
                     type="text"
-                    className="px-4 py-2 w-full bg-[#0B0D29] focus-within:border-[#815BF5]  border rounded outline-none"
+                    className="px-4 py-2 w-full dark:bg-[#0B0D29] focus-within:border-[#815BF5]  border rounded outline-none"
                     value={organizationName}
                     onChange={(e: any) => setOrganizationName(e.target.value)}
                   />
@@ -283,10 +283,10 @@ export default function Page() {
                     value={industry}
                     onValueChange={(value) => setIndustry(value)}
                   >
-                    <SelectTrigger className="bg-[#0B0D29] mt-2 text-white outline-none focus:ring-[#815BF5]">
+                    <SelectTrigger className="dark:bg-[#0B0D29] mt-2 dark:text-white outline-none focus:ring-[#815BF5]">
                       <SelectValue placeholder="Select Industry" />
                     </SelectTrigger>
-                    <SelectContent className="p-1 bg-[#04061E] text-white rounded-xl shadow-lg">
+                    <SelectContent className="p-1 dark:bg-[#04061E] dark:text-white rounded-xl shadow-lg">
                       {/* 
       EXACT SAME options:
       Retail/E-Commerce, Technology, Service Provider, Healthcare(Doctors/Clinics/Physicians/Hospital),
@@ -361,25 +361,23 @@ export default function Page() {
                       </SelectItem>
                     </SelectContent>
                   </Select>
-
                 </div>
 
                 <div>
                   {/* Description Textarea */}
                   <textarea
-                    className="px-4 py-2 mt-2 w-full bg-[#0B0D29] focus-within:border-[#815BF5] border rounded outline-none"
+                    className="px-4 py-2 mt-2 w-full dark:bg-[#0B0D29] focus-within:border-[#815BF5] border rounded outline-none"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                   />
                 </div>
-
                 <div>
                   {/* Team Size Dropdown */}
                   <Select value={teamSize} onValueChange={(value) => setTeamSize(value)}>
-                    <SelectTrigger className=" text-white bg-[#0B0D29] outline-none focus:ring-[#815BF5]">
+                    <SelectTrigger className=" dark:text-white dark:bg-[#0B0D29] outline-none focus:ring-[#815BF5]">
                       <SelectValue placeholder="Select Team Size" />
                     </SelectTrigger>
-                    <SelectContent className="p-1 bg-[#04061E] text-white rounded-xl shadow-lg">
+                    <SelectContent className="p-1 dark:bg-[#04061E] dark:text-white rounded-xl shadow-lg">
                       <SelectItem value="1-10" className="hover:bg-[#815BF5] font-medium">
                         1-10
                       </SelectItem>
@@ -415,7 +413,7 @@ export default function Page() {
       )}
       {role === "orgAdmin" && (
         <div>
-          <div className=" mt-4 bg-[#0A0D28] p-2 px-4 border rounded-xl ">
+          <div className=" mt-4 dark:bg-[#0A0D28] p-2 px-4 border rounded-xl ">
             <h1 className="text- text-muted-foreground">WhatsApp Integration</h1>
           </div>
           <div onClick={() => setWabaOpen(true)} className="mb-2  mt-2 flex   px-4 py-4  ' cursor-pointer ' underline-offset-4  m border-b w-full  ">
@@ -424,7 +422,7 @@ export default function Page() {
           </div>
         </div>
       )}
-      <div className=" mt-6 bg-[#0A0D28] p-2 px-4 border rounded-xl ">
+      <div className=" mt-6 dark:bg-[#0A0D28] p-2 px-4 border rounded-xl ">
         <h1 className="text- text-muted-foreground">Task App Settings</h1>
       </div>
       <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
@@ -436,7 +434,7 @@ export default function Page() {
         </DialogTrigger>
 
         <DialogContent className=" z-[100] flex items-center justify-center">
-          <div className="bg-[#0b0d29] z-[100] overflow-y-scroll scrollbar-hide h-fit max-h-[600px]  shadow-lg w-full   max-w-lg  rounded-lg">
+          <div className="dark:bg-[#0b0d29] z-[100] overflow-y-scroll scrollbar-hide h-fit max-h-[600px]  shadow-lg w-full   max-w-lg  rounded-lg">
             <div className="flex border-b py-2  w-full justify-between">
               <DialogTitle className="text-md   px-6 py-2 font-medium">
                 Notifications
@@ -514,7 +512,7 @@ export default function Page() {
                   </DialogTrigger>
 
                   {/* Time Picker Module */}
-                  <DialogContent className="scale-75 p-6 ">
+                  <DialogContent className="scale-75 bg-[#0a0d28] p-6 ">
 
 
                     <CustomTimePicker
@@ -584,7 +582,7 @@ export default function Page() {
         </DialogContent>
       </Dialog>
       <Dialog open={wabaOpen} onOpenChange={setWabaOpen}>
-        <DialogContent className=" z-[100] flex items-center bg-[#0b0d29] h-[240px] justify-center">
+        <DialogContent className=" z-[100] flex items-center dark:bg-[#0b0d29] h-[240px] justify-center">
           <div className="  overflow-y-scroll scrollbar-hide h-full  shadow-lg w-full   max-w-lg  rounded-lg">
             <div className="flex border-b py-2  w-full justify-between">
               <DialogTitle className="text-md   px-6 py-2 font-medium">
@@ -596,7 +594,7 @@ export default function Page() {
 
             </div>
             <div className="relative mt-2 p-6 ">
-              <label className="absolute bg-[#0b0d29] ml-2 text-xs text-[#787CA5] -mt-2 px-1">
+              <label className="absolute bg-white dark:bg-[#0b0d29] ml-2 text-xs text-[#787CA5] -mt-2 px-1">
                 WA Channel ID
               </label>
               <input type="text"

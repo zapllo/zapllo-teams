@@ -101,20 +101,20 @@ export default function Tutorials() {
                     <div className="flex items-center justify-between w-full">
                         <h1 className="ml-24 text-lg font-bold text-center">{selectedCategory}</h1>
                         <div className="flex gap-2">
-                        <div className=" flex items-center w-full px-4 focus-within:border-[#815bf5] rounded border py-2 gap-3 bg-[#0B0D29]">
+                        <div className=" flex items-center w-full px-4 focus-within:border-[#815bf5] rounded border py-2 gap-3 dark:bg-[#0B0D29]">
                                 <FaSearch className="text-gray-400" />
                                 <input
                                     type="text"
                                     value={searchQuery}
                                     onChange={handleSearch}
                                     placeholder="Search Tutorials"
-                                    className="text-sm w-full bg-transparent  text-white  focus:outline-none"
+                                    className="text-sm w-full bg-transparent  dark:text-white  focus:outline-none"
                                 />
                             </div>
                             <select
                                 value={selectedCategory}
                                 onChange={handleCategoryChange}
-                                className="px-4 py-2 border border-gray-700 text-sm bg-[#0B0D29] text-white rounded focus:outline-none"
+                                className="px-4 py-2 border dark:border-gray-700 text-sm dark:bg-[#0B0D29] dark:text-white rounded focus:outline-none"
                             >
                                 {categories.map((category) => (
                                     <option key={category} value={category}>
@@ -132,7 +132,7 @@ export default function Tutorials() {
                         filteredTutorials.map((tutorial) => (
                             <div
                                 key={tutorial._id}
-                                className="border-2 hover:border-[#815BF5] rounded-lg  w-full text-white cursor-pointer hover:shadow-lg transition"
+                                className="border-2 hover:border-[#815BF5] rounded-lg  w-full dark:text-white cursor-pointer hover:shadow-lg transition"
                                 onClick={() => handleTutorialClick(tutorial._id)}
                             >
                                 <img

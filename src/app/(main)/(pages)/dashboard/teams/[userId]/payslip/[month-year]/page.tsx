@@ -287,8 +287,8 @@ export default function PayslipPage({
                             <Button
                                 onClick={handlePrint}
                                 disabled={loadingPrint} // Disable button while printing
-                                className={`px-4 py-2 flex bg-transparent items-center gap-2 rounded-md border shadow-md ${loadingPrint ? "bg-gray-400 cursor-not-allowed" : " hover:bg-transparent hover:border-muted-foreground"
-                                    } text-white`}
+                                className={`px-4 py-2 flex text-black dark:text-white bg-transparent items-center gap-2 rounded-md border shadow-md ${loadingPrint ? "bg-gray-400 cursor-not-allowed" : " hover:bg-transparent hover:border-muted-foreground"
+                                    } dark:text-white`}
                             >
                                 <Printer className="h-5" /> {loadingPrint ? "Printing..." : "Print Payslip"}
                             </Button>
@@ -298,21 +298,20 @@ export default function PayslipPage({
                             <Button
                                 onClick={handleEmailShare}
                                 disabled={loadingPrint} // Disable button while printing
-                                className={`px-4 py-2 flex bg-transparent items-center gap-2 rounded-md border shadow-md ${loadingPrint ? "bg-gray-400 cursor-not-allowed" : " hover:bg-transparent hover:border-muted-foreground"
-                                    } text-white`}
+                                className={`px-4 py-2 text-black dark:text-white flex bg-transparent items-center gap-2 rounded-md border shadow-md ${loadingPrint ? "bg-gray-400 cursor-not-allowed" : " hover:bg-transparent hover:border-muted-foreground"
+                                    } dark:text-white`}
                             >
-                                <Mail className="h-5" /> Send Email
+                                <Mail className="h-5 text-red-500" /> Send Email
                             </Button>
                         </div>
                         <div>
                             <Button
                                 onClick={handleWhatsappShare}
-
                                 disabled={loadingPrint} // Disable button while printing
-                                className={`px-4 py-2 flex bg-transparent items-center gap-2 rounded-md border shadow-md ${loadingPrint ? "bg-gray-400 cursor-not-allowed" : " hover:bg-transparent hover:border-muted-foreground"
-                                    } text-white`}
+                                className={`px-4 py-2 flex text-black dark:text-white bg-transparent items-center gap-2 rounded-md border shadow-md ${loadingPrint ? "bg-gray-400 cursor-not-allowed" : " hover:bg-transparent hover:border-muted-foreground"
+                                    } dark:text-white`}
                             >
-                                <FaWhatsapp className="h-5" /> Send WhatsApp Message
+                                <FaWhatsapp className="h-5 text-green-500" /> Send WhatsApp Message
                             </Button>
                         </div>
                     </div>

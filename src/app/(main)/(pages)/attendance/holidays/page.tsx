@@ -155,7 +155,7 @@ const HolidayManager: React.FC = () => {
         {/* Modal Content */}
 
         <DialogContent className=" z-[100]  flex items-center justify-center">
-          <div className="bg-[#0b0d29] w-full max-w-lg overflow-y-scroll scrollbar-hide h-fit max-h-[600px]  shadow-lg   rounded-lg">
+          <div className="dark:bg-[#0b0d29] w-full max-w-lg overflow-y-scroll scrollbar-hide h-fit max-h-[600px]  shadow-lg   rounded-lg">
             <div className="flex border-b py-2  w-full justify-between">
 
               <DialogTitle className="text-md   px-6 py-2 font-medium">
@@ -180,9 +180,9 @@ const HolidayManager: React.FC = () => {
           {/* <h3 className="text-sm font-bold mb-4">Upcoming Holidays</h3> */}
           {/* <Toaster /> */}
           {holidays.length > 0 ? (
-            <div className="bg-[#0B0D29] text-sm w-full rounded-2xl  border overflow-hidden">
+            <div className="dark:bg-[#0B0D29] text-sm w-full rounded-2xl  border overflow-hidden">
               <table className="w-full">
-                <thead className="bg-[#0B0D29] ">
+                <thead className="dark:bg-[#0B0D29] ">
                   <tr>
                     <th className="px-4 text-gray-400 text-xs text-start py-2">Name</th>
                     <th className="px-4 text-gray-400 text-xs text-start py-2">Date</th>

@@ -76,10 +76,10 @@ const LeaveDetails: React.FC<LeaveDetailsProps> = ({ selectedLeave, onClose }) =
         <SheetHeader>
           <div className="flex gap-2">
             <ArrowLeft
-              className="cursor-pointer h-7 w-7 bg-[#121212] border hover:bg-white hover:text-[#121212] border-white rounded-full"
+              className="cursor-pointer h-7 w-7 dark:bg-[#121212] border hover:bg-white hover:text-[#121212] border-white rounded-full"
               onClick={onClose}
             />
-            <SheetTitle className="text-white mb-4">Leave Details</SheetTitle>
+            <SheetTitle className="dark:text-white mb-4">Leave Details</SheetTitle>
           </div>
         </SheetHeader>
         <div className="border overflow-y-scroll scrollbar-hide h-10/11 p-4 rounded-lg">
@@ -94,7 +94,7 @@ const LeaveDetails: React.FC<LeaveDetailsProps> = ({ selectedLeave, onClose }) =
               {selectedLeave.user.firstName && (
                 <div className="flex gap-2 justify-start">
                   <div className="h-6 w-6 rounded-full bg-primary">
-                    <h1 className="text-center uppercase text-xs mt-1">
+                    <h1 className="text-center text-white uppercase text-xs mt-1">
                       {selectedLeave.user.firstName[0]}
                       {selectedLeave.user.lastName[0]}
                     </h1>
@@ -255,13 +255,13 @@ const LeaveDetails: React.FC<LeaveDetailsProps> = ({ selectedLeave, onClose }) =
               <CheckCheck className="h-5" />
               <Label className="text-md mt-auto">Updates</Label>
             </div>
-            <div className="mt-2 border bg-[#121212] p-2 py-8 rounded">
+            <div className="mt-2 border dark:bg-[#121212] p-2 py-8 rounded">
               {manager && manager.firstName ? (
                 <div className="flex justify-between items-center p-2 rounded">
                   {/* Display remark and manager details */}
                   <div className="flex gap-2 items-start">
                     <div className="h-6 w-6 rounded-full bg-primary">
-                      <h1 className="text-center uppercase text-xs mt-1">
+                      <h1 className="text-center text-white uppercase text-xs mt-1">
                         {manager.firstName[0]}
                         {manager.lastName[0]}
                       </h1>
@@ -276,15 +276,15 @@ const LeaveDetails: React.FC<LeaveDetailsProps> = ({ selectedLeave, onClose }) =
                       <p className="text-xs max-w-[600px]">{selectedLeave.remarks}</p>
                     </div>
                   </div>
-                  <div className={` rounded px-2 py-1  ${selectedLeave.status === "Rejected" ? "bg-red-500" :"bg-[#017a5b]"}`}>
+                  <div className={` rounded text-white px-2 py-1  ${selectedLeave.status === "Rejected" ? "bg-red-500" :"bg-[#017a5b]"}`}>
                     <p className="text-xs">{selectedLeave.status}</p>
                   </div>
                 </div>
               ) : (
                 <div className="flex justify-center">
                   <div>
-                    <Bell />
-                    <p className="text-xs mt-2 -ml-10 text-white">
+                    <Bell className='dark:text-white' />
+                    <p className="text-xs mt-2 -ml-10 dark:text-white">
                       No remarks provided.
                     </p>
                   </div>

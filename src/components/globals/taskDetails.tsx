@@ -106,8 +106,8 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ selectedTask,
                 <SheetContent className={`max-w-4xl scrollbar-hide z-[100] w-full `}>
                     <SheetHeader>
                         <div className="flex gap-2">
-                            <ArrowLeft className="cursor-pointer h-7 w-7 bg-[#121212] hover:bg-white hover:text-black border border-white rounded-full" onClick={() => setSelectedTask(null)} />
-                            <SheetTitle className="text-white mb-4">
+                            <ArrowLeft className="cursor-pointer h-7 w-7 dark:bg-[#121212] bg- hover:bg-white hover:text-black border border-white rounded-full" onClick={() => setSelectedTask(null)} />
+                            <SheetTitle className="dark:text-white mb-4">
                                 Task details
                             </SheetTitle>
                         </div>
@@ -122,7 +122,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ selectedTask,
                                 {selectedTask?.assignedUser?.firstName ? (
                                     <div className="flex gap-2  justify-start">
                                         <div className="h-6 w-6  rounded-full bg-primary -400">
-                                            <h1 className="text-center uppercase  text-xs mt-1">
+                                            <h1 className="text-center uppercase text-white text-xs mt-1">
                                                 {`${selectedTask?.assignedUser?.firstName?.slice(0, 1)}`}
                                                 {`${selectedTask?.assignedUser?.lastName?.slice(0, 1)}`}
                                             </h1>
@@ -139,7 +139,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ selectedTask,
                                 {selectedTask?.user?.firstName ? (
                                     <div className="flex gap-2 justify-start">
                                         <div className="h-6 w-6 rounded-full bg-[#4F2A2B]">
-                                            <h1 className="text-center text-xs mt-1 uppercase">
+                                            <h1 className="text-center text-xs mt-1 text-white uppercase">
                                                 {selectedTask.user.firstName.slice(0, 1)}
                                                 {selectedTask.user.lastName.slice(0, 1)}
                                             </h1>
@@ -270,7 +270,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ selectedTask,
                         <div className="flex p-4 gap-2">
                             <h1 className="text-sm  ">Links</h1>
                             <div className='h-6 w-6 rounded-full items-center text-center border cursor-pointer shadow-white shadow-sm  bg-[#282D32] '>
-                                <Link className='h-4 text-center m-auto mt-1' />
+                                <Link className='h-4 text-center text-white m-auto mt-1' />
                             </div>
                         </div>
                         <div className="">
@@ -300,7 +300,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ selectedTask,
                         <div className="flex p-4 gap-2">
                             <h1 className=" text-sm ">Files</h1>
                             <div className="bg-green-600 h-6 w-6 text-center items-center rounded-full">
-                                <File className="h-4 mt-1 text-center" />
+                                <File className="h-4 mt-1 text-white text-center" />
                             </div>
                         </div>
                         <div className="px-4">
@@ -331,7 +331,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ selectedTask,
                         <div className="flex p-4 gap-2">
                             <h1 className="  ">Reminders</h1>
                             <div className="bg-red-600 h-6 w-6 rounded-full">
-                                <Bell className="h-4 mt-1" />
+                                <Bell className="h-4 mt-1 text-white" />
                             </div>
                         </div>
 
@@ -366,7 +366,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ selectedTask,
 
                         {
                             selectedTask.audioUrl && (
-                                <div className="p-4 w-1/2 border rounded-xl ml-2 bg-[#121212]">
+                                <div className=" p-4 w-1/2 border rounded-xl ml-2 dark:bg-[#121212]">
                                     <CustomAudioPlayer audioUrl={selectedTask.audioUrl} />
                                 </div>
                             )
@@ -380,21 +380,21 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ selectedTask,
                                             setStatusToUpdate("Reopen"); // Assuming 'In Progress' status is used for reopening
                                             setIsReopenDialogOpen(true);
                                         }}
-                                        className="gap-2 border bg-transparent  hover:border-yellow-500 hover:bg-transparent border-gray-600 w-fit"
+                                        className="gap-2 border bg-transparent dark:text-white  text-black hover:border-yellow-500 hover:bg-transparent border-gray-600 w-fit"
                                     >
                                         <PlayIcon className="h-4 bg-[#FDB077] rounded-full w-4" />
                                         Reopen
                                     </Button>
                                     <Button
                                         onClick={handleEditClick}
-                                        className="border bg-transparent hover:-sm hover:border-blue-500 hover:bg-transparent border-gray-600 w-fit"
+                                        className="border bg-transparent hover:-sm dark:text-white text-black hover:border-blue-500 hover:bg-transparent border-gray-600 w-fit"
                                     >
                                         <Edit className="h-4 rounded-full text-blue-400" />
                                         Edit
                                     </Button>
                                     <Button
                                         onClick={() => handleDeleteClick(selectedTask._id)}
-                                        className="border bg-transparent hover:-sm hover:border-red-500 hover:bg-transparent border-gray-600 w-fit "
+                                        className="border bg-transparent hover:-sm dark:text-white text-black hover:border-red-500 hover:bg-transparent border-gray-600 w-fit "
                                     >
                                         <Trash className="h-4 rounded-full text-red-400" />
                                         Delete
@@ -407,7 +407,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ selectedTask,
                                             setStatusToUpdate("In Progress");
                                             setIsDialogOpen(true);
                                         }}
-                                        className="gap-1 border bg-transparent hover:-sm hover:border-orange-500 hover:bg-transparent border-gray-600 w-full"
+                                        className="gap-1 border bg-transparent hover:-sm dark:text-white text-black hover:border-orange-500 hover:bg-transparent border-gray-600 w-full"
                                     >
                                         <IconProgress className="scale-105 text-orange-500 rounded-full w-4" />
                                         In Progress
@@ -417,21 +417,21 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ selectedTask,
                                             setStatusToUpdate("Completed");
                                             setIsCompleteDialogOpen(true);
                                         }}
-                                        className="border flex gap-1 bg-transparent hover:-sm hover:border-green-500 hover:bg-transparent border-gray-600 w-full"
+                                        className="border flex gap-1 bg-transparent hover:-sm dark:text-white text-black hover:border-green-500 hover:bg-transparent border-gray-600 w-full"
                                     >
                                         <CheckboxIcon className="scale-125 rounded-full text-green-400" />
                                         Completed
                                     </Button>
                                     <Button
                                         onClick={handleEditClick}
-                                        className="border flex items-center gap-1 bg-transparent hover:-sm hover:border-blue-500 hover:bg-transparent border-gray-600 w-full"
+                                        className="border flex items-center gap-1 bg-transparent dark:text-white text-black hover:-sm hover:border-blue-500 hover:bg-transparent border-gray-600 w-full"
                                     >
                                         <Edit className="h-4 rounded-full text-blue-400" />
                                         Edit
                                     </Button>
                                     <Button
                                         onClick={() => handleDeleteClick(selectedTask._id)}
-                                        className="border flex gap-1 items-center rounded hover:-sm hover:border-red-500 hover:bg-transparent bg-transparent border-gray-600 w-full"
+                                        className="border flex gap-1 items-center rounded dark:text-white text-black hover:-sm hover:border-red-500 hover:bg-transparent bg-transparent border-gray-600 w-full"
                                     >
                                         <Trash className="h-4 rounded-full text-red-400 " />
                                         Delete
@@ -462,11 +462,11 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ selectedTask,
                         <div className="space-y-2 h-full">
                             {sortedComments && sortedComments.length > 0 ? (
                                 sortedComments.map((commentObj, index) => (
-                                    <div key={index} className="relative border bg-[#121212] rounded-lg p-2">
+                                    <div key={index} className="relative border dark:bg-[#121212] rounded-lg p-2">
                                         <div className="flex gap-2 items-center">
                                             <div className="h-6 w-6 text-xs  text-center rounded-full bg-red-700">
 
-                                                <h1 className='mt-1'>
+                                                <h1 className='mt-1 text-white'>
                                                     {commentObj.userName.slice(0, 1)}
                                                 </h1>
                                             </div>
@@ -520,9 +520,9 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ selectedTask,
                                     </div>
                                 ))
                             ) : (
-                                <div className="text-center text-white mt-6 -500">
+                                <div className="text-center dark:text-white mt-6 -500">
                                     <div className='flex mt-4 justify-center'>
-                                        <Bell className='mt-2' />
+                                        <Bell className='mt-2 dark:text-white' />
                                     </div>
                                     <h1 className='mt-1'>
                                         No Activity

@@ -58,6 +58,7 @@ import {
   X,
   Play,
   ArrowRight,
+  LucideHome,
 } from "lucide-react";
 import {
   IconBrandTeams,
@@ -112,6 +113,7 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { Task, TasksTabProps, User, Category, DateFilter, DateRange, TaskStatusCounts } from "@/types/tasksTab";
 import MainLoader from "../loaders/loader";
 import { cn } from "@/lib/utils";
+import { useTheme } from "next-themes";
 
 export default function TasksTab({
   tasks,
@@ -124,6 +126,7 @@ export default function TasksTab({
   const [imageOrVideo, setImageOrVideo] = useState<File | null>(null);
   const [otherFile, setOtherFile] = useState<File | null>(null);
   const [profilePic, setProfilePic] = useState("");
+  const { theme } = useTheme();
 
   const [activeDateFilter, setActiveDateFilter] = useState<string | undefined>(
     "thisWeek"
@@ -1192,52 +1195,55 @@ export default function TasksTab({
           className="w-[180px] mt-12 "
         >
           <TabsList className="flex gap-y-6 mt-4 h-24  text-center">
-            <TabsTrigger value="all" className="flex justify-start gap-2">
+            <TabsTrigger value="all" className="flex  group justify-start gap-2">
               <div className="flex justify-start ml-4 w-full gap-2">
-                <HomeIcon />
-                <h1 className="mt-auto text-xs">Dashboard</h1>
+                <LucideHome className={`h-5  ${activeTab == "all" ? "text-white" : ""} `} />
+                <h1 className={`mt-auto text-xs ${activeTab == "all" ? "text-white" : ""} `}>Dashboard</h1>
               </div>
             </TabsTrigger>
             <TabsTrigger
               value="myTasks"
               className="flex justify-start w-full gap-2"
             >
-              <div className="flex justify-start ml-4 w-full gap-2">
-                <TasksIcon />
-                <h1 className="mt-auto text-xs">My Tasks</h1>
+              <div className="flex justify-start items-center ml-4 w-full gap-2">
+                <img
+                  src="/icons/task.png"
+                  className={`h-5 dark:invert-0 invert-[100] ${activeTab == "myTasks" ? " invert-0" : ""} `} />
+
+                <h1 className={`mt-auto text-xs ${activeTab == "myTasks" ? "text-white" : ""} `}>My Tasks</h1>
               </div>
             </TabsTrigger>
             <TabsTrigger
               value="delegatedTasks"
               className="flex justify-start w-full gap-2"
             >
-              <div className="flex justify-start w-full ml-4 gap-2">
+              <div className="flex justify-start items-center ml-4 w-full gap-2">
                 <img
                   src="/icons/delegated.png"
-                  className="h-[16px] mt-1"
-                  alt="Delegated Tasks Icon"
-                />
-                <h1 className="text-xs mt-1">Delegated Tasks</h1>
+                  className={`h-5 dark:invert-0 invert-[100] ${activeTab == "delegatedTasks" ? " invert-0" : ""} `} />
+
+                <h1 className={`mt-auto text-xs ${activeTab == "delegatedTasks" ? "text-white" : ""} `}>Delegated Tasks</h1>
               </div>
             </TabsTrigger>
-            <TabsTrigger
-              value="allTasks"
-              className="flex justify-start w-full gap-2 "
-            >
-              <div className="flex justify-start w-full gap-2 ml-4">
+            {(userDetails?.role === "orgAdmin" && (
+              <TabsTrigger
+                value="allTasks"
+                className="flex justify-start w-full gap-2 "
+              >
+               <div className="flex justify-start items-center ml-4 w-full gap-2">
                 <img
                   src="/icons/all.png"
-                  className="h-5 mt-0.5"
-                  alt="All Tasks Icon"
-                />
-                <h1 className="text-xs mt-1">All Tasks</h1>
+                  className={`h-5 dark:invert-0 invert-[100] ${activeTab == "allTasks" ? " invert-0" : ""} `} />
+
+                <h1 className={`mt-auto text-xs ${activeTab == "allTasks" ? "text-white" : ""} `}>All Tasks</h1>
               </div>
-            </TabsTrigger>
+              </TabsTrigger>
+            ))}
           </TabsList>
         </Tabs>
       </div>
-      <div className="flex-1 h-screen overflow-y-scroll overflow-x-hidden scrollbar-hide  border ml-44  p-4">
-        <div className="w-screen overflow-x-hidden max-w-6xl mx-auto">
+      <div className="flex-1 h-screen overflow-y-scroll overflow-x-hidden scrollbar-hide border-t-0 mt-7 border ml-44  p-4">
+        <div className="w-screen overflow-x-hidden max-w-6xl -mt-7 mx-auto">
           <div className="gap-2 flex mb-6 w-full">
             <div className="-mt-2">
               <div className="p-4">
@@ -1279,14 +1285,14 @@ export default function TasksTab({
 
                           {isCustomModalOpen && (
                             <Dialog open={isCustomModalOpen} onOpenChange={() => setIsCustomModalOpen(false)}>
-                              <DialogContent className="w-96 p-6 ml-12 z-[100] bg-[#0B0D29]">
+                              <DialogContent className="w-96 p-6 ml-12 z-[100] ">
                                 <div className="flex justify-between">
-                                  <DialogTitle className="text-md  font-medium text-white">
+                                  <DialogTitle className="text-md  font-medium dark:text-white">
                                     Select Custom Date Range
                                   </DialogTitle>
                                   <DialogClose>
                                     {" "}
-                                    <CrossCircledIcon className="scale-150  hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
+                                    <CrossCircledIcon className="scale-150 dark:text-white hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
                                     {/* <X className="cursor-pointer border -mt-4 rounded-full border-white h-6 hover:bg-white hover:text-black w-6" /> */}
                                   </DialogClose>
                                 </div>
@@ -1296,7 +1302,7 @@ export default function TasksTab({
                                     <button
                                       type="button"
                                       onClick={() => setDatePickerType("start")}
-                                      className="text-start text-xs text-gray-400 w-full border p-2 rounded"
+                                      className="text-start text-xs text-gray-400 w-full border  p-2 rounded"
                                     >
                                       <div className="flex gap-1">
                                         <Calendar className="h-4" />
@@ -1339,7 +1345,7 @@ export default function TasksTab({
                           {/* Date Picker Dialog */}
                           {datePickerType && (
                             <Dialog open={Boolean(datePickerType)} onOpenChange={() => setDatePickerType(null)}>
-                              <DialogContent className=" z-[100] scale-90  flex justify-center ">
+                              <DialogContent className=" z-[100]  bg-[#0a0d28] scale-90  flex justify-center ">
                                 <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
                                   <div className="w-full flex mb-4 justify-between">
                                     <CustomDatePicker
@@ -1477,12 +1483,13 @@ export default function TasksTab({
                                           ? 0
                                           : (completedTasks / totalTasks) * 100;
                                       };
-
+                                      const textColor = theme === "dark" ? "#ffffff" : "#000000";
                                       const completionPercentage =
                                         getCompletionPercentage(
                                           completedTasks,
                                           totalTasks
                                         );
+
 
                                       // Determine the color based on the traffic light logic
                                       let pathColor;
@@ -1518,7 +1525,7 @@ export default function TasksTab({
                                                 />
                                               ) : (
 
-                                                <h1 className="text-center text-sm mt-1 uppercase">
+                                                <h1 className="text-center text-sm mt-1 text-white uppercase">
                                                   {`${user?.firstName?.slice(
                                                     0,
                                                     1
@@ -1534,7 +1541,6 @@ export default function TasksTab({
                                               {user.firstName} {user.lastName}
                                             </h2>
                                           </div>
-
                                           {/* <p className="text-xs"> {user.email}</p> */}
                                           <div className="flex gap-2 ] text-xs mt-1">
                                             <div className="flex font-medium ">
@@ -1566,7 +1572,6 @@ export default function TasksTab({
                                             <h1 className="text-[#6C636E] text-xs">
                                               |
                                             </h1>
-
                                             <div className="flex gap-2 font-medium">
                                               <CheckCircle className="text-green-600 h-4" />
                                               <p className="text-xs">
@@ -1578,7 +1583,7 @@ export default function TasksTab({
                                             className="ml-auto  -mt-12"
                                             style={{ width: 40, height: 40 }}
                                           >
-                                            <div className="">
+                                            <div className="  dark:bg-transparent rounded-full">
                                               <CircularProgressbar
                                                 value={completionPercentage}
                                                 text={`${Math.round(
@@ -1587,7 +1592,7 @@ export default function TasksTab({
                                                 styles={buildStyles({
                                                   textSize: "24px",
                                                   pathColor: pathColor, // Dynamic path color
-                                                  textColor: "#ffffff",
+                                                  textColor: textColor,
                                                   trailColor: "#6C636E", // Trail color should be lighter for better contrast
                                                   backgroundColor: "#3e98c7",
                                                 })}
@@ -1708,7 +1713,7 @@ export default function TasksTab({
                                             className="ml-auto  -mt-12"
                                             style={{ width: 40, height: 40 }}
                                           >
-                                            <div className="">
+                                            <div className=" bg-black dark:bg-transparent rounded-full">
                                               <CircularProgressbar
                                                 value={completionPercentage}
                                                 text={`${Math.round(
@@ -1856,7 +1861,7 @@ export default function TasksTab({
                                               className="ml-auto  -mt-12"
                                               style={{ width: 40, height: 40 }}
                                             >
-                                              <div className="">
+                                              <div className=" bg-black dark:bg-transparent rounded-full">
                                                 <CircularProgressbar
                                                   value={completionPercentage}
                                                   text={`${Math.round(
@@ -1973,7 +1978,7 @@ export default function TasksTab({
                                         >
                                           <div className="flex gap-2 justify-start">
                                             <div className="h-7 w-7 rounded-full bg-[#815BF5] -400">
-                                              <h1 className="text-center text-sm mt-1 uppercase">
+                                              <h1 className="text-center text-sm mt-1 text-white uppercase">
                                                 {`${user?.firstName?.slice(
                                                   0,
                                                   1
@@ -2032,7 +2037,7 @@ export default function TasksTab({
                                             className="ml-auto  -mt-12"
                                             style={{ width: 40, height: 40 }}
                                           >
-                                            <div className="">
+                                            <div className=" bg-black dark:bg-transparent rounded-full">
                                               <CircularProgressbar
                                                 value={completionPercentage}
                                                 text={`${Math.round(
@@ -2061,11 +2066,11 @@ export default function TasksTab({
                               <div className="flex  flex-col ">
                                 {customStartDate && customEndDate && (
                                   <div className="flex gap-8 p-2  mt-2 justify-center w-full">
-                                    <h1 className="text-xs  text-center text-white">
+                                    <h1 className="text-xs  text-center dark:text-white">
                                       Start Date:{" "}
                                       {customStartDate.toLocaleDateString()}
                                     </h1>
-                                    <h1 className="text-xs text-center text-white">
+                                    <h1 className="text-xs text-center dark:text-white">
                                       End Date:{" "}
                                       {customEndDate.toLocaleDateString()}
                                     </h1>
@@ -2260,10 +2265,10 @@ export default function TasksTab({
                                     >
                                       <div className=" items-center gap-4">
                                         <div>
-                                          <p className="font-medium text-sm text-white">
+                                          <p className="font-medium text-sm dark:text-white">
                                             {task.title}
                                           </p>
-                                          <p className="text-[#E0E0E0] text-xs">
+                                          <p className="dark:text-[#E0E0E0] text-xs">
                                             Assigned by{" "}
                                             <span className="text-[#007A5A] font-bold">
                                               {task?.user?.firstName}
@@ -2401,7 +2406,7 @@ export default function TasksTab({
                                                   className="gap-2 border mt-4 h-6 py-3 px-2 bg-transparent hover:bg-transparent hover:border-orange-400 rounded border-gray-600 w-fit"
                                                 >
                                                   <Play className="h-4 w-4 text-orange-400" />
-                                                  <h1 className="text-xs">
+                                                  <h1 className="text-xs text-black dark:text-white">
                                                     In Progress
                                                   </h1>
                                                 </Button>
@@ -2415,7 +2420,7 @@ export default function TasksTab({
                                                   className="border mt-4 px-2 py-3 bg-transparent hover:bg-transparent h-6 rounded hover:border-[#007A5A] border-gray-600 w-fit"
                                                 >
                                                   <CheckCircle className="h-4 rounded-full text-green-400" />
-                                                  <h1 className="text-xs">
+                                                  <h1 className="text-xs text-black dark:text-white">
                                                     Completed
                                                   </h1>
                                                 </Button>
@@ -2510,11 +2515,11 @@ export default function TasksTab({
                           <div className="flex    flex-col ">
                             {customStartDate && customEndDate && (
                               <div className="flex gap-8 p-2 justify-center w-full">
-                                <h1 className="text-xs  text-center text-white">
+                                <h1 className="text-xs  text-center dark:text-white">
                                   Start Date:{" "}
                                   {customStartDate.toLocaleDateString()}
                                 </h1>
-                                <h1 className="text-xs text-center text-white">
+                                <h1 className="text-xs text-center dark:text-white">
                                   End Date:{" "}
                                   {customStartDate.toLocaleDateString()}
                                 </h1>
@@ -2712,10 +2717,10 @@ export default function TasksTab({
                                     >
                                       <div className=" items-center gap-4">
                                         <div>
-                                          <p className="font-medium text-sm text-white">
+                                          <p className="font-medium text-sm dark:text-white">
                                             {task.title}
                                           </p>
-                                          <p className="text-[#E0E0E0] text-xs">
+                                          <p className="dark:text-[#E0E0E0] text-xs">
                                             Assigned by{" "}
                                             <span className="text-[#007A5A] font-bold">
                                               {task.user.firstName}
@@ -2850,7 +2855,7 @@ export default function TasksTab({
                                                     );
                                                     setIsDialogOpen(true);
                                                   }}
-                                                  className="gap-2 border mt-4 h-6 py-3 px-2 hover:bg-transparent bg-transparent hover:border-orange-400 rounded border-gray-600 w-fit"
+                                                  className="gap-2 border mt-4 text-black dark:text-white h-6 py-3 px-2 hover:bg-transparent bg-transparent hover:border-orange-400 rounded border-gray-600 w-fit"
                                                 >
                                                   <Play className="h-4 w-4 text-orange-400" />
                                                   <h1 className="text-xs">
@@ -2871,7 +2876,7 @@ export default function TasksTab({
                                                   className="border mt-4 px-2 py-3 hover:bg-transparent bg-transparent h-6 rounded hover:border-[#007A5A] border-gray-600 w-fit"
                                                 >
                                                   <CheckCircle className="h-4 rounded-full text-green-400" />
-                                                  <h1 className="text-xs">
+                                                  <h1 className="text-xs text-black dark:text-white">
                                                     Completed
                                                   </h1>
                                                 </Button>
@@ -2955,11 +2960,11 @@ export default function TasksTab({
                           <div className="flex    flex-col ">
                             {customStartDate && customEndDate && (
                               <div className="flex gap-8 p-2 justify-center w-full">
-                                <h1 className="text-xs  text-center text-white">
+                                <h1 className="text-xs  text-center dark:text-white">
                                   Start Date:{" "}
                                   {customStartDate.toLocaleDateString()}
                                 </h1>
-                                <h1 className="text-xs text-center text-white">
+                                <h1 className="text-xs text-center dark:text-white">
                                   End Date:{" "}
                                   {customStartDate.toLocaleDateString()}
                                 </h1>
@@ -3194,10 +3199,10 @@ export default function TasksTab({
                                     >
                                       <div className=" items-center gap-4">
                                         <div>
-                                          <p className="font-medium text-sm text-white">
+                                          <p className="font-medium text-sm dark:text-white">
                                             {task?.title}
                                           </p>
-                                          <p className="text-[#E0E0E0] text-xs">
+                                          <p className="dark:text-[#E0E0E0] text-xs">
                                             Assigned by{" "}
                                             <span className="text-[#007A5A] font-bold">
                                               {task?.user?.firstName}
@@ -3336,7 +3341,7 @@ export default function TasksTab({
                                                   className="gap-2 border mt-4 h-6 py-3 px-2 hover:bg-transparent bg-transparent hover:border-orange-400 rounded border-gray-600 w-fit"
                                                 >
                                                   <Play className="h-4 w-4 text-orange-400" />
-                                                  <h1 className="text-xs">
+                                                  <h1 className="text-xs text-black dark:text-white">
                                                     In Progress
                                                   </h1>
                                                 </Button>
@@ -3354,7 +3359,7 @@ export default function TasksTab({
                                                   className="border mt-4 px-2 py-3 hover:bg-transparent bg-transparent h-6 rounded hover:border-[#017a5b] border-gray-600 w-fit"
                                                 >
                                                   <CheckCircle className="h-4 rounded-full text-green-400" />
-                                                  <h1 className="text-xs">
+                                                  <h1 className="text-xs text-black dark:text-white">
                                                     Completed
                                                   </h1>
                                                 </Button>
@@ -3463,7 +3468,7 @@ export default function TasksTab({
                             </p>
                             <div className="mt-2">
                               <div className="relative">
-                                <Label className="absolute bg-[#0b0d29] !text-muted-foreground ml-2 text-xs -mt-2 px-1">Comment</Label>
+                                <Label className="absolute bg-white dark:bg-[#0b0d29] !text-muted-foreground ml-2 text-xs -mt-2 px-1">Comment</Label>
                                 <textarea
                                   value={comment}
                                   onChange={(e) => {
@@ -3485,7 +3490,7 @@ export default function TasksTab({
                                   className="h-8 w-8 rounded-full items-center text-center border cursor-pointer hover:shadow-white shadow-sm bg-[#282D32]"
                                   onClick={triggerImageOrVideoUpload}
                                 >
-                                  <Files className="h-5 text-center m-auto mt-1" />
+                                  <Files className="h-5 text-white text-center m-auto mt-1" />
                                 </div>
                                 <h1 className="text-xs mt-2">
                                   Attach a File (All File Types Accepted)
@@ -3518,7 +3523,7 @@ export default function TasksTab({
                                     <button
                                       type="button"
                                       onClick={() => handleRemoveFile(index)}
-                                      className="absolute top-2 right-1 bg-red-600 text-white rounded-full p-1"
+                                      className="absolute top-2 right-1 bg-red-600 dark:text-white rounded-full p-1"
                                     >
                                       <X className="h-3 w-3" />
                                     </button>
@@ -3530,7 +3535,7 @@ export default function TasksTab({
                               <Button
                                 onClick={!loading ? handleUpdateTaskStatus : undefined} // Prevent multiple clicks
                                 className={cn(
-                                  "w-full text-white bg-[#007A5A]",
+                                  "w-full dark:text-white bg-[#007A5A]",
                                   !loading ? "hover:bg-[#007A5A]" : "opacity-50 cursor-not-allowed"
                                 )}
                                 disabled={loading} // Disable button when loading
@@ -3575,7 +3580,7 @@ export default function TasksTab({
                             </p>
                             <div className="mt-2">
                               <div className="relative">
-                                <Label className="absolute bg-[#0b0d29] !text-muted-foreground ml-2 text-xs -mt-2 px-1">Comment</Label>
+                                <Label className="absolute bg-white dark:bg-[#0b0d29] !text-muted-foreground ml-2 text-xs -mt-2 px-1">Comment</Label>
                                 <textarea
                                   value={comment}
                                   onChange={(e) => {
@@ -3597,7 +3602,7 @@ export default function TasksTab({
                                   className="h-8 w-8 rounded-full items-center text-center border cursor-pointer hover:shadow-white shadow-sm bg-[#282D32]"
                                   onClick={triggerImageOrVideoUpload}
                                 >
-                                  <Files className="h-5 text-center m-auto mt-1" />
+                                  <Files className="h-5 text-center text-white m-auto mt-1" />
                                 </div>
                                 <h1 className="text-xs mt-2">
                                   Attach a File (All File Types Accepted)
@@ -3630,7 +3635,7 @@ export default function TasksTab({
                                     <button
                                       type="button"
                                       onClick={() => handleRemoveFile(index)}
-                                      className="absolute top-2 right-1 bg-red-600 text-white rounded-full p-1"
+                                      className="absolute top-2 right-1 bg-red-600 dark:text-white rounded-full p-1"
                                     >
                                       <X className="h-3 w-3" />
                                     </button>
@@ -3658,7 +3663,7 @@ export default function TasksTab({
                                   <button
                                     type="button"
                                     onClick={() => handleRemoveFile(index)}
-                                    className="absolute top-2 right-1 bg-red-600 text-white rounded-full p-1"
+                                    className="absolute top-2 right-1 bg-red-600 dark:text-white rounded-full p-1"
                                   >
                                     <X className="h-3 w-3" />
                                   </button>
@@ -3669,7 +3674,7 @@ export default function TasksTab({
                               <Button
                                 onClick={!loading ? handleUpdateTaskStatus : undefined} // Prevent multiple clicks
                                 className={cn(
-                                  "w-full text-white bg-[#007A5A]",
+                                  "w-full dark:text-white bg-[#007A5A]",
                                   !loading ? "hover:bg-[#007A5A]" : "opacity-50 cursor-not-allowed"
                                 )}
                                 disabled={loading} // Disable button when loading
@@ -3761,7 +3766,7 @@ export default function TasksTab({
                                     <button
                                       type="button"
                                       onClick={() => handleRemoveFile(index)}
-                                      className="absolute top-2 right-1 bg-red-600 text-white rounded-full p-1"
+                                      className="absolute top-2 right-1 bg-red-600 dark:text-white rounded-full p-1"
                                     >
                                       <X className="h-3 w-3" />
                                     </button>
@@ -3773,7 +3778,7 @@ export default function TasksTab({
                               <Button
                                 onClick={!loading ? handleUpdateTaskStatus : undefined} // Prevent multiple clicks
                                 className={cn(
-                                  "w-full text-white bg-[#007A5A]",
+                                  "w-full dark:text-white bg-[#007A5A]",
                                   !loading ? "hover:bg-[#007A5A]" : "opacity-50 cursor-not-allowed"
                                 )}
                                 disabled={loading} // Disable button when loading

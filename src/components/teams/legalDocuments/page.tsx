@@ -163,7 +163,7 @@ export default function LegalDocuments({ userId }: LegalDocumentProps) {
                 <div className="flex justify-center items-center gap-2">
                     <label
                         htmlFor={documentType}
-                        className="px-4 py-2 bg-[#04061E] text-white text-sm rounded cursor-pointer"
+                        className="px-4 py-2 dark:bg-[#04061E] text-white text-sm rounded cursor-pointer"
                     >
                         <div className="flex flex-col items-center text-purple-500">
                             <FaFileAlt className='h-6' />

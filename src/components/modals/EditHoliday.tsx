@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import Loader from "../ui/loader";
 import CustomDatePicker from "../globals/date-picker";
 import { Calendar } from "lucide-react";
+import { CrossCircledIcon } from "@radix-ui/react-icons";
 
 interface Holiday {
     _id: string;
@@ -69,24 +70,20 @@ const HolidayFormModal: React.FC<HolidayFormModalProps> = ({
     return (
         <Dialog open={true} onOpenChange={onClose}>
             <DialogContent className="z-[100] flex items-center justify-center">
-                <div className="bg-[#0b0d29] w-full max-w-lg overflow-y-scroll scrollbar-hide h-fit max-h-[600px] shadow-lg rounded-lg">
+                <div className=" w-full max-w-lg overflow-y-scroll scrollbar-hide h-fit max-h-[600px] shadow-lg rounded-lg">
                     <div className="flex border-b py-2 w-full justify-between">
                         <DialogTitle className="text-md px-6 py-2 font-medium">
                             Edit Holiday
                         </DialogTitle>
                         <DialogClose className="px-6 py-2">
-                            <button
-                                onClick={onClose}
-                                className="scale-150 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]"
-                            >
-                                X
-                            </button>
+                            <CrossCircledIcon onClick={onClose} className="scale-150 mt-1 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
                         </DialogClose>
+
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4 p-6">
                         <div className="relative">
-                            <label className="absolute bg-[#0b0d29] text-[#787CA5] ml-2 text-xs -mt-2 px-1">
+                            <label className="absolute bg-white dark:bg-[#0b0d29] text-[#787CA5] ml-2 text-xs -mt-2 px-1">
                                 Holiday Name
                             </label>
                             <input
@@ -124,7 +121,7 @@ const HolidayFormModal: React.FC<HolidayFormModalProps> = ({
                                     </button>
                                 </DialogTrigger>
 
-                                <DialogContent className="z-[100] scale-90 flex justify-center">
+                                <DialogContent className="z-[100] bg-black dark:bg-[#0a0d28] scale-90 flex justify-center">
                                     <div className="z-[20] rounded-lg scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
                                         <div className="w-full flex mb-4 justify-between">
                                             <CustomDatePicker

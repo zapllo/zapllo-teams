@@ -5,7 +5,11 @@ import React from 'react'
 
 const TasksIcon = ({  }) => {
   return (
-    <img src='/icons/task.png' className='h-5'/>
+    <img 
+    src="/icons/task.png" 
+    className="h-5 invert-[100] dark:invert-0" 
+    alt="Home Icon"
+  />
   )
 }
 

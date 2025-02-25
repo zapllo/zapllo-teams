@@ -129,7 +129,7 @@ export default function ChecklistPage({ }) {
 
                                                 <label className={`text-sm overflow-hidden ${progress.includes(item._id)
                                                     ? 'line-through text-gray-400'
-                                                    : 'text-white'
+                                                    : 'dark:text-white'
                                                     }`}
                                                 >{item.text}
                                                 </label>

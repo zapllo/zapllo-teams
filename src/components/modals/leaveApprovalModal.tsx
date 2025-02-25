@@ -126,7 +126,7 @@ const LeaveApprovalModal: React.FC<LeaveApprovalModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black backdrop-blur-sm bg-opacity-50 flex items-center justify-center z-[100]">
-      <div className="bg-[#0b0d29] overflow-y-scroll pb-6 scrollbar-hide h-fit max-h-screen m-auto shadow-lg w-full z-[100]  max-w-md  rounded-lg">
+      <div className="dark:bg-[#0b0d29] bg-white overflow-y-scroll pb-6 scrollbar-hide h-fit max-h-screen m-auto shadow-lg w-full z-[100]  max-w-md  rounded-lg">
         <div className="flex border-b py-2  w-full justify-between">
           <h2 className="text-md   px-6 py-2 font-medium">
             {leaveType} By {user.firstName} {user.lastName}
@@ -186,7 +186,7 @@ const LeaveApprovalModal: React.FC<LeaveApprovalModalProps> = ({
               type="text"
               value={new Date(fromDate).toDateString()}
               readOnly
-              className="w-full  p-2   bg-[#0b0d29] outline-none border rounded-md"
+              className="w-full  p-2   dark:bg-[#0b0d29] outline-none border rounded-md"
             />
           </div>
           <div className="flex gap-2">
@@ -195,7 +195,7 @@ const LeaveApprovalModal: React.FC<LeaveApprovalModalProps> = ({
               type="text"
               value={new Date(toDate).toDateString()}
               readOnly
-              className="w-full  p-2   bg-[#0b0d29] outline-none border rounded-md"
+              className="w-full  p-2   dark:bg-[#0b0d29] outline-none border rounded-md"
             />
           </div>
         </div>
@@ -210,7 +210,7 @@ const LeaveApprovalModal: React.FC<LeaveApprovalModalProps> = ({
                 {new Date(day.date).toDateString()} ({day.unit})
               </span>
               <select
-                className={`text-xs outline-none border  bg-[#0b0d29] rounded-md p-2 ${day.status === "Approved"
+                className={`text-xs outline-none border  dark:bg-[#0b0d29] rounded-md p-2 ${day.status === "Approved"
                   ? "border-[#017a5b]"
                   : day.status === "Rejected"
                     ? "border-red-500"

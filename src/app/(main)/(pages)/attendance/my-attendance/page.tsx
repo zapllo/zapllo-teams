@@ -1176,11 +1176,11 @@ export default function MyAttendance() {
     <div className="container m h-full overflow-y-scroll scrollbar-hide rounded-lg p-4 shadow-lg">
       {/* <Toaster /> */}
       {displayLoader && (
-        <div className="absolute  w-screen h-screen  z-[100]  inset-0 bg-[#04061e] -900  bg-opacity-90 rounded-xl flex justify-center items-center">
+        <div className="absolute  w-screen h-screen  z-[100]  inset-0 bg-white dark:bg-[#04061e] -900  bg-opacity-90 rounded-xl flex justify-center items-center">
           {/* <Toaster /> */}
           <div className=" z-[100]  max-h-screen max-w-screen text-[#D0D3D3] w-[100%] rounded-lg ">
             <div className="">
-              <div className="absolute z-50 inset-0 flex flex-col items-center justify-center text-white font-bold px-4 pointer-events-none text-3xl text-center md:text-4xl lg:text-7xl">
+              <div className="absolute z-50 inset-0 flex flex-col items-center justify-center dark:text-white font-bold px-4 pointer-events-none text-3xl text-center md:text-4xl lg:text-7xl">
                 <img src="/logo/loader.png" className="h-[15%] animate-pulse" />
                 <p className="bg-clip-text text-transparent drop-shadow-2xl bg-gradient-to-b text-sm from-white/80 to-white/20">
                   Loading...
@@ -1191,11 +1191,11 @@ export default function MyAttendance() {
         </div>
       )}
       {attendanceLoading && (
-        <div className="absolute  w-screen h-screen  z-[100]  inset-0 bg-[#04061e] -900  bg-opacity-90 rounded-xl flex justify-center items-center">
+        <div className="absolute  w-screen h-screen  z-[100] bg-white  inset-0 dark:bg-[#04061e] -900  bg-opacity-90 rounded-xl flex justify-center items-center">
 
           <div className=" z-[100]  max-h-screen max-w-screen text-[#D0D3D3] w-[100%] rounded-lg ">
             <div className="">
-              <div className="absolute z-50 inset-0 flex flex-col items-center justify-center text-white font-bold px-4 pointer-events-none text-3xl text-center md:text-4xl lg:text-7xl">
+              <div className="absolute z-50 inset-0 flex flex-col items-center justify-center dark:text-white font-bold px-4 pointer-events-none text-3xl text-center md:text-4xl lg:text-7xl">
                 <img src="/logo/loader.png" className="h-[15%] animate-pulse" />
                 <p className="bg-clip-text text-transparent drop-shadow-2xl bg-gradient-to-b text-sm from-white/80 to-white/20">
                   Loading...
@@ -1281,7 +1281,7 @@ export default function MyAttendance() {
             </p>
           </div>
         ) : (
-          <div className="space-y-4 bg-[#0B0D29]  rounded p-4 w-[60%] mx-12">
+          <div className="space-y-4 dark:bg-[#0B0D29] bg-white shadow-sm   rounded p-4 w-[60%] mx-12">
             {todayEntries?.map((entry: LoginEntry, index: number) => {
               // Format login and logout times to 01:00 PM format
               const formattedLoginTime = entry.loginTime
@@ -1355,7 +1355,7 @@ export default function MyAttendance() {
                     <div className="flex justify-end">
                       <button
                         onClick={() => handleViewMap(entry.lat, entry.lng)}
-                        className="underline text-white h-5"
+                        className="underline dark:text-white h-5"
                       >
                         <MapPin />
                       </button>
@@ -1381,49 +1381,49 @@ export default function MyAttendance() {
       <div className="tabs mb-6 flex flex-wrap justify-center space-x-2">
         <button
           onClick={() => setActiveTab("today")}
-          className={`px-4 h-fit py-2 text-xs rounded ${activeTab === "today" ? "bg-[#815BF5]" : "bg-[#] border "
+          className={`px-4 h-fit py-2 text-xs rounded ${activeTab === "today" ? "bg-[#815BF5] text-white" : "bg-[#] border "
             }`}
         >
           Today
         </button>
         <button
           onClick={() => setActiveTab("yesterday")}
-          className={`px-4 h-fit py-2 text-xs rounded ${activeTab === "yesterday" ? "bg-[#815BF5]" : "bg-[#] border"
+          className={`px-4 h-fit py-2 text-xs rounded ${activeTab === "yesterday" ? "bg-[#815BF5] text-white" : "bg-[#] border"
             }`}
         >
           Yesterday
         </button>
         <button
           onClick={() => setActiveTab("thisWeek")}
-          className={`px-4 py-2 h-fit text-xs rounded ${activeTab === "thisWeek" ? "bg-[#815BF5]" : "bg-[#] border"
+          className={`px-4 py-2 h-fit text-xs rounded ${activeTab === "thisWeek" ? "bg-[#815BF5] text-white" : "bg-[#] border"
             }`}
         >
           This Week
         </button>
         <button
           onClick={() => setActiveTab("lastWeek")}
-          className={`px-4 py-2 text-xs h-fit rounded ${activeTab === "lastWeek" ? "bg-[#815BF5]" : "bg-[#] border"
+          className={`px-4 py-2 text-xs h-fit rounded ${activeTab === "lastWeek" ? "bg-[#815BF5] text-white"  : "bg-[#] border"
             }`}
         >
           Last Week
         </button>
         <button
           onClick={() => setActiveTab("thisMonth")}
-          className={`px-4 py-2 text-xs h-fit rounded ${activeTab === "thisMonth" ? "bg-[#815BF5]" : "bg-[#] border"
+          className={`px-4 py-2 text-xs h-fit rounded ${activeTab === "thisMonth" ? "bg-[#815BF5] text-white" : "bg-[#] border"
             }`}
         >
           This Month
         </button>
         <button
           onClick={() => setActiveTab("lastMonth")}
-          className={`px-4 py-2 text-xs h-fit rounded ${activeTab === "lastMonth" ? "bg-[#815BF5]" : "bg-[#] border"
+          className={`px-4 py-2 text-xs h-fit rounded ${activeTab === "lastMonth" ? "bg-[#815BF5] text-white" : "bg-[#] border"
             }`}
         >
           Last Month
         </button>
         <button
           onClick={() => setActiveTab("allTime")}
-          className={`px-4 py-2 text-xs h-fit rounded ${activeTab === "allTime" ? "bg-[#815BF5]" : "bg-[#] border"
+          className={`px-4 py-2 text-xs h-fit rounded ${activeTab === "allTime" ? "bg-[#815BF5] text-white" : "bg-[#] border"
             }`}
         >
           All Time
@@ -1442,18 +1442,18 @@ export default function MyAttendance() {
         <button
           onClick={() => setActiveAttendanceTab("dailyReport")}
           className={`px-4 flex gap-2 py-2 text-xs rounded ${activeAttendanceTab === "dailyReport"
-            ? "bg-[#815BF5]"
-            : "bg-[#37384B] "
+            ? "bg-[#815BF5] text-white"
+            : "dark:bg-[#37384B] border"
             }`}
         >
-          <img src="/icons/report.png" className="invert-[100] h-4" />
+          <img src="/icons/report.png" className="dark:invert-[100] h-4" />
           Daily Report
         </button>
         <button
           onClick={() => setActiveAttendanceTab("regularization")}
           className={`px-4 flex gap-2 py-2 text-xs rounded ${activeAttendanceTab === "regularization"
-            ? "bg-[#815BF5]"
-            : "bg-[#37384B] "
+            ? "bg-[#815BF5] text-white"
+            : "dark:bg-[#37384B] border"
             }`}
         >
           <Users2 className="h-4" />
@@ -1480,7 +1480,7 @@ export default function MyAttendance() {
                     </h1>
                   </div>
                   <div className="text-xs flex  border px-4 py-2">
-                    <CalendarClock className="h-4 text-white" />
+                    <CalendarClock className="h-4 dark:text-white" />
                     <h1 className="mt-[1px]">
                       Regularized: {regularizedCount}
                     </h1>
@@ -1496,7 +1496,7 @@ export default function MyAttendance() {
                   className="h-56"
                   autoplay
                 />
-                <p className="text-center text-white -600">
+                <p className="text-center dark:text-white -600">
                   No Entries for the selected time frame
                 </p>
               </div>
@@ -1515,7 +1515,7 @@ export default function MyAttendance() {
                     </h1>
                   </div>
                   <div className="text-xs flex  border px-4 py-2">
-                    <CalendarClock className="h-4 text-white" />
+                    <CalendarClock className="h-4 dark:text-white" />
                     <h1 className="mt-[1px]">
                       Regularized: {regularizedCount}
                     </h1>
@@ -1529,7 +1529,7 @@ export default function MyAttendance() {
                   <div key={index} className="mb-4  w-full">
                     <div
                       onClick={() => toggleDayExpansion(date)}
-                      className="w-full grid cursor-pointer grid-cols-3 gap-2 text-xs text-left border text-white px-4 py-2 rounded rounded-b-none"
+                      className="w-full grid cursor-pointer grid-cols-3 gap-2 text-xs text-left border dark:text-white px-4 py-2 rounded rounded-b-none"
                     >
                       <div className="flex gap-2">
                         <Calendar className="h-4" /> {date}
@@ -1581,7 +1581,7 @@ export default function MyAttendance() {
                               )}
                             </div>
 
-                            <div className={`text-xs cursor-pointer border w-fit h-fit flex gap-2 items-center  px-2 py-1  rounded-2xl ${entry.action === "login"
+                            <div className={`text-xs cursor-pointer border w-fit h-fit text-white flex gap-2 items-center  px-2 py-1  rounded-2xl ${entry.action === "login"
                               ? "bg-green-800"
                               : entry.action === "logout"
                                 ? "bg-red-800"
@@ -1629,7 +1629,7 @@ export default function MyAttendance() {
       {/* Radix UI Dialog for Face Login */}
       <Dialog open={isModalOpen} onOpenChange={handleModalChange}>
         <DialogContent className="z-[100] flex items-center justify-center ">
-          <div className="bg-[#0B0D29] z-[100] p-6 rounded-lg max-w-lg w-full relative">
+          <div className=" z-[100] p-6 rounded-lg max-w-lg w-full relative">
             <div className="flex justify-between">
               <div className="flex gap-2  items-center ">
                 <img src="/branding/AII.png" className="h-10" />
@@ -1641,7 +1641,7 @@ export default function MyAttendance() {
             </div>
             <Separator className="my-4" />
             <div className="w-full flex items-center mb-4 justify-between">
-              <h3 className="text-sm text-white text-center ">
+              <h3 className="text-sm dark:text-white text-center ">
                 {isLoggedIn
                   ? `Logout at ${new Date().toLocaleTimeString()}`
                   : `Login at ${new Date().toLocaleTimeString()}`}
@@ -1886,7 +1886,7 @@ export default function MyAttendance() {
                 <Globe className="h-6 text-[#815BF5]" />
                 Geo Location
               </h1>
-              <DialogClose className="text-white py-4 px-1  ">
+              <DialogClose className="dark:text-white py-4 px-1  ">
                 <CrossCircledIcon className="scale-150 mt-1 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
               </DialogClose>
             </div>
@@ -1929,9 +1929,9 @@ export default function MyAttendance() {
 
       {/* Custom Date Range Modal */}
       <Dialog open={isCustomModalOpen} onOpenChange={setIsCustomModalOpen}>
-        <DialogContent className="w-96 z-[100] ml-12 p-6 bg-[#0B0D29]">
+        <DialogContent className="w-96 z-[100] ml-12 p-6 ">
           <div className="flex justify-between">
-            <DialogTitle className="text-md  font-medium text-white">
+            <DialogTitle className="text-md  font-medium dark:text-white">
               Select Custom Date Range
             </DialogTitle>
             <DialogClose className="" onClick={handleClose}>
@@ -2024,7 +2024,7 @@ export default function MyAttendance() {
 
       {/* Start Date Picker Modal */}
       <Dialog open={isStartPickerOpen} onOpenChange={setIsStartPickerOpen}>
-        <DialogContent className=" z-[100]  scale-90 flex justify-center ">
+        <DialogContent className=" z-[100] bg-black dark:bg-[#0a0d28] scale-90 flex justify-center ">
           <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
             <div className="w-full flex mb-4 justify-between">
               <CustomDatePicker
@@ -2042,7 +2042,7 @@ export default function MyAttendance() {
 
       {/* End Date Picker Modal */}
       <Dialog open={isEndPickerOpen} onOpenChange={setIsEndPickerOpen}>
-        <DialogContent className=" z-[100]  scale-90 flex justify-center ">
+        <DialogContent className=" z-[100] bg-black dark:bg-[#0a0d28]  scale-90 flex justify-center ">
           <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
             <div className="w-full flex mb-4 justify-between">
               <CustomDatePicker
@@ -2257,7 +2257,7 @@ export default function MyAttendance() {
         <DialogContent className="z-[100] flex w-full justify-center">
           <div className="w-full">
             <div className="flex border-b py-2  w-full justify-between ">
-              <DialogTitle className="text-md   px-6 py-2 font-medium">
+              <DialogTitle className="text-md  dark:text-white  px-6 py-2 font-medium">
                 Register Faces (Upload 3 Images)
               </DialogTitle>
               <DialogClose className=" px-6 py-2">

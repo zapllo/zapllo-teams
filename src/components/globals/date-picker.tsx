@@ -84,7 +84,7 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ selectedDate, onDat
   };
 
   return (
-    <div className="flex flex-row gap-4 mt-4 scale-105   text-gray-300 w-full rounded-lg shadow-lg">
+    <div className="flex flex-row gap-4 mt-4 scale-105  text-gray-300 w-full rounded-lg shadow-lg">
       {/* Selected Date Preview */}
       <div className="flex flex-col items-center text-white mr-8">
         {/* <div className="text-lg">Select Date</div> */}

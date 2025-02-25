@@ -271,7 +271,7 @@ const LeaveTypes: React.FC = () => {
                 "text-xs px-4  h-8 mt-[2px] rounded-md",
                 activeTab === "All"
                   ? "bg-[#815BF5] text-white"
-                  : "bg-transparent text-white border-[#505356]  border"
+                  : "bg-transparent dark:text-white border-[#505356]  border"
               )}
               onClick={() => setActiveTab("All")}
             >
@@ -282,7 +282,7 @@ const LeaveTypes: React.FC = () => {
                 "text-xs px-4  h-8 mt-[2px] rounded-md",
                 activeTab === "Paid"
                   ? "bg-[#815BF5] text-white"
-                  : "bg-transparent text-white border-[#505356]  border"
+                  : "bg-transparent dark:text-white border-[#505356]  border"
               )}
               onClick={() => setActiveTab("Paid")}
             >
@@ -293,7 +293,7 @@ const LeaveTypes: React.FC = () => {
                 "text-xs px-4  h-8 mt-[2px]  rounded-md",
                 activeTab === "Unpaid"
                   ? "bg-[#815BF5] text-white"
-                  : "bg-transparent text-white border-[#505356]  border"
+                  : "bg-transparent dark:text-white border-[#505356]  border"
               )}
               onClick={() => setActiveTab("Unpaid")}
             >
@@ -303,8 +303,8 @@ const LeaveTypes: React.FC = () => {
               <DialogTrigger asChild>
                 <button className={clsx(
                   "text-xs px-4 flex items-center  h-8 mt-[2px]  rounded-md",
-                  "border-[#815BF5] hover:bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white",
-                  "bg-transparent text-white border-[#505356]  border"
+                  "border-[#815BF5] hover:bg-gradient-to-r from-[#815BF5] to-[#FC8929] dark:text-white hover:text-white",
+                  "bg-transparent dark:text-white border-[#505356]  border"
                 )}>
                   <Repeat className="h-4" />
                   Update Leave Balance for 2025</button>
@@ -318,10 +318,10 @@ const LeaveTypes: React.FC = () => {
                 </DialogDescription>
                 <DialogFooter>
                   <DialogClose>
-                    <Button className="bg-transparent hover:border-gray-400 hover:bg-transparent border rounded">
+                    <Button className="bg-transparent dark:text-white text-black hover:border-gray-400 hover:bg-transparent border rounded">
                       Cancel
                     </Button>
-                  </DialogClose>
+                  </DialogClose> 
                   <Button onClick={handleUpdateLeaveBalance} className="bg-red-500 hover:bg-red-700 border rounded">
                     Confirm
                   </Button>
@@ -331,7 +331,7 @@ const LeaveTypes: React.FC = () => {
 
           </div>
           <DialogContent className=" z-[100] m-auto h-full max-h-screen  flex items-center justify-center">
-            <div className="bg-[#0b0d29]  overflow-y-scroll scrollbar-hide h-full m-auto max-w-lg  shadow-lg w-full    rounded-lg">
+            <div className="overflow-y-scroll scrollbar-hide h-full m-auto max-w-lg  shadow-lg w-full    rounded-lg">
               <div className="flex border-b py-2  w-full justify-between ">
                 <DialogTitle className="text-lg   px-6 py-2 font-medium">
                   {" "}
@@ -346,7 +346,7 @@ const LeaveTypes: React.FC = () => {
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4 p-6">
                   <div className="relative">
-                    <label className="absolute bg-[#0b0d29] ml-2 text-xs text-[#787CA5] -mt-2 px-1">
+                    <label className="absolute bg-white dark:bg-[#04061E] ml-2 text-xs text-[#787CA5] -mt-2 px-1">
                       Leave Type
                     </label>
                     <input
@@ -355,14 +355,14 @@ const LeaveTypes: React.FC = () => {
                       value={formData.leaveType}
                       onChange={handleInputChange}
                       // placeholder='Leave Type'
-                      className="w-full text-xs p-2 bg-[#1A1C20] outline-none border rounded bg-transparent"
+                      className="w-full text-xs p-2 dark:bg-[#1A1C20] dark:text-white outline-none border rounded bg-transparent"
                       required
                     />
                   </div>
 
                   <div className="relative">
                     {/* <label className="block text-sm">Description</label> */}
-                    <label className="absolute bg-[#0b0d29] ml-2 text-xs text-[#787CA5] -mt-2 px-1">
+                    <label className="absolute dark:bg-[#1A1C20] bg-white dark:text-white ml-2 text-xs text-[#787CA5] -mt-2 px-1">
                       Description
                     </label>
 
@@ -378,7 +378,7 @@ const LeaveTypes: React.FC = () => {
 
                   <div className="relative">
                     {/* <label className="block text-sm">Allotted Leaves</label> */}
-                    <label className="absolute bg-[#0b0d29] ml-2 text-xs text-[#787CA5] -mt-2 px-1">
+                    <label className="absolute bg-white dark:bg-[#0b0d29] ml-2 text-xs text-[#787CA5] -mt-2 px-1">
                       Alloted Leaves
                     </label>
                     <input
@@ -420,8 +420,8 @@ const LeaveTypes: React.FC = () => {
                   </div>
 
                   <div className="flex items-center gap-8">
-                    <div className="flex items-center w-full gap-2  bg-gray-800 p-2  rounded">
-                      <label className="block text-xs text-white ">
+                    <div className="flex items-center w-full gap-2  dark:bg-gray-800 p-2  rounded">
+                      <label className="block text-xs dark:text-white ">
                         Backdated Leave Days
                       </label>
                       <div>
@@ -434,8 +434,8 @@ const LeaveTypes: React.FC = () => {
                         />
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 w-full bg-gray-800 p-2 rounded">
-                      <label className="block text-xs  text-white">
+                    <div className="flex items-center gap-2 w-full dark:bg-gray-800 p-2 rounded">
+                      <label className="block text-xs  dark:text-white">
                         Advance Leave Days
                       </label>
                       <div>
@@ -477,10 +477,10 @@ const LeaveTypes: React.FC = () => {
                       />
                     </div>
                   </div>
-                  <div className="bg-gray-800 p-2 rounded">
-                    <div className="flex gap-2 bg-gray-800  rounded">
+                  <div className="dark:bg-gray-800 p-2 rounded">
+                    <div className="flex gap-2 dark:bg-gray-800  rounded">
                       <div className="flex items-center gap-2">
-                        <label className="block text-sm  text-white">
+                        <label className="block text-sm  dark:text-white">
                           Unit
                         </label>
                         <div className="flex items-center space-x-4">
@@ -489,7 +489,7 @@ const LeaveTypes: React.FC = () => {
                               key={unit}
                               type="button"
                               className={clsx(
-                                "px-4 py-2 text-xs rounded  text-white bg-[#815BF5]",
+                                "px-4 py-2 text-xs rounded  dark:text-white bg-[#815BF5]",
                                 formData.unit.includes(unit)
                                   ? "bg-[#017A5B] text-white"
                                   : "bg-transparent border border-[#505356]  "

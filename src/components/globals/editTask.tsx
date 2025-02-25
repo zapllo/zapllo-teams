@@ -43,6 +43,7 @@ import { Avatar, AvatarFallback } from "../ui/avatar";
 import { CaretDownIcon, CrossCircledIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
 import Loader from "../ui/loader";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 // interface Reminder {
 //   type: "minutes" | "hours" | "days" | "specific"; // Added 'specific'
@@ -74,6 +75,7 @@ interface Task {
   audioUrl?: string;
   dates?: number[];
   categories?: string[];
+  repeatInterval: number;
   dueDate: Date;
   completionDate: string;
   attachment?: string[];
@@ -139,6 +141,7 @@ const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
     dueDate: new Date(),
     days: [] as string[],
     dates: [] as number[],
+    repeatInterval: 0,
     attachment: [] as string[],
     links: [] as string[],
     status: "Pending",
@@ -346,6 +349,7 @@ const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
         dueDate: task.dueDate ? new Date(task.dueDate) : new Date(),
         days: task.days || [],
         dates: task.dates || [],
+        repeatInterval: task.repeatInterval || 0,
         attachment: task.attachment || [],
         links: task.links || [],
         status: task.status || "Pending",
@@ -620,8 +624,8 @@ const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
   if (!open) return null; // Render nothing if the dialog is not open
 
   return (
-    <div className="fixed inset-0 w-full bg-black bg-opacity-50 flex items-center justify-center z-40">
-      <div className="bg-[#0B0D29] z-50 border max-h-screen h-fit m-auto overflow-y-scroll scrollbar-hide p-6 text-xs rounded-lg max-w-screen w-[50%] shadow-lg">
+    <div className="fixed inset-0 w-full bg-white bg-opacity-50 flex items-center justify-center z-40">
+      <div className="dark:bg-[#0B0D29] bg-white  z-50 border max-h-screen h-fit m-auto overflow-y-scroll scrollbar-hide p-6 text-xs rounded-lg max-w-screen w-[50%] shadow-lg">
         <div className="flex w-full justify-between mb-4">
           <h2 className="text-lg font-medium ">Edit Task</h2>
           <button className="cursor-pointer  text-lg" onClick={onClose}>
@@ -741,7 +745,7 @@ const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
             )}
           </div>
         </div>
-        <div className="w-full flex justify-between">
+        <div className="w-full ">
           <div className="block mb-2">
             <div className="flex gap-2 border px-4 py-5 w-full rounded ">
               <h1 className="text-xs font-bold">Priority:</h1>
@@ -769,8 +773,9 @@ const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
               </div>
             </div>
           </div>
-
-          <div className="flex gap-2 ml-40 items-center ">
+        </div>
+        <div className="flex gap-2 justify-between  items-center ">
+          <div className="flex gap-2">
             <Repeat className="h-4" />
             <Label htmlFor="repeat" className="font-semibold text-xs ">
               Repeat
@@ -783,27 +788,61 @@ const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
               className="mr-2"
             />
           </div>
+          {formData.repeat && (
+            <div className="flex flex-col gap-4">
+              {/* Repeat Type Selection */}
+              <div className="flex w-full ">
+                {/* You can swap out the plain <select> with ShadcnSelect for consistency */}
+                <Select
+                  value={formData.repeatType}
+                  onValueChange={(value) => {
+                    setFormData({ ...formData, repeatType: value });
+                    if (value === "Monthly") {
+                      setIsMonthlyDaysModalOpen(true);
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-48 dark:bg-[#292d33] border text-xs h-fit outline-none rounded px-3">
+                    <SelectValue placeholder="Select Repeat Type" />
+                  </SelectTrigger>
+                  <SelectContent className="z-[100] text-xs">
+                    <SelectItem value="Daily">Daily</SelectItem>
+                    <SelectItem value="Weekly">Weekly</SelectItem>
+                    <SelectItem value="Monthly">Monthly</SelectItem>
+                    <SelectItem value="Yearly">Yearly</SelectItem>
+                    <SelectItem value="Periodically">Periodically</SelectItem>
+                  </SelectContent>
+                </Select>
+
+              </div>
+
+
+            </div>
+          )}
         </div>
-        {formData.repeat && (
-          <div className="flex w-full relative justify-end">
-            <label className="block absolute mb-2">
-              Repeat Type:
-              <select
-                name="repeatType"
-                value={formData.repeatType}
-                onChange={handleChange}
-                className="w-full p-2 border outline-none rounded mt-1"
-              >
-                <option value="Daily">Daily</option>
-                <option value="Weekly">Weekly</option>
-                <option value="Monthly">Monthly</option>
-              </select>
-            </label>
+        {/* Periodically: Input for repeat interval */}
+        {formData.repeatType === "Periodically" && (
+          <div className="my-4">
+            <input
+              type="number"
+              id="repeatInterval"
+              value={formData.repeatInterval}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  repeatInterval: Number(e.target.value),
+                })
+              }
+              className="w-44 ml-4 dark:bg-[#292d33] border text-xs outline-none rounded px-3 py-2"
+              placeholder="Enter interval in days"
+              min={1}
+            />
           </div>
         )}
 
-        {formData.repeatType === "Weekly" && formData.repeat && (
-          <div className="mb-4 ml-2 mt-12">
+        {/* Weekly: Toggle buttons for selecting days */}
+        {formData.repeatType === "Weekly" && (
+          <div className="mb-4 mt-2 ml-2">
             <Label className="block font-medium mb-2">Select Days</Label>
             <div className="grid grid-cols-7 p-2 rounded">
               {[
@@ -815,27 +854,21 @@ const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
                 "Saturday",
                 "Sunday",
               ].map((day) => (
-                <div
-                  key={day}
-                  className="flex gap-2 cursor-pointer items-center"
-                >
+                <div key={day} className="flex gap-2 cursor-pointer items-center">
                   <Toggle
                     variant="outline"
-                    aria-label={`${day}`}
-                    pressed={formData.days.includes(day)} // Set pressed state based on inclusion in formData.days
+                    aria-label={day}
+                    pressed={formData.days.includes(day)}
                     onPressedChange={(pressed) =>
                       handleDaysChange(day, pressed)
-                    } // Update handler to pass the pressed state
+                    }
                     className={
                       formData.days.includes(day)
                         ? "text-white cursor-pointer"
                         : "text-black cursor-pointer"
                     }
                   >
-                    <Label
-                      htmlFor={day}
-                      className="font-semibold cursor-pointer"
-                    >
+                    <Label htmlFor={day} className="font-semibold cursor-pointer">
                       {day.slice(0, 1)}
                     </Label>
                   </Toggle>
@@ -845,7 +878,8 @@ const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
           </div>
         )}
 
-        {formData.repeatType === "Monthly" && formData.repeat && (
+        {/* Monthly: Days select modal for choosing specific dates */}
+        {formData.repeatType === "Monthly" && (
           <div>
             {isMonthlyDaysModalOpen && (
               <DaysSelectModal
@@ -858,19 +892,20 @@ const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
                     dates:
                       typeof update === "function"
                         ? update(prev.dates)
-                        : update, // Handles both function and direct state
+                        : update,
                   }))
                 }
               />
             )}
           </div>
         )}
+
         <div className="flex gap-2 ">
           <label className="block mb-2">
             <Button
               type="button"
               onClick={handleOpenDatePicker}
-              className=" border-2 text-xs rounded bg-[#282D32] hover:bg-transparent px-3 flex gap-1  py-2"
+              className=" border-2 text-xs rounded dark:bg-[#282D32] bg-transparent text-black dark:text-white hover:bg-transparent px-3 flex gap-1  py-2"
             >
               <Calendar className="h-5 text-sm" />
               {formData.dueDate ? (
@@ -895,7 +930,7 @@ const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
               open={isDatePickerOpen}
               onOpenChange={setIsDatePickerOpen}
             >
-              <DialogContent className=" z-[100]  scale-90 flex justify-center ">
+              <DialogContent className=" z-[100] bg-[#0a0d28] scale-90 flex justify-center ">
                 <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
                   <div className="w-full flex mb-4 justify-between">
                     <CustomDatePicker
@@ -915,7 +950,7 @@ const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
             open={isTimePickerOpen}
             onOpenChange={setIsTimePickerOpen}
           >
-            <DialogContent className="z-[100] scale-90 flex justify-center ">
+            <DialogContent className="z-[100] bg-[#0a0d28] scale-90 flex justify-center ">
               <div className="z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
                 <div className="w-full flex mb-4 justify-between">
                   <CustomTimePicker
@@ -943,7 +978,7 @@ const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
               className={`h-8 w-8 rounded-full items-center text-center border cursor-pointer hover:shadow-white shadow-sm bg-[#282D32] ${nonEmptyLinksCount > 0 ? "border-[#017A5B]" : ""
                 }`}
             >
-              <Link className="h-5 text-center m-auto mt-1" />
+              <Link className="h-5 text-white text-center m-auto mt-1" />
             </div>
             {nonEmptyLinksCount > 0 && (
               <span className="text-xs mt-2">{nonEmptyLinksCount} Links</span>
@@ -958,7 +993,7 @@ const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
               className={`h-8 w-8 rounded-full items-center text-center border cursor-pointer hover:shadow-white shadow-sm bg-[#282D32] ${formData.attachment.length > 0 ? "border-[#017A5B]" : ""
                 }`}
             >
-              <Paperclip className="h-5 text-center m-auto mt-1" />
+              <Paperclip className="h-5 text-white text-center m-auto mt-1" />
             </div>
             {formData.attachment.length > 0 && (
               <span className="text-xs mt-2 text">
@@ -984,7 +1019,7 @@ const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
                 className={`h-8 w-8 rounded-full items-center text-center border cursor-pointer hover:shadow-white shadow-sm bg-[#282D32] ${reminders.length > 0 ? "border-[#815BF5]" : ""
                   }`}
               >
-                <Clock className="h-5 text-center m-auto mt-1" />
+                <Clock className="h-5 text-white text-center m-auto mt-1" />
               </div>
               {reminders.length > 0 && (
                 <span className="text-xs mt-2">
@@ -1046,7 +1081,7 @@ const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
                 <Button
                   type="button"
                   onClick={addLinkInputField}
-                  className="bg-transparent border border-[#505356] text-white hover:bg-[#017A5B] px-4 py-2 flex gap-2 rounded"
+                  className="bg-transparent border border-[#505356] text-black dark:text-white hover:bg-[#017A5B] px-4 py-2 flex gap-2 rounded"
                 >
                   Add Link
                   <Plus />

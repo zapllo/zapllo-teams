@@ -21,7 +21,8 @@ const SheetOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Overlay
     className={cn(
-      "fixed inset-0 w-full  bg-black/80 z-[100]  data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      // Light mode uses a white overlay while dark mode uses a dark overlay.
+      "fixed inset-0 w-full bg-white/80 dark:bg-black/80 z-[100] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className
     )}
     {...props}
@@ -31,14 +32,15 @@ const SheetOverlay = React.forwardRef<
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName
 
 const sheetVariants = cva(
-  "fixed  z-50    gap-4 bg-[#1A1D21] p-6 overflow-y-scroll scrollbar-hide shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
+  // The base now uses a white background for light mode and a dark background for dark mode.
+  "fixed z-50 gap-4 bg-white dark:bg-[#1A1D21] p-6 overflow-y-scroll scrollbar-hide shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
   {
     variants: {
       side: {
-        top: "inset-x-0 top-0 h-1/2 w-full border-b data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
-        bottom: "inset-x-0 bottom-0 h-1/2 w-full border-t data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
-        left: "inset-y-0 left-0 w-1/2 h-full border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left",
-        right: "inset-y-0 right-0 h-full  w-1/2  border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right",
+        top: "inset-x-0 top-0 h-1/2 w-full border-b border-gray-300 dark:border-gray-700 data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
+        bottom: "inset-x-0 bottom-0 h-1/2 w-full border-t border-gray-300 dark:border-gray-700 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
+        left: "inset-y-0 left-0 w-1/2 h-full border-r border-gray-300 dark:border-gray-700 data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left",
+        right: "inset-y-0 right-0 h-full w-1/2 border-l border-gray-300 dark:border-gray-700 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right",
       },
     },
     defaultVariants: {
@@ -63,7 +65,13 @@ const SheetContent = React.forwardRef<
       {...props}
     >
       {children}
-      <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 outline-none ring-2 ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
+      <SheetPrimitive.Close
+        className={cn(
+          // The close button now adapts its active background between light and dark modes.
+          "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 outline-none ring-2 ring-ring focus:ring-offset-2 disabled:pointer-events-none",
+          "data-[state=open]:bg-gray-100 dark:data-[state=open]:bg-gray-700"
+        )}
+      >
         {/* <Cross2Icon className="h-6 w-6" /> */}
         <span className="sr-only">Close</span>
       </SheetPrimitive.Close>
@@ -78,7 +86,8 @@ const SheetHeader = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "flex flex-col space-y-2 text-center sm:text-left",
+      // Adding text color overrides for light and dark modes.
+      "flex flex-col space-y-2 text-center sm:text-left text-gray-900 dark:text-gray-100",
       className
     )}
     {...props}
@@ -106,7 +115,11 @@ const SheetTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Title
     ref={ref}
-    className={cn("text-lg font-semibold text-foreground", className)}
+    className={cn(
+      // Use dark mode text overrides.
+      "text-lg font-semibold text-gray-900 dark:text-gray-100",
+      className
+    )}
     {...props}
   />
 ))
@@ -118,7 +131,10 @@ const SheetDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn(
+      "text-sm text-gray-700 dark:text-gray-300",
+      className
+    )}
     {...props}
   />
 ))

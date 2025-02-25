@@ -102,7 +102,7 @@ const MenuOptions = (props: Props) => {
   };
 
   return (
-    <nav className="dark:bg-[#0A0D28] z-[50] h-screen fixed border-r border-[#37384B] overflow-hidden scrollbar-hide justify-between flex items-center flex-col gap-10 py-4 px-2 w-14">
+    <nav className="dark:bg-[#0A0D28] z-[50] h-screen fixed border-r bg-[#05071E] dark:border-[#37384B] overflow-hidden scrollbar-hide justify-between flex items-center flex-col gap-10 py-4 px-2 w-14">
       <div className="flex items-center justify-center flex-col gap-8">
         <Link href="/dashboard">
           <img src='/icons/zapllo.png' className='h-full w-full scale-75' alt="Zapllo Logo" />
@@ -132,7 +132,7 @@ const MenuOptions = (props: Props) => {
                   </TooltipTrigger>
                   <TooltipContent
                     side="right"
-                    className="bg-black/10 backdrop-blur-xl"
+                    className="dark:bg-black/10 backdrop-blur-xl"
                   >
                     <p>{menuItem.name}</p>
                   </TooltipContent>

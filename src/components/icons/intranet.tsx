@@ -8,7 +8,7 @@ type Props = {
 
 const Intranet = ({ selected }: Props) => {
     return (
-        <Globe className='h-3' />
+        <Globe className='h-3 invert-[100] dark:invert-0' />
 
   )
 }

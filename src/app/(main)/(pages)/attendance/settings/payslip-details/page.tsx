@@ -148,9 +148,9 @@ export default function PayslipDetailsPage() {
                 <div className='grid '>
                     {/* Name Input */}
                     <div className="relative mt-4">
-                        <label className="absolute text-gray-500 bg-[#04061E] px-1 -top-2 left-2 text-sm">Company Name *</label>
+                        <label className="absolute text-gray-500 bg-white dark:bg-[#04061E] px-1 -top-2 left-2 text-sm">Company Name *</label>
                         <input
-                            className="border outline-none bg-[#04061E] rounded-2xl text-white -foreground focus:border-[#815bf5] px-2 py-2 w-full"
+                            className="border outline-none dark:bg-[#04061E] rounded-2xl dark:text-white -foreground focus:border-[#815bf5] px-2 py-2 w-full"
                             type="text"
                             name="name"
                             value={formData.name}
@@ -161,9 +161,9 @@ export default function PayslipDetailsPage() {
 
                     {/* Address Input */}
                     <div className="relative mt-4">
-                        <label className="absolute text-gray-500 bg-[#04061E] px-1 -top-2 left-2 text-sm">Company Address *</label>
+                        <label className="absolute text-gray-500 bg-white dark:bg-[#04061E] px-1 -top-2 left-2 text-sm">Company Address *</label>
                         <input
-                            className="border outline-none bg-[#04061E] rounded-2xl text-white -foreground focus:border-[#815bf5] px-2 py-2 w-full"
+                            className="border outline-none dark:bg-[#04061E] rounded-2xl dark:text-white -foreground focus:border-[#815bf5] px-2 py-2 w-full"
                             type="text"
                             name="address"
                             value={formData.address}
@@ -174,9 +174,9 @@ export default function PayslipDetailsPage() {
 
                     {/* Contact Input */}
                     <div className="relative mt-4">
-                        <label className="absolute text-gray-500 bg-[#04061E] px-1 -top-2 left-2 text-sm">Company Contact *</label>
+                        <label className="absolute text-gray-500 bg-white dark:bg-[#04061E]px-1 -top-2 left-2 text-sm">Company Contact *</label>
                         <input
-                            className="border outline-none bg-[#04061E] rounded-2xl text-white -foreground focus:border-[#815bf5] px-2 py-2 w-full"
+                            className="border outline-none dark:bg-[#04061E] rounded-2xl dark:text-white -foreground focus:border-[#815bf5] px-2 py-2 w-full"
                             type="text"
                             name="contact"
                             value={formData.contact}
@@ -188,9 +188,9 @@ export default function PayslipDetailsPage() {
 
                     {/* Email or Website Input */}
                     <div className="relative mt-4">
-                        <label className="absolute text-gray-500 bg-[#04061E] px-1 -top-2 left-2 text-sm">Website/Email</label>
+                        <label className="absolute text-gray-500 bg-white dark:bg-[#04061E] px-1 -top-2 left-2 text-sm">Website/Email</label>
                         <input
-                            className="border outline-none bg-[#04061E] rounded-2xl text-white -foreground focus:border-[#815bf5] px-2 py-2 w-full"
+                            className="border outline-none dark:bg-[#04061E] rounded-2xl dark:text-white -foreground focus:border-[#815bf5] px-2 py-2 w-full"
                             type="text"
                             name="emailOrWebsite"
                             value={formData.emailOrWebsite}

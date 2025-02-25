@@ -108,7 +108,7 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, closeModal, categorie
                                 <label key={user._id} className='flex justify-between cursor-pointer'>
                                     <div className='flex items-center'>
                                         <div className='h-8 w-8 bg-[#815BF5] text-center text-lg rounded-full'>
-                                            <h1 className='mt-[1.5px]'>
+                                            <h1 className='mt-[1.5px] text-white'>
                                                 {`${user.firstName}`.slice(0, 1)}{`${user.lastName}`.slice(0, 1)}
                                             </h1>
                                         </div>
@@ -218,8 +218,8 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, closeModal, categorie
             <DialogContent className='h-fit '>
                 <DialogHeader>
                     <div className="flex justify-between items-center border-b py-4 px-6">
-                        <DialogTitle className="text-lg text-white">Filter Tasks</DialogTitle>
-                        <DialogClose className="text-white hover:bg-white rounded-full hover:text-[#815BF5]">
+                        <DialogTitle className="text-lg dark:text-white">Filter Tasks</DialogTitle>
+                        <DialogClose className="dark:text-white hover:bg-white rounded-full hover:text-[#815BF5]">
                             <CrossCircledIcon className="scale-150 cursor-pointer " />
                         </DialogClose>
                     </div>
@@ -230,7 +230,7 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, closeModal, categorie
                             {sections.map((section) => (
                                 <li
                                     key={section.name}
-                                    className={`cursor-pointer text-sm px-12 p-3 w-full flex items-center ${activeSection === section.name ? 'bg-[#282D32]' : ''
+                                    className={`cursor-pointer text-sm px-12 p-3 w-full flex items-center ${activeSection === section.name ? 'dark:bg-[#282D32] bg-primary text-white' : ''
                                         }`}
                                     onClick={() => {
                                         setActiveSection(section.name);
@@ -258,7 +258,7 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, closeModal, categorie
                         </button>
                         <button
                             type="button"
-                            className="inline-flex justify-center text-xs rounded-md border px-4 py-2 bg-transparent text-white hover:bg-red-500"
+                            className="inline-flex justify-center text-xs rounded-md border px-4 py-2 bg-transparent dark:text-white hover:bg-red-500"
                             onClick={handleClearFilters}
                         >
                             Clear

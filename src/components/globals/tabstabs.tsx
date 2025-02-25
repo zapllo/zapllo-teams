@@ -567,7 +567,7 @@ export default function TeamTabs() {
               <DialogContent className="p-6 m-auto h-screen 2xl:h-full   overflow-y-scroll scrollbar-hide z-[100]">
                 <div className="flex justify-between w-full h-full items-center">
                   <DialogTitle>
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2">
                       <UserCircle className='h-7' />
                       <h1 className="text-md mt-1">
                         Add New Member
@@ -650,7 +650,7 @@ export default function TeamTabs() {
                   <select
                     value={newMember.role}
                     onChange={(e) => setNewMember({ ...newMember, role: e.target.value })}
-                    className="block w-full px-2 text-xs py-2 bg-[#0b0d29] border  rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 "
+                    className="block w-full px-2 text-xs py-2 dark:bg-[#0b0d29] border  rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 "
                   >
                     <option className="text-xs" value="member">
                       Team Member
@@ -669,7 +669,7 @@ export default function TeamTabs() {
                       <select
                         value={selectedManager}
                         onChange={(e) => setSelectedManager(e.target.value)}
-                        className="block w-full px-2 py-2 bg-[#0b0d29]   text-xs border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 "
+                        className="block w-full px-2 py-2 dark:bg-[#0b0d29]   text-xs border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 "
                       >
                         <option className="text-xs" value="">
                           Select Reporting Manager
@@ -743,20 +743,20 @@ export default function TeamTabs() {
           </div>
         </div>
 
-        <div className=" flex items-center w-1/4 ml-48 mb-6 px-4 focus-within:border-[#815bf5] rounded border py-2 gap-3 bg-[#0B0D29]">
+        <div className=" flex items-center w-1/4 ml-48 mb-6 px-4 focus-within:border-[#815bf5] rounded border py-2 gap-3 dark:bg-[#0B0D29]">
           <FaSearch className="text-gray-400" />
           <input
             type="text"
             placeholder="Search Team Member"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="text-sm w-full bg-transparent  text-white  focus:outline-none"
+            className="text-sm w-full bg-transparent  dark:text-white  focus:outline-none"
           />
         </div>
         <div className="flex justify-center  -ml-96">
           <div className="flex items-center gap-1 bg-gradient-to-b from-[#815BF5] to-[#FC8929] p-2 rounded-2xl" >
-            <Users2Icon className="h-4" />
-            <h1 className="text-sm"> {filteredUsers.length} Members</h1>
+            <Users2Icon className="h-4 text-white" />
+            <h1 className="text-sm text-white"> {filteredUsers.length} Members</h1>
           </div>
         </div>
         <div className="grid  text-sm w-full py-4 -ml-44  gap-4">
@@ -779,7 +779,7 @@ export default function TeamTabs() {
                             className="h-full w-full rounded-full object-cover"
                           />
                         ) : (
-                          <AvatarFallback className="bg-[#815BF5]">{user.firstName.charAt(0)}{user.lastName.charAt(0)}</AvatarFallback>
+                          <AvatarFallback className="bg-[#815BF5] text-white">{user.firstName.charAt(0)}{user.lastName.charAt(0)}</AvatarFallback>
                         )}
 
                       </Avatar>
@@ -792,11 +792,11 @@ export default function TeamTabs() {
                     </div>
                     <div className="-ml-6 flex gap-2">
                       <Mail className="h-5" />
-                      <p className="text-[#E0E0E0]">{user.email}</p>
+                      <p className="dark:text-[#E0E0E0]">{user.email}</p>
                       <h1 className="text-[#E0E0E066]">|</h1>
                       <div className="flex gap-2 mt-[1px]">
                         <Phone className="h-4 mt-[1px]" />
-                        <p className="text-[#E0E0E0]">{user.whatsappNo}</p>
+                        <p className="dark:text-[#E0E0E0]">{user.whatsappNo}</p>
                       </div>
                       <h1 className="text-[#E0E0E066]">|</h1>
                       {reportingManagerNames[user._id] && (
@@ -810,7 +810,7 @@ export default function TeamTabs() {
 
                   <div className="justify-end px-8 w-full flex">
                     <div
-                      className={`w-fit px-4 py-1 rounded text-xs ${user.role === "orgAdmin"
+                      className={`w-fit px-4 py-1 text-white rounded text-xs ${user.role === "orgAdmin"
                         ? "bg-[#B4173B]"
                         : user.role === "manager"
                           ? "bg-blue-600"
@@ -871,7 +871,7 @@ export default function TeamTabs() {
       </div>
 
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="p-6 h-fit m-auto overflow-y-scroll scrollbar-hide z-[100]">
+        <DialogContent className="p-6 h-screen m-auto overflow-y-scroll scrollbar-hide z-[100]">
           <div className="flex justify-between">
             <div className="flex gap-2">
               <UserCircle className='h-7' />
@@ -918,7 +918,7 @@ export default function TeamTabs() {
             <select
               value={editedUser.role}
               onChange={(e) => setEditedUser({ ...editedUser, role: e.target.value })}
-              className="block w-full px-2 py-2 bg-[#0b0d29]  text-xs border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 "
+              className="block w-full px-2 py-2 dark:bg-[#0b0d29]  text-xs border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 "
             >
               <option value="member" className="text-xs">
                 Team Member
@@ -935,7 +935,7 @@ export default function TeamTabs() {
             </select>
             <select
               value={updateModalReportingManager || editedUser.reportingManager}
-              className="block w-full px-2  py-2 bg-[#0b0d29] text-xs border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 "
+              className="block w-full px-2  py-2 dark:bg-[#0b0d29] text-xs border rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 "
               onChange={(e) => setUpdateModalReportingManager(e.target.value)} // Update selected reporting manager
             >
               <option value="">Select Reporting Manager</option>
@@ -951,7 +951,7 @@ export default function TeamTabs() {
               onCountrySelect={handleCountrySelect}
             />
             <div className="flex items-center">
-              <span className="py-2 px-2 bg-[#0A0D28] rounded-l text-xs">{countryCode}</span>
+              <span className="py-2 px-2 dark:bg-[#0A0D28] rounded-l text-xs">{countryCode}</span>
               <input
                 placeholder="WhatsApp Number"
                 value={editedUser.whatsappNo}

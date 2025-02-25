@@ -131,7 +131,7 @@ const IntranetPage: React.FC = () => {
 
               <div className="flex items-center justify-end w-full space-x-4">
               <select
-                  className="p-2 px-4  bg-[#0B0D29] border  outline-none h-[35px] rounded-sm text-xs border-gray-700 "
+                  className="p-2 px-4  dark:bg-[#0B0D29] border  outline-none h-[35px] rounded-sm text-xs border-gray-400 dark:border-gray-700 "
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
                 >
@@ -171,7 +171,7 @@ const IntranetPage: React.FC = () => {
           <DialogContent className="z-[100]   ">
             <div className="mb-6 ">
               <div className="flex items-center justify-between border-b  p-6  ">
-                <DialogTitle className="text-md font-semibold text-white">
+                <DialogTitle className="text-md font-semibold dark:text-white">
                   Add New Link
                 </DialogTitle>
                 <DialogClose className="">
@@ -226,7 +226,7 @@ const IntranetPage: React.FC = () => {
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     required
-                    className=" h-9 px-4  bg-[#0b0d29] block text-xs  outline-none w-full p-2 border rounded-md"
+                    className=" h-9 px-4  dark:bg-[#0b0d29] block text-xs  outline-none w-full p-2 border rounded-md"
                   >
                     <option value="">Select a category</option>
                     {categories.map((cat) => (

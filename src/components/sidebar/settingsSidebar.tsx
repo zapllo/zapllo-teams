@@ -17,12 +17,12 @@ const SettingsSidebar: React.FC = () => {
     const isActive = (path: string) => pathname === path;
 
     return (
-        <div className="w-[250px] border-r bg-[#04061E] text-white h-screen">
+        <div className="w-[250px] border-r mt-1 dark:bg-[#04061E] text-white h-screen">
             <div className="space-y-4">
                 <div className="flex justify-center">
                     <Button
                         variant="default"
-                        className={`w-[90%] rounded-lg mt-6 gap-2 px-4 justify-start hover:bg-[#37384B] hover:rounded-lg bg-transparent mb-2 ${isActive('/dashboard/settings') ? 'bg-[#815BF5] hover:bg-[#815BF5] rounded-lg text-white' : 'text-gray-400'}`}
+                        className={`w-[90%] rounded-lg shadow-none mt-6 gap-2 px-4 justify-start dark:hover:bg-[#37384B] hover:bg-accent hover:rounded-lg bg-transparent mb-2 ${isActive('/dashboard/settings') ? 'bg-[#815BF5] hover:bg-[#815BF5] rounded-lg text-white' : 'dark:text-gray-400 text-black'}`}
                         onClick={() => handleNavigation('/dashboard/settings')}
                     >
                         <Settings className="h-5" /> General
@@ -31,7 +31,7 @@ const SettingsSidebar: React.FC = () => {
                 <div className="flex justify-center">
                     <Button
                         variant="default"
-                        className={`w-[90%] rounded-lg gap-2 px-4 bg-transparent justify-start hover:rounded-lg hover:bg-[#37384B]  mb-2 ${isActive('/dashboard/settings/categories') ? 'bg-[#815BF5] hover:bg-[#815BF5] text-white rounded-lg' : 'text-gray-400'}`}
+                        className={`w-[90%] rounded-lg shadow-none gap-2 px-4 bg-transparent justify-start hover:rounded-lg dark:hover:bg-[#37384B] hover:bg-accent  mb-2 ${isActive('/dashboard/settings/categories') ? 'bg-[#815BF5] hover:bg-[#815BF5] text-white rounded-lg' : 'dark:text-gray-400 text-black'}`}
                         onClick={() => handleNavigation('/dashboard/settings/categories')}
                     >
                         <PieChart className="h-5" /> Categories
@@ -40,7 +40,7 @@ const SettingsSidebar: React.FC = () => {
                 <div className="flex justify-center">
                     <Button
                         variant="default"
-                        className={`w-[90%] rounded-lg gap-2 px-4 bg-transparent justify-start hover:bg-[#37384B] hover:rounded-lg mb-2 ${isActive('/dashboard/billing') ? 'bg-[#815BF5] text-white rounded-lg' : 'text-gray-400'}`}
+                        className={`w-[90%] rounded-lg shadow-none gap-2 px-4 bg-transparent justify-start dark:hover:bg-[#37384B] hover:bg-accent hover:rounded-lg mb-2 ${isActive('/dashboard/billing') ? 'bg-[#815BF5] text-white rounded-lg' : 'dark:text-gray-400 text-black'}`}
                         onClick={() => handleNavigation('/dashboard/billing')}
                     >
                         <WalletCards className="h-5" /> Billing
@@ -49,7 +49,7 @@ const SettingsSidebar: React.FC = () => {
                 <div className="flex justify-center">
                     <Button
                         variant="default"
-                        className={`w-[90%] rounded-lg gap-2 px-4 bg-transparent justify-start hover:bg-[#37384B] hover:rounded-lg mb-2 ${isActive('/dashboard/integrations') ? 'bg-[#815BF5] text-white rounded-lg' : 'text-gray-400'}`}
+                        className={`w-[90%] shadow-none rounded-lg gap-2 px-4 bg-transparent justify-start dark:hover:bg-[#37384B] hover:bg-accent hover:rounded-lg mb-2 ${isActive('/dashboard/integrations') ? 'bg-[#815BF5] text-white rounded-lg' : 'dark:text-gray-400 text-black'}`}
                         onClick={() => handleNavigation('/dashboard/integrations')}
                     >
                         <GitBranchPlusIcon className='h-5' /> Integrations

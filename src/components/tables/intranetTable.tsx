@@ -121,9 +121,9 @@ const IntranetTable: React.FC<IntranetTableProps> = ({
 
       {/* Table container with a fixed height and scrollable content */}
       <main>
-        <div className="bg-[#0B0D29] text-sm w-full rounded-2xl  border overflow-hidden">
+        <div className="dark:bg-[#0B0D29] text-sm w-full rounded-2xl  border overflow-hidden">
           <table className="w-full">
-            <thead className="bg-[#0B0D29] ">
+            <thead className="dark:bg-[#0B0D29] ">
               <tr className=" ">
                 <th className="text-left py-3 px-4 text-gray-400 font-normal">
                   LINK NAME

@@ -67,7 +67,7 @@ const RegularizationRejectModal: React.FC<RegularizationRejectModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-[#0b0d29] overflow-y-scroll scrollbar-hide h-fit max-h-[600px]  shadow-lg w-full pb-6   max-w-md  rounded-lg">
+      <div className="dark:bg-[#0b0d29] bg-white overflow-y-scroll scrollbar-hide h-fit max-h-[600px]  shadow-lg w-full pb-6   max-w-md  rounded-lg">
         <div className="flex border-b py-2  w-full justify-between">
           <h2 className="text-md   px-6 py-2 font-medium">
             Reject Regularization
@@ -84,7 +84,7 @@ const RegularizationRejectModal: React.FC<RegularizationRejectModalProps> = ({
             value={remarks}
             onChange={(e) => setRemarks(e.target.value)}
             placeholder="Enter remarks..."
-            className="w-full mt-4 p-2 text-xs  bg-[#0b0d29] outline-none h-24 border rounded-md"
+            className="w-full mt-4 p-2 text-xs  dark:bg-[#0b0d29] outline-none h-24 border rounded-md"
           />
         </div>
         <div className="flex justify-end space-x-2 mt-6 px-6">

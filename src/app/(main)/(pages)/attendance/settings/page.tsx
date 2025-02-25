@@ -342,7 +342,7 @@ export default function Settings({ }: Props) {
 
     return (
         <div className='pt-4 w-full max-w-screen  overflow-y-scroll scrollbar-hide h-full '>
-            <div className=' bg-[#0B0D29] px-4   mx-2  p-2 border rounded-xl '>
+            <div className=' dark:bg-[#0B0D29] px-4   mx-2  p-2 border rounded-xl '>
                 <h1 className='text-md text-muted-foreground'>Leave Types</h1>
             </div>
             <Link href='/attendance/settings/leave-types'>
@@ -354,7 +354,7 @@ export default function Settings({ }: Props) {
                     <ChevronRight className='h-5' />
                 </div>
             </Link>
-            <div className=' mt-4 bg-[#0B0D29]   my-4 mx-2 p-2 border rounded-xl px-4'>
+            <div className=' mt-4 dark:bg-[#0B0D29]   my-4 mx-2 p-2 border rounded-xl px-4'>
                 <h1 className='text-md text-muted-foreground'>Attendance Settings</h1>
             </div>
             <Link href='/attendance/settings/register-faces'>
@@ -420,16 +420,16 @@ export default function Settings({ }: Props) {
                                 <h1>Timezone</h1>
                             </div>
                             <div>
-                                <label className="absolute bg-[#0b0d29] ml-2 text-xs text-[#787CA5] -mt-2 px-1">
+                                <label className="absolute dark:bg-[#0b0d29] ml-2 text-xs text-[#787CA5] -mt-2 px-1">
                                     Timezone
                                 </label>
                                 <select
                                     value={timezone}
                                     onChange={handleTimezoneChange}
-                                    className="w-full border bg-[#0B0D29] text-sm overflow-y-scroll scrollbar-thin scrollbar-thumb-[#815BF5] hover:scrollbar-thumb-[#815BF5] active:scrollbar-thumb-[#815BF5] scrollbar-track-gray-800   p-2 rounded bg-transparent outline-none focus-within:border-[#815BF5]"
+                                    className="w-full border dark:bg-[#0B0D29] text-sm overflow-y-scroll scrollbar-thin scrollbar-thumb-[#815BF5] hover:scrollbar-thumb-[#815BF5] active:scrollbar-thumb-[#815BF5] scrollbar-track-gray-800   p-2 rounded bg-transparent outline-none focus-within:border-[#815BF5]"
                                 >
                                     {availableTimezones.map((tz) => (
-                                        <option className="bg-[#0B0D29] text-sm" key={tz} value={tz}>
+                                        <option className="dark:bg-[#0B0D29] text-sm" key={tz} value={tz}>
                                             {tz}
                                         </option>
                                     ))}
@@ -448,7 +448,7 @@ export default function Settings({ }: Props) {
 
             {/* Time Picker Dialog */}
             <Dialog open={isTimePickerOpen} onOpenChange={setIsTimePickerOpen}>
-                <DialogContent className="p-6 scale-75">
+                <DialogContent className="p-6 scale-75 bg-[#0a0d28] dark:bg-[#0a0d28]">
 
 
                     <CustomTimePicker
@@ -463,7 +463,7 @@ export default function Settings({ }: Props) {
                 </DialogContent>
             </Dialog>
 
-            <div className=' bg-[#0B0D29] px-4  mt-4 mx-2  my-4  p-2 border rounded-xl '>
+            <div className=' dark:bg-[#0B0D29] px-4  mt-4 mx-2  my-4  p-2 border rounded-xl '>
 
                 <h1 className='text-md text-muted-foreground'>Office Settings</h1>
             </div>
@@ -476,7 +476,7 @@ export default function Settings({ }: Props) {
 
             <div onClick={() => setIsPenaltiesDialogOpen(true)} className='mb-2 flex justify-between gap-1  cursor-pointer  my-4 mx-2 p-2 w- m border-b rounded py-2'>
                 {/* <CameraIcon className='h-4' /> */}
-                <h1 className=' text-sm px-2 '>
+                <h1 className=' text-sm dark:text-white px-2 '>
                     Set Penalties</h1>
                 <ChevronRight className='h-5' />
             </div>
@@ -523,7 +523,7 @@ export default function Settings({ }: Props) {
                             className=""
                         >
                             <div className="flex justify-between items-center">
-                                <h3 className="text-sm font-medium text-white">Select Penalty Type</h3>
+                                <h3 className="text-sm font-medium dark:text-white">Select Penalty Type</h3>
                                 <TabsList3 className="flex gap-4 w-fit">
                                     <TabsTrigger3 value="leave" className={penaltyOption === "leave" ? "bg-primary text-white" : ""}>
                                         Leave
@@ -535,7 +535,7 @@ export default function Settings({ }: Props) {
                             </div>
                             <TabsContent3 value="leave" className="mt-4">
                                 <div className="mb-3">
-                                    <label className="block text-sm text-white">No. of Late Logins Allowed</label>
+                                    <label className="block text-sm dark:text-white">No. of Late Logins Allowed</label>
                                     <input
                                         type="number"
                                         value={lateLoginThreshold}
@@ -544,7 +544,7 @@ export default function Settings({ }: Props) {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm text-white">Penalty Leave Deduction Type</label>
+                                    <label className="block text-sm dark:text-white">Penalty Leave Deduction Type</label>
                                     <Select
                                         value={penaltyLeaveType}
                                         onValueChange={(value) =>
@@ -564,7 +564,7 @@ export default function Settings({ }: Props) {
                             </TabsContent3>
                             <TabsContent3 value="salary" className="mt-4">
                                 <div className="mb-3">
-                                    <label className="block text-sm text-white">No. of Late Logins Allowed</label>
+                                    <label className="block text-sm dark:text-white">No. of Late Logins Allowed</label>
                                     <input
                                         type="number"
                                         value={lateLoginThreshold}
@@ -573,7 +573,7 @@ export default function Settings({ }: Props) {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm text-white">Salary Amount Deduction</label>
+                                    <label className="block text-sm dark:text-white">Salary Amount Deduction</label>
                                     <input
                                         type="number"
                                         value={penaltySalaryAmount}
@@ -627,7 +627,7 @@ export default function Settings({ }: Props) {
 
             {/* Custom Time Picker Dialog for Login Time */}
             <Dialog open={isLoginTimePickerOpen} onOpenChange={setIsLoginTimePickerOpen}>
-                <DialogContent className="p-6 scale-75">
+                <DialogContent className="p-6 bg-[#0a0d28] dark:bg-[#0a0d28] scale-75">
                     <CustomTimePicker
                         selectedTime={loginTime}
                         onTimeChange={(time) => setLoginTime(time)}
@@ -640,7 +640,7 @@ export default function Settings({ }: Props) {
 
             {/* Custom Time Picker Dialog for Logout Time */}
             <Dialog open={isLogoutTimePickerOpen} onOpenChange={setIsLogoutTimePickerOpen}>
-                <DialogContent className="p-6 scale-75">
+                <DialogContent className="p-6 scale-75 bg-[#0a0d28] dark:bg-[#0a0d28]">
                     <CustomTimePicker
                         selectedTime={logoutTime}
                         onTimeChange={(time) => setLogoutTime(time)}
@@ -688,7 +688,7 @@ export default function Settings({ }: Props) {
                     {/* Geofencing Section */}
                     <div className="mt-4">
                         <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-muted-foreground">Allow Geofencing</span>
+                            <span className="text-sm dark:text-white font-medium text-muted-foreground">Allow Geofencing</span>
                             <Switch checked={allowGeofencing} onCheckedChange={setAllowGeofencing} />
                         </div>
                         {allowGeofencing && (
@@ -741,7 +741,7 @@ export default function Settings({ }: Props) {
             </Dialog>
 
 
-            <div className=' bg-[#0B0D29] px-4  mt-4 mx-2  my-4  p-2 border rounded-xl '>
+            <div className=' dark:bg-[#0B0D29] px-4  mt-4 mx-2  my-4  p-2 border rounded-xl '>
 
                 <h1 className='text-md text-muted-foreground'>Payslip Settings</h1>
             </div>

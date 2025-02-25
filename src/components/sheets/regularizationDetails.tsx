@@ -74,7 +74,7 @@ const RegularizationDetails: React.FC<RegularizationDetailsProps> = ({
               onClick={onClose}
               className="cursor-pointer border rounded-full border-white h-7 hover:bg-white hover:text-black w-7"
             />
-            <SheetTitle className="text-white mb-4">
+            <SheetTitle className="dark:text-white mb-4">
               Regularization Details
             </SheetTitle>
           </div>
@@ -95,7 +95,7 @@ const RegularizationDetails: React.FC<RegularizationDetailsProps> = ({
                 {selectedRegularization.userId?.firstName && (
                   <div className="flex gap-2 justify-start ml-11">
                     <div className="h-6 w-6 rounded-full bg-primary">
-                      <h1 className="text-center uppercase text-xs mt-1">
+                      <h1 className="text-center text-white uppercase text-xs mt-1">
                         {selectedRegularization.userId.firstName[0]}
                         {selectedRegularization.userId.lastName[0]}
                       </h1>
@@ -115,7 +115,7 @@ const RegularizationDetails: React.FC<RegularizationDetailsProps> = ({
                   </Label>
                   <div className="flex gap-2 justify-start">
                     <div className="h-6 w-6 rounded-full bg-primary">
-                      <h1 className="text-center uppercase text-xs mt-1">
+                      <h1 className="text-center uppercase text-white text-xs mt-1">
                         {selectedRegularization.approvedBy?.firstName[0]}
                         {selectedRegularization.approvedBy?.lastName[0]}
                       </h1>
@@ -272,8 +272,8 @@ const RegularizationDetails: React.FC<RegularizationDetailsProps> = ({
               ) : (
                 <div className='flex justify-center'>
                   <div>
-                    <Bell />
-                    <p className="text-xs mt-2 -ml-10 text-white -500">
+                    <Bell  className="dark:text-white"/>
+                    <p className="text-xs mt-2 -ml-10 dark:text-white -500">
                       No remarks provided.
                     </p>
                   </div>
