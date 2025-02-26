@@ -1277,7 +1277,7 @@ export default function TasksTab({
 
                           <button
                             onClick={() => setIsCustomModalOpen(true)}
-                            className={`text-xs h-7 px-3 border py-1 rounded ${activeDateFilter === "custom" ? "bg-[#815BF5] text-white" : "-200"
+                            className={`text-xs  px-3 border py-1 rounded ${activeDateFilter === "custom" ? "bg-[#815BF5] text-white" : "-200"
                               }`}
                           >
                             Custom
@@ -2088,7 +2088,7 @@ export default function TasksTab({
 
                               <div className="flex px-4  -mt-2 w-[100%]    space-x-2 justify-center ">
                                 <div className="space-x-2 flex">
-                                  <div className=" flex px-4 mt-2  space-x-2 justify-center mb-2">
+                                  <div className=" flex px-4 mt-2 items-center space-x-2 justify-center mb-2">
                                     <input
                                       type="text"
                                       placeholder="Search Task"
@@ -2101,7 +2101,7 @@ export default function TasksTab({
                                   </div>
                                   <Button
                                     onClick={() => setIsModalOpen(true)}
-                                    className="bg-[#007A5A] mt-4 hover:bg-green-800 h-8  text-sm"
+                                    className="bg-[#007A5A] mt-5 hover:bg-green-800 h-8  text-sm"
                                   >
                                     <FilterIcon className="h-4" /> Filter
                                   </Button>
@@ -2548,7 +2548,7 @@ export default function TasksTab({
                                   </div>
                                   <Button
                                     onClick={() => setIsModalOpen(true)}
-                                    className="bg-[#007A5A] hover:bg-green-800 mt-4 h-8"
+                                    className="bg-[#007A5A] hover:bg-green-800 mt-5 h-8"
                                   >
                                     <FilterIcon className="h-4" /> Filter
                                   </Button>
@@ -3000,7 +3000,7 @@ export default function TasksTab({
 
                                   <Button
                                     onClick={() => setIsModalOpen(true)}
-                                    className="bg-[#007A5A] hover:bg-green-800 mt-4 h-8"
+                                    className="bg-[#007A5A] hover:bg-green-800 mt-5 h-8"
                                   >
                                     <FilterIcon className="h-4" /> Filter
                                   </Button>

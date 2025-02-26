@@ -25,6 +25,7 @@ import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css'; // Import necessary styles for the progress bar
+import { useTheme } from "next-themes";
 
 
 
@@ -166,6 +167,8 @@ const MyLeaves: React.FC = () => {
   const [isStartPickerOpen, setIsStartPickerOpen] = useState(false); // For triggering the start date picker
   const [isEndPickerOpen, setIsEndPickerOpen] = useState(false); // For triggering the end date picker
   const scrollContainerRef = useRef<HTMLDivElement>(null); // Type the ref as HTMLDivElement
+  const { theme } = useTheme();
+  const textColor = theme === "dark" ? "#ffffff" : "#000000";
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
@@ -406,17 +409,17 @@ const MyLeaves: React.FC = () => {
       <div key={leaveType._id} className="w-60 relative flex-shrink-0 border px-4 py-3">
         {/* Circular Progress Bar */}
         <Info
-            className="h-4 absolute ml-48 text-muted-foreground dark:text-blue-200 cursor-pointer"
-            onClick={() => handleInfoClick(leaveType.leaveType)}
-          />
+          className="h-4 absolute ml-48 text-muted-foreground dark:text-blue-200 cursor-pointer"
+          onClick={() => handleInfoClick(leaveType.leaveType)}
+        />
         <div className="flex justify-center ">
-          <div className="scale-75 bg-black dark:bg-transparent rounded-full" style={{ width: 100, height: 100 }}>
+          <div className="scale-75 dark:bg-black dark:bg-transparent rounded-full" style={{ width: 100, height: 100 }}>
             <CircularProgressbar
               value={percentage}
               text={`Consumed ${consumedLeaves}`}
               styles={buildStyles({
                 pathColor: '#815BF5', // color of the progress bar (you can choose a color that matches the design)
-                textColor: '#ffffff', // color of the text inside the circle
+                textColor: textColor, // color of the text inside the circle
                 trailColor: '#9ca3af', // color of the remaining path
                 textSize: '12'
               })}
@@ -427,7 +430,7 @@ const MyLeaves: React.FC = () => {
         <div className="flex  justify-center">
 
           <h1 className="text-sm  font-semibold">{leaveType.leaveType}</h1>
-         
+
         </div>
         <div className="  text-center ">
           {/* <p className="text-xs">Allotted: {leaveType.allotedLeaves}</p> */}
@@ -533,7 +536,7 @@ const MyLeaves: React.FC = () => {
         <div className="relative flex justify-center  items-center space-x-4 mb-4">
 
 
-        
+
           {/* Scrollable Container */}
           <div
             ref={scrollContainerRef}
@@ -542,7 +545,7 @@ const MyLeaves: React.FC = () => {
             {leaveTypes.map((leaveType) => (
               <LeaveCard key={leaveType._id} leaveType={leaveType} />
             ))}
-         
+
           </div>
 
 
@@ -604,11 +607,11 @@ const MyLeaves: React.FC = () => {
                 <h1 className="text-s">{leave.user.firstName}</h1>
 
                 {/* Leave Details */}
-                <div className=" flex gap-4">
-                  <h3 className=" text-sm mt-[5px]">
+                <div className=" flex items-center gap-4">
+                  <h3 className=" text-sm ">
                     {leave?.leaveType?.leaveType}
                   </h3>
-                  <p className="text-sm flex gap-1 mt-1 text-gray-400">
+                  <p className="text-sm flex items-center gap-1  text-gray-400">
                     From:{" "}
                     <span className="dark:text-white">
                       {new Date(leave?.fromDate).toLocaleDateString()}
@@ -620,7 +623,7 @@ const MyLeaves: React.FC = () => {
                       </span>
                     </h1>
                   </p>
-                  <p className="text-sm flex gap-1 mt-1 text-gray-400">
+                  <p className="text-sm flex gap-1  text-gray-400">
                     Applied For:
                     <span className="dark:text-white">
                       {leave.appliedDays} Day(s)

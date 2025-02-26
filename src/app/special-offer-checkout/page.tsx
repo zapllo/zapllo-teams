@@ -99,54 +99,51 @@ export default function SpecialOfferCheckout() {
     }, []);
 
 
-    useEffect(() => {
+  useEffect(() => {
         // Only show toast notifications on non-mobile screens
         if (window.innerWidth < 768) return;
+
         let index = 0;
         const interval = setInterval(() => {
             const data = mockData[index];
             toast(
-                <div className="">
+                <div>
                     <div className="flex gap-2 items-center">
                         <div className="flex m-auto items-center">
-                            <Avatar className="h-6 w-6 rounded-full flex  bg-[#815BF5] items-center">
-                                {/* <AvatarImage className='h-6 w-6 ml-1 ' src={`/icons/${category.name.toLowerCase()}.png`} /> */}
+                            <Avatar className="h-7 w-7 rounded-full bg-[#815BF5] flex items-center">
                                 <AvatarFallback className="bg-[#815BF5]">
                                     <h1 className="text-sm text-white">
                                         {`${data.name}`.slice(0, 1)}
-                                        {/* {`${user.lastName}`.slice(0, 1)} */}
                                     </h1>
                                 </AvatarFallback>
                             </Avatar>
                         </div>
-                        <div className="text-white text-sm">
-                            <strong>{data.name}</strong> just purchased {' '}
+                        <div className="text-black text-sm">
+                            <strong>{data.name}</strong> just purchased{' '}
                         </div>
                     </div>
                     <div>
-                        <strong className="text-white text-md ml-8 ">{`${data.plan}`}</strong>
+                        <strong className="text-gray-700 text-sm ml-8 ">{data.plan}</strong>
                     </div>
-                    <div className="flex items-center gap-2  ml-8 ">
-                        <span className="text-[#787CA5] text-sm">{data.timeAgo}</span>
-
+                    <div className="flex items-center gap-2 ml-8">
+                        <span className="text-gray-600 text-xs">{data.timeAgo}</span>
                     </div>
-                </div>
-                ,
+                </div>,
                 {
-                    position: 'bottom-left', // Specify the position
-                    duration: 10000, // Optional: Longer duration if needed
+                    position: 'bottom-left',
+                    duration: 10000,
                     style: {
-                        background: '#0B0D26',
-                        borderColor: 'gray',
-
-                    }
-                },
+                        background: '#fefefe',
+                        borderColor: '#787CA5',
+                    },
+                }
             );
-            index = (index + 1) % mockData.length; // Loop through the mock data
-        }, 5000); // Show toast every 10 seconds
+            index = (index + 1) % mockData.length;
+        }, 5000);
 
-        return () => clearInterval(interval); // Clear interval on unmount
+        return () => clearInterval(interval);
     }, []);
+
 
 
 
@@ -176,16 +173,16 @@ export default function SpecialOfferCheckout() {
             {/* Run Your Business */}
 
             <div className="  bg-[#fefefe]">
-                <div className="md:absolute md:scale-100 scale-75 2xl:right-36 md:mt-16 right-16 ">
-                    <img src="/icons/offer.png" />
-                    <h1 className="text-white text-xl -mt-28 ml-20 ">Use Code</h1>
-                    <span className="font-bold text-white text-3xl -mt-28 ml-12">&quot;REPUBLIC&quot;</span>
-                    {/* <Clock className="h-4" /> */}
-                    <h1 className="text-white text-2xl  ml-[90px] ">
-                        {formatTime(timeLeft)}
-                    </h1>
+            <div className="md:absolute md:scale-100 scale-75 2xl:right-36 md:mt-16 right-16 ">
+                        <img src="/icons/offer.png" />
+                        <h1 className="text-white text-xl -mt-[120px] ml-20 ">Use Code</h1>
+                        <span className="font-bold text-white text-3xl -mt-28 ml-12">&quot;REPUBLIC&quot;</span>
+                        {/* <Clock className="h-4" /> */}
+                        <h1 className="text-white text-xl  ml-[90px] ">
+                            {formatTime(timeLeft)}
+                        </h1>
 
-                </div>
+                    </div>
                 <div className="z-10 flex items-center justify-center">
                     <div
                         className={cn(

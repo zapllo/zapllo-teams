@@ -214,9 +214,14 @@ export default function TeamTabs() {
     getUserDetails();
   }, []);
 
-  const handleReportingManagerChange = (value: string) => {
-    setSelectedReportingManager(value);
+  const handleReportingManagerChange = (value:string) => {
+    if (value === "none") {
+      setSelectedReportingManager(""); // or any default you need
+    } else {
+      setSelectedReportingManager(value);
+    }
   };
+  
 
   // Filter users based on search query, active tab, and selected reporting manager
   const filteredUsers = users.filter((user) => {
@@ -519,7 +524,8 @@ export default function TeamTabs() {
                 <SelectValue placeholder="Reporting Manager" />
               </SelectTrigger>
               <SelectContent>
-                {/* <SelectItem value="OKAY">Reporting Manager</SelectItem> */}
+                {/* Option to deselect the reporting manager */}
+                <SelectItem value="none">Select Reporting Manager</SelectItem>
                 {users.map((user) => (
                   <SelectItem key={user._id} value={user._id}>
                     {user.firstName} {user.lastName}
@@ -527,6 +533,7 @@ export default function TeamTabs() {
                 ))}
               </SelectContent>
             </Select>
+
 
             <Dialog open={isModalOpen} onOpenChange={(isOpen) => {
               setIsModalOpen(isOpen);
@@ -691,8 +698,9 @@ export default function TeamTabs() {
 
                     <div className="flex justify-between items-center">
                       <div className="flex gap-2 items-center">
-                        <img src="/branding/teamsicon.png" className="h-5" />
-                        <img src="/branding/teamstext.png" className="h-4 mt-1" />
+                        <img src="/branding/teamsicon.png" className="h-5 dark:block hidden" />
+                        <img src="/branding/teamstext.png" className="h-4 mt-1 dark:block hidden" />
+                        <img src="/branding/teams-light.png" className="h-5  dark:hidden block" />
                       </div>
                       <Switch
                         checked={newMember.isTaskAccess}
@@ -703,8 +711,10 @@ export default function TeamTabs() {
                     </div>
                     <div className="flex items-center justify-between mt-6">
                       <div className="flex gap-2 items-center">
-                        <img src="/branding/payrollicon.png" className="h-5" />
-                        <img src="/branding/payrolltext.png" className="h-4 mt-1" />
+                        <img src="/branding/payrollicon.png" className="h-5 dark:block hidden" />
+                        <img src="/branding/payrolltext.png" className="h-4 mt-1 dark:block hidden" />
+                        <img src="/branding/payroll-light.png" className="h-5  dark:hidden block" />
+
                       </div>
 
                       <Switch
@@ -871,14 +881,16 @@ export default function TeamTabs() {
       </div>
 
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="p-6 h-screen m-auto overflow-y-scroll scrollbar-hide z-[100]">
-          <div className="flex justify-between">
-            <div className="flex gap-2">
-              <UserCircle className='h-7' />
-              <h1 className="text-md mt-1">
-                Edit User
-              </h1>
-            </div>
+        <DialogContent className="p-6 m-auto h-screen 2xl:h-full   overflow-y-scroll scrollbar-hide z-[100]">
+          <div className="flex justify-between w-full h-full items-center">
+            <DialogTitle>
+              <div className="flex items-center gap-2">
+                <UserCircle className='h-7' />
+                <h1 className="text-md mt-1">
+                  Add New Member
+                </h1>
+              </div>
+            </DialogTitle>
             <DialogClose className="cursor-pointer">
               <CrossCircledIcon
                 className="scale-150  cursor-pointer hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]"

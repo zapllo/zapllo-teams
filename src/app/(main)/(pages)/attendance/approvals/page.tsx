@@ -790,10 +790,10 @@ export default function Approvals() {
       </div>
 
       {/* Filter Buttons */}
-      <div className="flex justify-center gap-4 mb-6">
+      <div className="flex items-center justify-center gap-4 mb-6">
         <button
           onClick={() => setFilter("Leave")}
-          className={`px-4 text-xs py-2 rounded flex ${filter === "Leave"
+          className={`px-4 text-xs py-2 rounded flex items-center ${filter === "Leave"
             ? "bg-[#815BF5] text-white"
             : "bg-[#] border dark:text-white"
             }`}
@@ -803,7 +803,7 @@ export default function Approvals() {
         </button>
         <button
           onClick={() => setFilter("Regularization")}
-          className={`px-4 text-xs py-2 rounded flex ${filter === "Regularization"
+          className={`px-4 text-xs py-2 rounded flex items-center ${filter === "Regularization"
             ? "bg-[#815BF5] text-white"
             : "bg-[#] border dark:text-white"
             }`}

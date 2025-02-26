@@ -463,7 +463,7 @@ export default function AllAttendance() {
       <div className="flex justify-center gap-4 mb-6">
         <button
           onClick={() => setFilter("Attendance")}
-          className={`px-4 text-xs flex py-2 rounded ${filter === "Attendance"
+          className={`px-4 text-xs flex items-center py-2 rounded ${filter === "Attendance"
             ? "bg-[#815BF5] text-white"
             : "bg-[#] border dark:text-white"
             }`}
@@ -473,7 +473,7 @@ export default function AllAttendance() {
         </button>
         <button
           onClick={() => setFilter("Regularization")}
-          className={`px-4 text-xs flex py-2 rounded ${filter === "Regularization"
+          className={`px-4 text-xs flex items-center py-2 rounded ${filter === "Regularization"
             ? "bg-[#815BF5] text-white"
             : "bg-[#] border dark:text-white"
             }`}

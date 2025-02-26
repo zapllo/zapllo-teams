@@ -665,7 +665,7 @@ export default function MyAttendance() {
         console.log("Fetched new location:", loc);
         // Save the location with a timestamp in a cookie that expires in 1 hour
         // Save the location with a timestamp in a cookie that expires in 1 hour
-      Cookies.set('userLocation', JSON.stringify({ location: loc, timestamp: Date.now() }), { expires: 1 / 24 });
+        Cookies.set('userLocation', JSON.stringify({ location: loc, timestamp: Date.now() }), { expires: 1 / 24 });
       },
       (error) => {
         console.error("Error fetching location:", error);
@@ -939,8 +939,8 @@ export default function MyAttendance() {
                 className="flex cursor-pointer border text-xs justify-between items-center px-4 py-2 rounded shadow-md"
               >
                 {entry.userId && (
-                  <div className="flex gap-2 justify-start">
-                    <div className="h-6 w-6 rounded-full text-white bg-[#815BF5]">
+                  <div className="flex gap-2 items-center justify-start">
+                    <div className="h-7 w-7 rounded-full text-white bg-[#815BF5]">
                       <h1 className="text-center uppercase text-xs mt-1">
                         {entry.userId.firstName[0]}
                         {entry.userId.lastName[0]}
@@ -1173,7 +1173,7 @@ export default function MyAttendance() {
 
   console.log(todayEntries, 'todays');
   return (
-    <div className="container m h-full overflow-y-scroll scrollbar-hide rounded-lg p-4 shadow-lg">
+    <div className="container m h-full overflow-y-scroll scrollbar-hide rounded-lg p-4 dark:shadow-lg">
       {/* <Toaster /> */}
       {displayLoader && (
         <div className="absolute  w-screen h-screen  z-[100]  inset-0 bg-white dark:bg-[#04061e] -900  bg-opacity-90 rounded-xl flex justify-center items-center">
@@ -1281,7 +1281,7 @@ export default function MyAttendance() {
             </p>
           </div>
         ) : (
-          <div className="space-y-4 dark:bg-[#0B0D29] bg-white shadow-sm   rounded p-4 w-[60%] mx-12">
+          <div className="space-y-4 dark:bg-[#0B0D29] border bg-white shadow-sm   rounded p-4 w-[60%] mx-12">
             {todayEntries?.map((entry: LoginEntry, index: number) => {
               // Format login and logout times to 01:00 PM format
               const formattedLoginTime = entry.loginTime
@@ -1331,7 +1331,7 @@ export default function MyAttendance() {
                     </div>
                   )}
                   <div
-                    className={`px-2 py-1 h-6 w-fit flex justify-center text-xs border rounded-xl text-white ${entry.action === "login"
+                    className={`px-2 py-1 h-7 w-fit flex items-center justify-center text-xs border rounded-xl text-white ${entry.action === "login"
                       ? "bg-green-800"
                       : entry.action === "logout"
                         ? "bg-red-800"
@@ -1402,7 +1402,7 @@ export default function MyAttendance() {
         </button>
         <button
           onClick={() => setActiveTab("lastWeek")}
-          className={`px-4 py-2 text-xs h-fit rounded ${activeTab === "lastWeek" ? "bg-[#815BF5] text-white"  : "bg-[#] border"
+          className={`px-4 py-2 text-xs h-fit rounded ${activeTab === "lastWeek" ? "bg-[#815BF5] text-white" : "bg-[#] border"
             }`}
         >
           Last Week
@@ -1438,10 +1438,10 @@ export default function MyAttendance() {
           Custom
         </button>
       </div>
-      <div className="flex justify-center gap-4 mt-2 mb-6">
+      <div className="flex items-center justify-center gap-4 mt-2 mb-6">
         <button
           onClick={() => setActiveAttendanceTab("dailyReport")}
-          className={`px-4 flex gap-2 py-2 text-xs rounded ${activeAttendanceTab === "dailyReport"
+          className={`px-4 flex items-center gap-2 py-2 text-xs rounded ${activeAttendanceTab === "dailyReport"
             ? "bg-[#815BF5] text-white"
             : "dark:bg-[#37384B] border"
             }`}
@@ -1451,7 +1451,7 @@ export default function MyAttendance() {
         </button>
         <button
           onClick={() => setActiveAttendanceTab("regularization")}
-          className={`px-4 flex gap-2 py-2 text-xs rounded ${activeAttendanceTab === "regularization"
+          className={`px-4 flex items-center gap-2 py-2 text-xs rounded ${activeAttendanceTab === "regularization"
             ? "bg-[#815BF5] text-white"
             : "dark:bg-[#37384B] border"
             }`}
@@ -1629,11 +1629,13 @@ export default function MyAttendance() {
       {/* Radix UI Dialog for Face Login */}
       <Dialog open={isModalOpen} onOpenChange={handleModalChange}>
         <DialogContent className="z-[100] flex items-center justify-center ">
-          <div className=" z-[100] p-6 rounded-lg max-w-lg w-full relative">
+          <div className=" z-[100] p-6 h-screen rounded-lg max-w-lg w-full relative">
             <div className="flex justify-between">
               <div className="flex gap-2  items-center ">
-                <img src="/branding/AII.png" className="h-10" />
-                <img src="/branding/zapllo ai.png" className="h-5 mt-2" />
+                <img src="/branding/AII.png" className="h-10 dark:block hidden" />
+                <img src="/branding/zapllo ai.png" className="h-5 mt-2 dark:block hidden" />
+                <img src="/branding/ai-light.png" className="h-9 dark:hidden block" />
+
               </div>
               <DialogClose className=" ">
                 <CrossCircledIcon className="scale-150 -mt-1 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
@@ -1744,9 +1746,9 @@ export default function MyAttendance() {
             )}
 
             <div className="text-center flex w-full justify-center text-xs text-white -400 mt-4">
-              <div className="bg-[#1E2A38] rounded-lg py-2 px-4 flex items-center gap-2 shadow-lg">
+              <div className="dark:bg-[#1E2A38] rounded-lg py-2 px-4 flex items-center gap-2 border dark:shadow-lg">
                 <MapPinIcon className="h-4 text-[#FC8929]" />
-                <p className="text-sm text-white font-semibold">
+                <p className="text-xs dark:text-white text-black dark:font-semibold">
                   {location
                     ? `Lat: ${location.lat}, Long: ${location.lng}`
                     : "Fetching location..."}
@@ -1765,8 +1767,9 @@ export default function MyAttendance() {
           <div className=" z-[100] p-6 rounded-lg max-w-lg w-full relative">
             <div className="flex justify-between">
               <div className="flex gap-2  items-center ">
-                <img src="/branding/AII.png" className="h-10" />
-                <img src="/branding/zapllo ai.png" className="h-5 mt-2" />
+                <img src="/branding/AII.png" className="h-10 dark:block hidden" />
+                <img src="/branding/zapllo ai.png" className="h-5 mt-2 dark:block hidden" />
+                <img src="/branding/ai-light.png" className="h-9 dark:hidden block" />
               </div>
               <DialogClose className=" ">
                 <CrossCircledIcon className="scale-150 -mt-1 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
@@ -1861,9 +1864,9 @@ export default function MyAttendance() {
             )}
 
             <div className="text-center flex w-full justify-center text-xs text-white -400 mt-4">
-              <div className="bg-[#1E2A38] rounded-lg py-2 px-4 flex items-center gap-2 shadow-lg">
+              <div className="dark:bg-[#1E2A38] rounded-lg border py-2 px-4 flex items-center gap-2 dark:shadow-lg">
                 <MapPinIcon className="h-4 text-[#FC8929]" />
-                <p className="text-sm text-white font-semibold">
+                <p className="text-xs dark:text-white text-black dark:font-semibold">
                   {location
                     ? `Lat: ${location.lat}, Long: ${location.lng}`
                     : "Fetching location..."}

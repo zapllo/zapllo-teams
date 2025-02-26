@@ -246,7 +246,7 @@ const Categories: React.FC = () => {
                 placeholder="Add New Category"
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
-                className="w-full focus-within:border-[#815BF5] outline-none text-xs text-white dark:bg-[#0A0D28] border rounded px-3 py-2"
+                className="w-full focus-within:border-[#815BF5] outline-none text-xs dark:text-white dark:bg-[#0A0D28] border rounded px-3 py-2"
               />
             </div>
             <div className="mt-4">
@@ -270,10 +270,11 @@ const Categories: React.FC = () => {
                   onClick={handleAddSuggestedCategories}
                 >
                   <div className="flex gap-2  mt-4 items-center text-muted-foreground">
-                    <img src="/branding/AII.png" className="h-10" />
-                    <img src="/branding/zapllo ai.png" className="h-5 mt-2" />
+                    <img src="/branding/AII.png" className="h-10 dark:block hidden" />
+                    <img src="/branding/zapllo ai.png" className="h-5 mt-2 dark:block hidden" />
+                    <img src="/branding/ai-light.png" className="h-9 dark:hidden block" />
                   </div>
-                  <p className="text-muted-foreground text-xs w-fit mt-4">
+                  <p className="dark:text-muted-foreground text-xs w-fit mt-4">
                     Use our intelligent AI engine to analyze your industry and
                     carefully curate a selection of categories for your workflow.
                   </p>
@@ -291,8 +292,9 @@ const Categories: React.FC = () => {
               <div className="flex justify-between ">
                 <div className="">
                   <div className="flex gap-2 items-center text-muted-foreground">
-                    <img src="/branding/AII.png" className="h-7" />
-                    <img src="/branding/zapllo ai.png" className="h-4 mt-2" />
+                  <img src="/branding/AII.png" className="h-7 dark:block hidden" />
+                <img src="/branding/zapllo ai.png" className="h-4 mt-2 dark:block hidden" />
+                <img src="/branding/ai-light.png" className="h-9 dark:hidden block" />
                   </div>
                   {/* <DialogTitle className='text-md mt-4 '>✨ Suggested Categories
 
@@ -364,7 +366,7 @@ const Categories: React.FC = () => {
         {loading ? <Loader /> : ""}
       </div>
 
-      <div className="flex justify-start rounded items-center border dark:bg-[#0A0D28] w-full mt-4">
+      <div className="flex justify-start rounded items-center border bg-muted dark:bg-[#0A0D28] w-full mt-4">
         {/* <Label>Search Categories</Label> */}
         <h1 className="text-start text- font-medium  p-4">Categories</h1>
         <div className=" ml-auto">
@@ -380,7 +382,7 @@ const Categories: React.FC = () => {
 
       <div className="mt-4 grid grid-cols-3 gap-4 mb-16">
         {filteredCategories.map((cat) => (
-          <div key={cat._id} className="border w-full h-10 flex gap-2 items-center text-sm">
+          <div key={cat._id} className="border rounded-lg w-full h-12 p-2 flex gap-2 items-center text-sm">
             {editingCategoryId === cat._id ? (
               <Dialog open={Boolean(editingCategoryId)} onOpenChange={() => setEditingCategoryId(null)}>
                 <DialogTrigger asChild>

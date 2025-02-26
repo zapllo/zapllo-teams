@@ -93,8 +93,8 @@ const RegularizationDetails: React.FC<RegularizationDetailsProps> = ({
                   Applied By
                 </Label>
                 {selectedRegularization.userId?.firstName && (
-                  <div className="flex gap-2 justify-start ml-11">
-                    <div className="h-6 w-6 rounded-full bg-primary">
+                  <div className="flex gap-2 items-center justify-start ml-11">
+                    <div className="h-7 w-7 rounded-full bg-primary">
                       <h1 className="text-center text-white uppercase text-xs mt-1">
                         {selectedRegularization.userId.firstName[0]}
                         {selectedRegularization.userId.lastName[0]}
@@ -113,8 +113,8 @@ const RegularizationDetails: React.FC<RegularizationDetailsProps> = ({
                   <Label htmlFor="user" className="text-right text-xs mt-1">
                     Approved By
                   </Label>
-                  <div className="flex gap-2 justify-start">
-                    <div className="h-6 w-6 rounded-full bg-primary">
+                  <div className="flex gap-2 items-center justify-start">
+                    <div className="h-7 w-7 rounded-full bg-primary">
                       <h1 className="text-center uppercase text-white text-xs mt-1">
                         {selectedRegularization.approvedBy?.firstName[0]}
                         {selectedRegularization.approvedBy?.lastName[0]}
@@ -235,8 +235,8 @@ const RegularizationDetails: React.FC<RegularizationDetailsProps> = ({
               {selectedRegularization.notes ? (
                 <div className="flex justify-between items-center p-2 rounded">
                   {/* Display remark and approvedBy user */}
-                  <div className="flex gap-2 items-start">
-                    <div className="h-6 w-6 rounded-full bg-primary">
+                  <div className="flex  gap-2 items-start">
+                    <div className="h-7 w-7 rounded-full bg-primary">
                       <h1 className="text-center text-white uppercase text-xs mt-1">
                         {
                           selectedRegularization.approvedBy

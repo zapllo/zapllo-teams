@@ -387,15 +387,15 @@ export default function Profile({ }: Props) {
                       <h1> Timezone</h1>
                     </div>
                     <div>
-                      <label className="absolute bg-[#0b0d29] ml-2 text-xs text-[#787CA5] -mt-2 px-1">
+                      <label className="absolute bg-white dark:bg-[#0b0d29] ml-2 text-xs dark:text-[#787CA5] -mt-2 px-1">
                         Timezone </label>
                       <select
                         value={timezone}
                         onChange={handleTimezoneChange}
-                        className="w-full border bg-[#0B0D29] text-sm overflow-y-scroll scrollbar-thin scrollbar-thumb-[#815BF5] hover:scrollbar-thumb-[#815BF5] active:scrollbar-thumb-[#815BF5] scrollbar-track-gray-800   p-2 rounded bg-transparent outline-none focus-within:border-[#815BF5]"
+                        className="w-full border bg-white dark:bg-[#0B0D29] text-sm overflow-y-scroll scrollbar-thin scrollbar-thumb-[#815BF5] hover:scrollbar-thumb-[#815BF5] active:scrollbar-thumb-[#815BF5] scrollbar-track-gray-800   p-2 rounded bg-transparent outline-none focus-within:border-[#815BF5]"
                       >
                         {availableTimezones.map((tz) => (
-                          <option className="bg-[#0B0D29] text-sm" key={tz} value={tz}>
+                          <option className="bg-white dark:bg-[#0B0D29] text-sm" key={tz} value={tz}>
                             {tz}
                           </option>
                         ))}

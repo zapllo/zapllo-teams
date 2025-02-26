@@ -106,7 +106,9 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ selectedTask,
                 <SheetContent className={`max-w-4xl scrollbar-hide z-[100] w-full `}>
                     <SheetHeader>
                         <div className="flex gap-2">
-                            <ArrowLeft className="cursor-pointer h-7 w-7 dark:bg-[#121212] bg- hover:bg-white hover:text-black border border-white rounded-full" onClick={() => setSelectedTask(null)} />
+                            <div className="cursor-pointer h-7 w-7 dark:bg-[#121212] bg- dark:hover:bg-white hover:text-black dar border border-white rounded-full" onClick={() => setSelectedTask(null)}>
+                                <ArrowLeft />
+                            </div>
                             <SheetTitle className="dark:text-white mb-4">
                                 Task details
                             </SheetTitle>

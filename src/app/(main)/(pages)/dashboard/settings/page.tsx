@@ -258,7 +258,7 @@ export default function Page() {
       {role === "orgAdmin" && (
         <div>
           <div className=" mt-2 bg- p-2 px-4 border dark:bg-[#0A0D28] text-lg rounded-xl ">
-            <h1 className="text-md text-muted-foreground">Organization Details</h1>
+            <h1 className="text-sm text-muted-foreground">Organization Details</h1>
           </div>
           <div className=" text-sm grid grid-cols-1 text- p-2 gap-2 py-2">
             <div className="grid-cols-2 grid gap-2 p-2">

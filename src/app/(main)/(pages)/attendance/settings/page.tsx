@@ -343,7 +343,7 @@ export default function Settings({ }: Props) {
     return (
         <div className='pt-4 w-full max-w-screen  overflow-y-scroll scrollbar-hide h-full '>
             <div className=' dark:bg-[#0B0D29] px-4   mx-2  p-2 border rounded-xl '>
-                <h1 className='text-md text-muted-foreground'>Leave Types</h1>
+                <h1 className='text-sm text-muted-foreground'>Leave Types</h1>
             </div>
             <Link href='/attendance/settings/leave-types'>
                 <div className='mb-2 cursor-pointer flex items-center  justify-between gap-1   my-4 mx-2 p-2 w-   m border-b rounded py-2'>
@@ -355,7 +355,7 @@ export default function Settings({ }: Props) {
                 </div>
             </Link>
             <div className=' mt-4 dark:bg-[#0B0D29]   my-4 mx-2 p-2 border rounded-xl px-4'>
-                <h1 className='text-md text-muted-foreground'>Attendance Settings</h1>
+                <h1 className='text-sm text-muted-foreground'>Attendance Settings</h1>
             </div>
             <Link href='/attendance/settings/register-faces'>
                 <div className='mb-2 flex justify-between gap-1  cursor-pointer  my-4 mx-2 p-2 w- m border-b rounded py-2'>
@@ -465,7 +465,7 @@ export default function Settings({ }: Props) {
 
             <div className=' dark:bg-[#0B0D29] px-4  mt-4 mx-2  my-4  p-2 border rounded-xl '>
 
-                <h1 className='text-md text-muted-foreground'>Office Settings</h1>
+                <h1 className='text-sm text-muted-foreground'>Office Settings</h1>
             </div>
             <div onClick={() => setIsLoginLogoutDialogOpen(true)} className='mb-2 flex justify-between gap-1  cursor-pointer  my-4 mx-2 p-2 w- m border-b rounded py-2'>
                 {/* <CameraIcon className='h-4' /> */}
@@ -743,7 +743,7 @@ export default function Settings({ }: Props) {
 
             <div className=' dark:bg-[#0B0D29] px-4  mt-4 mx-2  my-4  p-2 border rounded-xl '>
 
-                <h1 className='text-md text-muted-foreground'>Payslip Settings</h1>
+                <h1 className='text-sm text-muted-foreground'>Payslip Settings</h1>
             </div>
             <Link href='/attendance/settings/payslip-details'>
                 <div className='mb-12 flex justify-between gap-1  cursor-pointer  my-4 mx-2 p-2 w- m border-b rounded py-2'>

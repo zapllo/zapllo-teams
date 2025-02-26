@@ -93,7 +93,7 @@ const LeaveDetails: React.FC<LeaveDetailsProps> = ({ selectedLeave, onClose }) =
               </Label>
               {selectedLeave.user.firstName && (
                 <div className="flex gap-2 justify-start">
-                  <div className="h-6 w-6 rounded-full bg-primary">
+                  <div className="h-7 w-7 rounded-full bg-primary">
                     <h1 className="text-center text-white uppercase text-xs mt-1">
                       {selectedLeave.user.firstName[0]}
                       {selectedLeave.user.lastName[0]}
@@ -112,7 +112,7 @@ const LeaveDetails: React.FC<LeaveDetailsProps> = ({ selectedLeave, onClose }) =
                   {managerLabel}
                 </Label>
                 <div className="flex gap-2 justify-start">
-                  <div className={`h-6 w-6 rounded-full ${managerBgColor}`}>
+                  <div className={`h-7 w-7 rounded-full ${managerBgColor}`}>
                     <h1 className="text-center uppercase text-xs mt-1">
                       {manager.firstName[0]}
                       {manager.lastName[0]}
@@ -260,7 +260,7 @@ const LeaveDetails: React.FC<LeaveDetailsProps> = ({ selectedLeave, onClose }) =
                 <div className="flex justify-between items-center p-2 rounded">
                   {/* Display remark and manager details */}
                   <div className="flex gap-2 items-start">
-                    <div className="h-6 w-6 rounded-full bg-primary">
+                    <div className="h-7 w-7 rounded-full bg-primary">
                       <h1 className="text-center text-white uppercase text-xs mt-1">
                         {manager.firstName[0]}
                         {manager.lastName[0]}

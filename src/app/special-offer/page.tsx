@@ -108,7 +108,7 @@ export default function Home() {
                 <div>
                     <div className="flex gap-2 items-center">
                         <div className="flex m-auto items-center">
-                            <Avatar className="h-6 w-6 rounded-full bg-[#815BF5] flex items-center">
+                            <Avatar className="h-7 w-7 rounded-full bg-[#815BF5] flex items-center">
                                 <AvatarFallback className="bg-[#815BF5]">
                                     <h1 className="text-sm text-white">
                                         {`${data.name}`.slice(0, 1)}
@@ -116,23 +116,23 @@ export default function Home() {
                                 </AvatarFallback>
                             </Avatar>
                         </div>
-                        <div className="text-white text-sm">
+                        <div className="text-black text-sm">
                             <strong>{data.name}</strong> just purchased{' '}
                         </div>
                     </div>
                     <div>
-                        <strong className="text-white text-md ml-8 ">{data.plan}</strong>
+                        <strong className="text-gray-700 text-sm ml-8 ">{data.plan}</strong>
                     </div>
                     <div className="flex items-center gap-2 ml-8">
-                        <span className="text-[#787CA5] text-sm">{data.timeAgo}</span>
+                        <span className="text-gray-600 text-xs">{data.timeAgo}</span>
                     </div>
                 </div>,
                 {
                     position: 'bottom-left',
                     duration: 10000,
                     style: {
-                        background: '#0B0D26',
-                        borderColor: 'gray',
+                        background: '#fefefe',
+                        borderColor: '#787CA5',
                     },
                 }
             );
@@ -210,10 +210,10 @@ export default function Home() {
                     </div>
                     <div className="md:absolute md:scale-100 scale-75 2xl:right-36 md:mt-16 right-16 ">
                         <img src="/icons/offer.png" />
-                        <h1 className="text-white text-xl -mt-28 ml-20 ">Use Code</h1>
+                        <h1 className="text-white text-xl -mt-[120px] ml-20 ">Use Code</h1>
                         <span className="font-bold text-white text-3xl -mt-28 ml-12">&quot;REPUBLIC&quot;</span>
                         {/* <Clock className="h-4" /> */}
-                        <h1 className="text-white text-2xl  ml-[90px] ">
+                        <h1 className="text-white text-xl  ml-[90px] ">
                             {formatTime(timeLeft)}
                         </h1>
 
@@ -284,7 +284,7 @@ export default function Home() {
             {/* Pricing Cards */}
             <div className="mt-20 bg-[#fefefe]  mx-4 flex flex-col items-center gap-8">
                 <div className="grid md:grid-cols-2 w-full max-w-7xl   justify-center gap-12 relative">
-                 
+
                     {/* Middle Card */}
                     <div className="p-[2px]  bg-gradient-to-r from-[#815BF5] to-[#FC8929] rounded-[50px]">
                         <div
@@ -368,8 +368,8 @@ export default function Home() {
                     </div>
 
                     {/* Right Card */}
-                  {/* Left Card */}
-                  <div className="bg-[#fefefe] mt-8 border rounded-[50px_50px_50px_50px] w-full   p-6 text-black relative z-10 shadow-lg">
+                    {/* Left Card */}
+                    <div className="bg-[#fefefe] mt-8 border rounded-[50px_50px_50px_50px] w-full   p-6 text-black relative z-10 shadow-lg">
                         <div className="absolute -top-0 right-0 w-32 bg-gradient-to-r from-[#815BF5] to-[#FC8929] px-4 py-1 rounded-[0_50px_0_20px] text-sm font-thin text-white">
                             Get Flat 50% OFF
                         </div>
@@ -608,7 +608,7 @@ export default function Home() {
                             ].map((feature, index) => (
                                 <div
                                     key={index}
-                                    className="bg-[#0B0C24] p-6 rounded-lg border border-[#37384B] flex items-start space-x-4"
+                                    className=" bg-white p-6 rounded-lg border border-muted-foreground text-black flex items-start space-x-4"
                                 >
                                     {/* <span className="text-[#FC8929] text-2xl">✔️</span> */}
                                     <img
@@ -623,10 +623,10 @@ export default function Home() {
                                         }}
                                     />
                                     <div>
-                                        <h3 className="text-xl font-semibold text-white">
+                                        <h3 className="text-xl font-semibold text-black">
                                             {feature.title}
                                         </h3>
-                                        <p className="text-muted-foreground mt-2">{feature.description}</p>
+                                        <p className="text-gray-800 mt-2">{feature.description}</p>
                                     </div>
                                 </div>
                             ))}
@@ -636,7 +636,7 @@ export default function Home() {
                 <div className="container mx-auto flex flex-col items-center gap-6 ">
                     {/* Total Value Text */}
                     <p
-                        className="text-center text-black font-golosText"  
+                        className="text-center text-black font-golosText"
                         style={{
                             fontSize: "24px",
                             fontWeight: "400",
@@ -752,7 +752,7 @@ export default function Home() {
                             ].map((feature, index) => (
                                 <div
                                     key={index}
-                                    className="bg-[#0B0C24] p-6 rounded-lg border border-[#37384B] flex items-start space-x-4"
+                                    className=" bg-white p-6 rounded-lg border border-muted-foreground text-black flex items-start space-x-4"
                                 >
                                     {/* <span className="text-[#FC8929] text-2xl">✔️</span> */}
                                     <img
@@ -767,10 +767,10 @@ export default function Home() {
                                         }}
                                     />
                                     <div>
-                                        <h3 className="text-xl font-semibold text-white">
+                                        <h3 className="text-xl font-semibold text-black">
                                             {feature.title}
                                         </h3>
-                                        <p className="text-muted-foreground mt-2">{feature.description}</p>
+                                        <p className="text-gray-800 mt-2">{feature.description}</p>
                                     </div>
                                 </div>
                             ))}
@@ -903,7 +903,7 @@ export default function Home() {
                             ].map((feature, index) => (
                                 <div
                                     key={index}
-                                    className="bg-[#0B0C24] p-6 rounded-lg border border-[#37384B] flex items-start space-x-4"
+                                    className=" bg-white p-6 rounded-lg border border-muted-foreground text-black flex items-start space-x-4"
                                 >
                                     {/* <span className="text-[#FC8929] text-2xl">✔️</span> */}
                                     <img
@@ -918,10 +918,10 @@ export default function Home() {
                                         }}
                                     />
                                     <div>
-                                        <h3 className="text-xl font-semibold text-white">
+                                        <h3 className="text-xl font-semibold text-black">
                                             {feature.title}
                                         </h3>
-                                        <p className="text-muted-foreground mt-2">{feature.description}</p>
+                                        <p className="text-gray-800 mt-2">{feature.description}</p>
                                     </div>
                                 </div>
                             ))}
@@ -1046,7 +1046,7 @@ export default function Home() {
                             ].map((feature, index) => (
                                 <div
                                     key={index}
-                                    className="bg-[#0B0C24] p-6 rounded-lg border border-[#37384B] flex items-start space-x-4"
+                                    className=" bg-white p-6 rounded-lg border border-muted-foreground text-black flex items-start space-x-4"
                                 >
                                     <img
                                         src="/tick.png" // Replace with actual path
@@ -1060,10 +1060,10 @@ export default function Home() {
                                         }}
                                     />
                                     <div>
-                                        <h3 className="text-xl font-semibold text-white">
+                                        <h3 className="text-xl font-semibold text-black">
                                             {feature.title}
                                         </h3>
-                                        <p className="text-muted-foreground mt-2">{feature.description}</p>
+                                        <p className="text-gray-800 mt-2">{feature.description}</p>
                                     </div>
                                 </div>
                             ))}
@@ -1102,9 +1102,9 @@ export default function Home() {
                 </div>
             </div>
 
-       
+
             <div className="  bg-[#fefefe]">
-            
+
 
                 <div className="z-10 flex items-center justify-center">
                     <div
@@ -1153,7 +1153,7 @@ export default function Home() {
             {/* Pricing Cards */}
             <div className="mt-20 bg-[#fefefe]  mx-4 flex flex-col items-center gap-8">
                 <div className="grid md:grid-cols-2 w-full max-w-7xl   justify-center gap-12 relative">
-                 
+
                     {/* Middle Card */}
                     <div className="p-[2px]  bg-gradient-to-r from-[#815BF5] to-[#FC8929] rounded-[50px]">
                         <div
@@ -1237,8 +1237,8 @@ export default function Home() {
                     </div>
 
                     {/* Right Card */}
-                  {/* Left Card */}
-                  <div className="bg-[#fefefe] mt-8 border rounded-[50px_50px_50px_50px] w-full   p-6 text-black relative z-10 shadow-lg">
+                    {/* Left Card */}
+                    <div className="bg-[#fefefe] mt-8 border rounded-[50px_50px_50px_50px] w-full   p-6 text-black relative z-10 shadow-lg">
                         <div className="absolute -top-0 right-0 w-32 bg-gradient-to-r from-[#815BF5] to-[#FC8929] px-4 py-1 rounded-[0_50px_0_20px] text-sm font-thin text-white">
                             Get Flat 50% OFF
                         </div>
@@ -1348,7 +1348,7 @@ export default function Home() {
 
 
             <div className="flex bg-[#04061E]  mt-56 justify-center">
-                <OtherFooter  />
+                <OtherFooter />
             </div>
         </main >
         // </LoaderLayout>

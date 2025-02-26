@@ -371,7 +371,7 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
               analyserRef.current.getByteFrequencyData(dataArray);
 
               // Clear the canvas before rendering bars
-              canvasCtx.fillStyle = "rgb(0, 0, 0)";
+              canvasCtx.fillStyle = "rgb(255, 255, 255)";
               canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
               const bars = 40;
@@ -494,14 +494,14 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
                 <button
                   type="button"
                   onClick={() => setIsFromDatePickerOpen(true)}
-                  className="w-full text-sm p-2 outline-none border rounded bg-[#] flex gap-1 mt-auto text-gray-300"
+                  className="w-full text-sm p-2 outline-none border rounded bg-[#] flex gap-1 mt-auto dark:text-gray-300"
                   disabled={!formData.leaveType}
                 >
                   <Calendar className="h-5" />{" "}
                   {formData.fromDate ? (
                     new Date(formData.fromDate).toLocaleDateString("en-GB")
                   ) : (
-                    <h1 className="text-[#787CA5]">Start Date</h1>
+                    <h1 className="dark:text-[#787CA5]">Start Date</h1>
                   )}
                 </button>
                 {/* {isFromDatePickerOpen && (
@@ -561,14 +561,14 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
                 <button
                   type="button"
                   onClick={() => setIsToDatePickerOpen(true)}
-                  className="w-full text-sm flex gap-1 p-2 outline-none border rounded bg-[#] text-gray-300"
+                  className="w-full text-sm flex gap-1 p-2 outline-none border rounded bg-[#] dark:text-gray-300"
                   disabled={!formData.leaveType}
                 >
                   <Calendar className="h-5" />{" "}
                   {formData.toDate ? (
                     new Date(formData.toDate).toLocaleDateString("en-GB")
                   ) : (
-                    <h1 className="text-[#787CA5]">End Date</h1>
+                    <h1 className="dark:text-[#787CA5]">End Date</h1>
                   )}
                 </button>
                 {/* {isToDatePickerOpen && (
@@ -728,7 +728,7 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
 
             <div
               className={` ${recording ? `w-full  ` : "hidden"
-                } border rounded border-dashed border-[#815BF5] px-4 py-2  bg-black flex justify-center`}
+                } border rounded border-dashed border-[#815BF5] px-4 py-2  bg-white flex justify-center`}
             >
               <canvas
                 ref={canvasRef}

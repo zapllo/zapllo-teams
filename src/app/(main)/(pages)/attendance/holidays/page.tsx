@@ -184,8 +184,8 @@ const HolidayManager: React.FC = () => {
               <table className="w-full">
                 <thead className="dark:bg-[#0B0D29] ">
                   <tr>
-                    <th className="px-4 text-gray-400 text-xs text-start py-2">Name</th>
-                    <th className="px-4 text-gray-400 text-xs text-start py-2">Date</th>
+                    <th className="px-4 dark:text-gray-400 text-xs text-start py-2">Name</th>
+                    <th className="px-4 dark:text-gray-400 text-xs text-start py-2">Date</th>
                     {userRole === 'orgAdmin' && <th className="text-xs text-start px-4 py-2">Actions</th>}
                   </tr>
                 </thead>

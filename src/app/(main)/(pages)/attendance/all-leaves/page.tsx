@@ -488,7 +488,7 @@ export default function AllLeaves() {
 
         <button
           onClick={() => setTab("balances")}
-          className={`px-4 text-xs py-2 flex  rounded ${tab === "balances"
+          className={`px-4 text-xs py-2 flex  items-center rounded ${tab === "balances"
             ? "bg-[#815BF5] text-white"
             : "bg-[#] border dark:text-white"
             }`}
@@ -498,7 +498,7 @@ export default function AllLeaves() {
         </button>
         <button
           onClick={() => setTab("applications")}
-          className={`px-4 text-xs py-2 flex  rounded ${tab === "applications"
+          className={`px-4 text-xs py-2 flex items-center  rounded ${tab === "applications"
             ? "bg-[#815BF5] text-white"
             : "bg-[#] border dark:text-white"
             }`}
@@ -628,10 +628,10 @@ export default function AllLeaves() {
               {filteredLeaves.map((leave) => (
                 <div
                   key={leave._id}
-                  className="border hover:border-[#815BF5] cursor-pointer"
+                  className="border items-center hover:border-[#815BF5] cursor-pointer"
                   onClick={() => setSelectedLeaveForDetails(leave)}
                 >
-                  <div className="flex items-center justify-between  px-4 rounded shadow-sm py-2 ">
+                  <div className="flex items-center justify-between    px-4 rounded shadow-sm py-2 ">
                     <div className="flex items-center gap-4">
                       {/* User Profile Icon */}
                       <div className="h-6 w-6 rounded-full bg-[#7c3987] flex items-center justify-center text-white text-sm">
