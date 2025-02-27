@@ -1487,12 +1487,12 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
                       onChange={(e) =>
                         setReminderType(e.target.value as "email" | "whatsapp")
                       }
-                      className=" border bg-transparent outline-none p-2 bg-[#1A1C20]  rounded h-full"
+                      className=" border bg-transparent outline-none p-2 dark:bg-[#1A1C20]  rounded h-full"
                     >
-                      <option className="bg-[#1A1C20]" value="email">
+                      <option className="dark:bg-[#1A1C20]" value="email">
                         Email
                       </option>
-                      <option className="bg-[#1A1C20]" value="whatsapp">
+                      <option className="dark:bg-[#1A1C20]" value="whatsapp">
                         WhatsApp
                       </option>
                     </select>
@@ -1512,15 +1512,15 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
                           e.target.value as "minutes" | "hours" | "days"
                         )
                       }
-                      className=" p-2 outline-none bg-[#1A1C20] border bg-transparent rounded h-full"
+                      className=" p-2 outline-none dark:bg-[#1A1C20] border bg-transparent rounded h-full"
                     >
-                      <option className="bg-[#1A1C20]" value="minutes">
+                      <option className="dark:bg-[#1A1C20]" value="minutes">
                         minutes
                       </option>
-                      <option className="bg-[#1A1C20]" value="hours">
+                      <option className="dark:bg-[#1A1C20]" value="hours">
                         hours
                       </option>
-                      <option className="bg-[#1A1C20]" value="days">
+                      <option className="dark:bg-[#1A1C20]" value="days">
                         days
                       </option>
                     </select>

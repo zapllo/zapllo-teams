@@ -37,7 +37,7 @@ export default function TasksHero() {
                 </h1>
             </div>
             <div className='flex justify-center'>
-                <span className='mt-4 text-center md:text-4xl text-xl'>  Manage your Team in just 10 mins a day </span>
+                <span className='mt-4 text-center md:text-5xl text-xl'>  Manage your Team in just 10 mins a day </span>
             </div>
             <div className='flex justify-center '>
                 <p className={`max-w-[700px] text-center mx-4 text-xs  md:mx-0 mt-4 md:text-md leading-relaxed text-muted-foreground ${golos.className}`}>Effortless Task Delegation, Automated WhatsApp reminders Realtime Department & Employee Performance Reports 

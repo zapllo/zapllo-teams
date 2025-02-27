@@ -21,7 +21,7 @@ export default function SaveLanding({ }: Props) {
                     </p>
                     <div className="md:w-[110%] items-center w-56  gap-4 mt-8 ">
                         <Link href='https://masterclass.zapllo.com/workshop/'>
-                            <Button className="mt-8 mb-4 relative py-7 w-72 text-xl font-semibold bg-primary text-white rounded-full shadow-lg flex items-center ">
+                            <Button className="mt-8 mb-4 relative py-7 w-80 text-xl font-semibold bg-primary text-white rounded-full shadow-lg flex items-center ">
                                 <p className="-ml-8">   Join Live Masterclass</p>
                                 <img src="/icons/rocket.png" className="h-20 absolute right-0" />
                             </Button>
@@ -29,7 +29,7 @@ export default function SaveLanding({ }: Props) {
 
                         <div className=' '>
                             <Link href='/signup'>
-                                <button className='bg-gradient-to-b text-xl from-[#1C1F3E]  w-72 to-[#010313] border px-4 py-2 rounded-3xl text-[#815BF5]'>Create Your Free Account </button>
+                                <button className='bg-gradient-to-b text-xl from-[#1C1F3E]  w-80 to-[#010313] border px-4 py-2 rounded-3xl text-[#815BF5]'>Create Your Free Account </button>
                             </Link>
                         </div>
                     </div>

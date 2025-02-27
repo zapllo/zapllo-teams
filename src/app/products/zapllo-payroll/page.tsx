@@ -34,7 +34,7 @@ export default function Home() {
             <div
                 className='scroller mt-20 md:mt-12  relative z-20 bg-gradient-to-r from-[#815BF5] via-[#FC8929] to-[#FC8929]  max-w-8xl py-4 mb-4 overflow- space-x-6'
             >
-                <h1 className="text-center text-xs md:text-2xl">
+                <h1 className="text-center text-xs md:text-xl">
                     We are on a mission to help 10 Million MSMEs automate their business and get freedom from daily firefighting.
                 </h1>
             </div>

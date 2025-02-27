@@ -37,7 +37,7 @@ export default function Footer() {
             <div className='grid grid-cols-1 md:grid-cols-3 w-full  p-6 gap-12'>
                 <div className='Zapllo my-8  '>
                     <img src='/logo.png' className='h-6' />
-                    <div className='flex gap-3 text-xs mt-6'>
+                    <div className='flex gap-2 text-[14px] mt-6'>
                         <Link href='https://zapllo.notion.site/Work-at-Zapllo-9c970622e3d142919bdca4c42ee38aab?pvs=4'>
                             <h1>CAREERS</h1>
                         </Link>
@@ -74,7 +74,7 @@ export default function Footer() {
                             </ShineBorder>
                         </Link> */}
                         <Link href='https://masterclass.zapllo.com/workshop/'>
-                            <Button className="mt-8 mb-4 relative py-7 w-72 text-xl font-semibold bg-primary text-white rounded-full shadow-lg flex items-center ">
+                            <Button className="mt-8 mb-4 relative py-7 w-80 text-xl font-semibold bg-primary text-white rounded-full shadow-lg flex items-center ">
                                 <p className="-ml-8">   Join Live Masterclass</p>
                                 <img src="/icons/rocket.png" className="h-20 absolute right-0" />
                             </Button>

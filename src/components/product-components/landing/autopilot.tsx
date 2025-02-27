@@ -19,7 +19,7 @@ export default function Autopilot() {
                         <h1 className='text-2xl'>For Your Everyday Business needs</h1>
                     </div>
                 </div>
-                <div className='flex justify-center '>
+                <div className='flex justify-center items-center '>
                     <div className='grid grid-cols-1 mx-4 md:grid-cols-4 w-full gap-4   justify-center mt-8     -400'>
                         <Link href='/products/zapllo-teams'>
                             <div className='bg-[#0A0D28] hover:border-[#815bf5] cursor-pointer border hover:scale-105 p-4 rounded'>

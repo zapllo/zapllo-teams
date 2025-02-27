@@ -107,8 +107,8 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, closeModal, categorie
                             {users.filter(user => (`${user.firstName} ${user.lastName}`).toLowerCase().includes(lowercasedSearchTerm)).map(user => (
                                 <label key={user._id} className='flex justify-between cursor-pointer'>
                                     <div className='flex items-center'>
-                                        <div className='h-8 w-8 bg-[#815BF5] text-center text-lg rounded-full'>
-                                            <h1 className='mt-[1.5px] text-white'>
+                                        <div className='h-8 w-8 bg-[#815BF5] flex items-center m-auto text-lg rounded-full'>
+                                            <h1 className=' text-sm ml-1 text-white'>
                                                 {`${user.firstName}`.slice(0, 1)}{`${user.lastName}`.slice(0, 1)}
                                             </h1>
                                         </div>
@@ -230,14 +230,14 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, closeModal, categorie
                             {sections.map((section) => (
                                 <li
                                     key={section.name}
-                                    className={`cursor-pointer text-sm px-12 p-3 w-full flex items-center ${activeSection === section.name ? 'dark:bg-[#282D32] bg-primary text-white' : ''
+                                    className={`cursor-pointer text-xs px-12 p-3 w-full flex items-center ${activeSection === section.name ? 'dark:bg-[#282D32] bg-primary text-white' : ''
                                         }`}
                                     onClick={() => {
                                         setActiveSection(section.name);
                                         setSearchTerm('');
                                     }}
                                 >
-                                    <img src={section.imgSrc} alt={section.name} className="mr-2 h-4" />
+                                    <img src={section.imgSrc} alt={section.name} className="mr-2 h-4 dark:invert-0 invert-[100]" />
                                     {section.name}
                                 </li>
                             ))}

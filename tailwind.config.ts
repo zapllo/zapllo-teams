@@ -32,6 +32,7 @@ const config = {
       xl: '1.5rem',    // Increased from 1.25rem
       '2xl': '1.8rem', // Increased from 1.5rem
       '3xl': '1.9rem', // Increased from 1.5rem
+      '4xl': '2.2rem', 
       '5xl':'2.35rem',
       '8xl':'4.25rem'
       // add or modify other sizes as needed
