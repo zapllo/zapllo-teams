@@ -919,7 +919,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
         initial="hidden"
         animate={controls}
       >
-        <div className="flex justify-between   items-center  px-8 py-3 border-b dark:border-gray-700 w-full">
+        <div className="flex justify-between   items-center  px-8 py-3 border-b  w-full">
           <h2 className="dark:text-lg  dark:font-bold   ">Assign New Task</h2>
 
           <CrossCircledIcon
@@ -960,7 +960,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
             <div>
               <button
                 type="button"
-                className="p-2 flex text-xs justify-between dark:border-gray-500 dark:border-border  dark:border-2 border bg-transparent w-full text-start  rounded"
+                className="p-2 flex text-xs justify-between dark:border-border    border bg-transparent w-full text-start  rounded"
                 onClick={handleOpen}
               >
                 {popoverInputValue ? (
@@ -990,7 +990,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
               <div>
                 <button
                   type="button"
-                  className="p-2 text-xs flex border items-center dark:border-2 dark:border-gray-500 dark:border-border   bg-transparent justify-between w-full text-start  rounded"
+                  className="p-2 text-xs flex border items-center 0 dark:border-border   bg-transparent justify-between w-full text-start  rounded"
                   onClick={handleCategoryOpen}
                 >
                   {popoverCategoryInputValue ? (
@@ -1021,7 +1021,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
             </div>
           </div>
           <div className=" flex itrc justify-between">
-            <div className="mb-2  justify-between border dark:border-gray-500 dark:border-border  rounded-md h-14 items-center flex gap-4 mta w-full">
+            <div className="mb-2  justify-between border dark:border-border  rounded-md h-14 items-center flex gap-4 mta w-full">
               <div className=" gap-2 flex justify-between h-fit  items-center p-4 w-full ">
                 <div className="flex g   text-xs dark:text-white dark:font-bold">
                   {/* <FlagIcon className='h-5' /> */}
@@ -1158,7 +1158,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
             <Button
               type="button"
               onClick={handleOpenDatePicker}
-              className=" dark:border-2 border dark:border-gray-500 dark:border-border  bg-background
+              className="  border  dark:border-border  bg-background
               text-black dark:text-white rounded dark:bg-[#282D32] hover:bg-transparent px-3 flex gap-1  py-2"
             >
               <Calendar className="h-5 text-sm" />
@@ -2026,7 +2026,7 @@ const CategorySelectPopup: React.FC<CategorySelectPopupProps> = ({
   return (
     <div
       ref={popupRef}
-      className="absolute dark:bg-[#0B0D29] bg-white text-black dark:border-gray-500 dark:border-border border mt-2 rounded shadow-md p-4 w-[45%] z-50"
+      className="absolute dark:bg-[#0B0D29] bg-white text-black dark:border-gray-700 dark:border-border border mt-2 rounded shadow-md p-4 w-[45%] z-50"
     >
       <input
         placeholder=" Search Categories"
