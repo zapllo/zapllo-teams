@@ -190,7 +190,7 @@ export default async function BlogPostPage({
 
                         <CardDescription className="md:-mt-20 -mt-14">
                             <div className='shadow-md  shadow-orange-500 bg-white mt-4  p-4 rounded-lg '>
-                                {excerpt && <p className="text-black     md:text-xl">{excerpt}</p>}
+                                {excerpt && <p className="text-black     md:text-">{excerpt}</p>}
                             </div>
 
                         </CardDescription>

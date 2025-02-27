@@ -80,7 +80,7 @@ export default function BlogsPage() {
                         Grow your business <span className="font-bold"> with the power of AI & Automation</span>
                     </p>
                     <Link href="/signup">
-                        <Button className="mt-8 mb-4 relative py-7 w-64 text-xl font-semibold bg-primary text-white rounded-full shadow-lg flex items-center ">
+                        <Button className="mt-8 mb-4 relative py-7 w-72 text-xl font-semibold bg-primary text-white rounded-full shadow-lg flex items-center ">
                             <p className="-ml-8">    Let’s Get Started!</p>
                             <img src="/icons/rocket.png" className="h-20 absolute right-0" />
                         </Button>
@@ -106,28 +106,28 @@ export default function BlogsPage() {
 
 
                 {/* Category Tabs using ShadCN UI */}
-                <div className="flex justify-center mb-20 md:mb-4">
-                    <Tabs3 defaultValue="All" value={selectedCategory} onValueChange={(value) => {
-                        setSelectedCategory(value);
-                        setSelectedTag(null); // Reset tag selection when changing category
-                    }}>
-                        <TabsList3 className="flex flex-wrap border-none   h-14 gap-4  justify-center bg-transparent md:border-b border-gray-300">
-                            {categories.map((category) => (
-                                <TabsTrigger3
-                                    key={category}
-                                    value={category}
-                                    className={`px-4 py-2 md:text-md border shadow-sm border-transparent rounded-xl transition-colors hover:border-primary hover:bg-transparent hover:text-black 
-                                        ${selectedCategory === category ? "border-primary text-primary font-bold" : "text-black"}`}
-                                >
-                                    {category}
-                                </TabsTrigger3>
-                            ))}
-                        </TabsList3>
-                    </Tabs3>
+                {/* Category Buttons using ShadCN UI */}
+                <div className="flex justify-center mb-24 md:mb-4">
+                    <div className="flex flex-wrap gap-4">
+                        {categories.map((category) => (
+                            <Button
+                                key={category}
+                                onClick={() => {
+                                    setSelectedCategory(category);
+                                    setSelectedTag(null); // Reset tag selection when changing category
+                                }}
+                                className={`px-4 py-2 mb-4 md:text-md bg-transparent text-black border shadow-sm border-transparent rounded-lg 
+          hover:border-primary hover:bg-transparent hover:text-black 
+          ${selectedCategory === category ? "border-primary bg-primary text-white font-bold" : "text-black"}`}
+                            >
+                                {category}
+                            </Button>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Blog List */}
-                <Card className="grid grid-cols-1 fade-in-bottom shadow-none md:grid-cols-3 mx-12 bg-transparent border-none gap-6">
+                <Card className="grid grid-cols-1 mt-4 fade-in-bottom shadow-none md:grid-cols-3 mx-12 bg-transparent border-none gap-6">
                     {loading ? (
                         // **Show Skeleton Loaders when loading**
                         [...Array(6)].map((_, index) => (
