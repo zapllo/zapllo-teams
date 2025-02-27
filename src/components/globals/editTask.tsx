@@ -754,9 +754,9 @@ const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
                 {["High", "Medium", "Low"].map((level) => (
                   <label
                     key={level}
-                    className={`px-4 py-1 text-xs border border-[#505356] font-medium cursor-pointer ${formData.priority === level
+                    className={`px-4 py-1 text-xs border   border-[#505356] font-medium cursor-pointer ${formData.priority === level
                       ? "bg-[#815BF5] text-white"
-                      : "bg-[#282D32] text-gray-300 hover:bg-gray-600"
+                      : "dark:bg-[#282D32] dark:text-gray-300 dark:hover:bg-gray-600"
                       }`}
                   >
                     <input
@@ -1081,7 +1081,7 @@ const EditTaskDialog: React.FC<EditTaskDialogProps> = ({
                 <Button
                   type="button"
                   onClick={addLinkInputField}
-                  className="bg-transparent border border-[#505356] text-black dark:text-white hover:bg-[#017A5B] px-4 py-2 flex gap-2 rounded"
+                  className="bg-transparent border border-[#505356] hover:text-white text-black dark:text-white hover:bg-[#017A5B] px-4 py-2 flex gap-2 rounded"
                 >
                   Add Link
                   <Plus />
@@ -1457,11 +1457,11 @@ const UserSelectPopup: React.FC<UserSelectPopupProps> = ({
   return (
     <div
       ref={popupRef}
-      className="absolute bg-[#0B0D29] text-white border mt-10 border-gray-700 rounded shadow-md p-4 w-[22%] z-50"
+      className="absolute dark:bg-[#0B0D29] bg-white dark:text-white border mt-10 border-gray-700 rounded shadow-md p-4 w-[22%] z-50"
     >
       <input
         placeholder="Search user"
-        className="h-8 text-xs px-4 text-white w-full bg-[#292d33] gray-600 border rounded outline-none mb-2"
+        className="h-8 text-xs px-4 dark:text-white w-full dark:bg-[#292d33] gray-600 border rounded outline-none mb-2"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
       />
@@ -1638,11 +1638,11 @@ const CategorySelectPopup: React.FC<CategorySelectPopupProps> = ({
   return (
     <div
       ref={popupRef}
-      className="absolute bg-[#0B0D29] ml-4 text-black border -mt-4 rounded shadow-md p-4 w-[22%] z-50"
+      className="absolute dark:bg-[#0B0D29] bg-white ml-4 dark:text-black border -mt-4 rounded shadow-md p-4 w-[22%] z-50"
     >
       <input
         placeholder=" Search Categories..."
-        className="h-8 text-xs px-4 text-white w-full bg-[#282D32] -800 border rounded outline-none mb-2"
+        className="h-8 text-xs px-4 dark:text-white w-full dark:bg-[#282D32] -800 border rounded outline-none mb-2"
         value={searchCategoryQuery}
         onChange={(e) => setSearchCategoryQuery(e.target.value)}
       />
@@ -1650,14 +1650,14 @@ const CategorySelectPopup: React.FC<CategorySelectPopupProps> = ({
         {categories.length === 0 ? (
           <div>No categories found.</div>
         ) : (
-          <div className="w-full text-sm text-white max-h-40 overflow-y-scroll scrollbar-hide">
+          <div className="w-full text-sm dark:text-white max-h-40 overflow-y-scroll scrollbar-hide">
             {filteredCategories.map((categorys) => (
               <div
                 key={categorys._id}
                 className="cursor-pointer p-2 flex items-center justify-start  mb-1"
                 onClick={() => handleSelectCategory(categorys._id)}
               >
-                <div className="bg-[#282D32] rounded-full h-8  w-8">
+                <div className="dark:bg-[#282D32] rounded-full h-8  w-8">
                   {getCategoryIcon(categorys.name) ? (
                     <img
                       src={getCategoryIcon(categorys?.name) as string} // Type assertion
