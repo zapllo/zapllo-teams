@@ -21,6 +21,17 @@ import { toast } from 'sonner'
 
 type Props = {}
 
+interface IUser {
+    _id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    reminders: {
+        email: boolean;
+    };
+}
+
+
 
 interface OrgData {
     penaltyOption: "leave" | "salary";
@@ -37,7 +48,6 @@ interface OrgData {
 export default function Settings({ }: Props) {
     const [timezone, setTimezone] = useState<string>("");
     const [availableTimezones, setAvailableTimezones] = useState<string[]>([]);
-    const [isReminderEnabled, setIsReminderEnabled] = useState<boolean>(false)
     const [selectedTime, setSelectedTime] = useState<string | null>(null)
 
     // For controlling the visibility of the Time Picker dialog
@@ -66,6 +76,8 @@ export default function Settings({ }: Props) {
     const [allowGeofencing, setAllowGeofencing] = useState<boolean>(false);
     const [geofenceInput, setGeofenceInput] = useState<string>(""); // raw input from user
     const [selectedUnit, setSelectedUnit] = useState<"km" | "m">("km");
+    const [user, setUser] = useState<IUser | null>(null);
+
 
     // New state variables (add these along with your other state declarations)
     const [penaltyOption, setPenaltyOption] = useState<"leave" | "salary">("leave");
@@ -73,6 +85,8 @@ export default function Settings({ }: Props) {
     const [penaltyLeaveType, setPenaltyLeaveType] = useState<"half day" | "Full Day" | "quarter day">("half day");
     const [penaltySalaryAmount, setPenaltySalaryAmount] = useState<string>("");
 
+    const [isReminderEnabled, setIsReminderEnabled] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     const mapContainerStyle = {
         width: '100%',
@@ -281,9 +295,7 @@ export default function Settings({ }: Props) {
         setTimezone(e.target.value)
     }
 
-    const handleSwitchChange = (checked: boolean) => {
-        setIsReminderEnabled(checked)
-    }
+
     const handleTimeChange = (time: string) => {
         // Convert the 12-hour time format (hh:mm A) to 24-hour format (HH:mm)
         const formattedTime = dayjs(`1970-01-01T${time}:00`, 'YYYY-MM-DDTHH:mm:ss').format('HH:mm');
@@ -338,6 +350,52 @@ export default function Settings({ }: Props) {
             toast.error('Error updating login/logout time')
         }
     }
+
+
+
+    // Fetch the current user data
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const response = await axios.get("/api/users/me");
+                console.log(response.data.data, 'okay??????')
+                setUser(response.data.data)
+                if (response.data?.data?.reminders?.email !== undefined) {
+                    setIsReminderEnabled(response.data?.data?.reminders.email);
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchUserData();
+    }, []);
+
+    console.log(isReminderEnabled, 'is reminder enabled?')
+
+    // Handle switch toggle
+    const handleSwitchChange = async (checked: boolean) => {
+        setIsReminderEnabled(checked); // Optimistic UI update
+
+        try {
+            const response = await axios.patch("/api/users/update", {
+                _id: user?._id, // Replace with the actual user ID dynamically
+                reminders: {
+                    email: checked, // Toggle the reminder email field
+                },
+            });
+
+            if (!response.data.success) {
+                throw new Error("Failed to update reminders");
+            }
+            console.log("Reminder updated successfully!");
+        } catch (error) {
+            console.error("Error updating reminder:", error);
+            setIsReminderEnabled((prev) => !prev); // Revert if API fails
+        }
+    };
 
 
     return (
@@ -440,7 +498,7 @@ export default function Settings({ }: Props) {
 
                     <DialogFooter className='p-6'>
                         <DialogClose asChild>
-                            <Button className="w-full bg-[#815bf5] ">Save</Button>
+                            <Button onClick={() => toast.success("Reminder settings saved successfully!")} className="w-full bg-[#815bf5] ">Save</Button>
                         </DialogClose>
                     </DialogFooter>
                 </DialogContent>

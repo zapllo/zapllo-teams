@@ -26,6 +26,7 @@ export async function PATCH(request: NextRequest) {
       email,
       password,
       firstName,
+      reminders,
       lastName,
       role,
       reportingManager,  // Add reportingManager in the request body
@@ -104,6 +105,10 @@ export async function PATCH(request: NextRequest) {
     }
     if (typeof workFromHomeAllowed !== "undefined") {
       userToEdit.workFromHomeAllowed = workFromHomeAllowed;
+    }
+    // ✅ Update the `reminders` field if provided
+    if (reminders) {
+      userToEdit.reminders = { ...userToEdit.reminders, ...reminders };
     }
 
 
