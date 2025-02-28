@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "../ui/sheet";
-import { Edit, Edit3, FileEdit, Mail, Pencil, Phone, Plus, PlusCircleIcon, Trash, Trash2, User, UserCheck, UserCircle, Users, Users2Icon } from "lucide-react";
+import { Edit, Edit3, FileEdit, Mail, MessageCircle, MessageCircleDashedIcon, Pencil, Phone, Plane, Plus, PlusCircleIcon, Trash, Trash2, User, UserCheck, UserCircle, Users, Users2Icon } from "lucide-react";
 import axios from "axios";
 import { Tabs2, TabsList2, TabsTrigger2 } from "../ui/tabs2";
 import { Tabs3, TabsList3, TabsTrigger3 } from "../ui/tabs3";
@@ -30,10 +30,12 @@ import UserCountry from "./userCountry";
 import { Switch } from "../ui/switch";
 import { CrossCircledIcon } from "@radix-ui/react-icons";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaTelegram, FaTelegramPlane, FaWhatsapp } from "react-icons/fa";
 import { validateEmail } from "@/helper/emailValidation";
 import { useRouter } from "next/navigation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import Link from "next/link";
 
 interface User {
   _id: string;
@@ -214,14 +216,14 @@ export default function TeamTabs() {
     getUserDetails();
   }, []);
 
-  const handleReportingManagerChange = (value:string) => {
+  const handleReportingManagerChange = (value: string) => {
     if (value === "none") {
       setSelectedReportingManager(""); // or any default you need
     } else {
       setSelectedReportingManager(value);
     }
   };
-  
+
 
   // Filter users based on search query, active tab, and selected reporting manager
   const filteredUsers = users.filter((user) => {
@@ -567,7 +569,7 @@ export default function TeamTabs() {
             >
               {loggedInUserRole === "orgAdmin" && (
                 <DialogTrigger asChild>
-                  <Button size="sm" className="ml-4 bg-[#017a5b] hover:bg-[#15624f] border gap-2" onClick={() => setIsModalOpen(true)}>
+                  <Button className="ml-4  bg-[#017a5b] hover:bg-[#15624f] border gap-2" onClick={() => setIsModalOpen(true)}>
                     Add Member </Button>
                 </DialogTrigger>
               )}
@@ -800,12 +802,32 @@ export default function TeamTabs() {
 
                       </div>
                     </div>
-                    <div className="-ml-6 flex gap-2">
-                      <Mail className="h-5" />
+                    <div className="-ml-6 items-center flex gap-2">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Link
+                              href={`https://wa.me/${user.whatsappNo}`}    // or http://
+                              onClick={(e) => e.stopPropagation()}         // prevents card's onClick
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <span className="flex items-center">
+                                <FaTelegramPlane className="h-5 dark:text-muted-foreground -600 cursor-pointer" />
+                              </span>
+                            </Link>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom">
+                            {/* Content shown when hovering over the arrow icon */}
+                            <span>Send Message</span>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <Mail className="h-5 text-red-800" />
                       <p className="dark:text-[#E0E0E0]">{user.email}</p>
                       <h1 className="text-[#E0E0E066]">|</h1>
-                      <div className="flex gap-2 mt-[1px]">
-                        <Phone className="h-4 mt-[1px]" />
+                      <div className="flex gap-2 items-center mt-[1px]">
+                        <FaWhatsapp className="h-5 mt-[1px] text-green-500" />
                         <p className="dark:text-[#E0E0E0]">{user.whatsappNo}</p>
                       </div>
                       <h1 className="text-[#E0E0E066]">|</h1>

@@ -31,37 +31,50 @@ export async function GET() {
     console.log(`Found ${users.length} users`);
 
     for (const user of users) {
-      const storedTime = dayjs(`1970-01-01T${user.reminders.dailyAttendanceReportTime}:00`);
-      const currentTime = dayjs(`1970-01-01T${currentHourMinute}:00`);
+      const storedHourMinute = user.reminders.dailyAttendanceReportTime // e.g. "04:20" in DB
+
+      // Parse stored hour/minute
+      const [storedHStr, storedMStr] = storedHourMinute.split(':')
+      const storedH = parseInt(storedHStr, 10)
+      const storedM = parseInt(storedMStr, 10)
+
+      // Parse current hour/minute
+      const [currentHStr, currentMStr] = currentHourMinute.split(':')
+      const currentH = parseInt(currentHStr, 10)
+      const currentM = parseInt(currentMStr, 10)
+
       console.log(
-        `User ${user.email} - stored time: ${storedTime.format("HH:mm")}, current time: ${currentTime.format("HH:mm")}`
-      );
-      // Check if the user's reminder time matches the current time
-      if (storedTime.isSame(currentTime, 'minute')) {
-        console.log(`Sending daily attendance report for user: ${user.email}`);
+        `User ${user.email} - stored time: ${storedHourMinute}, current time: ${currentHourMinute}`
+      )
 
-        // Fetch the employees reporting to this user and generate the report
-        const employees = await User.find({ reportingManager: user._id });
-        console.log(employees, 'employees')
-        const reportDate = new Date();
-        const formattedDate = format(reportDate, 'dd MMM yyyy');
+      // Option A: Exact match  (04:26 == 04:26)
+      const exactMatch = storedH === currentH && storedM === currentM
 
-        const reportData = await generateAttendanceReport(employees, formattedDate);
-        console.log("report?", reportData)
-        const subject = `Employee Attendance Report for ${formattedDate}`;
-        const htmlContent = generateReportHtml(reportData, user, formattedDate);
+      // Option B: 12-hour difference match (04:26 == 16:26)
+      const twelveHourMatch =
+        ((storedH + 12) % 24) === currentH && storedM === currentM
+
+      // If either condition is true, we send the report
+      if (exactMatch || twelveHourMatch) {
+        console.log(`Sending daily attendance report for user: ${user.email}`)
+
+        const employees = await User.find({ reportingManager: user._id })
+        const reportDate = new Date()
+        const formattedDate = format(reportDate, 'dd MMM yyyy')
+
+        const reportData = await generateAttendanceReport(employees, formattedDate)
+        const subject = `Employee Attendance Report for ${formattedDate}`
+        const htmlContent = generateReportHtml(reportData, user, formattedDate)
 
         const emailOptions: SendEmailOptions = {
           to: user.email,
           text: subject,
-          subject: subject,
+          subject,
           html: htmlContent,
-        };
+        }
 
-        // Send the email
-
-        await sendEmail(emailOptions);
-        console.log("mail sent!")
+        await sendEmail(emailOptions)
+        console.log('mail sent!')
       }
     }
 

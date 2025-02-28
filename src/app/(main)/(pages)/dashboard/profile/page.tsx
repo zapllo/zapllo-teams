@@ -10,6 +10,7 @@ import { Mail, Phone } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import { FaWhatsapp } from "react-icons/fa";
 import { IoPersonAddSharp } from "react-icons/io5";
 import { toast, Toaster } from "sonner";
 
@@ -309,13 +310,13 @@ export default function Profile({ }: Props) {
             </div>
             <h1>|</h1>
             <div className="flex items-center text-xs gap-1">
-              <Mail className="h-4" />
+              <Mail className="h-4 text-red-800" />
               <p className="">{email}</p>
             </div>
             <h1>|</h1>
 
             <p className="flex items-center gap-2 text-xs">
-              <Phone className="h-4" />
+              <FaWhatsapp className="h-4 text-green-500" />
               {whatsappNo}
             </p>
           </div>

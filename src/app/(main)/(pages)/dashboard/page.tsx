@@ -240,7 +240,7 @@ const DashboardPage = () => {
                 <img src='/icons/atask.png' className=' h-6  ml-[10px]   object-cover' />
               </div>
               <h1 className='text-lg font-medium'>Zapllo Tasks</h1>
-              <p className='text-xs font-medium'>Delegate one time and recurring task to your team</p>
+              <p className='text-xs font-medium '>Delegate one time and recurring task to your team</p>
               <div className="pt-2">
                 {(isTaskAccess || isTaskPlanEligible) ? (
                   <Link href="/dashboard/tasks">
