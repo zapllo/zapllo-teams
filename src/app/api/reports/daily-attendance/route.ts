@@ -8,6 +8,7 @@ import Leave from '@/models/leaveModel';
 import { Types } from 'mongoose';
 import dayjs from 'dayjs';
 import connectDB from '@/lib/db';
+export const dynamic = 'force-dynamic';
 
 interface AttendanceReport {
   name: string;
@@ -21,76 +22,94 @@ interface ReportData {
 
 export async function GET() {
   try {
-    console.log('GET /api/reports/daily-attendance-report endpoint called');
+    console.log('🚀 GET /api/reports/daily-attendance-report endpoint called');
+
     await connectDB();
+    console.log('✅ MongoDB Connected!');
+
     const now = new Date();
     const currentHourMinute = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // Local time in "HH:MM" format
+    console.log(`🕒 Current Time: ${currentHourMinute}`);
 
-    // Fetch users and filter out the ones with 'member' role
+    // Fetch users
     const users = await User.find({}).exec();
-    console.log(`Found ${users.length} users`);
+    console.log(`👥 Found ${users.length} users in database`);
 
     for (const user of users) {
-      const storedHourMinute = user.reminders.dailyAttendanceReportTime // e.g. "04:20" in DB
+      if (!user.reminders || !user.reminders.dailyAttendanceReportTime) {
+        console.log(`⚠️ Skipping user ${user.email}, no dailyAttendanceReportTime set`);
+        continue;
+      }
 
-      // Parse stored hour/minute
-      const [storedHStr, storedMStr] = storedHourMinute.split(':')
-      const storedH = parseInt(storedHStr, 10)
-      const storedM = parseInt(storedMStr, 10)
+      const storedHourMinute = user.reminders.dailyAttendanceReportTime; // e.g. "04:20"
+      console.log(`📌 Checking user ${user.email} - Reminder time: ${storedHourMinute}`);
 
-      // Parse current hour/minute
-      const [currentHStr, currentMStr] = currentHourMinute.split(':')
-      const currentH = parseInt(currentHStr, 10)
-      const currentM = parseInt(currentMStr, 10)
+      // Parse stored time
+      const [storedHStr, storedMStr] = storedHourMinute.split(':');
+      const storedH = parseInt(storedHStr, 10);
+      const storedM = parseInt(storedMStr, 10);
 
-      console.log(
-        `User ${user.email} - stored time: ${storedHourMinute}, current time: ${currentHourMinute}`
-      )
+      // Parse current time
+      const [currentHStr, currentMStr] = currentHourMinute.split(':');
+      const currentH = parseInt(currentHStr, 10);
+      const currentM = parseInt(currentMStr, 10);
 
-      // Option A: Exact match  (04:26 == 04:26)
-      const exactMatch = storedH === currentH && storedM === currentM
+      console.log(`🔄 Parsed times for ${user.email} - Stored: ${storedH}:${storedM}, Current: ${currentH}:${currentM}`);
 
-      // Option B: 12-hour difference match (04:26 == 16:26)
-      const twelveHourMatch =
-        ((storedH + 12) % 24) === currentH && storedM === currentM
+      // Match conditions
+      const exactMatch = storedH === currentH && storedM === currentM;
+      const twelveHourMatch = ((storedH + 12) % 24) === currentH && storedM === currentM;
 
-      // If either condition is true, we send the report
       if (exactMatch || twelveHourMatch) {
-        console.log(`Sending daily attendance report for user: ${user.email}`)
+        console.log(`✅ Match found for ${user.email}, sending report...`);
 
-        const employees = await User.find({ reportingManager: user._id })
-        const reportDate = new Date()
-        const formattedDate = format(reportDate, 'dd MMM yyyy')
+        const employees = await User.find({ reportingManager: user._id });
+        console.log(`📊 ${employees.length} employees found under ${user.email}`);
 
-        const reportData = await generateAttendanceReport(employees, formattedDate)
-        const subject = `Employee Attendance Report for ${formattedDate}`
-        const htmlContent = generateReportHtml(reportData, user, formattedDate)
+        const reportDate = new Date();
+        const formattedDate = format(reportDate, 'dd MMM yyyy');
+        console.log(`📅 Report Date: ${formattedDate}`);
+
+        const reportData = await generateAttendanceReport(employees, formattedDate);
+        console.log(`📈 Report Data Generated`);
+
+        const subject = `Employee Attendance Report for ${formattedDate}`;
+        const htmlContent = generateReportHtml(reportData, user, formattedDate);
+        console.log(`📧 Email Content Generated`);
 
         const emailOptions: SendEmailOptions = {
           to: user.email,
           text: subject,
           subject,
           html: htmlContent,
-        }
+        };
 
-        await sendEmail(emailOptions)
-        console.log('mail sent!')
+        try {
+          console.log(`📤 Sending email to ${user.email}...`);
+          await sendEmail(emailOptions);
+          console.log('✅ Email sent successfully!');
+        } catch (emailError) {
+          console.error(`❌ Error sending email to ${user.email}:`, emailError);
+        }
+      } else {
+        console.log(`⏭ No time match for ${user.email}, skipping email`);
       }
     }
 
+    console.log('🎉 Daily attendance reports processed successfully');
     return NextResponse.json({ message: 'Daily attendance reports processed successfully.' }, { status: 200 });
   } catch (error) {
-    console.error('Error processing daily attendance report:', error);
+    console.error('🚨 Error processing daily attendance report:', error);
     return NextResponse.json({ error: 'Failed to process daily attendance report.' }, { status: 500 });
   }
 }
 
 const generateAttendanceReport = async (employees: IUser[], reportDate: string): Promise<ReportData> => {
+  console.log('📌 Generating attendance report...');
   const reportData: AttendanceReport[] = [];
 
   for (const employee of employees) {
     const attendanceStatus = await getEmployeeAttendanceStatus(employee._id, reportDate);
-    // Ensure the status is one of 'Present' | 'Absent' | 'On Leave'
     const status: 'Present' | 'Absent' | 'On Leave' = attendanceStatus.status as 'Present' | 'Absent' | 'On Leave';
 
     reportData.push({
@@ -100,17 +119,20 @@ const generateAttendanceReport = async (employees: IUser[], reportDate: string):
     });
   }
 
+  console.log(`✅ Attendance report generated for ${employees.length} employees`);
   return { reportData };
 };
 
-// Function to retrieve the attendance status of each employee
 const getEmployeeAttendanceStatus = async (employeeId: Types.ObjectId, date: string) => {
+  console.log(`🔍 Fetching attendance status for employee ${employeeId}`);
+
   const loginEntry = await LoginEntry.findOne({
     userId: employeeId,
     timestamp: { $gte: date, $lt: new Date(date).setDate(new Date(date).getDate() + 1) },
   });
 
   if (loginEntry) {
+    console.log(`✅ Employee ${employeeId} is Present`);
     return { status: 'Present', loginTime: format(loginEntry.timestamp, 'hh:mm a') };
   }
 
@@ -121,9 +143,11 @@ const getEmployeeAttendanceStatus = async (employeeId: Types.ObjectId, date: str
   });
 
   if (leaveRecord) {
+    console.log(`🟠 Employee ${employeeId} is On Leave`);
     return { status: 'On Leave', loginTime: 'N/A' };
   }
 
+  console.log(`❌ Employee ${employeeId} is Absent`);
   return { status: 'Absent', loginTime: 'N/A' };
 };
 

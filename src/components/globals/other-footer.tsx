@@ -56,8 +56,12 @@ export default function OtherFooter() {
                     </div>
                     <div className='flex gap-3 mt-6'>
                         <img src="/twitter.png" alt="" className='h-8' />
-                        <img src="/facebook.png" alt="" className='h-8' />
-                        <img src="/instagram.png" alt="" className='h-8' />
+                        <Link href='https://www.facebook.com/zapllohq'>
+                            <img src="/facebook.png" alt="" className='h-8' />
+                        </Link>
+                        <Link href='https://www.instagram.com/zapllohq/'>
+                            <img src="/instagram.png" alt="" className='h-8' />
+                        </Link>
                     </div>
                     <div className='flex w-full justify-start  mt-8'>
                         {/* <Link

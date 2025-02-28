@@ -1629,7 +1629,7 @@ export default function MyAttendance() {
       {/* Radix UI Dialog for Face Login */}
       <Dialog open={isModalOpen} onOpenChange={handleModalChange}>
         <DialogContent className="z-[100] flex items-center justify-center ">
-          <div className=" z-[100] p-6 h-screen rounded-lg max-w-lg w-full relative">
+          <div className=" z-[100] p-6 h-full rounded-lg max-w-lg w-full relative">
             <div className="flex justify-between">
               <div className="flex gap-2  items-center ">
                 <img src="/branding/AII.png" className="h-10 dark:block hidden" />

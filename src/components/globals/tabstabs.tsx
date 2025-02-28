@@ -998,8 +998,9 @@ export default function TeamTabs() {
 
             <div className="flex justify-between items-center">
               <div className="flex gap-2 items-center">
-                <img src="/branding/teamsicon.png" className="h-5" />
-                <img src="/branding/teamstext.png" className="h-4 mt-1" />
+                <img src="/branding/teamsicon.png" className="h-5 dark:block hidden" />
+                <img src="/branding/teamstext.png" className="h-4 mt-1 dark:block hidden" />
+                <img src="/branding/teams-light.png" className="h-5  dark:hidden block" />
               </div>
               {/* <label className="text-sm">Zapllo Tasks Access</label> */}
               <Switch
@@ -1011,8 +1012,9 @@ export default function TeamTabs() {
             </div>
             <div className="flex justify-between mt-6">
               <div className="flex gap-2 items-center">
-                <img src="/branding/payrollicon.png" className="h-5" />
-                <img src="/branding/payrolltext.png" className="h-4 mt-1" />
+                <img src="/branding/payrollicon.png" className="h-5 dark:block hidden" />
+                <img src="/branding/payrolltext.png" className="h-4 mt-1 dark:block hidden" />
+                <img src="/branding/payroll-light.png" className="h-5  dark:hidden block" />
               </div>
               {/* <label className="text-sm">Zapllo Payroll Access</label> */}
               <Switch
