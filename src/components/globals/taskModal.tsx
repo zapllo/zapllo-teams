@@ -910,7 +910,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
   };
 
   return (
-    <div className="absolute overflow-y-scroll scrollbar-hide z-[100] h-screen max-h-screen inset-0 dark:bg-black bg-white backdrop-blur-sm -900  bg-opacity-50 rounded-xl flex justify-center items-center">
+    <div className="absolute overflow-y-scroll scrollbar-hide z-[100] h-screen max-h-screen inset-0 dark:bg-black bg-black dark:backdrop-blur-sm backdrop-blur-[1px] -900  bg-opacity-50 rounded-xl flex justify-center items-center">
 
 
       <motion.div
