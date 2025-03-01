@@ -1,15 +1,17 @@
-'use client'
+'use client';
 
 import axios from 'axios';
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const TrialStatusContext = createContext<any>(null);
 
 export const TrialStatusProvider = ({ children }: { children: React.ReactNode }) => {
     const [leavesTrialExpires, setLeavesTrialExpires] = useState<Date | null>(null);
     const [attendanceTrialExpires, setAttendanceTrialExpires] = useState<Date | null>(null);
+    const [loading, setLoading] = useState(true);
 
-    const fetchTrialIconStatus = async () => {
+    const fetchTrialIconStatus = useCallback(async () => {
+        setLoading(true);
         try {
             const response = await axios.get('/api/organization/getById');
             const { leavesTrialExpires, attendanceTrialExpires } = response.data.data;
@@ -26,12 +28,14 @@ export const TrialStatusProvider = ({ children }: { children: React.ReactNode })
             );
         } catch (error) {
             console.error('Error fetching trial status:', error);
+        } finally {
+            setLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         fetchTrialIconStatus();
-    }, []);
+    }, [fetchTrialIconStatus]);
 
     return (
         <TrialStatusContext.Provider
@@ -39,6 +43,7 @@ export const TrialStatusProvider = ({ children }: { children: React.ReactNode })
                 leavesTrialExpires,
                 attendanceTrialExpires,
                 fetchTrialIconStatus,
+                loading,
             }}
         >
             {children}

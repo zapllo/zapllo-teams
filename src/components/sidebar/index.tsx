@@ -25,7 +25,20 @@ const MenuOptions = (props: Props) => {
   const router = useRouter();
   // const [leavesTrialExpires, setLeavesTrialExpires] = useState<Date | null>(null);
   // const [attendanceTrialExpires, setAttendanceTrialExpires] = useState<Date | null>(null);
-  const { leavesTrialExpires, attendanceTrialExpires } = useTrialStatus(); // Access trial status
+  const { leavesTrialExpires, attendanceTrialExpires, fetchTrialIconStatus, loading } = useTrialStatus();
+  const [shouldShowLeavesAttendance, setShouldShowLeavesAttendance] = useState(false);
+
+  useEffect(() => {
+    fetchTrialIconStatus(); // Ensures latest trial status is fetched
+  }, []);
+  // Recalculate visibility when trial data changes
+  useEffect(() => {
+    if (leavesTrialExpires || attendanceTrialExpires) {
+      setShouldShowLeavesAttendance(true);
+    } else {
+      setShouldShowLeavesAttendance(false);
+    }
+  }, [leavesTrialExpires, attendanceTrialExpires]);
 
   const logout = async () => {
     try {
@@ -74,9 +87,8 @@ const MenuOptions = (props: Props) => {
 
   const filteredMenuOptions = menuOptions.filter(menuItem => {
     if (menuItem.name === 'Leaves & Attendance') {
-      return leavesTrialExpires || attendanceTrialExpires;
+      return shouldShowLeavesAttendance;
     }
-    // Exclude "Billing" for roles 'member' and 'manager'
     if ((role === 'member' || role === 'manager') && menuItem.name === 'Billing') {
       return false;
     }
@@ -102,7 +114,7 @@ const MenuOptions = (props: Props) => {
   };
 
   return (
-    <nav className="dark:bg-[#0A0D28] z-[50] h-screen fixed border-r bg-[#05071E] dark:border-[#37384B] overflow-hidden scrollbar-hide justify-between flex items-center flex-col gap-10 py-4 px-2 w-14">
+    <nav  className="dark:bg-[#0A0D28] z-[50] h-screen fixed border-r bg-[#05071E] dark:border-[#37384B] overflow-hidden scrollbar-hide justify-between flex items-center flex-col gap-10 py-4 px-2 w-14">
       <div className="flex items-center justify-center flex-col gap-8">
         <Link href="/dashboard">
           <img src='/icons/zapllo.png' className='h-full w-full scale-75' alt="Zapllo Logo" />

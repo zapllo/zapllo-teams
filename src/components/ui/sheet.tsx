@@ -22,7 +22,7 @@ const SheetOverlay = React.forwardRef<
   <SheetPrimitive.Overlay
     className={cn(
       // Light mode uses a white overlay while dark mode uses a dark overlay.
-      "fixed inset-0 w-full bg-white/80 dark:bg-black/80 z-[100] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+      "fixed inset-0 w-full bg-black/40 dark:bg-black/80 z-[100] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className
     )}
     {...props}
