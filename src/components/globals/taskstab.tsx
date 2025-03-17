@@ -2618,7 +2618,7 @@ export default function TasksTab({
                             <div className="container mx-auto w-full p-6">
                               <div className="flex justify-between w-full items-center mb-2">
                                 <div className="flex justify-between w-full items-center mb-4 mx-2">
-                                  <h1 className="text-xl font-bold text-white">Task Templates</h1>
+                                  <h1 className="text-lg font-bold text-white">Task Templates</h1>
                                   <div className='flex gap-4'>
                                     <div className="">
                                       <CategoryFilter
@@ -4043,8 +4043,20 @@ export function TemplateList({
 
   if (!filteredTemplates || filteredTemplates.length === 0) {
     return (
-      <div className="mt-4 ml-56">
+      <div className="mt-4 ">
         {/* Your empty state */}
+        <DotLottieReact
+          src="/lottie/empty.lottie"
+          loop
+          autoplay
+          className="h-72"
+        />
+        <h1 className="text-center font-bold text-md -ml-4">
+          No Task Templates Found
+        </h1>
+        <p className="text-center text-sm -ml-4 p-2">
+          The list is currently empty for the selected filters
+        </p>
       </div>
     );
   }
@@ -4080,12 +4092,13 @@ function TemplateCard({ template, onUseTemplate }: TemplateCardProps) {
         throw new Error(errorData.error || "Failed to delete template");
       }
       // Refresh or remove template from state
-      alert("Template deleted successfully!");
+      toast.success("Template deleted successfully!");
       setDeleteDialogOpen(false);
+      window.location.reload(); // or use Next.js router refresh
       // Optionally, call a function passed down to re-fetch or remove from local state
     } catch (err) {
       console.error(err);
-      alert("Error deleting template");
+      toast.error("Error deleting template");
     }
   }
 
