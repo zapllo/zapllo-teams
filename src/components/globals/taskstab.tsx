@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { Card } from "@/components/ui/card";
@@ -59,6 +59,8 @@ import {
   Play,
   ArrowRight,
   LucideHome,
+  Trash2,
+  Eye,
 } from "lucide-react";
 import {
   IconBrandTeams,
@@ -80,8 +82,11 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
+  DialogHeader,
   DialogOverlay,
   DialogTitle,
+  DialogTrigger,
 } from "../ui/dialog";
 import { Separator } from "../ui/separator";
 import axios from 'axios';
@@ -114,6 +119,12 @@ import { Task, TasksTabProps, User, Category, DateFilter, DateRange, TaskStatusC
 import MainLoader from "../loaders/loader";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
+import { Input } from "../ui/input";
+import TaskTemplateForm from "../forms/taskTemplateForm";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import TaskTemplatesList from "../lists/TaskTemplatesList";
+import TaskTemplateDialog from "../forms/taskTemplateForm";
+import TaskModal from "./taskModal";
 
 export default function TasksTab({
   tasks,
@@ -192,6 +203,47 @@ export default function TasksTab({
 
   const [selectedUserId, setSelectedUserId] = useState<User | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [templates, setTemplates] = useState<any[]>([]); // default to empty array
+  const [openTemplateDialog, setOpenTemplateDialog] = useState(false);
+  const [openTaskModal, setOpenTaskModal] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+  // Search input for templates
+  const [searchText, setSearchText] = useState("");
+
+  // Filter by category & search
+  const filteredTemplates = useMemo(() => {
+    let temp = [...templates];
+
+    // If a category is selected, filter by category._id
+    if (selectedCategory) {
+      temp = temp.filter(
+        (t) => t.category?._id === selectedCategory._id
+      );
+    }
+
+    // If searchText is non-empty, filter by title or description
+    if (searchText.trim()) {
+      const lowerSearch = searchText.toLowerCase();
+      temp = temp.filter(
+        (t) =>
+          t.title?.toLowerCase().includes(lowerSearch) ||
+          t.description?.toLowerCase().includes(lowerSearch)
+      );
+    }
+
+    return temp;
+  }, [templates, selectedCategory, searchText]);
+
+
+  // Called when user clicks "Use Template"
+  function handleUseTemplate(template: Template) {
+    setSelectedTemplate(template);
+    setOpenTaskModal(true);
+  }
+
+
+
+  console.log(templates, 'template check')
 
   // Handlers to open date pickers
   const openStartDatePicker = () => setDatePickerType("start");
@@ -712,7 +764,6 @@ export default function TasksTab({
   }, []);
 
   const [categories, setCategories] = useState<Category[]>([]);
-
   // Fetch categories from the server
   const fetchCategories = async () => {
     try {
@@ -734,8 +785,24 @@ export default function TasksTab({
     }
   };
 
+  async function fetchTemplates() {
+    try {
+      const res = await fetch("/api/taskTemplates", { method: "GET" });
+      const data = await res.json();
+      if (res.ok) {
+        setTemplates(data.data); // data might be an array
+      } else {
+        console.error("Error fetching templates:", data.error);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
+
+
   useEffect(() => {
     fetchCategories();
+    fetchTemplates();
   }, []);
 
 
@@ -1230,13 +1297,43 @@ export default function TasksTab({
                 value="allTasks"
                 className="flex justify-start w-full gap-2 "
               >
-               <div className="flex justify-start items-center ml-4 w-full gap-2">
-                <img
-                  src="/icons/all.png"
-                  className={`h-5 dark:invert-0 invert-[100] ${activeTab == "allTasks" ? " invert-0" : ""} `} />
+                <div className="flex justify-start items-center ml-4 w-full gap-2">
+                  <img
+                    src="/icons/all.png"
+                    className={`h-5 dark:invert-0 invert-[100] ${activeTab == "allTasks" ? " invert-0" : ""} `} />
 
-                <h1 className={`mt-auto text-xs ${activeTab == "allTasks" ? "text-white" : ""} `}>All Tasks</h1>
-              </div>
+                  <h1 className={`mt-auto text-xs ${activeTab == "allTasks" ? "text-white" : ""} `}>All Tasks</h1>
+                </div>
+              </TabsTrigger>
+            ))}
+
+            {(userDetails?.role === "orgAdmin" && (
+              <TabsTrigger
+                value="taskTemplates"
+                className="flex justify-start w-full gap-2 "
+              >
+                <div className="flex justify-start items-center ml-4 w-full gap-2">
+                  <img
+                    src="/icons/template.png"
+                    className={`h-5 dark:invert-0 invert-[100] ${activeTab == "taskTemplates" ? " invert-0" : ""} `} />
+
+                  <h1 className={`mt-auto text-xs ${activeTab == "taskTemplates" ? "text-white" : ""} `}>Task Templates</h1>
+                </div>
+              </TabsTrigger>
+            ))}
+
+            {(userDetails?.role === "orgAdmin" && (
+              <TabsTrigger
+                value="taskDirectory"
+                className="flex justify-start w-full gap-2 "
+              >
+                <div className="flex justify-start items-center ml-4 w-full gap-2">
+                  <img
+                    src="/icons/directory.png"
+                    className={`h-5 dark:invert-0 invert-[100] ${activeTab == "taskDirectory" ? " invert-0" : ""} `} />
+
+                  <h1 className={`mt-auto text-xs ${activeTab == "taskDirectory" ? "text-white" : ""} `}>Task Directory</h1>
+                </div>
               </TabsTrigger>
             ))}
           </TabsList>
@@ -1252,121 +1349,123 @@ export default function TasksTab({
                   <div className=" w-full ml-2  justify-start">
                     <div className=" scrollbar-hide  mt-6">
                       <div className="flex scale-90  w-full justify-center ">
-                        <div className="justify-center -ml-12 w-full flex gap-4">
-                          {[
-                            { label: "Today", value: "today" },
-                            { label: "Yesterday", value: "yesterday" },
-                            { label: "This Week", value: "thisWeek" },
-                            { label: "Last Week", value: "lastWeek" },
-                            { label: "Next Week", value: "nextWeek" },
-                            { label: "This Month", value: "thisMonth" },
-                            { label: "Last Month", value: "lastMonth" },
-                            // { label: "Next Month", value: "nextMonth" },
-                            { label: "This Year", value: "thisYear" },
-                            { label: "All Time", value: "allTime" },
-                          ].map(({ label, value }) => (
+                        {activeTab !== "taskTemplates" && activeTab !== "taskDirectory" && (
+                          <div className="justify-center -ml-12 w-full flex gap-4">
+                            {[
+                              { label: "Today", value: "today" },
+                              { label: "Yesterday", value: "yesterday" },
+                              { label: "This Week", value: "thisWeek" },
+                              { label: "Last Week", value: "lastWeek" },
+                              { label: "Next Week", value: "nextWeek" },
+                              { label: "This Month", value: "thisMonth" },
+                              { label: "Last Month", value: "lastMonth" },
+                              // { label: "Next Month", value: "nextMonth" },
+                              { label: "This Year", value: "thisYear" },
+                              { label: "All Time", value: "allTime" },
+                            ].map(({ label, value }) => (
+                              <button
+                                key={value}
+                                onClick={() => handleButtonClick(value as DateFilter)}
+                                className={`text-xs  px-3 whitespace-nowrap  border py-1 rounded ${activeDateFilter === value ? "bg-[#815BF5] text-white" : "bg-"
+                                  }`}
+                              >
+                                {label}
+                              </button>
+                            ))}
+
                             <button
-                              key={value}
-                              onClick={() => handleButtonClick(value as DateFilter)}
-                              className={`text-xs  px-3 whitespace-nowrap  border py-1 rounded ${activeDateFilter === value ? "bg-[#815BF5] text-white" : "bg-"
+                              onClick={() => setIsCustomModalOpen(true)}
+                              className={`text-xs  px-3 border py-1 rounded ${activeDateFilter === "custom" ? "bg-[#815BF5] text-white" : "-200"
                                 }`}
                             >
-                              {label}
+                              Custom
                             </button>
-                          ))}
 
-                          <button
-                            onClick={() => setIsCustomModalOpen(true)}
-                            className={`text-xs  px-3 border py-1 rounded ${activeDateFilter === "custom" ? "bg-[#815BF5] text-white" : "-200"
-                              }`}
-                          >
-                            Custom
-                          </button>
+                            {isCustomModalOpen && (
+                              <Dialog open={isCustomModalOpen} onOpenChange={() => setIsCustomModalOpen(false)}>
+                                <DialogContent className="w-96 p-6 ml-12 z-[100] ">
+                                  <div className="flex justify-between">
+                                    <DialogTitle className="text-md  font-medium dark:text-white">
+                                      Select Custom Date Range
+                                    </DialogTitle>
+                                    <DialogClose>
+                                      {" "}
+                                      <CrossCircledIcon className="scale-150 dark:text-white hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
+                                      {/* <X className="cursor-pointer border -mt-4 rounded-full border-white h-6 hover:bg-white hover:text-black w-6" /> */}
+                                    </DialogClose>
+                                  </div>
+                                  {/* Start and End Date Buttons */}
+                                  <div className="flex justify-between gap-2">
+                                    <div className="w-full">
+                                      <button
+                                        type="button"
+                                        onClick={() => setDatePickerType("start")}
+                                        className="text-start text-xs text-gray-400 w-full border  p-2 rounded"
+                                      >
+                                        <div className="flex gap-1">
+                                          <Calendar className="h-4" />
+                                          {customStartDate
+                                            ? new Date(customStartDate).toLocaleDateString()
+                                            : "Start Date"}
+                                        </div>
+                                      </button>
+                                    </div>
 
-                          {isCustomModalOpen && (
-                            <Dialog open={isCustomModalOpen} onOpenChange={() => setIsCustomModalOpen(false)}>
-                              <DialogContent className="w-96 p-6 ml-12 z-[100] ">
-                                <div className="flex justify-between">
-                                  <DialogTitle className="text-md  font-medium dark:text-white">
-                                    Select Custom Date Range
-                                  </DialogTitle>
-                                  <DialogClose>
-                                    {" "}
-                                    <CrossCircledIcon className="scale-150 dark:text-white hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
-                                    {/* <X className="cursor-pointer border -mt-4 rounded-full border-white h-6 hover:bg-white hover:text-black w-6" /> */}
-                                  </DialogClose>
-                                </div>
-                                {/* Start and End Date Buttons */}
-                                <div className="flex justify-between gap-2">
-                                  <div className="w-full">
+                                    <div className="w-full">
+                                      <button
+                                        type="button"
+                                        onClick={() => setDatePickerType("end")}
+                                        className="text-start text-xs text-gray-400 w-full border p-2 rounded"
+                                      >
+                                        <div className="flex gap-1">
+                                          <Calendar className="h-4" />
+                                          {customEndDate
+                                            ? new Date(customEndDate).toLocaleDateString()
+                                            : "End Date"}
+                                        </div>
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  {/* Apply Button */}
+                                  <div className="flex justify-end gap-4 mt-4">
                                     <button
-                                      type="button"
-                                      onClick={() => setDatePickerType("start")}
-                                      className="text-start text-xs text-gray-400 w-full border  p-2 rounded"
+                                      onClick={handleCustomApply}
+                                      className="bg-[#815BF5] text-white py-2 px-4 rounded w-full text-xs"
                                     >
-                                      <div className="flex gap-1">
-                                        <Calendar className="h-4" />
-                                        {customStartDate
-                                          ? new Date(customStartDate).toLocaleDateString()
-                                          : "Start Date"}
-                                      </div>
+                                      Apply
                                     </button>
                                   </div>
+                                </DialogContent>
+                              </Dialog>
+                            )}
 
-                                  <div className="w-full">
-                                    <button
-                                      type="button"
-                                      onClick={() => setDatePickerType("end")}
-                                      className="text-start text-xs text-gray-400 w-full border p-2 rounded"
-                                    >
-                                      <div className="flex gap-1">
-                                        <Calendar className="h-4" />
-                                        {customEndDate
-                                          ? new Date(customEndDate).toLocaleDateString()
-                                          : "End Date"}
-                                      </div>
-                                    </button>
+                            {/* Date Picker Dialog */}
+                            {datePickerType && (
+                              <Dialog open={Boolean(datePickerType)} onOpenChange={() => setDatePickerType(null)}>
+                                <DialogContent className=" z-[100]  bg-[#0a0d28] scale-90  flex justify-center ">
+                                  <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
+                                    <div className="w-full flex mb-4 justify-between">
+                                      <CustomDatePicker
+                                        selectedDate={datePickerType === "start" ? customStartDate : customEndDate}
+                                        onDateChange={(date) => {
+                                          if (datePickerType === "start") {
+                                            setCustomStartDate(date);
+                                          } else if (datePickerType === "end") {
+                                            setCustomEndDate(date);
+                                          }
+                                          setDatePickerType(null); // Close the dialog after selection
+                                        }}
+                                        onCloseDialog={() => setDatePickerType(null)}
+                                      />
+                                    </div>
                                   </div>
-                                </div>
+                                </DialogContent>
+                              </Dialog>
+                            )}
 
-                                {/* Apply Button */}
-                                <div className="flex justify-end gap-4 mt-4">
-                                  <button
-                                    onClick={handleCustomApply}
-                                    className="bg-[#815BF5] text-white py-2 px-4 rounded w-full text-xs"
-                                  >
-                                    Apply
-                                  </button>
-                                </div>
-                              </DialogContent>
-                            </Dialog>
-                          )}
-
-                          {/* Date Picker Dialog */}
-                          {datePickerType && (
-                            <Dialog open={Boolean(datePickerType)} onOpenChange={() => setDatePickerType(null)}>
-                              <DialogContent className=" z-[100]  bg-[#0a0d28] scale-90  flex justify-center ">
-                                <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
-                                  <div className="w-full flex mb-4 justify-between">
-                                    <CustomDatePicker
-                                      selectedDate={datePickerType === "start" ? customStartDate : customEndDate}
-                                      onDateChange={(date) => {
-                                        if (datePickerType === "start") {
-                                          setCustomStartDate(date);
-                                        } else if (datePickerType === "end") {
-                                          setCustomEndDate(date);
-                                        }
-                                        setDatePickerType(null); // Close the dialog after selection
-                                      }}
-                                      onCloseDialog={() => setDatePickerType(null)}
-                                    />
-                                  </div>
-                                </div>
-                              </DialogContent>
-                            </Dialog>
-                          )}
-
-                        </div>
+                          </div>
+                        )}
                       </div>
                       <div>
                         {activeTab === "all" ? (
@@ -1714,7 +1813,7 @@ export default function TasksTab({
                                             className="ml-auto  -mt-12"
                                             style={{ width: 40, height: 40 }}
                                           >
-                                               <div className="  dark:bg-transparent rounded-full">
+                                            <div className="  dark:bg-transparent rounded-full">
                                               <CircularProgressbar
                                                 value={completionPercentage}
                                                 text={`${Math.round(
@@ -1863,7 +1962,7 @@ export default function TasksTab({
                                               className="ml-auto  -mt-12"
                                               style={{ width: 40, height: 40 }}
                                             >
-                                                <div className="  dark:bg-transparent rounded-full">
+                                              <div className="  dark:bg-transparent rounded-full">
                                                 <CircularProgressbar
                                                   value={completionPercentage}
                                                   text={`${Math.round(
@@ -2040,7 +2139,7 @@ export default function TasksTab({
                                             className="ml-auto  -mt-12"
                                             style={{ width: 40, height: 40 }}
                                           >
-                                              <div className="  dark:bg-transparent rounded-full">
+                                            <div className="  dark:bg-transparent rounded-full">
                                               <CircularProgressbar
                                                 value={completionPercentage}
                                                 text={`${Math.round(
@@ -2513,6 +2612,73 @@ export default function TasksTab({
                                 initialSelectedPriority={priorityFilterModal} // Pass the currently selected priority
                               />
                             </div>
+                          </div>
+                        ) : activeTab === "taskTemplates" ? (
+                          <div className="w-[920px]">
+                            <div className="container mx-auto w-full p-6">
+                              <div className="flex justify-between w-full items-center mb-2">
+                                <div className="flex justify-between w-full items-center mb-4 mx-2">
+                                  <h1 className="text-xl font-bold text-white">Task Templates</h1>
+                                  <div className='flex gap-4'>
+                                    <div className="">
+                                      <CategoryFilter
+                                        categories={categories}  // from your state or fetch
+                                        selectedCategory={selectedCategory}
+                                        setSelectedCategory={setSelectedCategory}
+                                      />
+                                    </div>
+                                    {/* Search Input */}
+                                    <input
+                                      type="text"
+                                      placeholder="Search Templates..."
+                                      value={searchText}
+                                      onChange={(e) => setSearchText(e.target.value)}
+                                      className="px-3 py-2 rounded-lg border outline-none bg-transparent  text-sm"
+                                    />
+
+                                    <Button
+                                      onClick={() => setOpenTemplateDialog(true)}
+                                      className="bg-primary text-white px-4 py-2 rounded"
+                                    >
+                                      Add New Template
+                                    </Button>
+                                  </div>
+                                </div>
+                                {/* Add New Template Button */}
+                                <TaskTemplateDialog
+                                  open={openTemplateDialog}
+                                  setOpen={setOpenTemplateDialog}
+                                />
+                              </div>
+
+                              {/* Template List & Filter */}
+
+                              <TemplateList
+                                templates={filteredTemplates}
+                                onUseTemplate={handleUseTemplate}
+                                selectedCategory={selectedCategory}
+                              />
+                              {
+                                openTaskModal && (
+                                  <TaskModal
+                                    closeModal={() => setOpenTaskModal(false)}
+                                    prefillData={selectedTemplate}
+                                  />
+                                )
+                              }
+                            </div>
+                          </div>
+                        ) : activeTab === "taskDirectory" ? (
+                          <div className="container mx-auto p-6 text-white">
+                            <div className="mb-6">
+                              <h1 className="text-3xl font-bold">Task Templates Directory</h1>
+                              <p className="text-gray-300 mt-2 text-sm max-w-prose">
+                                Browse our library of ready-made templates, sorted by category. Copy any
+                                template into your organization with a single click.
+                              </p>
+                            </div>
+
+                            <DirectoryView />
                           </div>
                         ) : activeTab === "delegatedTasks" ? (
                           <div className="flex    flex-col ">
@@ -3803,3 +3969,636 @@ export default function TasksTab({
     </div >
   );
 }
+
+interface CategoryFilterProps {
+  categories: Category[];
+  selectedCategory: Category | null;
+  setSelectedCategory: (cat: Category | null) => void;
+}
+
+function CategoryFilter({
+  categories,
+  selectedCategory,
+  setSelectedCategory,
+}: CategoryFilterProps) {
+  // We'll compare the current selectedCategory._id to the <option> value
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = e.target.value;
+
+    if (!selectedId) {
+      // user selected "All"
+      setSelectedCategory(null);
+    } else {
+      // find the Category object from the categories array
+      const found = categories.find((cat) => cat._id === selectedId) || null;
+      setSelectedCategory(found);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      {/* <label className="text-white">Filter by Category:</label> */}
+      <select
+        value={selectedCategory ? selectedCategory._id : ""}
+        onChange={handleChange}
+        className="p-2 rounded-lg outline-none dark:bg-[#04071F] border dark:text-white"
+      >
+        <option value="">All Categories</option>
+        {categories.map((cat) => (
+          <option key={cat._id} value={cat._id}>
+            {cat.name}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+interface Template {
+  _id: string;
+  title?: string;
+  description?: string;
+  category?: { _id: string; name: string };
+  priority?: string;
+  repeat?: boolean;
+  repeatType?: string;
+  days?: string[];
+}
+
+interface TemplateListProps {
+  templates: Template[];
+  selectedCategory: Category | null;
+  onUseTemplate?: (template: Template) => void;
+}
+
+export function TemplateList({
+  templates,
+  selectedCategory,
+  onUseTemplate
+}: TemplateListProps) {
+  // Filtering logic as you already have
+  const filteredTemplates = selectedCategory
+    ? templates.filter((tmpl) => tmpl.category?._id === selectedCategory._id)
+    : templates;
+
+  if (!filteredTemplates || filteredTemplates.length === 0) {
+    return (
+      <div className="mt-4 ml-56">
+        {/* Your empty state */}
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+      {filteredTemplates.map((template) => (
+        <TemplateCard
+          key={template._id}
+          template={template}
+          onUseTemplate={onUseTemplate}
+        />
+      ))}
+    </div>
+  );
+}
+
+interface TemplateCardProps {
+  template: Template;
+  onUseTemplate?: (template: Template) => void;
+}
+
+function TemplateCard({ template, onUseTemplate }: TemplateCardProps) {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  async function handleDeleteTemplate() {
+    try {
+      const res = await fetch(`/api/taskTemplates/${template._id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to delete template");
+      }
+      // Refresh or remove template from state
+      alert("Template deleted successfully!");
+      setDeleteDialogOpen(false);
+      // Optionally, call a function passed down to re-fetch or remove from local state
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting template");
+    }
+  }
+
+  return (
+    <Card className="p-4 bg-transparent border rounded-lg relative">
+      <h2 className="text-lg font-bold mb-2 text-white">{template.title}</h2>
+      <p className="text-sm text-gray-200 mb-2">{template.description}</p>
+      <p className="text-xs text-gray-300">
+        Category: {template.category?.name}
+      </p>
+
+      {/* Use Template button */}
+      <button
+        onClick={() => onUseTemplate && onUseTemplate(template)}
+        className="mt-2 bg-[#017a5b] px-3 py-1 rounded"
+      >
+        Use Template
+      </button>
+
+      {/* Trash icon button */}
+      <button
+        onClick={() => setDeleteDialogOpen(true)}
+        className="absolute  bottom-5 right-2 text-red-500"
+      >
+        <Trash2 className="h-5" />
+
+      </button>
+
+      {/* The confirmation dialog */}
+      <DeleteConfirmationDialog
+        isOpen={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={handleDeleteTemplate}
+        title="Delete Template"
+        description={`Are you sure you want to delete "${template.title}"? This cannot be undone.`}
+      />
+    </Card>
+  );
+}
+
+function DirectoryView() {
+  const [selectedDirCategory, setSelectedDirCategory] = useState("");
+  const [directorySearchText, setDirectorySearchText] = useState("");
+
+  // Build an array of all category names so we can populate the dropdown
+  const allCategoryNames = directoryData.map((cat) => cat.categoryName);
+
+  // Filter logic
+  const filteredData = useMemo(() => {
+    // 1) Filter by category
+    let catFiltered = directoryData;
+    if (selectedDirCategory) {
+      catFiltered = catFiltered.filter(
+        (c) =>
+          c.categoryName.toLowerCase() ===
+          selectedDirCategory.toLowerCase()
+      );
+    }
+
+    // 2) For each category, filter the templates by directorySearchText
+    return catFiltered.map((catItem) => {
+      if (!directorySearchText.trim()) {
+        return catItem; // no search => no additional filter
+      }
+      const lowerSearch = directorySearchText.toLowerCase();
+      const filteredTemplates = catItem.templates.filter(
+        (tmpl) =>
+          tmpl.title.toLowerCase().includes(lowerSearch) ||
+          tmpl.description.toLowerCase().includes(lowerSearch)
+      );
+      return {
+        ...catItem,
+        templates: filteredTemplates,
+      };
+    }).filter((catItem) => catItem.templates.length > 0);
+  }, [selectedDirCategory, directorySearchText]);
+
+  return (
+    <div className="space-y-8 w-[920px]">
+
+      {/* Category & Search Row */}
+      <div className="mb-4 flex items-center gap-4">
+        {/* Category Dropdown */}
+
+        {/* Search Input */}
+        <div>
+          <input
+            type="text"
+            placeholder="Search Directory..."
+            value={directorySearchText}
+            onChange={(e) => setDirectorySearchText(e.target.value)}
+            className="px-3 py-2 rounded-lg border outline-none bg-transparent text-white text-sm"
+          />
+        </div>
+        <div>
+          {/* <label className="mr-2 text-sm">Filter by Category:</label> */}
+          <select
+            value={selectedDirCategory}
+            onChange={(e) => setSelectedDirCategory(e.target.value)}
+            className="px-2 py-2 rounded-lg bg-[#04071F] border outline-none text-sm"
+          >
+            <option value="">All Categories</option>
+            {allCategoryNames.map((cn) => (
+              <option key={cn} value={cn}>
+                {cn}
+              </option>
+            ))}
+          </select>
+        </div>
+
+      </div>
+
+      {/* Render filtered data */}
+      {filteredData.map((categoryItem) => (
+        <div key={categoryItem.categoryName}>
+          <h2 className="text-xl font-semibold mb-4">
+            {categoryItem.categoryName}
+          </h2>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {categoryItem.templates.map((tmpl, idx) => (
+              <DirectoryTemplateCard
+                key={idx}
+                template={tmpl}
+                categoryName={categoryItem.categoryName}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+interface TemplateData {
+  _id?: string;
+  title?: string;
+  description?: string;
+  priority?: string;
+  repeat?: boolean;
+  repeatType?: string;
+  days?: string[];
+  dates?: number[];
+  attachments?: string[];
+  links?: string[];
+  reminders?: {
+    notificationType: string;
+    type: string;
+    value?: number;
+    date?: Date;
+    sent?: boolean;
+  }[];
+}
+
+interface DirectoryTemplateCardProps {
+  template: TemplateData;
+  categoryName: string;
+}
+
+
+export function DirectoryTemplateCard({ template, categoryName }: DirectoryTemplateCardProps) {
+  const [showDetails, setShowDetails] = useState(false);
+
+  // For confirmation dialog
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
+  async function copyTemplate() {
+    try {
+      // 1) Fetch all existing categories
+      const catRes = await fetch("/api/category/get", { method: "GET" });
+      if (!catRes.ok) {
+        const errData = await catRes.json();
+        throw new Error(errData.error || "Failed to fetch categories");
+      }
+
+      const catJson = await catRes.json();
+      const allCategories = catJson.data || [];
+
+      // 2) Check if user’s org already has a matching category
+      const foundCategory = allCategories.find(
+        (c: any) => c.name.toLowerCase() === categoryName.toLowerCase()
+      );
+      let categoryId;
+
+      // 3) If not found, create it
+      if (!foundCategory) {
+        const createCatRes = await fetch("/api/category/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: categoryName }),
+        });
+        if (!createCatRes.ok) {
+          const createErrData = await createCatRes.json();
+          throw new Error(createErrData.error || "Failed to create category");
+        }
+        const createCatJson = await createCatRes.json();
+        categoryId = createCatJson.data._id;
+      } else {
+        categoryId = foundCategory._id;
+      }
+
+      // 4) Create the new template
+      const bodyData = {
+        title: template.title,
+        description: template.description,
+        priority: template.priority,
+        category: categoryId,
+      };
+
+      const res = await fetch("/api/taskTemplates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bodyData),
+      });
+
+      if (!res.ok) {
+        const { error } = await res.json();
+        throw new Error(error || "Failed to copy template");
+      }
+
+      // Show success toast, then refresh the page
+      toast.success("Template copied successfully!");
+      window.location.reload(); // or use Next.js router refresh
+    } catch (err: any) {
+      console.error(err);
+      alert("Error copying template: " + err.message);
+    }
+  }
+
+  function handleViewDetails() {
+    setShowDetails(true);
+  }
+
+  function handleConfirmCopy() {
+    // Close the confirmation dialog immediately
+    setShowConfirmation(false);
+    // Then proceed with actual copying
+    copyTemplate();
+  }
+
+  return (
+    <Card className="bg-transparent rounded shadow hover:shadow-lg transition-shadow p-4 flex flex-col">
+      <h3 className="text-lg font-medium mb-1">{template.title}</h3>
+      <p className="text-sm text-gray-300 flex-grow">{template.description}</p>
+
+      <div className="mt-4 flex items-center justify-between">
+        <span className="text-xs px-2 py-1 rounded border">
+          {template.priority}
+        </span>
+        <div className="flex gap-2">
+          <button
+            onClick={handleViewDetails}
+            className="px-3 py-1 rounded text-sm font-medium"
+          >
+            <Eye />
+          </button>
+          <button
+            onClick={() => setShowConfirmation(true)} // <-- open the confirmation
+            className="t px-3 py-1 rounded text-sm font-medium"
+          >
+            <CopyIcon className="text-primary" />
+          </button>
+        </div>
+      </div>
+
+      {/* Details Dialog */}
+      <Dialog open={showDetails} onOpenChange={setShowDetails}>
+        <DialogContent className="bg-[#0B0D29] text-white max-w-md mx-auto p-4">
+          <DialogTitle>{template.title}</DialogTitle>
+          <DialogDescription>
+            <div className="text-sm mt-2 space-y-2">
+              <p>
+                <strong>Description:</strong> {template.description}
+              </p>
+              <p>
+                <strong>Priority:</strong> {template.priority}
+              </p>
+              {template.repeat && (
+                <>
+                  <p>
+                    <strong>Repeat:</strong> {template.repeatType}
+                  </p>
+                  {template.days && template.days.length > 0 && (
+                    <p>
+                      <strong>Days:</strong> {template.days.join(", ")}
+                    </p>
+                  )}
+                  {template.dates && template.dates.length > 0 && (
+                    <p>
+                      <strong>Dates:</strong> {template.dates.join(", ")}
+                    </p>
+                  )}
+                </>
+              )}
+              {template.attachments && template.attachments.length > 0 && (
+                <p>
+                  <strong>Attachments:</strong>{" "}
+                  {template.attachments.join(", ")}
+                </p>
+              )}
+              {template.links && template.links.length > 0 && (
+                <p>
+                  <strong>Links:</strong>
+                  {template.links.map((link, i) => (
+                    <a
+                      key={i}
+                      href={link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 underline ml-2"
+                    >
+                      {link}
+                    </a>
+                  ))}
+                </p>
+              )}
+              {template.reminders && template.reminders.length > 0 && (
+                <div>
+                  <strong>Reminders:</strong>
+                  <ul className="list-disc list-inside pl-4">
+                    {template.reminders.map((rem, i) => (
+                      <li key={i}>
+                        {rem.notificationType} - {rem.type} - {rem.value}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </DialogDescription>
+          <button
+            onClick={() => setShowConfirmation(true)}
+            className="t px-3 py-1 ml-auto rounded text-sm font-medium"
+          >
+            <CopyIcon className="text-primary" />
+          </button>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+        <DialogContent className="p-6">
+          <DialogHeader>
+            <DialogTitle>Copy Template?</DialogTitle>
+            <DialogDescription>
+              This will create a new copy of the template in your organization.
+              Are you sure you want to proceed?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfirmation(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmCopy}>
+              Yes, copy
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </Card>
+  );
+}
+
+
+const directoryData = [
+  {
+    categoryName: "Sales",
+    templates: [
+      { title: "Follow-up Email Campaign", description: "Automated tasks...", priority: "High" },
+      { title: "Prospect Research", description: "Daily tasks for leads", priority: "Medium" },
+      { title: "Sales Pipeline Review", description: "Weekly pipeline overview", priority: "High" },
+      { title: "Lead Qualification", description: "Process for new leads", priority: "Low" },
+      { title: "Account Renewal Tracking", description: "Monitor renewals", priority: "Medium" },
+      { title: "Demo Scheduling", description: "Organize product demos", priority: "Low" },
+      { title: "Proposal Follow-up", description: "Follow up after proposals", priority: "High" },
+      { title: "Cold Calling Prep", description: "Prepare scripts & lists", priority: "Medium" },
+      { title: "Deal Closing Checklist", description: "Ensure deal steps done", priority: "High" },
+      { title: "Sales Team Training", description: "Onboarding new reps", priority: "Low" },
+    ],
+  },
+  {
+    categoryName: "Marketing",
+    templates: [
+      { title: "Social Media Calendar", description: "Plan weekly posts", priority: "Medium" },
+      { title: "SEO Keyword Research", description: "Monthly keyword analysis", priority: "High" },
+      { title: "Content Strategy", description: "Brainstorm content topics", priority: "Medium" },
+      { title: "Email Newsletter", description: "Draft & schedule newsletters", priority: "Low" },
+      { title: "Webinar Promotion", description: "Promote upcoming webinars", priority: "Medium" },
+      { title: "Campaign Analytics", description: "Review ad performance", priority: "High" },
+      { title: "Landing Page Review", description: "Check copy & design", priority: "Low" },
+      { title: "Influencer Outreach", description: "Contact relevant influencers", priority: "Medium" },
+      { title: "Podcast Guest Invitations", description: "Invite experts to show", priority: "Low" },
+      { title: "Seasonal Campaign Planning", description: "Plan holiday campaigns", priority: "High" },
+    ],
+  },
+  {
+    categoryName: "HR",
+    templates: [
+      { title: "New Hire Onboarding", description: "Orientation tasks", priority: "High" },
+      { title: "Vacation Requests", description: "Track annual leaves", priority: "Low" },
+      { title: "Payroll Processing", description: "Monthly payroll tasks", priority: "High" },
+      { title: "Performance Reviews", description: "Quarterly review checklist", priority: "Medium" },
+      { title: "Job Posting & Recruitment", description: "Create job ads", priority: "Medium" },
+      { title: "Employee Feedback Sessions", description: "Monthly feedback calls", priority: "Low" },
+      { title: "Benefits Enrollment", description: "Open enrollment tasks", priority: "High" },
+      { title: "Team Building Events", description: "Plan quarterly events", priority: "Medium" },
+      { title: "Exit Interviews", description: "Checklist for departing staff", priority: "High" },
+      { title: "HR Policy Updates", description: "Review & revise policies", priority: "Low" },
+    ],
+  },
+  {
+    categoryName: "Finance",
+    templates: [
+      { title: "Budget Planning", description: "Annual budget tasks", priority: "High" },
+      { title: "Invoice Processing", description: "Monthly invoicing tasks", priority: "Low" },
+      { title: "Expense Reimbursements", description: "Track & reimburse employees", priority: "Medium" },
+      { title: "Financial Reporting", description: "Quarterly statements", priority: "High" },
+      { title: "Tax Preparation", description: "Gather docs for taxes", priority: "High" },
+      { title: "Vendor Payment Schedule", description: "Weekly vendor checks", priority: "Medium" },
+      { title: "Cash Flow Monitoring", description: "Daily checks", priority: "Medium" },
+      { title: "Audit Support", description: "Prepare data for auditors", priority: "High" },
+      { title: "Insurance Renewals", description: "Renew coverage annually", priority: "Low" },
+      { title: "Payroll Funding", description: "Ensure payroll accounts funded", priority: "High" },
+    ],
+  },
+  {
+    categoryName: "IT",
+    templates: [
+      { title: "Server Maintenance", description: "Weekly updates & patches", priority: "High" },
+      { title: "Backup Verification", description: "Check backups daily", priority: "Low" },
+      { title: "Network Security Scan", description: "Run monthly scans", priority: "High" },
+      { title: "Software Updates", description: "Install patches & versions", priority: "Medium" },
+      { title: "Help Desk Triage", description: "Daily support tickets", priority: "Low" },
+      { title: "Asset Inventory", description: "Track hardware & licenses", priority: "Medium" },
+      { title: "System Migration", description: "Plan & execute migrations", priority: "High" },
+      { title: "Incident Response Test", description: "Quarterly DR drills", priority: "High" },
+      { title: "Cloud Usage Review", description: "Monitor cloud usage costs", priority: "Medium" },
+      { title: "New Software Rollout", description: "Deploy to staff", priority: "Low" },
+    ],
+  },
+  {
+    categoryName: "Operations",
+    templates: [
+      { title: "Supply Chain Review", description: "Weekly vendor checks", priority: "High" },
+      { title: "Warehouse Inventory Audit", description: "Monthly stock check", priority: "Medium" },
+      { title: "Logistics Scheduling", description: "Plan shipping routes", priority: "Low" },
+      { title: "Process Improvement", description: "Analyze & optimize ops", priority: "Medium" },
+      { title: "Equipment Maintenance", description: "Monthly machine checks", priority: "High" },
+      { title: "Facility Management", description: "Oversee building upkeep", priority: "Low" },
+      { title: "Compliance Checklist", description: "Adhere to ops regulations", priority: "High" },
+      { title: "Resource Allocation", description: "Assign staff & budgets", priority: "Medium" },
+      { title: "Daily Shift Handover", description: "Checklist for next shift", priority: "Low" },
+      { title: "Vendor Contracts", description: "Renew or negotiate terms", priority: "Medium" },
+    ],
+  },
+  {
+    categoryName: "Project Management",
+    templates: [
+      { title: "Project Kickoff", description: "Initial meeting checklist", priority: "High" },
+      { title: "Milestone Planning", description: "Outline major deliverables", priority: "High" },
+      { title: "Resource Assignment", description: "Allocate team & budgets", priority: "Medium" },
+      { title: "Risk Assessment", description: "Identify & mitigate risks", priority: "High" },
+      { title: "Task Breakdown", description: "Create WBS for tasks", priority: "Medium" },
+      { title: "Daily Standups", description: "Agenda for quick updates", priority: "Low" },
+      { title: "Sprint Retrospective", description: "Evaluate last sprint", priority: "Medium" },
+      { title: "Stakeholder Updates", description: "Send weekly progress", priority: "Low" },
+      { title: "Change Requests", description: "Handle scope changes", priority: "High" },
+      { title: "Project Closure", description: "Final tasks & sign-off", priority: "High" },
+    ],
+  },
+  {
+    categoryName: "Customer Support",
+    templates: [
+      { title: "Ticket Escalation Process", description: "Guidelines for advanced issues", priority: "High" },
+      { title: "FAQ Maintenance", description: "Update support docs monthly", priority: "Medium" },
+      { title: "CSAT Surveys", description: "Collect & analyze feedback", priority: "Low" },
+      { title: "New Release Support Prep", description: "Train staff on new features", priority: "Medium" },
+      { title: "Support Shift Handover", description: "Share open tickets", priority: "Low" },
+      { title: "Incident Postmortem", description: "Analyze big support issues", priority: "High" },
+      { title: "Chatbot Optimization", description: "Tweak bot flows", priority: "Medium" },
+      { title: "Refund & Return Protocol", description: "Process guidelines", priority: "High" },
+      { title: "Support Hiring Plan", description: "Recruit new agents", priority: "Low" },
+      { title: "Support Portal Cleanup", description: "Archive old tickets", priority: "Low" },
+    ],
+  },
+  {
+    categoryName: "Research & Development",
+    templates: [
+      { title: "Idea Brainstorming", description: "Weekly innovation session", priority: "Medium" },
+      { title: "Prototype Testing", description: "User feedback loops", priority: "High" },
+      { title: "Market Analysis", description: "Study competitor features", priority: "Medium" },
+      { title: "Feasibility Study", description: "Check cost & viability", priority: "High" },
+      { title: "Patent Review", description: "Check prior art & IP", priority: "Low" },
+      { title: "Beta Release Plan", description: "Schedule for pilot users", priority: "Medium" },
+      { title: "Tech Stack Evaluation", description: "Choose frameworks", priority: "High" },
+      { title: "Benchmarking Tests", description: "Compare performance", priority: "Medium" },
+      { title: "Data Collection", description: "Gather for AI models", priority: "High" },
+      { title: "R&D Reporting", description: "Monthly updates to execs", priority: "Low" },
+    ],
+  },
+  {
+    categoryName: "Legal & Compliance",
+    templates: [
+      { title: "Contract Review", description: "Check legal terms", priority: "High" },
+      { title: "Regulatory Filing", description: "Prepare monthly/quarterly forms", priority: "High" },
+      { title: "Policy Updates", description: "Review internal policies", priority: "Medium" },
+      { title: "Data Privacy Audit", description: "Ensure GDPR or relevant compliance", priority: "High" },
+      { title: "Trademark Registration", description: "File new brand marks", priority: "Low" },
+      { title: "License Renewals", description: "Renew business licenses", priority: "Medium" },
+      { title: "Litigation Hold Notice", description: "Preserve relevant docs", priority: "High" },
+      { title: "Compliance Training", description: "Annual staff training", priority: "Medium" },
+      { title: "Non-Disclosure Agreements", description: "Process NDAs for new partners", priority: "Low" },
+      { title: "Ethics Hotline Check", description: "Monitor reported issues", priority: "Medium" },
+    ],
+  },
+];

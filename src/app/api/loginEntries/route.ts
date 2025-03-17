@@ -7,7 +7,6 @@ import { IUser } from '@/models/userModel';
 export async function GET(request: NextRequest) {
     try {
         const userId = await getDataFromToken(request);
-
         // Fetch all login entries for the user, populate `userId` and `reportingManager`
         const entries = await LoginEntry.find({ userId })
             .populate({

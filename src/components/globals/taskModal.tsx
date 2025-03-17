@@ -94,6 +94,16 @@ import { Checkbox } from "../ui/checkbox";
 
 interface TaskModalProps {
   closeModal: () => void;
+  prefillData?: {
+    _id: string;
+    title?: string;
+    description?: string;
+    category?: { _id: string; name: string };
+    priority?: string;
+    repeat?: boolean;
+    repeatType?: string;
+    days?: string[];
+  } | null;
 }
 interface Reminder {
   type: "minutes" | "hours" | "days";
@@ -112,7 +122,7 @@ interface Reminder {
   notificationType: "email" | "whatsapp";
 }
 
-const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
+const TaskModal: React.FC<TaskModalProps> = ({ closeModal, prefillData }) => {
   // State variables for form inputs
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -288,6 +298,21 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
       },
     },
   };
+
+  useEffect(() => {
+    if (prefillData) {
+      // Set each local state to the relevant template data:
+      setTitle(prefillData.title || "");
+      setDescription(prefillData.description || "");
+      setCategory(prefillData.category?._id || "");
+      setPriority(prefillData.priority || "High");
+      setRepeat(prefillData.repeat ?? false);
+      setRepeatType(prefillData.repeatType || "");
+      setDays(prefillData.days || []);
+      // etc. for all fields you want to prefill
+    }
+  }, [prefillData]);
+
 
   // Trigger the animation when the component mounts
   useEffect(() => {
@@ -1028,7 +1053,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal }) => {
                   Priority
                 </div>
                 <div className=" rounded-lg w-full ">
-                  <Tabs3 value={priority} onValueChange={setPriority}>
+                  <Tabs3 className="" value={priority} onValueChange={setPriority}>
 
                     <TabsList3 className="rounded-lg text- flex  dark:border-border border w-fit">
 
