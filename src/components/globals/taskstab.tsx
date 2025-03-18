@@ -61,6 +61,12 @@ import {
   LucideHome,
   Trash2,
   Eye,
+  ListChecks,
+  UserCheck,
+  ClipboardList,
+  Save,
+  Folder,
+  Pencil,
 } from "lucide-react";
 import {
   IconBrandTeams,
@@ -204,7 +210,12 @@ export default function TasksTab({
   const [selectedUserId, setSelectedUserId] = useState<User | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [templates, setTemplates] = useState<any[]>([]); // default to empty array
+
+
   const [openTemplateDialog, setOpenTemplateDialog] = useState(false);
+  const [templateToEdit, setTemplateToEdit] = useState<Template | null>(null);
+
+
   const [openTaskModal, setOpenTaskModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   // Search input for templates
@@ -241,6 +252,11 @@ export default function TasksTab({
     setOpenTaskModal(true);
   }
 
+  // Called when user clicks “Edit”
+  function handleEditTemplate(template: Template) {
+    setTemplateToEdit(template);
+    setOpenTemplateDialog(true);
+  }
 
 
   console.log(templates, 'template check')
@@ -1261,81 +1277,120 @@ export default function TasksTab({
           onValueChange={setActiveTab}
           className="w-[180px] mt-12 "
         >
-          <TabsList className="flex gap-y-6 mt-4 h-24  text-center">
-            <TabsTrigger value="all" className="flex  group justify-start gap-2">
-              <div className="flex justify-start ml-4 w-full gap-2">
-                <LucideHome className={`h-5  ${activeTab == "all" ? "text-white" : ""} `} />
-                <h1 className={`mt-auto text-xs ${activeTab == "all" ? "text-white" : ""} `}>Dashboard</h1>
+          <TabsList className="flex gap-y-6 mt-4 h-24 text-center">
+            {/* Dashboard */}
+            <TabsTrigger value="all" className="flex group justify-start gap-2">
+              <div className="flex justify-start ml-4 w-full gap-2 items-center">
+                <LucideHome
+                  className={`h-5 transition-colors ${activeTab === "all" ? "text-white" : "dark:text-white text-black"
+                    }`}
+                />
+                <h1
+                  className={`mt-auto text-xs transition-colors ${activeTab === "all" ? "text-white" : "dark:text-white text-black"
+                    }`}
+                >
+                  Dashboard
+                </h1>
               </div>
             </TabsTrigger>
-            <TabsTrigger
-              value="myTasks"
-              className="flex justify-start w-full gap-2"
-            >
-              <div className="flex justify-start items-center ml-4 w-full gap-2">
-                <img
-                  src="/icons/task.png"
-                  className={`h-5 dark:invert-0 invert-[100] ${activeTab == "myTasks" ? " invert-0" : ""} `} />
 
-                <h1 className={`mt-auto text-xs ${activeTab == "myTasks" ? "text-white" : ""} `}>My Tasks</h1>
+            {/* My Tasks */}
+            <TabsTrigger value="myTasks" className="flex justify-start w-full gap-2">
+              <div className="flex justify-start ml-4 w-full gap-2 items-center">
+                <ListChecks
+                  className={`h-5 transition-colors ${activeTab === "myTasks" ? "text-white" : "dark:text-white text-black"
+                    }`}
+                />
+                <h1
+                  className={`mt-auto text-xs transition-colors ${activeTab === "myTasks" ? "text-white" : "dark:text-white text-black"
+                    }`}
+                >
+                  My Tasks
+                </h1>
               </div>
             </TabsTrigger>
+
+            {/* Delegated Tasks */}
             <TabsTrigger
               value="delegatedTasks"
               className="flex justify-start w-full gap-2"
             >
-              <div className="flex justify-start items-center ml-4 w-full gap-2">
-                <img
-                  src="/icons/delegated.png"
-                  className={`h-5 dark:invert-0 invert-[100] ${activeTab == "delegatedTasks" ? " invert-0" : ""} `} />
-
-                <h1 className={`mt-auto text-xs ${activeTab == "delegatedTasks" ? "text-white" : ""} `}>Delegated Tasks</h1>
+              <div className="flex justify-start ml-4 w-full gap-2 items-center">
+                <UserCheck
+                  className={`h-5 transition-colors ${activeTab === "delegatedTasks" ? "text-white" : "dark:text-white text-black"
+                    }`}
+                />
+                <h1
+                  className={`mt-auto text-xs transition-colors ${activeTab === "delegatedTasks" ? "text-white" : "dark:text-white text-black"
+                    }`}
+                >
+                  Delegated Tasks
+                </h1>
               </div>
             </TabsTrigger>
-            {(userDetails?.role === "orgAdmin" && (
+
+            {/* All Tasks (orgAdmin only) */}
+            {userDetails?.role === "orgAdmin" && (
               <TabsTrigger
                 value="allTasks"
-                className="flex justify-start w-full gap-2 "
+                className="flex justify-start w-full gap-2"
               >
-                <div className="flex justify-start items-center ml-4 w-full gap-2">
-                  <img
-                    src="/icons/all.png"
-                    className={`h-5 dark:invert-0 invert-[100] ${activeTab == "allTasks" ? " invert-0" : ""} `} />
-
-                  <h1 className={`mt-auto text-xs ${activeTab == "allTasks" ? "text-white" : ""} `}>All Tasks</h1>
+                <div className="flex justify-start ml-4 w-full gap-2 items-center">
+                  <ClipboardList
+                    className={`h-5 transition-colors ${activeTab === "allTasks" ? "text-white" : "dark:text-white text-black"
+                      }`}
+                  />
+                  <h1
+                    className={`mt-auto text-xs transition-colors ${activeTab === "allTasks" ? "text-white" : "dark:text-white text-black"
+                      }`}
+                  >
+                    All Tasks
+                  </h1>
                 </div>
               </TabsTrigger>
-            ))}
+            )}
 
-            {(userDetails?.role === "orgAdmin" && (
+            {/* Task Templates (orgAdmin only) */}
+            {userDetails?.role === "orgAdmin" && (
               <TabsTrigger
                 value="taskTemplates"
-                className="flex justify-start w-full gap-2 "
+                className="flex justify-start w-full gap-2"
               >
-                <div className="flex justify-start items-center ml-4 w-full gap-2">
-                  <img
-                    src="/icons/template.png"
-                    className={`h-5 dark:invert-0 invert-[100] ${activeTab == "taskTemplates" ? " invert-0" : ""} `} />
-
-                  <h1 className={`mt-auto text-xs ${activeTab == "taskTemplates" ? "text-white" : ""} `}>Task Templates</h1>
+                <div className="flex justify-start ml-4 w-full gap-2 items-center">
+                  <Save
+                    className={`h-5 transition-colors ${activeTab === "taskTemplates" ? "text-white" : "dark:text-white text-black"
+                      }`}
+                  />
+                  <h1
+                    className={`mt-auto text-xs transition-colors ${activeTab === "taskTemplates" ? "text-white" : "dark:text-white text-black"
+                      }`}
+                  >
+                    Task Templates
+                  </h1>
                 </div>
               </TabsTrigger>
-            ))}
+            )}
 
-            {(userDetails?.role === "orgAdmin" && (
+            {/* Task Directory (orgAdmin only) */}
+            {userDetails?.role === "orgAdmin" && (
               <TabsTrigger
                 value="taskDirectory"
-                className="flex justify-start w-full gap-2 "
+                className="flex justify-start w-full gap-2"
               >
-                <div className="flex justify-start items-center ml-4 w-full gap-2">
-                  <img
-                    src="/icons/directory.png"
-                    className={`h-5 dark:invert-0 invert-[100] ${activeTab == "taskDirectory" ? " invert-0" : ""} `} />
-
-                  <h1 className={`mt-auto text-xs ${activeTab == "taskDirectory" ? "text-white" : ""} `}>Task Directory</h1>
+                <div className="flex justify-start ml-4 w-full gap-2 items-center">
+                  <Folder
+                    className={`h-5 transition-colors ${activeTab === "taskDirectory" ? "text-white" : "dark:text-white text-black"
+                      }`}
+                  />
+                  <h1
+                    className={`mt-auto text-xs transition-colors ${activeTab === "taskDirectory" ? "text-white" : "dark:text-white text-black"
+                      }`}
+                  >
+                    Task Directory
+                  </h1>
                 </div>
               </TabsTrigger>
-            ))}
+            )}
           </TabsList>
         </Tabs>
       </div>
@@ -2618,7 +2673,7 @@ export default function TasksTab({
                             <div className="container mx-auto w-full p-6">
                               <div className="flex justify-between w-full items-center mb-2">
                                 <div className="flex justify-between w-full items-center mb-4 mx-2">
-                                  <h1 className="text-lg font-bold text-white">Task Templates</h1>
+                                  <h1 className="text-lg font-bold dark:text-white">Task Templates</h1>
                                   <div className='flex gap-4'>
                                     <div className="">
                                       <CategoryFilter
@@ -2633,14 +2688,14 @@ export default function TasksTab({
                                       placeholder="Search Templates..."
                                       value={searchText}
                                       onChange={(e) => setSearchText(e.target.value)}
-                                      className="px-3 py-2 rounded-lg border outline-none bg-transparent  text-sm"
+                                      className="px-3 py-2 rounded border outline-none bg-transparent  text-sm"
                                     />
 
                                     <Button
                                       onClick={() => setOpenTemplateDialog(true)}
-                                      className="bg-primary text-white px-4 py-2 rounded"
+                                      className="bg-[#017a5b] hover:bg-green-900 flex gap-1 items-center text-white px-4 py-2 rounded"
                                     >
-                                      Add New Template
+                                      <Plus /> Create Template
                                     </Button>
                                   </div>
                                 </div>
@@ -2648,6 +2703,8 @@ export default function TasksTab({
                                 <TaskTemplateDialog
                                   open={openTemplateDialog}
                                   setOpen={setOpenTemplateDialog}
+                                  existingTemplate={templateToEdit} // Pass the template if editing
+                                  onSuccess={fetchTemplates} // <--- pass parent's refresher
                                 />
                               </div>
 
@@ -2657,6 +2714,7 @@ export default function TasksTab({
                                 templates={filteredTemplates}
                                 onUseTemplate={handleUseTemplate}
                                 selectedCategory={selectedCategory}
+                                onEditTemplate={handleEditTemplate} // Pass the edit callback
                               />
                               {
                                 openTaskModal && (
@@ -2669,10 +2727,10 @@ export default function TasksTab({
                             </div>
                           </div>
                         ) : activeTab === "taskDirectory" ? (
-                          <div className="container mx-auto p-6 text-white">
+                          <div className="container mx-auto p-6 dark:text-white">
                             <div className="mb-6">
-                              <h1 className="text-3xl font-bold">Task Templates Directory</h1>
-                              <p className="text-gray-300 mt-2 text-sm max-w-prose">
+                              <h1 className="text-xl font-bold">Task Templates Directory</h1>
+                              <p className="dark:text-gray-300 text-muted-foreground  mt-2 text-sm max-w-prose">
                                 Browse our library of ready-made templates, sorted by category. Copy any
                                 template into your organization with a single click.
                               </p>
@@ -3982,11 +4040,9 @@ function CategoryFilter({
   setSelectedCategory,
 }: CategoryFilterProps) {
   // We'll compare the current selectedCategory._id to the <option> value
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedId = e.target.value;
-
-    if (!selectedId) {
-      // user selected "All"
+  const handleChange = (selectedId: string) => {
+    if (selectedId === "all") {
+      // user selected "All Categories"
       setSelectedCategory(null);
     } else {
       // find the Category object from the categories array
@@ -3997,19 +4053,25 @@ function CategoryFilter({
 
   return (
     <div className="flex items-center gap-2">
+
       {/* <label className="text-white">Filter by Category:</label> */}
-      <select
-        value={selectedCategory ? selectedCategory._id : ""}
-        onChange={handleChange}
-        className="p-2 rounded-lg outline-none dark:bg-[#04071F] border dark:text-white"
+      <Select
+        value={selectedCategory ? selectedCategory._id : "all"}
+        onValueChange={handleChange} // Directly passing the string value
       >
-        <option value="">All Categories</option>
-        {categories.map((cat) => (
-          <option key={cat._id} value={cat._id}>
-            {cat.name}
-          </option>
-        ))}
-      </select>
+        <SelectTrigger className="w-[200px] p-2 rounded border dark:bg-[#04071F] dark:text-white">
+          <SelectValue placeholder="All Categories" />
+        </SelectTrigger>
+        <SelectContent className="dark:bg-[#04071F] border dark:text-white">
+          <SelectItem value="all">All Categories</SelectItem>
+          {categories.map((cat) => (
+            <SelectItem key={cat._id} value={cat._id}>
+              {cat.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
     </div>
   );
 }
@@ -4029,12 +4091,15 @@ interface TemplateListProps {
   templates: Template[];
   selectedCategory: Category | null;
   onUseTemplate?: (template: Template) => void;
+  // New: a callback to edit
+  onEditTemplate?: (template: Template) => void;
 }
 
 export function TemplateList({
   templates,
   selectedCategory,
-  onUseTemplate
+  onUseTemplate,
+  onEditTemplate
 }: TemplateListProps) {
   // Filtering logic as you already have
   const filteredTemplates = selectedCategory
@@ -4062,12 +4127,13 @@ export function TemplateList({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
       {filteredTemplates.map((template) => (
         <TemplateCard
           key={template._id}
           template={template}
           onUseTemplate={onUseTemplate}
+          onEdit={onEditTemplate} // pass onEdit callback
         />
       ))}
     </div>
@@ -4077,9 +4143,12 @@ export function TemplateList({
 interface TemplateCardProps {
   template: Template;
   onUseTemplate?: (template: Template) => void;
+
+  // ⬇︎ We'll add these new props for editing
+  onEdit?: (template: Template) => void;
 }
 
-function TemplateCard({ template, onUseTemplate }: TemplateCardProps) {
+function TemplateCard({ template, onUseTemplate, onEdit }: TemplateCardProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   async function handleDeleteTemplate() {
@@ -4104,29 +4173,37 @@ function TemplateCard({ template, onUseTemplate }: TemplateCardProps) {
 
   return (
     <Card className="p-4 bg-transparent border rounded-lg relative">
-      <h2 className="text-lg font-bold mb-2 text-white">{template.title}</h2>
-      <p className="text-sm text-gray-200 mb-2">{template.description}</p>
-      <p className="text-xs text-gray-300">
+      <h2 className="text- font-bold mb-2 dark:text-white">{template.title}</h2>
+      <p className="text-xs dark:text-gray-200 mb-2">{template.description}</p>
+      <p className="text-xs flex gap-2 dark:text-gray-300">
         Category: {template.category?.name}
       </p>
+      <div className='flex justify-end gap-2 mt-2 w-full'>
+        {/* Use Template button */}
+        <button
+          onClick={() => onUseTemplate && onUseTemplate(template)}
+          className=""
+        >
+          <CheckCircle className='text-[#017a5b]' />
+        </button>
+        {/* Edit Button */}
+        {onEdit && (
+          <button
+            className="  text-blue-800 "
+            onClick={() => onEdit(template)}
+          >
+            <Pencil className="h-5" />
+          </button>
+        )}
+        {/* Trash icon button */}
+        <button
+          onClick={() => setDeleteDialogOpen(true)}
+          className=" text-red-500"
+        >
+          <Trash2 className="h-5" />
 
-      {/* Use Template button */}
-      <button
-        onClick={() => onUseTemplate && onUseTemplate(template)}
-        className="mt-2 bg-[#017a5b] px-3 py-1 rounded"
-      >
-        Use Template
-      </button>
-
-      {/* Trash icon button */}
-      <button
-        onClick={() => setDeleteDialogOpen(true)}
-        className="absolute  bottom-5 right-2 text-red-500"
-      >
-        <Trash2 className="h-5" />
-
-      </button>
-
+        </button>
+      </div>
       {/* The confirmation dialog */}
       <DeleteConfirmationDialog
         isOpen={deleteDialogOpen}
@@ -4187,26 +4264,27 @@ function DirectoryView() {
         <div>
           <input
             type="text"
-            placeholder="Search Directory..."
+            placeholder="Search Directory"
             value={directorySearchText}
             onChange={(e) => setDirectorySearchText(e.target.value)}
-            className="px-3 py-2 rounded-lg border outline-none bg-transparent text-white text-sm"
+            className="px-3 py-2 rounded border outline-none bg-transparent text-white text-sm"
           />
         </div>
         <div>
           {/* <label className="mr-2 text-sm">Filter by Category:</label> */}
-          <select
-            value={selectedDirCategory}
-            onChange={(e) => setSelectedDirCategory(e.target.value)}
-            className="px-2 py-2 rounded-lg bg-[#04071F] border outline-none text-sm"
-          >
-            <option value="">All Categories</option>
-            {allCategoryNames.map((cn) => (
-              <option key={cn} value={cn}>
-                {cn}
-              </option>
-            ))}
-          </select>
+          <Select value={selectedDirCategory} onValueChange={setSelectedDirCategory}>
+            <SelectTrigger className="w-[200px] dark:bg-[#04071F] border rounded px-2 py-2 text-sm">
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent className="dark:bg-[#04071F] border">
+              <SelectItem value="All">All Categories</SelectItem>
+              {allCategoryNames.map((cn) => (
+                <SelectItem key={cn} value={cn}>
+                  {cn}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
       </div>
@@ -4320,7 +4398,16 @@ export function DirectoryTemplateCard({ template, categoryName }: DirectoryTempl
       }
 
       // Show success toast, then refresh the page
-      toast.success("Template copied successfully!");
+      toast(<div className=" w-full mb-6 gap-2 m-auto  ">
+        <div className="w-full flex  justify-center">
+          <DotLottieReact
+            src="/lottie/tick.lottie"
+            loop
+            autoplay
+          />
+        </div>
+        <h1 className="text-black text-center font-medium text-lg">Template copied successfully</h1>
+      </div>);
       window.location.reload(); // or use Next.js router refresh
     } catch (err: any) {
       console.error(err);
@@ -4342,12 +4429,18 @@ export function DirectoryTemplateCard({ template, categoryName }: DirectoryTempl
   return (
     <Card className="bg-transparent rounded shadow hover:shadow-lg transition-shadow p-4 flex flex-col">
       <h3 className="text-lg font-medium mb-1">{template.title}</h3>
-      <p className="text-sm text-gray-300 flex-grow">{template.description}</p>
+      <p className="text-sm dark:text-gray-300 flex-grow">{template.description}</p>
 
       <div className="mt-4 flex items-center justify-between">
-        <span className="text-xs px-2 py-1 rounded border">
+        <span
+          className={`text-xs px-2 py-1 rounded border 
+    ${template.priority === "High" ? "border-red-500 text-red-500" : ""} 
+    ${template.priority === "Medium" ? "border-orange-500 text-orange-500" : ""} 
+    ${template.priority === "Low" ? "border-green-500 text-green-500" : ""}`}
+        >
           {template.priority}
         </span>
+
         <div className="flex gap-2">
           <button
             onClick={handleViewDetails}
@@ -4366,8 +4459,13 @@ export function DirectoryTemplateCard({ template, categoryName }: DirectoryTempl
 
       {/* Details Dialog */}
       <Dialog open={showDetails} onOpenChange={setShowDetails}>
-        <DialogContent className="bg-[#0B0D29] text-white max-w-md mx-auto p-4">
-          <DialogTitle>{template.title}</DialogTitle>
+        <DialogContent className="dark:bg-[#0B0D29] text-white max-w-md mx-auto p-4">
+          <div className='flex gap-2 justify-between w-full items-center'>
+            <DialogTitle>{template.title}</DialogTitle>
+            <DialogClose>
+              <CrossCircledIcon className="scale-150 cursor-pointer dark:text-white text-black ] rounded-full dark:hover:text-[#815BF5]" />
+            </DialogClose>
+          </div>
           <DialogDescription>
             <div className="text-sm mt-2 space-y-2">
               <p>

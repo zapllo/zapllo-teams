@@ -1093,7 +1093,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal, prefillData }) => {
                 <div className="ml-4">
                   <div className="bg-transparent">
                     {/* <Label htmlFor="repeatType" className="block font-semibold">Repeat Type</Label> */}
-                    <ShadcnSelect value={repeatType} onValueChange={setRepeatType}>
+                    <ShadcnSelect  value={repeatType} onValueChange={setRepeatType}>
                       <SelectTrigger className="w-48 dark:bg-[#292d33] border text-xs h-fit outline-none rounded px-3 ">
                         <SelectValue placeholder="Select Repeat Type" />
                       </SelectTrigger>
@@ -1210,7 +1210,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal, prefillData }) => {
                 onOpenChange={setIsDatePickerOpen}
               >
 
-                <DialogContent className=" z-[100] bg-[#0a0d28] scale-90 flex justify-center ">
+                <DialogContent className=" z-[100] bg-[#0a0d28] scale-90 pb-4 flex justify-center ">
                   <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
                     <div className="w-full flex mb-4  justify-between">
                       <CustomDatePicker

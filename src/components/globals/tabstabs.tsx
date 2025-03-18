@@ -569,8 +569,8 @@ export default function TeamTabs() {
             >
               {loggedInUserRole === "orgAdmin" && (
                 <DialogTrigger asChild>
-                  <Button className="ml-4  bg-[#017a5b] hover:bg-[#15624f] border gap-2" onClick={() => setIsModalOpen(true)}>
-                    Add Member </Button>
+                  <Button className="ml-4  bg-[#017a5b] hover:bg-[#15624f] border gap-1 flex items-center" onClick={() => setIsModalOpen(true)}>
+                    <Plus /> Add Member </Button>
                 </DialogTrigger>
               )}
               <DialogContent className="p-6 m-auto h-screen 2xl:h-full   overflow-y-scroll scrollbar-hide z-[100]">

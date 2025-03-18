@@ -708,7 +708,6 @@ export default function MyAttendance() {
     setIsBreakModalOpen(isOpen);
   };
 
-  console.log(location, 'loc bitch!')
   // When the user clicks "Take a Break"
   const captureImageAndSubmitBreakStart = async () => {
     // Capture image

@@ -27,6 +27,7 @@ import {
   Calendar,
   Plus,
   X,
+  Trash2,
 } from "lucide-react";
 
 import Select from "react-select";
@@ -39,11 +40,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 
-import {
-  Tabs as Tabs3,
-  TabsList as TabsList3,
-  TabsTrigger as TabsTrigger3,
-} from "@/components/ui/tabs";
+
 
 import { Toggle } from "@/components/ui/toggle";
 import { Separator } from "@/components/ui/separator";
@@ -55,7 +52,18 @@ import CustomAudioPlayer from "../globals/customAudioPlayer";
 import { StylesConfig } from "react-select";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import axios from "axios";
+import { Tabs3, TabsList3, TabsTrigger3 } from "../ui/tabs3";
 
+interface Template {
+  _id: string;
+  title?: string;
+  description?: string;
+  category?: { _id: string; name: string };
+  priority?: string;
+  repeat?: boolean;
+  repeatType?: string;
+  days?: string[];
+}
 
 
 // Example variants for the motion container
@@ -80,24 +88,31 @@ interface Category {
 interface ITaskTemplateDialogProps {
   open: boolean;
   setOpen: (value: boolean) => void;
+  existingTemplate?: Template | null;
+  onSuccess?: () => void;  // <-- new callback
 }
 
 /**
  * A dialog nearly identical to your “Assign New Task” form,
  * but will create a Task Template instead of a Task.
  */
-export default function TaskTemplateDialog({ open, setOpen }: ITaskTemplateDialogProps) {
+export default function TaskTemplateDialog({ open, setOpen, existingTemplate, onSuccess }: ITaskTemplateDialogProps) {
   const controls = useAnimation();
+
+  // Are we editing an existing template?
+  const isEditMode = !!existingTemplate?._id;
 
   // -------------------------
   // All state hooks mirroring your existing fields:
   // -------------------------
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [title, setTitle] = useState(existingTemplate?.title || "");
+  const [description, setDescription] = useState(existingTemplate?.description || "");
   const [assignedUser, setAssignedUser] = useState<string>("");
 
-  // Priority changed from Tabs to button group
-  const [priority, setPriority] = useState<"High" | "Medium" | "Low">("Low");
+  const [priority, setPriority] = useState<"High" | "Medium" | "Low">(
+    (existingTemplate?.priority as "High" | "Medium" | "Low") || "Low"
+  );
+
 
   const [repeat, setRepeat] = useState(false);
   const [repeatType, setRepeatType] = useState("");
@@ -137,8 +152,9 @@ export default function TaskTemplateDialog({ open, setOpen }: ITaskTemplateDialo
   // For "create more templates" toggle
   const [createMoreTemplates, setCreateMoreTemplates] = useState(false);
 
-  // Category
-  const [category, setCategory] = useState<string>("");
+  const [category, setCategory] = useState<string>(
+    typeof existingTemplate?.category === "string" ? existingTemplate.category : ""
+  );
   const [categories, setCategories] = useState<Category[]>([]);
 
   // Users
@@ -156,6 +172,30 @@ export default function TaskTemplateDialog({ open, setOpen }: ITaskTemplateDialo
 
   const [popoverCategoryInputValue, setPopoverCategoryInputValue] =
     useState<string>(""); // State for input value in popover
+
+  // WATCH FOR CHANGES TO existingTemplate
+  useEffect(() => {
+    if (existingTemplate) {
+      // Edit mode => prefill
+      setTitle(existingTemplate.title || "");
+      setDescription(existingTemplate.description || "");
+      setPriority((existingTemplate.priority as "High" | "Medium" | "Low") || "Low");
+
+      if (typeof existingTemplate.category === "string") {
+        setCategory(existingTemplate.category);
+      } else if (existingTemplate.category?._id) {
+        setCategory(existingTemplate.category._id);
+      }
+      // etc. for all other fields
+    } else {
+      // Create mode => clear
+      setTitle("");
+      setDescription("");
+      setPriority("Low");
+      setCategory("");
+      // etc...
+    }
+  }, [existingTemplate]);
 
   // -------------------------
   // Fetch Users & Categories from the server
@@ -346,8 +386,10 @@ export default function TaskTemplateDialog({ open, setOpen }: ITaskTemplateDialo
   // -------------------------
   // CREATE TEMPLATE
   // -------------------------
-  async function handleCreateTemplate(e: React.FormEvent) {
+  async function handleCreateOrEditTemplate(e: React.FormEvent) {
     e.preventDefault();
+
+
     setLoading(true);
 
     let fileUrls: string[] = [];
@@ -404,30 +446,45 @@ export default function TaskTemplateDialog({ open, setOpen }: ITaskTemplateDialo
     };
 
     try {
-      const response = await fetch("/api/taskTemplates", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(templateData),
-      });
-      const result = await response.json();
-
-      if (response.ok) {
-        toast.success("Template created successfully!");
-        if (!createMoreTemplates) {
-          setOpen(false);
+      if (isEditMode && existingTemplate?._id) {
+        // If we are editing an existing template
+        const res = await fetch(`/api/taskTemplates/${existingTemplate._id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(templateData),
+        });
+        const result = await res.json();
+        if (!res.ok) {
+          toast.error(result.error || "Failed to update template");
+          return;
         }
-        clearFormFields();
+        toast.success("Template updated successfully!");
       } else {
-        console.error("Error creating template:", result.error);
-        toast.error(result.error || "Error creating template");
+        // Create new
+        const res = await fetch("/api/taskTemplates", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(templateData),
+        });
+        const result = await res.json();
+        if (!res.ok) {
+          toast.error(result.error || "Failed to create template");
+          return;
+        }
+        toast.success("Template created successfully!");
       }
+
+      setOpen(false);
+      // 1) Trigger the parent’s fetch
+      if (onSuccess) {
+        onSuccess();
+      }
+      // Optional: refresh or clear states
     } catch (error: any) {
-      console.error("Error creating template:", error);
+      console.error(error);
       toast.error(error.message || "An error occurred");
     }
-    setLoading(false);
   }
-
   // -------------------------
   // Helper to clear form
   // -------------------------
@@ -461,10 +518,12 @@ export default function TaskTemplateDialog({ open, setOpen }: ITaskTemplateDialo
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="dark:bg-[#0B0D29] bg-white z-[100]  h-screen m-auto scrollbar-hide text-[#000000] border dark:text-[#D0D3D3] rounded-lg">
+      <DialogContent className="dark:bg-[#0B0D29] bg-white z-[100] h-full  m-auto scrollbar-hide text-[#000000] border dark:text-[#D0D3D3] rounded-lg">
         {/* Header */}
         <div className="flex justify-between items-center px-8 py-3 border-b w-full">
-          <h2 className="dark:text-lg dark:font-bold">Create New Template</h2>
+          <h2 className=" dark:font-bold">
+            {isEditMode ? "Edit Template" : "Create New Template"}
+          </h2>
           <CrossCircledIcon
             onClick={() => setOpen(false)}
             className="scale-150 cursor-pointer hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]"
@@ -472,13 +531,13 @@ export default function TaskTemplateDialog({ open, setOpen }: ITaskTemplateDialo
         </div>
 
         <form
-          onSubmit={handleCreateTemplate}
-          className="text-sm space-y-2  px-8  scrollbar-hide max-h-[80vh]"
+          onSubmit={handleCreateOrEditTemplate}
+          className="text-sm space-y-2  px-8 h-screen pb-4  scrollbar-hide max-h-[80vh]"
         >
           {/* Title */}
           <div className="grid grid-cols-1 gap-2">
             <div className="relative">
-              <h1 className="block absolute dark:bg-[#0B0D29] bg-white text-gray-500 px-1 ml-2 -mt-1 dark:text-muted-foreground text-xs dark:font-semibold">
+              <h1 className="block absolute dark:bg-[#0B0D29] bg-white text-gray-500 px-1 ml-2 -mt-1 dark:text-muted-foreground text-[12px] ">
                 Title
               </h1>
               <input
@@ -486,19 +545,19 @@ export default function TaskTemplateDialog({ open, setOpen }: ITaskTemplateDialo
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full text-xs outline-none focus-within:border-[#815BF5] bg-transparent border dark:border-gray-500 dark:border-border mt-1 rounded px-3 py-2"
+                className="w-full text-xs outline-none focus-within:border-[#815BF5] bg-transparent border  dark:border-border mt-1 rounded px-3 py-2"
               />
             </div>
             {/* Description */}
             <div className="mt-1 relative">
-              <h1 className="block absolute dark:bg-[#0B0D29] bg-white text-gray-500 px-1 ml-2 -mt-1 dark:text-muted-foreground text-xs dark:font-semibold">
+              <h1 className="block absolute dark:bg-[#0B0D29] bg-white text-gray-500 px-1 ml-2 -mt-1 dark:text-muted-foreground text-[12px] ">
                 Description
               </h1>
               <textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="text-xs w-full focus-within:border-[#815BF5] outline-none bg-transparent dark:border-gray-500 border dark:border-border mt-1 rounded px-3 py-3"
+                className="text-xs w-full focus-within:border-[#815BF5] outline-none bg-transparent border dark:border-border mt-1 rounded px-3 py-3"
               />
             </div>
           </div>
@@ -540,44 +599,29 @@ export default function TaskTemplateDialog({ open, setOpen }: ITaskTemplateDialo
           </div>
 
           {/* Priority - now as button group */}
-          <div className="flex items-center border dark:border-border rounded-md h-14 gap-4 p-4 w-full">
-            <div className="text-xs dark:text-white dark:font-bold">Priority:</div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => handlePrioritySelect("High")}
-                className={`px-3 py-1 rounded border 
-                  ${priority === "High"
-                    ? "bg-[#815BF5] text-white border-[#815BF5]"
-                    : "bg-transparent dark:text-white border-gray-500 hover:bg-[#1f1f1f]"
-                  }`}
-              >
-                High
-              </button>
-              <button
-                type="button"
-                onClick={() => handlePrioritySelect("Medium")}
-                className={`px-3 py-1 rounded border 
-                  ${priority === "Medium"
-                    ? "bg-[#815BF5] text-white border-[#815BF5]"
-                    : "bg-transparent dark:text-white border-gray-500 hover:bg-[#1f1f1f]"
-                  }`}
-              >
-                Medium
-              </button>
-              <button
-                type="button"
-                onClick={() => handlePrioritySelect("Low")}
-                className={`px-3 py-1 rounded border 
-                  ${priority === "Low"
-                    ? "bg-[#815BF5] text-white border-[#815BF5]"
-                    : "bg-transparent dark:text-white border-gray-500 hover:bg-[#1f1f1f]"
-                  }`}
-              >
-                Low
-              </button>
+          <div className=" flex itrc justify-between">
+            <div className="mb-2  justify-between border dark:border-border  rounded-md h-14 items-center flex gap-4 mta w-full">
+              <div className=" gap-6 flex justify-between h-fit  items-center p-4 w-full ">
+                <div className="flex g   text-xs dark:text-white dark:font-bold">
+                  {/* <FlagIcon className='h-5' /> */}
+                  Priority
+                </div>
+                <div className=" rounded-lg w-full ">
+                  <Tabs3 value={priority} onValueChange={(val) => setPriority(val as "High" | "Medium" | "Low")}>
+                    <TabsList3 className="rounded-lg text- flex  dark:border-border border w-fit">
+
+                      {["High", "Medium", "Low"].map((level) => (
+                        <TabsTrigger3 className="text-xs" key={level} value={level}>
+                          {level}
+                        </TabsTrigger3>
+                      ))}
+                    </TabsList3>
+                  </Tabs3>
+                </div>
+              </div>
             </div>
           </div>
+
 
           {/* Repeat */}
           <div className="flex mb-2 py-2 items-center">
@@ -591,7 +635,7 @@ export default function TaskTemplateDialog({ open, setOpen }: ITaskTemplateDialo
                 />
                 <Label
                   htmlFor="repeat"
-                  className="dark:font-semibold dark:text-white text-xs"
+                  className=" dark:text-white text-xs"
                 >
                   Repeat
                 </Label>
@@ -600,20 +644,18 @@ export default function TaskTemplateDialog({ open, setOpen }: ITaskTemplateDialo
               {repeat && (
                 <div className="ml-4">
                   {/* The repeat type select */}
-                  <select
-                    value={repeatType}
-                    onChange={(e) => setRepeatType(e.target.value)}
-                    className="w-48 dark:bg-[#292d33] border text-xs h-fit outline-none rounded px-3 py-1"
-                  >
-                    <option value="" disabled>
-                      Select Repeat Type
-                    </option>
-                    <option value="Daily">Daily</option>
-                    <option value="Weekly">Weekly</option>
-                    <option value="Monthly">Monthly</option>
-                    <option value="Yearly">Yearly</option>
-                    <option value="Periodically">Periodically</option>
-                  </select>
+                  <ShadcnSelect value={repeatType} onValueChange={setRepeatType}>
+                    <SelectTrigger className="w-48 dark:bg-[#292d33] border text-xs rounded px-3 py-1 outline-none">
+                      <SelectValue placeholder="Select Repeat Type" />
+                    </SelectTrigger>
+                    <SelectContent className="dark:bg-[#292d33] z-[100] text-xs border">
+                      <SelectItem className="hover:bg-accent" value="Daily">Daily</SelectItem>
+                      <SelectItem className="hover:bg-accent" value="Weekly">Weekly</SelectItem>
+                      <SelectItem className="hover:bg-accent" value="Monthly">Monthly</SelectItem>
+                      <SelectItem className="hover:bg-accent" value="Yearly">Yearly</SelectItem>
+                      <SelectItem className="hover:bg-accent" value="Periodically">Periodically</SelectItem>
+                    </SelectContent>
+                  </ShadcnSelect>
                 </div>
               )}
 
@@ -624,7 +666,7 @@ export default function TaskTemplateDialog({ open, setOpen }: ITaskTemplateDialo
                     id="repeatInterval"
                     value={repeatInterval}
                     onChange={(e) => setRepeatInterval(Number(e.target.value))}
-                    className="w-44 dark:bg-[#292d33] border text-xs outline-none rounded px-3 py-2"
+                    className="w-32 dark:bg-[#292d33]  border text-xs outline-none rounded px-3 py-2"
                     placeholder="Enter interval in days"
                     min={1}
                   />
@@ -803,7 +845,7 @@ export default function TaskTemplateDialog({ open, setOpen }: ITaskTemplateDialo
                       onClick={() => removeLinkInputField(index)}
                       className="text-white bg-transparent hover:bg-transparent rounded"
                     >
-                      <FaTimes className="text-red-500 hover:text-red-800" />
+                      <Trash2 className="text-red-500 hover:text-red-800" />
                     </Button>
                   </div>
                 ))}
@@ -907,12 +949,12 @@ export default function TaskTemplateDialog({ open, setOpen }: ITaskTemplateDialo
                     onChange={(e) =>
                       setReminderType(e.target.value as "email" | "whatsapp")
                     }
-                    className="border bg-transparent outline-none p-2 dark:bg-[#1A1C20] rounded h-full"
+                    className="border bg-transparent outline-none p-2 dark:bg-[#1A1C20] bg-[#0a0c29] rounded h-full"
                   >
-                    <option className="dark:bg-[#1A1C20]" value="email">
+                    <option className="dark:bg-[#1A1C20] bg-[#0a0c29]" value="email">
                       Email
                     </option>
-                    <option className="dark:bg-[#1A1C20]" value="whatsapp">
+                    <option className="dark:bg-[#1A1C20] bg-[#0a0c29]" value="whatsapp">
                       WhatsApp
                     </option>
                   </select>
@@ -930,15 +972,15 @@ export default function TaskTemplateDialog({ open, setOpen }: ITaskTemplateDialo
                     onChange={(e) =>
                       setTimeUnit(e.target.value as "minutes" | "hours" | "days")
                     }
-                    className="p-2 outline-none dark:bg-[#1A1C20] border bg-transparent rounded h-full"
+                    className="p-2 outline-none dark:bg-[#1A1C20] bg-[#0a0c29] border bg-transparent rounded h-full"
                   >
-                    <option className="dark:bg-[#1A1C20]" value="minutes">
+                    <option className="dark:bg-[#1A1C20] bg-[#0a0c29]" value="minutes">
                       minutes
                     </option>
-                    <option className="dark:bg-[#1A1C20]" value="hours">
+                    <option className="dark:bg-[#1A1C20] bg-[#0a0c29]" value="hours">
                       hours
                     </option>
-                    <option className="dark:bg-[#1A1C20]" value="days">
+                    <option className="dark:bg-[#1A1C20] bg-[#0a0c29]" value="days">
                       days
                     </option>
                   </select>
@@ -1061,12 +1103,12 @@ export default function TaskTemplateDialog({ open, setOpen }: ITaskTemplateDialo
           </Dialog>
 
           {/* Create Template Button */}
-          <div className="flex justify-end">
+          <div className="flex justify-end pb-2">
             <Button
               type="submit"
               className="bg-[#815BF5] hover:bg-[#5f31e9] text-white px-4 py-2 w-full mt-2 mb-2 rounded"
             >
-              {loading ? "Saving..." : "Create Template"}
+              Save
             </Button>
           </div>
         </form>
@@ -1448,7 +1490,7 @@ const CategorySelectPopup: React.FC<CategorySelectPopupProps> = ({
     >
       <input
         placeholder=" Search Categories"
-        className="h-8 text-xs px-4 dark:text-white focus:border-[#815bf5] w-full dark:bg-[#282D32] -800 border-gray-500 dark:border-border  border rounded outline-none mb-2"
+        className="h-8 text-xs px-4  dark:text-white focus:border-[#815bf5] w-full dark:bg-[#282D32] -800 border-gray-500 dark:border-border  border rounded outline-none mb-2"
         value={searchCategoryQuery}
         onChange={(e) => setSearchCategoryQuery(e.target.value)}
       />
@@ -1480,7 +1522,7 @@ const CategorySelectPopup: React.FC<CategorySelectPopupProps> = ({
                   <input
                     type="radio"
                     name="category"
-                    className="bg-primary ml-auto "
+                    className="bg-primary w-full ml-64  "
                     checked={category === categorys._id}
                     onChange={() => handleSelectCategory(categorys._id)}
                   />

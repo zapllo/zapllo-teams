@@ -46,7 +46,6 @@ const HolidayFormModal: React.FC<HolidayFormModalProps> = ({
                 holidayName,
                 holidayDate,
             });
-
             onHolidayUpdated(response.data.holiday);
             setIsSubmitting(false);
             onClose(); // Close the modal after successful update
