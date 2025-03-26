@@ -1,177 +1,356 @@
+'use client'
 import React from 'react'
-import PayrollFaq from './Faq'
-import SaveMore from './save'
+import { motion } from 'framer-motion'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ArrowRight } from 'lucide-react'
+import Link from 'next/link'
+import { Tabs2, TabsList2, TabsTrigger2 } from '@/components/ui/tabs2'
+import { Tabs3, TabsList3, TabsTrigger3 } from '@/components/ui/tabs3'
 
-type Props = {}
+type FeatureProps = {
+    title: string;
+    description: string;
+    icon: string;
+    delay?: number;
+}
 
-export default function TaskFeatures({ }: Props) {
+const Feature = ({ title, description, icon, delay = 0 }: FeatureProps) => {
     return (
-        <div className='w-full flex justify-center'>
-            <div className='mb-16 max-w-5xl w-full mt-20 '>
-                <div className='flex justify-center'>
-                    <h1 className='text-center text-xl md:text-3xl font-bold md:max-w-xl'><span className='bg-gradient-to-r from-[#815BF5] via-[#FC8929] to-[#FC8929] bg-clip-text text-transparent '>
-                        Zapllo Tasks App Features
-                    </span> </h1>
-                </div>
-                <h1 className='font-bold text-center mb-4 text-xl md:text-3xl mt-4'>
-                    How Zapllo Tasks App saves 4 hours of each Employee?
-                </h1>
-                <div className='grid md:grid-cols-2 mx-12 md:mx-0 max-w-5xl   gap-4'>
-                    <div className=' h-[648px] md:block hidden relative rounded-xl'>
-                        <img src='/product/tasks.png' className='rounded-xl h-full object-cover' />
-                    </div>
-                    <div className='mt-12 rounded-xl'>
-                        <h1 className='text-xl md:text-3xl font-bold'>Effortless Task Delegation</h1>
-                        <div className='flex gap-4 mt-4 items-center'>
-                            <img src='/product/icons/assigned.png' className='h-12 ' />
-                            <h1 className='text-xl'>
-                                Task Assignment
-                            </h1>
-                        </div>
-                        <p className='text-muted-foreground mt-4 text-sm'>
-                            Assign tasks with deadlines and priorities, allow assigners to choose frequency, and ensure efficient completion and management.
-                        </p>
-                        <div className='flex gap-4 mt-4 items-center'>
-                            <img src='/product/icons/time.png' className='h-12 ' />
-                            <h1 className='text-xl'>
-                                Recurring Tasks-Daily, Weekly & Monthly
-                            </h1>
-                        </div>
-                        <p className='text-muted-foreground mt-4 text-sm'>
-                            Set up recurring tasks that need to be done on a periodic basis.
-                        </p>
-                        <div className='flex gap-4 mt-4 items-center'>
-                            <img src='/product/icons/progress.png' className='h-12 ' />
-                            <h1 className='text-xl'>
-                                Task Progress Updation
-
-                            </h1>
-                        </div>
-                        <p className='text-muted-foreground mt-4 text-sm'>
-                            Teammates stay updated on tasks and report progress to ensure assigners are kept informed.
-                        </p>
-                    </div>
-                    <div className=' h-[648px] block md:hidden relative rounded-xl'>
-                        <img src='/product/tasks.png' className='rounded-xl h-full object-cover' />
-                    </div>
-                </div>
-                <div className='grid md:grid-cols-2 max-w-5xl mx-12 md:mx-0   gap-4'>
-                    <div className='mt-12 rounded-xl'>
-                        <h1 className=' text-xl md:text-3xl font-bold'>Task Tracking & MIS Reports</h1>
-                        <div className='flex gap-4 mt-4 items-center'>
-                            <img src='/product/icons/assigned.png' className='h-12 ' />
-                            <h1 className='text-xl'>
-                                Department wise Dashboard
-                            </h1>
-                        </div>
-                        <p className='text-muted-foreground mt-4 text-sm'>
-                            Get real-time updates on tasks, including completion notifications and milestone achievements.
-                        </p>
-                        <div className='flex gap-4 mt-4 items-center'>
-                            <img src='/product/icons/time.png' className='h-12 ' />
-                            <h1 className='text-xl'>
-                                Employee Performance
-                            </h1>
-                        </div>
-                        <p className='text-muted-foreground mt-4 text-sm'>
-                            Analyze employee performance with MIS scores, fostering responsibility and accountability.
-                        </p>
-
-
-                    </div>
-                    <div className=' w-full h-auto relative rounded-xl'>
-                        <img src='/product/performance.png' className='rounded-xl h-full scale-125  object-cover' />
-                    </div>
-                </div>
-                <div className='grid md:grid-cols-2  max-w-5xl   gap-4'>
-                    <div className=' w-full h-auto md:block hidden relative rounded-xl'>
-                        <img src='/product/reminders.png' className='rounded-xl h-full w-full object-cover' />
-                    </div>
-                    <div className=' mx-12 rounded-xl'>
-                        <h1 className='text-xl md:text-3xl font-bold'>Notifications & Reminders                        </h1>
-                        <div className='flex gap-4  mt-4 items-center'>
-                            <img src='/product/icons/bell.png' className='h-12 ' />
-                            <h1 className='text-xl'>
-                                Instant WhatsApp & Email Reminders
-                            </h1>
-                        </div>
-                        <p className='text-muted-foreground mt-4 text-sm'>
-                            Automated reminders and notifications about tasks and deliverables.
-                        </p>
-                        <div className='flex gap-4 mt-4 items-center'>
-                            <img src='/product/icons/time.png' className='h-12 ' />
-                            <h1 className='text-xl'>
-                                Daily Reminders on WhatsApp
-                            </h1>
-                        </div>
-                        <p className='text-muted-foreground mt-4 text-sm'>
-                            Employees get Daily Reminder for pending Tasks which pushes them to complete on time
-                        </p>
-                        <div className='flex gap-4 mt-4 items-center'>
-                            <img src='/product/icons/time.png' className='h-12 ' />
-                            <h1 className='text-xl'>
-                                Notification Subscriptions
-                            </h1>
-                        </div>
-                        <p className='text-muted-foreground mt-4 text-sm'>
-                            Admin and manager can subscribe to any task and get notifications about that tasks.
-                        </p>
-
-                    </div>
-                    <div className=' w-full h-auto block md:hidden relative rounded-xl'>
-                        <img src='/product/reminders.png' className='rounded-xl h-full w-full object-cover' />
-                    </div>
-
-                </div>
-                <div className='grid mx-12 md:mx-0 mt-24 md:grid-cols-2 max-w-5xl   gap-4'>
-                    <div>
-                        <h1 className='text-xl md:text-3xl font-bold'>Say GoodBye to Miscommunications</h1>
-                        <div className='flex gap-4  mt-8 items-center'>
-                            <img src='/product/icons/audio.png' className='h-12 ' />
-                            <h1 className='text-2xl font-medium '>
-                                Audio Notes
-                            </h1>
-                        </div>
-                        <p className='mt-4 max-w-md text-muted-foreground'>
-                            While assigning tasks, you can add audio note to explain in detail about how to perform a specific tasks or what to avoid.
-                        </p>
-                        <div className='flex gap-4  mt-8 items-center'>
-                            <img src='/product/icons/attachments.png' className='h-12 ' />
-                            <h1 className='text-2xl font-medium '>
-                                KRAs
-                            </h1>
-                        </div>
-                        <p className='mt-4 max-w-md text-muted-foreground'>
-                            Every team leader and manager will be able to assign, modify and delete KRAs to each team member.
-                        </p>
-                        <div className='flex gap-4  mt-8 items-center'>
-                            <img src='/product/icons/reminders.png' className='h-12 ' />
-                            <h1 className='text-2xl font-medium '>
-                                Templates Directory
-
-                            </h1>
-                        </div>
-                        <p className='mt-4 max-w-md text-muted-foreground'>
-                            Predefined department-wise task templates for you to use.
-                        </p>
-                        <div className='flex gap-4  mt-8 items-center'>
-                            <img src='/product/icons/export.png' className='h-12 ' />
-                            <h1 className='text-2xl font-medium '>
-                                Upload
-                            </h1>
-                        </div>
-                        <p className='mt-4 max-w-md text-muted-foreground'>
-                            Every Admin, Manager and Team Members can upload and attach any kind of files which are relatable to the task.
-                        </p>
-                    </div>
-                    <div className=' h-[648px] -ml-14  mt-10 relative rounded-xl'>
-                        <img src='/product/tasks.png' className='rounded-xl h-full w-full scale-90 md:scale-100 object-cover' />
-                    </div>
-                </div>
-                <SaveMore />
-
+        <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay }}
+            className='flex gap-4 mt-6 items-start'
+        >
+            <div className="bg-[#0A0D28] p-2 rounded-lg border border-[#815BF5]/20">
+                <img src={icon} className='w-12' alt={title} />
             </div>
+            <div>
+                <h3 className='text-xl font-medium'>{title}</h3>
+                <p className='text-muted-foreground mt-2 text-sm'>{description}</p>
+            </div>
+        </motion.div>
+    )
+}
 
+export default function TaskFeatures() {
+    return (
+        <div className='w-full py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#05071E] to-[#04061E] relative'>
+            {/* Decorative elements */}
+            <div className="absolute top-40 right-0 w-96 h-96 bg-[#815BF5]/5 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-40 left-0 w-96 h-96 bg-[#FC8929]/5 rounded-full blur-3xl"></div>
+            
+            <div className='max-w-7xl mx-auto'>
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5 }}
+                    className="text-center mb-16"
+                >
+                    <Badge className="mb-4 bg-[#0A0D28] text-[#815BF5] border-[#815BF5]/30">
+                        FEATURES
+                    </Badge>
+                    
+                    <h2 className='text-3xl font-bold mb-4'>
+                        <span className='bg-gradient-to-r from-[#815BF5] via-[#FC8929] to-[#FC8929] bg-clip-text text-transparent'>
+                            Zapllo Tasks App Features
+                        </span>
+                    </h2>
+                    
+                    <h3 className='font-bold text-center mb-6 text-xl md:text-3xl'>
+                        How Zapllo Tasks App saves 5 hours of each Employee?
+                    </h3>
+                    
+                    <p className="text-muted-foreground max-w-2xl mx-auto">
+                        Our powerful features streamline task management, automate reminders, and provide real-time insights into team performance.
+                    </p>
+                </motion.div>
+
+                <Tabs3 defaultValue="delegation" className="w-full">
+                    <div className="flex justify-center mb-8">
+                        <TabsList3 className="bg-[#0A0D28] p-1 h-12 md:scale-100 scale-75 border border-[#815BF5]/20 rounded-full">
+                            <TabsTrigger3
+                                value="delegation" 
+                                className="rounded-full px-4 py-2 data-[state=active]:bg-[#815BF5] data-[state=active]:text-white transition-all"
+                            >
+                                Task Delegation
+                            </TabsTrigger3>
+                            <TabsTrigger3
+                                value="tracking" 
+                                className="rounded-full px-4 py-2 data-[state=active]:bg-[#815BF5] data-[state=active]:text-white transition-all"
+                            >
+                                Tracking & Reports
+                            </TabsTrigger3>
+                            <TabsTrigger3 
+                                value="notifications" 
+                                className="rounded-full px-4 py-2 data-[state=active]:bg-[#815BF5] data-[state=active]:text-white transition-all"
+                            >
+                                Notifications
+                            </TabsTrigger3>
+                        </TabsList3>
+                    </div>
+                    
+                    <TabsContent value="delegation" className="mt-0">
+                        <div className='grid md:grid-cols-2 gap-8'>
+                            <motion.div 
+                                initial={{ opacity: 0, x: -20 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5 }}
+                                className='relative'
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-r from-[#815BF5]/10 to-[#FC8929]/10 rounded-xl blur-md"></div>
+                                <Card className="h-full bg-[#0A0D28]/80 backdrop-blur-sm border-[#815BF5]/20 overflow-hidden">
+                                    <CardContent className="p-0">
+                                        <img 
+                                            src='/product/tasks.png' 
+                                            className='w-full h-full object-cover rounded-t-xl' 
+                                            alt="Task delegation interface" 
+                                        />
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
+                            
+                            <div>
+                                <motion.h3 
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.5 }}
+                                    className='text-2xl md:text-3xl font-bold'
+                                >
+                                    Effortless Task Delegation
+                                </motion.h3>
+                                
+                                <Feature 
+                                    icon='/product/icons/assigned.png'
+                                    title='Task Assignment'
+                                    description='Assign tasks with deadlines and priorities, allow assigners to choose frequency, and ensure efficient completion and management.'
+                                    delay={0.1}
+                                />
+                                
+                                <Feature 
+                                    icon='/product/icons/time.png'
+                                    title='Recurring Tasks-Daily, Weekly & Monthly'
+                                    description='Set up recurring tasks that need to be done on a periodic basis.'
+                                    delay={0.2}
+                                />
+                                
+                                <Feature 
+                                    icon='/product/icons/progress.png'
+                                    title='Task Progress Updation'
+                                    description='Teammates stay updated on tasks and report progress to ensure assigners are kept informed.'
+                                    delay={0.3}
+                                />
+                                
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.5, delay: 0.4 }}
+                                    className="mt-8"
+                                >
+                                    <Link href="/signup" className="text-[#815BF5] inline-flex items-center hover:underline">
+                                        Try task delegation feature <ArrowRight className="ml-1 h-4 w-4" />
+                                    </Link>
+                                </motion.div>
+                            </div>
+                        </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="tracking" className="mt-0">
+                        <div className='grid md:grid-cols-2 gap-8'>
+                            <div>
+                                <motion.h3 
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.5 }}
+                                    className='text-2xl md:text-3xl font-bold'
+                                >
+                                    Task Tracking & MIS Reports
+                                </motion.h3>
+                                
+                                <Feature 
+                                    icon='/product/icons/assigned.png'
+                                    title='Department wise Dashboard'
+                                    description='Get real-time updates on tasks, including completion notifications and milestone achievements.'
+                                    delay={0.1}
+                                />
+                                
+                                <Feature 
+                                    icon='/product/icons/time.png'
+                                    title='Employee Performance'
+                                    description='Analyze employee performance with MIS scores, fostering responsibility and accountability.'
+                                    delay={0.2}
+                                />
+                                
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.5, delay: 0.3 }}
+                                    className="mt-8"
+                                >
+                                    <Link href="/signup" className="text-[#815BF5] inline-flex items-center hover:underline">
+                                        Explore performance analytics <ArrowRight className="ml-1 h-4 w-4" />
+                                    </Link>
+                                </motion.div>
+                            </div>
+                            
+                            <motion.div 
+                                initial={{ opacity: 0, x: 20 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5 }}
+                                className='relative'
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-r from-[#815BF5]/10 to-[#FC8929]/10 rounded-xl blur-md"></div>
+                                <Card className="h-full bg-[#0A0D28]/80 backdrop-blur-sm border-[#815BF5]/20 overflow-hidden">
+                                    <CardContent className="p-0">
+                                        <img 
+                                            src='/product/performance.png' 
+                                            className='w-full h-full object-cover rounded-t-xl' 
+                                            alt="Performance dashboard" 
+                                        />
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
+                        </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="notifications" className="mt-0">
+                        <div className='grid md:grid-cols-2 gap-8'>
+                            <motion.div 
+                                initial={{ opacity: 0, x: -20 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.5 }}
+                                className='relative'
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-r from-[#815BF5]/10 to-[#FC8929]/10 rounded-xl blur-md"></div>
+                                <Card className="h-full bg-[#0A0D28]/80 backdrop-blur-sm border-[#815BF5]/20 overflow-hidden">
+                                    <CardContent className="p-0">
+                                        <img 
+                                            src='/product/reminders.png' 
+                                            className='w-full h-full object-cover rounded-t-xl' 
+                                            alt="WhatsApp notifications" 
+                                        />
+                                    </CardContent>
+                                </Card>
+                            </motion.div>
+                            
+                            <div>
+                                <motion.h3 
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.5 }}
+                                    className='text-2xl md:text-3xl font-bold'
+                                >
+                                    Notifications & Reminders
+                                </motion.h3>
+                                
+                                <Feature 
+                                    icon='/product/icons/bell.png'
+                                    title='Instant WhatsApp & Email Reminders'
+                                    description='Automated reminders and notifications about tasks and deliverables.'
+                                    delay={0.1}
+                                />
+                                
+                                <Feature 
+                                    icon='/product/icons/time.png'
+                                    title='Daily Reminders on WhatsApp'
+                                    description='Employees get Daily Reminder for pending Tasks which pushes them to complete on time.'
+                                    delay={0.2}
+                                />
+                                
+                                <Feature 
+                                    icon='/product/icons/time.png'
+                                    title='Notification Subscriptions'
+                                    description='Admin and manager can subscribe to any task and get notifications about that tasks.'
+                                    delay={0.3}
+                                />
+                                
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 0.5, delay: 0.4 }}
+                                    className="mt-8"
+                                >
+                                    <Link href="/signup" className="text-[#815BF5] inline-flex items-center hover:underline">
+                                        Try automated reminders <ArrowRight className="ml-1 h-4 w-4" />
+                                    </Link>
+                                </motion.div>
+                            </div>
+                        </div>
+                    </TabsContent>
+                </Tabs3>
+                
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                    className="mt-24 bg-gradient-to-r from-[#0A0D28] to-[#151E4A] border border-[#815BF5]/20 rounded-2xl overflow-hidden"
+                >
+                    <div className="grid md:grid-cols-2 gap-8 p-8">
+                        <div>
+                            <h3 className="text-2xl font-bold mb-4">Say Goodbye to Miscommunications</h3>
+                            <p className="text-muted-foreground mb-6">
+                                Clear communication is key for successful task management. Our app eliminates confusion with these powerful features:
+                            </p>
+                            
+                            <div className="grid grid-cols-2 gap-6">
+                                {[
+                                    {
+                                        icon: '/product/icons/audio.png',
+                                        title: 'Audio Notes',
+                                        description: 'Add voice instructions to explain tasks in detail'
+                                    },
+                                    {
+                                        icon: '/product/icons/attachments.png',
+                                        title: 'KRAs',
+                                        description: 'Assign and track key result areas for each team member'
+                                    },
+                                    {
+                                        icon: '/product/icons/reminders.png',
+                                        title: 'Templates',
+                                        description: 'Use predefined department-wise task templates'
+                                    },
+                                    {
+                                        icon: '/product/icons/export.png',
+                                        title: 'File Uploads',
+                                        description: 'Attach any kind of files related to tasks'
+                                    }
+                                ].map((item, i) => (
+                                    <Card key={i} className="bg-[#0A0D28]/50 border-[#815BF5]/20">
+                                        <CardContent className="p-4">
+                                            <img src={item.icon} className="h-10 w-10 mb-3" alt={item.title} />
+                                            <h4 className="font-medium mb-1">{item.title}</h4>
+                                            <p className="text-xs text-muted-foreground">{item.description}</p>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        <div className="relative flex items-center justify-center">
+                            <div className="absolute inset-0 bg-gradient-to-r from-[#815BF5]/10 to-[#FC8929]/10 rounded-xl blur-md"></div>
+                            <img 
+                                src='/product/tasks.png' 
+                                className='relative z-10 w-full max-w-md rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-500' 
+                                alt="Communication features" 
+                            />
+                        </div>
+                    </div>
+                </motion.div>
+            </div>
         </div>
     )
-};
+}

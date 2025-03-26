@@ -1,8 +1,50 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import Image from 'next/image'
 import React, { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
+
+// Partner logo component with hover effect
+const PartnerLogo = ({ name, logo = '' }: { name: string, logo?: string }) => (
+    <div className="group flex flex-col items-center justify-center mx-6">
+        <div className="h-12 w-auto relative flex items-center justify-center overflow-hidden transition-all duration-300 filter grayscale hover:grayscale-0 hover:scale-110">
+            {logo ? (
+                <h1
+                    className="h-full text-muted-foreground text-lg object-contain"
+                >{name}</h1>
+            ) : (
+                <div className="bg-gradient-to-r from-[#815BF5]/10 to-[#FC8929]/10 px-6 py-3 rounded-lg">
+                    <span className="text-lg font-semibold bg-gradient-to-r from-[#815BF5] to-[#FC8929] bg-clip-text text-transparent">
+                        {name}
+                    </span>
+                </div>
+            )}
+        </div>
+    </div>
+)
+
+// Sample partner data - replace with actual partner logos
+const partners = [
+    { name: "CoCreative", logo: "/partners/cocreative.png" },
+    { name: "Daily AI", logo: "/partners/dailyai.png" },
+    { name: "Collaboration AI", logo: "/partners/collaborationai.png" },
+    { name: "Young Indians", logo: "/partners/youngindia.png" },
+    { name: "BNI Kolkata", logo: "/partners/bni.png" },
+    { name: "BNI Dhanbad", logo: "/partners/bni.png" },
+    { name: "Mach Energy Services", logo: "/partners/mach.png" },
+    { name: "DPG Media", logo: "/partners/dpg.png" },
+    { name: "Nyrah Beauty", logo: "/partners/nyrah.png" },
+    { name: "Top Tier Authentics", logo: "/partners/toptier.png" },
+    { name: "Lions International", logo: "/partners/lions.png" },
+    { name: "Malabar", logo: "/partners/lions.png" },
+    { name: "Emeralds", logo: "/partners/lions.png" },
+    { name: "Sabhyasachi", logo: "/partners/lions.png" },
+    { name: "Walking Tree", logo: "/partners/lions.png" },
+    { name: "Birla Braniacs", logo: "/partners/lions.png" },
+    { name: "BVC Ventures", logo: "/partners/lions.png" },
+    { name: "Green Lab", logo: "/partners/lions.png" },
+    { name: "Lineargent", logo: "/partners/lions.png" },
+]
 
 export const InfiniteMoving2 = ({
     direction = 'left',
@@ -23,6 +65,7 @@ export const InfiniteMoving2 = ({
     }, [])
 
     const [start, setStart] = useState(false)
+
     function addAnimation() {
         if (containerRef.current && scrollerRef.current) {
             const scrollerContent = Array.from(scrollerRef.current.children)
@@ -39,6 +82,7 @@ export const InfiniteMoving2 = ({
             setStart(true)
         }
     }
+
     const getDirection = () => {
         if (containerRef.current) {
             if (direction === 'left') {
@@ -54,6 +98,7 @@ export const InfiniteMoving2 = ({
             }
         }
     }
+
     const getSpeed = () => {
         if (containerRef.current) {
             if (speed === 'fast') {
@@ -65,66 +110,35 @@ export const InfiniteMoving2 = ({
             }
         }
     }
+
     return (
-        <div
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1 }}
             ref={containerRef}
             className={cn(
-                'scroller relative z-20 bg-[#0a0d28] p-6 max-w-8xl overflow- space-x-6  ',
+                'scroller relative z-20 py-8 max-w-8xl overflow-hidden',
                 className
             )}
         >
+            <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-[#0a0d28] to-transparent z-10"></div>
+            <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-[#0a0d28] to-transparent z-10"></div>
+
             <ul
                 ref={scrollerRef}
                 className={cn(
-                    ' flex min-w-full shrink-0 space-x-4 -10 py-4 w-max flex-nowrap',
-                    start && 'animate-scroll ',
+                    'flex min-w-full shrink-0 gap-8 py-4 w-max flex-nowrap',
+                    start && 'animate-scroll',
                     pauseOnHover && 'hover:[animation-play-state:paused]'
                 )}
             >
-
-                {/* <img
-
-            src='/readers.png'
-            alt='readers'
-            className=" relative w-screen   "
-          /> */}
-                <div className=' text-md text-muted-foreground font-bold flex gap-4 space-x-6 uppercase'>
-                    <h1>
-                        CoCreative
-                    </h1>
-                    <h1>
-                        Daily AI
-                    </h1>
-                    <h1>
-                        Collaboration AI
-                    </h1>
-                    <h1>
-                        Young Indians
-                    </h1>
-                    <h1>
-                        BNI Kolkata
-                    </h1>
-                    <h1>
-                        BNI Dhanbad
-                    </h1>
-                    <h1>
-                        Mach Energy Services
-                    </h1>
-                    <h1>
-                        DPG Media
-                    </h1>
-                    <h1>
-                        Nyrah Beauty
-                    </h1>
-                    <h1>
-                        Top Tier Authentics
-                    </h1>
-                    <h1>
-                        Lions International
-                    </h1>
-                    {/* <img src='deep.png' /> */}
-                </div>
+                {partners.map((partner, index) => (
+                    <li key={`${partner.name}-${index}`} className="flex items-center justify-center">
+                        <PartnerLogo name={partner.name} logo={partner.logo} />
+                    </li>
+                ))}
             </ul>
-        </div>
+        </motion.div>
     )
 }

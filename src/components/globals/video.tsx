@@ -19,10 +19,10 @@ export default function VideoComponent() {
     };
 
     return (
-        <div className='relative w-[900px] md:mt-0 mt h-[500px]'>
+        <div className='relative w-full max-w-7xl md:mt-0 mt h-[500px]'>
             <video
                 ref={videoRef}
-                className='rounded-xl shadow-2xl shadow-blue-500/20 w-full h-full max-w-[900px]'
+                className='rounded-xl shadow-2xl shadow-blue-500/20 w-full h-full '
                 preload="auto"
             >
                 <source src="/intro.mp4" type="video/mp4" />

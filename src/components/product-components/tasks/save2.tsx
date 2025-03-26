@@ -8,7 +8,7 @@ type Props = {}
 export default function SaveMore2({ }: Props) {
     return (
         <div className='justify-center mt-20   w-full  flex '>
-            <div className='grid md:grid-cols-2 mx-12 gap-2 max-w-5xl w-full  mt-4 justify-center items-center '>
+            <div className='grid md:grid-cols-2 mx-12 gap-2 md:max-w-5xl w-full scale-75 md:scale-100  mt-4 justify-center items-center '>
                 <div className='w-full'>
                     <img src="/product/noexcuse.png" className='md:w-[90%] md:scale-100 scale-75 ' />
                 </div>

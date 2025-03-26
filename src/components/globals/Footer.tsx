@@ -1,153 +1,262 @@
 "use client"
 
-import React, { FormEvent, useRef, useState } from 'react'
-import { Separator } from '../ui/separator'
-import ShimmerButton from '../magicui/shimmer-button'
-import { BookCall } from '../ui/bookcall'
+import React, { useState } from 'react'
+import { motion } from 'framer-motion'
+import Link from 'next/link'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
-import { BookCall2 } from '../ui/bookdemo'
-import { LetsCall } from '../ui/letscall'
-import Link from 'next/link'
-import ShineBorder from '../magicui/shine-border'
-import Newsletter from './newsletter'
-import { motion } from 'framer-motion'
-
+import { Separator } from '../ui/separator'
+import {
+    FacebookIcon,
+    TwitterIcon,
+    InstagramIcon,
+    LinkedinIcon,
+    SendIcon,
+    ArrowRight,
+    RocketIcon,
+    GithubIcon
+} from 'lucide-react'
 
 export default function Footer() {
+    const [email, setEmail] = useState('')
+    const [isSubscribed, setIsSubscribed] = useState(false)
+
+    const handleSubscribe = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        if (email) {
+            try {
+                const response = fetch('/api/subscribers', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email }),
+                });
 
 
-    const gearVariant = {
-        hidden: { scale: 0.98 },
-        visible: {
-            scale: 1,
-            transition: {
-                duration: 0.2,
-                ease: "easeIn"
+
+                // setSubscribed(true);
+                setEmail('');
+            } catch (err) {
+                // setError('Something went wrong');
             }
+            setIsSubscribed(true)
+            setTimeout(() => setIsSubscribed(false), 3000)
         }
-    };
+    }
+
+    const navigationLinks = [
+        {
+            name: 'Products', links: [
+                { name: 'Task Delegation App', href: '/products/zapllo-teams' },
+                { name: 'Zapllo Payroll', href: '/products/zapllo-payroll' },
+                { name: 'WhatsApp API', href: '#' },
+                { name: 'Zapllo CRM', href: 'https://crm.zapllo.com' },
+            ]
+        },
+        {
+            name: 'Company', links: [
+                { name: 'About Us', href: '/about' },
+                { name: 'Careers', href: 'https://zapllo.notion.site/Work-at-Zapllo-9c970622e3d142919bdca4c42ee38aab?pvs=4' },
+                { name: 'Press', href: '/pressRelease' },
+                { name: 'Blog', href: '/blog' },
+            ]
+        },
+        {
+            name: 'Resources', links: [
+                { name: 'Documentation', href: '/docs' },
+                { name: 'Support', href: '/support' },
+                { name: 'Contact', href: '/contact' },
+                { name: 'Community', href: '/community' },
+            ]
+        },
+    ]
 
     return (
-        <footer className='max-w-8xl  p-4 w-full overflow-hidden'>
-            <div className='flex justify-center'>
-                <Separator className=' w-[95%] flex mt-12' />
-
-            </div>
-            <div className='grid grid-cols-1 md:grid-cols-3 w-full  p-6 gap-12'>
-                <div className='Zapllo my-8  '>
-                    <img src='/logo.png' className='h-6' />
-                    <div className='flex gap-2 text-[14px] mt-6'>
-                        <Link href='https://zapllo.notion.site/Work-at-Zapllo-9c970622e3d142919bdca4c42ee38aab?pvs=4'>
-                            <h1>CAREERS</h1>
-                        </Link>
-                        <Link href='/support'>
-                            <h1>SUPPORT</h1>
-                        </Link>
-                        <Link href='/contact'>
-                            <h1>CONTACT</h1>
-                        </Link>
-                        <Link href='/pressRelease'>
-                            <h1>PRESS RELEASE</h1>
-                        </Link>
-                        <Link href='/blog'>
-                            <h1>BLOGS</h1>
-                        </Link>
-                    </div>
-                    <div className='flex gap-3 mt-6'>
-                        <img src="/twitter.png" alt="" className='h-8' />
-                        <Link href='https://www.facebook.com/zapllohq'>
-                            <img src="/facebook.png" alt="" className='h-8' />
-                        </Link>
-                        <Link href='https://www.instagram.com/zapllohq/'>
-                            <img src="/instagram.png" alt="" className='h-8' />
-                        </Link>
-                    </div>
-                    <div className='flex w-full justify-start  mt-8'>
-                        {/* <Link
-                            href="/dashboard"
-                            className="relative inline-fl ex h-10 overflow-hidden rounded-full p-[2px] "
-                        >
-                            <ShineBorder borderRadius={50}
-                                className="text-center text-xl font-bold capitalize"
-                                color={["#A07CFE", "#FE8FB5", "#FFBE7B"]}
-                            >
-                                <h1>
-                                    Get Started
-                                </h1>
-                            </ShineBorder>
-                        </Link> */}
-                        <Link href='https://masterclass.zapllo.com/workshop/'>
-                            <Button className="mt-8 mb-4 relative py-7 w-80 text-xl font-semibold bg-primary text-white rounded-full shadow-lg flex items-center ">
-                                <p className="-ml-8">   Join Live Masterclass</p>
-                                <img src="/icons/rocket.png" className="h-20 absolute right-0" />
-                            </Button>
-                        </Link>
-                    </div>
-                </div>
-                <div className='empty rectangle hidden lg:block '>
-                    <motion.div className='-ml-12' initial="hidden" animate="visible" variants={gearVariant}>
-
-                        <img src='/shards.png' className='absolute -mt-40  h-56' />
-
-                    </motion.div>
-                    <img src='/gear.png' className='h-[100%]' />
-                </div>
-                <div className=' overflow-visible  my-8  '>
-                    <div className='flex md:justify-end gap-6'>
-                        {/* <img src='at.png' className='h-full' /> */}
-
-                        <img src='/at.gif' className='bg-gradient-to-r p-3 rounded-2xl from-[#815BF5] via-[#FC8929] to-[#FC8929]   h-20' />
-
-                        <div>
-                            <h1 className='text-lg   font-bold'>Subscribe to Zapllo Insider</h1>
-                            <p className='text-[#676B93] text-xs w-56  mt-2'>Get latest updates on how technology is transforming Businesses and leveraging AI for 10X results</p>
+        <footer className='w-full pt-20 pb-8 overflow-hidden'>
+            {/* Top CTA section */}
+            <div className="max-w-7xl mx-auto px-4 mb-20">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5 }}
+                    className="bg-gradient-to-br from-[#1a1e48]/80 to-[#0A0D28] border border-[#815bf5]/20 rounded-xl p-8 shadow-[0_0_30px_rgba(129,91,245,0.15)] relative overflow-hidden"
+                >
+                    <div className="absolute top-0 right-0 w-1/3 h-full">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#815BF5]/30 z-0"></div>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                            <motion.img
+                                src="/icons/rocket.png"
+                                alt="Get started"
+                                className="h-40 opacity-60 transform -rotate-12"
+                                animate={{ y: [0, -10, 0], rotate: [-12, -6, -12] }}
+                                transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+                            />
                         </div>
-                        {/* <img src='ellipse.png' className='absolute h- w-48 rounded-full object-cover' /> */}
                     </div>
-                    <div className='flex md:justify-end'>
-                        <Newsletter />
+
+                    <div className="relative z-10 max-w-3xl">
+                        <h2 className="text-2xl md:text-3xl font-bold mb-4">Ready to transform your business operations?</h2>
+                        <p className="text-[#676B93] mb-8">Join 20,000+ businesses that are saving time, boosting productivity, and growing faster with Zapllo&apos;s automation platform.</p>
+
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <Link href="/signup">
+                                <Button className="py-6 bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white rounded-full hover:opacity-90 transition-all text-lg">
+                                    Get Started for Free <ArrowRight className="ml-2 h-4 w-4" />
+                                </Button>
+                            </Link>
+
+                            <Link href='https://masterclass.zapllo.com/workshop/'>
+                                <Button variant="outline" className="py-6 bg-transparent border border-[#815BF5] text-[#815BF5] rounded-full hover:bg-[#815BF5]/10 transition-all text-lg">
+                                    Join Live Masterclass <RocketIcon className="ml-2 h-4 w-4" />
+                                </Button>
+                            </Link>
+                        </div>
+                    </div>
+                </motion.div>
+            </div>
+
+            <div className='max-w-7xl mx-auto px-4'>
+                <Separator className='w-full mb-12 opacity-30' />
+
+                {/* Main footer content */}
+                <div className='grid grid-cols-1 md:grid-cols-12 gap-8 mb-12'>
+                    {/* Logo and social links */}
+                    <div className='col-span-1 md:col-span-4'>
+                        <img src='/logo.png' className='h-8 mb-6' alt="Zapllo Logo" />
+                        <p className="text-[#676B93] mb-6 max-w-sm">Helping businesses automate their operations and get freedom from daily firefighting.</p>
+
+                        <div className='flex gap-4 mb-8'>
+                            <a href="https://twitter.com/zapllohq" target="_blank" rel="noopener noreferrer" className="h-10 w-10 rounded-full bg-[#141841] flex items-center justify-center hover:bg-[#815BF5]/20 transition-colors">
+                                <TwitterIcon size={18} />
+                            </a>
+                            <a href="https://www.facebook.com/zapllohq" target="_blank" rel="noopener noreferrer" className="h-10 w-10 rounded-full bg-[#141841] flex items-center justify-center hover:bg-[#815BF5]/20 transition-colors">
+                                <FacebookIcon size={18} />
+                            </a>
+                            <a href="https://www.instagram.com/zapllohq" target="_blank" rel="noopener noreferrer" className="h-10 w-10 rounded-full bg-[#141841] flex items-center justify-center hover:bg-[#815BF5]/20 transition-colors">
+                                <InstagramIcon size={18} />
+                            </a>
+                            <a href="https://www.linkedin.com/company/zapllo" target="_blank" rel="noopener noreferrer" className="h-10 w-10 rounded-full bg-[#141841] flex items-center justify-center hover:bg-[#815BF5]/20 transition-colors">
+                                <LinkedinIcon size={18} />
+                            </a>
+                            {/* <a href="https://github.com/zapllo" target="_blank" rel="noopener noreferrer" className="h-10 w-10 rounded-full bg-[#141841] flex items-center justify-center hover:bg-[#815BF5]/20 transition-colors">
+                                <GithubIcon size={18} />
+                            </a> */}
+                        </div>
+                    </div>
+
+                    {/* Navigation links */}
+                    {navigationLinks.map((section, i) => (
+                        <div key={i} className='col-span-1 md:col-span-2'>
+                            <h3 className="font-bold mb-4 text-lg">{section.name}</h3>
+                            <ul className="space-y-3">
+                                {section.links.map((link, j) => (
+                                    <li key={j}>
+                                        <Link href={link.href} className="text-[#676B93] hover:text-white transition-colors">
+                                            {link.name}
+                                        </Link>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ))}
+
+                    {/* Newsletter subscription */}
+                    <div className='col-span-1 md:col-span-4'>
+                        <div className="bg-gradient-to-br from-[#1a1e48]/50 to-[#0A0D28] border border-[#815bf5]/10 rounded-xl p-4">
+                            <div className="flex items-start gap-4 mb-4">
+                                <div className="h-12 w-12 bg-gradient-to-r from-[#815BF5]/20 to-[#FC8929]/20 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <SendIcon className="h-5 w-5 text-[#815BF5]" />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold mb-1">Subscribe to Zapllo Insider</h3>
+                                    <p className="text-[#676B93] text-sm">Get the latest updates on how technology is transforming businesses</p>
+                                </div>
+                            </div>
+
+                            <form onSubmit={handleSubscribe} className="space-y-3">
+                                <div className="flex gap-2">
+                                    <Input
+                                        type="email"
+                                        placeholder="Enter your email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                        className="bg-[#0A0D28] border-[#815bf5]/20 focus:border-[#815bf5] rounded-lg"
+                                    />
+                                    <Button
+                                        type="submit"
+                                        disabled={isSubscribed}
+                                        className="bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white hover:opacity-90"
+                                    >
+                                        {isSubscribed ? 'Subscribed!' : 'Subscribe'}
+                                    </Button>
+                                </div>
+                                <p className="text-xs text-[#676B93]">
+                                    We respect your privacy. Unsubscribe at any time.
+                                </p>
+                            </form>
+                        </div>
+
+                        {/* Mobile app badges */}
+                        <div className="mt-6">
+                            <p className="text-sm text-[#676B93] mb-3">Download our mobile app:</p>
+                            <div className="flex gap-3">
+                                <a href="#" className="bg-[#141841] rounded-lg p-2 hover:bg-[#1a1e48] transition-colors">
+                                    <img src="/app-store-badge.png" alt="App Store" className="h-8" onError={(e) => { e.currentTarget.style.display = 'none' }} />
+                                </a>
+                                <a href="#" className="bg-[#141841] rounded-lg p-2 hover:bg-[#1a1e48] transition-colors">
+                                    <img src="/google-play-badge.png" alt="Google Play" className="h-8" onError={(e) => { e.currentTarget.style.display = 'none' }} />
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div className='flex justify-center'>
-                <Separator className=' w-[95%] flex -mt-6' />
-            </div>
-            <div className='md:flex md:justify-between px-6 '>
-                <div className='md:max-w-[600px]'>
-                    <h1 className='text-[#676B93] mt-6 text-xs md:text-sm'>Copyright © 2025 Zapllo Technologies Private Limited. All rights reserved.</h1>
-                    <p className='text-[#676B93] text-xs '>This site is not a part of the Facebook website or Facebook Inc. Additionally, This site is NOT endorsed by Facebook in any way. FACEBOOK is a trademark of FACEBOOK, Inc.</p>
-                </div>
-                <div className='md:flex items-center mt-4 mb-4  gap-1 md:gap-2'>
-                    <h1 className='text-xs w-[500px] md:w-full md:text-md text-[#676B93]'>
-                        🔒 We care about privacy (
 
-                        <Link className='hover:underline text-blue-400' href='/privacypolicy'>
+                <Separator className='w-full mb-8 opacity-30' />
 
+                {/* Footer bottom section */}
+                <div className='flex flex-col md:flex-row md:items-center justify-between gap-4'>
+                    <div>
+                        <p className='text-[#676B93] text-sm'>
+                            Copyright © {new Date().getFullYear()} Zapllo Technologies Private Limited. All rights reserved.
+                        </p>
+                        <p className='text-[#676B93] text-xs mt-1 max-w-2xl'>
+                            This site is not a part of the Facebook website or Facebook Inc. Additionally, This site is NOT endorsed by Facebook in any way. FACEBOOK is a trademark of FACEBOOK, Inc.
+                        </p>
+                    </div>
+
+                    <div className='flex flex-wrap gap-4 items-center'>
+                        <Link href='/privacypolicy' className='text-[#676B93] text-sm hover:text-white transition-colors'>
                             Privacy Policy
-                        </Link> & <Link className='hover:underline text-blue-400' href='/terms'>Terms of Service</Link>)
-
-                    </h1>
-                    {/* <Link href='/disclaimer'>
-                        <h1 className='text-[#676B93] mt-6 text-xs md:text-sm cursor-pointer hover:text-gray-200'>Disclaimer</h1>
-                    </Link> */}
-                    {/* <h1 className='text-[#676B93] mt-6  hidden md:block text-xs md:text-sm'>|</h1> */}
-
-
-
-                    {/* <Link href='/refundpolicy'>
-                        <h1 className='text-[#676B93] mt-6 text-xs md:text-sm cursor-pointer hover:text-gray-200'>Refund Policy</h1>
-                    </Link> */}
-                    {/* <h1 className='text-[#676B93] mt-6  hidden md:block text-xs md:text-sm'>|</h1> */}
-
-
-                    {/* <h1 className='text-[#676B93] mt-6 hidden md:block text-xs md:text-sm'>|</h1> */}
-                    {/* <Link href='/contactus'>
-                        <h1 className='text-[#676B93] mt-6 text-xs md:text-sm cursor-pointer hover:text-gray-200'>Contact Us</h1>
-                    </Link> */}
-
+                        </Link>
+                        <span className='text-[#676B93]'>•</span>
+                        <Link href='/terms' className='text-[#676B93] text-sm hover:text-white transition-colors'>
+                            Terms of Service
+                        </Link>
+                        <span className='text-[#676B93]'>•</span>
+                        <Link href='/disclaimer' className='text-[#676B93] text-sm hover:text-white transition-colors'>
+                            Disclaimer
+                        </Link>
+                        <span className='text-[#676B93]'>•</span>
+                        <Link href='/refundpolicy' className='text-[#676B93] text-sm hover:text-white transition-colors'>
+                            Refund Policy
+                        </Link>
+                    </div>
                 </div>
-            </div >
-        </footer >
+
+                {/* Security badge */}
+                <div className="flex justify-center mt-8">
+                    <div className="bg-[#141841] rounded-full px-4 py-2 flex items-center gap-2">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z" stroke="#815BF5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <path d="M9 12L11 14L15 10" stroke="#815BF5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        <span className="text-xs text-[#676B93]">🔒 Secure payments powered by Razorpay</span>
+                    </div>
+                </div>
+            </div>
+        </footer>
     )
 }

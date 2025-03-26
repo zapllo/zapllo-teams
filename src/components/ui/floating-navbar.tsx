@@ -3,10 +3,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import ShimmerButton from "../magicui/shimmer-button";
-import ShineBorder from "../magicui/shine-border";
-import { Calendar, File } from "lucide-react";
 import { Button } from "./button";
+import {
+    ChevronDown,
+    LayoutDashboard,
+    CalendarDays,
+    MessageSquare,
+    BarChart,
+    FileText,
+    Rocket
+} from "lucide-react";
 
 export const FloatingNav = ({
     navItems,
@@ -20,21 +26,26 @@ export const FloatingNav = ({
     className?: string;
 }) => {
     const pathname = usePathname();
-
-    // Initialize visible state as true
     const [visible, setVisible] = useState(true);
-
-    // Handle hover state for "Products" dropdown
     const [isProductsHovered, setIsProductsHovered] = useState(false);
 
     return (
         <AnimatePresence mode="wait">
             <motion.div
-                className=" gap-2 max-w-6xl fixed top-0 md:top-5 py-3 inset-x-0 mx-auto border-transparent rounded-full bg-[#141841] shadow-md z-[5000] px-6 flex items-center justify-between"
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.4 }}
+                className="max-w-6xl fixed top-0 md:top-5 py-3 inset-x-0 mx-auto border border-gray-800/30 rounded-full bg-[#141841]/80 backdrop-blur-md shadow-lg z-[5000] px-6 flex items-center justify-between"
             >
+                <div className="py-3 ml-2">
+                    <Link href="/">
+                        <img src="/logo.png" height={120} width={120} alt="Zapllo Logo" className="-mt-1" />
+                    </Link>
+                </div>
+
                 <motion.div
                     className={cn(
-                        "flex max-w-fit   fixed top-5 md:top-8 inset-x-0 mx-auto border dark:border-[#2C2E44] rounded-full bg-[#141841] shadow-lg z-[5000] px-4 py-2 justify-center space-x-6",
+                        "flex items-center justify-center space-x-6",
                         className
                     )}
                 >
@@ -48,15 +59,23 @@ export const FloatingNav = ({
                             <Link
                                 href={navItem.link}
                                 className={cn(
-                                    "relative dark:text-neutral-50 items-center flex space-x-1 text-neutral-600 dark:hover:text-neutral-300 hover:text-neutral-500",
-                                    pathname === navItem.link && " "
+                                    "relative dark:text-neutral-50 items-center flex space-x-1 text-neutral-300 hover:text-white transition-colors duration-200",
+                                    pathname === navItem.link && "text-white"
                                 )}
-                                style={{ position: "relative" }}
                             >
                                 <span className="block sm:hidden">{navItem.icon}</span>
-                                <span className="hidden sm:block text-md">{navItem.name}</span>
+                                <span className="hidden sm:block text-md font-medium">{navItem.name}</span>
+                                {navItem.name === "Business Apps" && (
+                                    <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isProductsHovered ? 'rotate-180' : ''}`} />
+                                )}
                                 {pathname === navItem.link && (
-                                    <span className="absolute bottom-0 left-0 top-8 w-full h-0.5 bg-purple-400 rounded-sm shadow-purple-400 shadow-[4px_-2px_8px_rgba(0,0,0,0.38)]" />
+                                    <motion.span
+                                        layoutId="navbar-indicator"
+                                        className="absolute bottom-0 left-0 top-8 w-full h-0.5 bg-gradient-to-r from-[#815BF5] to-[#FC8929] rounded-full"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        transition={{ duration: 0.2 }}
+                                    />
                                 )}
                             </Link>
 
@@ -65,42 +84,68 @@ export const FloatingNav = ({
                                 <AnimatePresence>
                                     {isProductsHovered && (
                                         <motion.div
-                                            initial={{ opacity: 0, y: -10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: -10 }}
-                                            className="absolute space-y-12 gap-y-6 top-8 left-0  h-fit w-64 mt-2 bg-background shadow-lg rounded-lg py-2 px-4 z-10"
+                                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                            transition={{ duration: 0.2 }}
+                                            className="absolute top-8 left-0 w-72 mt-2 bg-[#1a1e48] border border-gray-800/50 shadow-xl rounded-lg py-2 px-1 z-10"
                                         >
                                             <Link href="/products/zapllo-teams">
-                                                <p className="p-2 mt-2 text-sm flex gap-1  hover:bg-[#815bf5] rounded-md">
-                                                    {/* <img src="/branding/teams.png" className="w-36" /> */}
-                                                    Task Delegation App
-                                                </p>
+                                                <div className="p-2 hover:bg-[#292e6a] rounded-md transition-colors flex items-center gap-3">
+                                                    <div className="w-8 h-8 bg-[#815bf5]/20 rounded-md flex items-center justify-center">
+                                                        <LayoutDashboard className="w-4 h-4 text-[#815bf5]" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-medium">Task Delegation App</p>
+                                                        <p className="text-xs text-gray-400">Boost team productivity</p>
+                                                    </div>
+                                                </div>
                                             </Link>
                                             <Link href="/products/zapllo-payroll">
-                                                <p className="p-2 mt-2  text-sm flex gap-1  hover:bg-[#815bf5]   rounded-md">
-                                                    {/* <img src="/branding/attendance.png" className="w-40" /> */}
-                                                    Zapllo Payroll
-                                                </p>
+                                                <div className="p-2 hover:bg-[#292e6a] rounded-md transition-colors flex items-center gap-3">
+                                                    <div className="w-8 h-8 bg-[#815bf5]/20 rounded-md flex items-center justify-center">
+                                                        <CalendarDays className="w-4 h-4 text-[#815bf5]" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-medium">Zapllo Payroll</p>
+                                                        <p className="text-xs text-gray-400">Leave & Attendance tracking</p>
+                                                    </div>
+                                                </div>
                                             </Link>
                                             <Link href="#">
-                                                <p className="p-2 text-sm mt-2 flex gap-1  hover:bg-[#815bf5]   rounded-md">
-                                                    {/* <img src="/branding/ai.png" className="w-28" />   */}
-                                                    Zapllo AI Assistant
-                                                </p>
+                                                <div className="p-2 hover:bg-[#292e6a] rounded-md transition-colors flex items-center gap-3">
+                                                    <div className="w-8 h-8 bg-[#815bf5]/20 rounded-md flex items-center justify-center">
+                                                        <MessageSquare className="w-4 h-4 text-[#815bf5]" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-medium">Zapllo AI Assistant</p>
+                                                        <p className="text-xs text-gray-400">AI-powered business help</p>
+                                                    </div>
+                                                </div>
+                                            </Link>
+                                            <Link href="https://crm.zapllo.com">
+                                                <div className="p-2 hover:bg-[#292e6a] rounded-md transition-colors flex items-center gap-3">
+                                                    <div className="w-8 h-8 bg-[#815bf5]/20 rounded-md flex items-center justify-center">
+                                                        <BarChart className="w-4 h-4 text-[#815bf5]" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-medium">Zapllo CRM <span className="ml-1 px-1.5 py-0.5 bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white text-[10px] rounded-full">NEW</span></p>
+                                                        <p className="text-xs text-gray-400">Manage customers & leads</p>
+                                                    </div>
+                                                </div>
                                             </Link>
                                             <Link href="#">
-                                                <p className="p-2 mt-2  text-sm flex gap-1  hover:bg-[#815bf5]   rounded-md">
-                                                    {/* <img src="/branding/crm.png" className="w-28" />   */}
-                                                    Zapllo CRM (Coming Soon)
-                                                </p>
+                                                <div className="p-2 hover:bg-[#292e6a] rounded-md transition-colors flex items-center gap-3">
+                                                    <div className="w-8 h-8 bg-[#815bf5]/20 rounded-md flex items-center justify-center">
+                                                        <FileText className="w-4 h-4 text-[#815bf5]" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-medium">Zapllo Invoice <span className="ml-1 px-1.5 py-0.5 bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white text-[10px] rounded-full">SOON</span></p>
+                                                        <p className="text-xs text-gray-400">Simplify billing & payments</p>
+                                                    </div>
+                                                </div>
                                             </Link>
-                                            <Link href="#">
-                                                <p className="p-2 mt-2  text-sm flex gap-1 hover:bg-[#815bf5] rounded-md">
-                                                    {/* <img src="/branding/invoice.png" className="w-32" />   */}
-                                                    Zapllo Invoice (Coming Soon)
-                                                </p>
-                                            </Link>
-
+                                           
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
@@ -109,33 +154,15 @@ export const FloatingNav = ({
                     ))}
                 </motion.div>
 
-                <div className="py-3 ml-6">
-                    <Link href="/">
-                        <img src="/logo.png" height={120} width={120} alt="Zapllo Logo" className="-mt-1" />
+                <div className="flex items-center gap-3">
+                    <Link href="/login">
+                        <Button variant="ghost" className="text-white hover:text-white/80 hover:bg-white/10 rounded-full">
+                            Login
+                        </Button>
                     </Link>
-                </div>
-                <div className="flex items-center gap-2">
-
-                    <Button className="bg-gradient-to-t h-10 from-[#1C1F3E] to-[#010313] hover:border-[#815bf5] border hover:bg-black rounded-full">
-                        <Link
-                            href="/signup"
-                            className="relative m0 text-white font-medium    overflow-hidden rounded-full "
-                        >
-                            <h1 className="text-md">
-                                Get Started
-                            </h1>
-                        </Link>
-
-                    </Button>
-                    <Link
-                        href="/login"
-                        className="relative h-10 text-white font-medium  overflow-hidden rounded-full  "
-                    >
-
-                        <Button className="rounded-full border bg-[#815bf5]">
-                            <h1 className="text-md">
-                                Login
-                                </h1>
+                    <Link href="/signup">
+                        <Button className="bg-gradient-to-r from-[#815BF5] to-[#FC8929] hover:opacity-90 transition-opacity rounded-full px-5 py-2">
+                            <Rocket className="mr-2 h-4 w-4" /> Get Started
                         </Button>
                     </Link>
                 </div>

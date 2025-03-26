@@ -1,71 +1,123 @@
-import { InfiniteMoving2 } from '@/components/globals/infinite-moving2';
-import Link from 'next/link';
+'use client'
 import React from 'react'
+import { motion } from 'framer-motion'
+import Link from 'next/link'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
+import { ChevronRight, Clock, BarChart, CalendarDays, MessageSquare } from 'lucide-react'
 
-
+const FeatureCard = ({ 
+    icon, 
+    title, 
+    description, 
+    link, 
+    badge = null,
+    delay = 0
+}: {
+    icon: React.ReactNode;
+    title: string;
+    description: string;
+    link: string;
+    badge?: React.ReactNode;
+    delay?: number;
+}) => {
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay }}
+        >
+            <Link href={link}>
+                <Card className="bg-[#0A0D28] hover:border-[#815bf5] cursor-pointer border h-full transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(129,91,245,0.2)]">
+                    <CardContent className="p-6">
+                        <div className="h-12 w-12 mb-4 mt-2 rounded-lg bg-gradient-to-br from-[#815bf5]/20 to-transparent flex items-center justify-center">
+                            {icon}
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2">
+                                <h3 className="text-xl font-bold mb-1">{title}</h3>
+                                {badge && badge}
+                            </div>
+                            <p className="text-[#676B93] text-sm">{description}</p>
+                            <div className="mt-4 flex items-center text-[#815bf5] text-sm font-medium">
+                                Learn more <ChevronRight className="h-4 w-4 ml-1" />
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </Link>
+        </motion.div>
+    )
+}
 
 export default function Autopilot() {
     return (
         <div className='w-full flex justify-center'>
-            <div className='mb-16 mt-20 '>
-                <div className=''>
-
-                    <div className='flex mt-4  justify-center'>
-                        <h1 className='text-center  text-3xl font-bold  bg-gradient-to-r from-[#815BF5] via-[#FC8929] to-[#FC8929] bg-clip-text text-transparent '>
-                            To Run your Business on Autopilot
-                        </h1>
-                    </div>
-                    <div className='flex mt-4  justify-center'>
-                        <h1 className='text-2xl'>For Your Everyday Business needs</h1>
-                    </div>
+            <div className='mb-16 mt-20 w-full max-w-7xl px-4'>
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5 }}
+                >
+                    <h2 className='text-center text-3xl font-bold bg-gradient-to-r from-[#815BF5] via-[#FC8929] to-[#FC8929] bg-clip-text text-transparent mb-2'>
+                        To Run your Business on Autopilot
+                    </h2>
+                    <h3 className='text-center text-2xl mb-6'>For Your Everyday Business needs</h3>
+                </motion.div>
+                
+                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8'>
+                    <FeatureCard 
+                        icon={<img src='/landing/tasks.png' className="h-6 w-6 text-[#815bf5]" />}
+                        title="Task Delegation App"
+                        description="Boost productivity, saving up to 5 hours per day. Prioritize, schedule, and delegate tasks efficiently, ensuring smoother workflows and timely project completion."
+                        link="/products/zapllo-teams"
+                        delay={0.1}
+                    />
+                    
+                    <FeatureCard 
+                        icon={<img src='/landing/payroll.png' className="h-6 w-6 text-[#815bf5]" />}
+                        title="Zapllo Payroll"
+                        description="Streamline your HR operations providing seamless leave requests, real-time attendance monitoring & payroll management with compliance automation."
+                        link="/products/zapllo-payroll"
+                        delay={0.2}
+                    />
+                    
+                    <FeatureCard 
+                        icon={<img src='/icons/Group.png' className="h-6 w-6 text-[#815bf5]" />}
+                        title="Official WhatsApp API"
+                        description="Accelerate your business growth with Official WhatsApp API, doubling your conversion rates & making your business run 24X7 with automated customer support."
+                        link="#"
+                        delay={0.3}
+                    />
+                    
+                    <FeatureCard 
+                        icon={<img src='/icons/crm.png' className="h-6 w-6 text-[#815bf5]" />}
+                        title="Zapllo CRM"
+                        description="Take control of your finances and save upto 40% expenses by optimizing spending through streamlined tracking, approval workflows, and insightful reporting."
+                        link="#"
+                        delay={0.4}
+                    />
                 </div>
-                <div className='flex justify-center items-center '>
-                    <div className='grid grid-cols-1 mx-4 md:grid-cols-4 w-full gap-4   justify-center mt-8     -400'>
-                        <Link href='/products/zapllo-teams'>
-                            <div className='bg-[#0A0D28] hover:border-[#815bf5] cursor-pointer border hover:scale-105 p-4 rounded'>
-                                <img src='/landing/tasks.png' className='h-12 mt-4' />
-                                <div className='mt-4'>
-                                    <h1 className='text-xl font-bold' >Task Delegation App</h1>
-                                    <p className='text-[#676B93] mb-4 md:max-w-[220px] w-full text-sm mt-4'>
-                                        Boost productivity, saving up to 5 hours per day. Prioritize, schedule, and delegate tasks efficiently, ensuring smoother workflows and timely project completion.
-                                    </p>
-                                </div>
+                
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.5 }}
+                    className="mt-12 w-full"
+                >
+                    <div className="mx-auto max-w-3xl p-6 rounded-xl bg-gradient-to-r from-[#0A0D28]/80 to-[#0A0D28] border border-[#815bf5]/30 text-center">
+                        <h3 className="text-xl md:text-2xl font-bold mb-4">Businesses using Zapllo save 30+ hours per week</h3>
+                        <p className="text-[#676B93] mb-6">Join 20,000+ businesses already automating their workflows</p>
+                        <Link href="/signup">
+                            <div className="inline-block bg-gradient-to-r from-[#815BF5] to-[#FC8929] hover:opacity-90 transition-all rounded-full px-6 py-3 text-white font-medium">
+                                Try Zapllo Free for 7 Days
                             </div>
                         </Link>
-
-
-                        <Link href='/products/zapllo-payroll'>
-
-                            <div className='bg-[#0A0D28] hover:border-[#815bf5] cursor-pointer border hover:scale-105 p-4 rounded'>
-                                <img src='/landing/payroll.png' className='h-12 mt-4' />
-                                <div className='mt-4'>
-                                    <h1 className='text-xl  font-bold' >Zapllo Payroll <br />(Leave & Attendance)</h1>
-                                    <p className='text-[#676B93] mb-4 md:max-w-[220px] w-full text-sm mt-4'>
-                                        Streamline your HR operations providing seamless leave requests, real-time attendance monitoring & payroll.
-                                    </p>
-                                </div>
-                            </div>
-                        </Link>
-                        <div className='bg-[#0A0D28] hover:border-[#815bf5] cursor-pointer border hover:scale-105 p-4 rounded'>
-                            <img src='/landing/whatsapp.png' className='h-12 mt-4' />
-                            <div className='mt-4'>
-                                <h1 className='text-xl font-bold' >Official WhatsApp API</h1>
-                                <p className='text-[#676B93] mb-4 md:max-w-[220px] w-full text-sm mt-4'>
-                                    Accelerate your business growth with Official WhatsApp API, doubling your conversion rates & making your business run 24X7.
-                                </p>
-                            </div>
-                        </div>
-                        <div className='bg-[#0A0D28] opacity-80 hover:border-[#815bf5] cursor-pointer border hover:scale-105 p-4 rounded'>
-                            <img src='/icons/crm.png' className='h-12 mt-4' />
-                            <div className='mt-4'>
-                                <h1 className='text-xl font-bold' >Zapllo CRM (Coming Soon)</h1>
-                                <p className='text-[#676B93] mb-4 md:max-w-[220px] w-full text-sm mt-4'>
-                                    Take control of your finances and save upto 40% expenses by optimizing spending through streamlined tracking, approval workflows, and insightful reporting.
-                                </p>
-                            </div>
-                        </div>
                     </div>
-                </div>
+                </motion.div>
             </div>
         </div>
     )
