@@ -176,7 +176,7 @@ const formatTime = (time: number) => {
                         </h1>
 
                         <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-4">
-                            You're just one step away from transforming your business operations
+                            You&apos;re just one step away from transforming your business operations
                         </p>
 
                         <div className="flex justify-center  mb-8">
@@ -495,7 +495,7 @@ const formatTime = (time: number) => {
                             Frequently Asked Questions
                         </h2>
                         <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-                            Have questions? We've got answers
+                            Have questions? We&apos;ve got answers
                         </p>
                     </motion.div>
 

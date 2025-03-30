@@ -523,7 +523,7 @@ export default function Home() {
                     <div className="flex justify-center mt-8">
                         <Badge className="bg-green-100 text-green-700 px-4 py-2 text-base font-medium rounded-lg flex items-center">
                             <Zap className="w-5 h-5 mr-2" />
-                            Use Code "{promoCode}" for 50% OFF at checkout!
+                            Use Code &quot;{promoCode}&quot; for 50% OFF at checkout!
                         </Badge>
                     </div>
                 </div>
@@ -935,7 +935,7 @@ export default function Home() {
                         className="text-center mb-16"
                     >
                         <h2 className={`text-3xl md:text-4xl font-bold text-gray-900 mb-4 ${spaceGrotesk.className}`}>
-                            The Value You're Getting
+                            The Value You&apos;re Getting
                         </h2>
                         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
                             Our solutions typically save businesses over ₹98,000 per employee annually
@@ -1059,7 +1059,7 @@ export default function Home() {
                                                 <Star key={i} className="w-5 h-5 fill-amber-400 stroke-amber-400" />
                                             ))}
                                         </div>
-                                        <p className="text-gray-200 italic mb-6">"{testimonial.content}"</p>
+                                        <p className="text-gray-200 italic mb-6">&quot;{testimonial.content}&quot;</p>
                                         <div className="flex items-center">
                                             <Avatar className="h-12 w-12 mr-4">
                                                 <AvatarImage src={testimonial.avatar} alt={testimonial.name} />
