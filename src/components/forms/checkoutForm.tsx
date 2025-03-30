@@ -1145,7 +1145,7 @@ const MultiStepForm = ({ selectedPlan }: { selectedPlan: PlanKeys; }) => {
                                                                     <div>
                                                                         <h4 className="font-semibold text-gray-900">Wallet Bonus: ₹{formatPrice(walletBonus)}</h4>
                                                                         <p className="text-sm text-gray-600 mt-1">
-                                                                            For purchasing 20+ users, we'll credit your account with a wallet bonus that can be used for future purchases or upgrades.
+                                                                            For purchasing 20+ users, we&apos;ll credit your account with a wallet bonus that can be used for future purchases or upgrades.
                                                                         </p>
                                                                         <Badge className="mt-2 bg-green-100 text-green-800 hover:bg-green-100">Premium Benefit</Badge>
                                                                     </div>
