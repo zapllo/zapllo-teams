@@ -235,10 +235,10 @@ export async function POST(request: NextRequest) {
     let bodyVariables: string[];
 
     if (authenticatedUser) {
-      templateName = 'loginsuccessmember'; // Template for new member
+      templateName = 'loginsuccessmember2'; // Template for new member
       bodyVariables = [savedUser.firstName, authenticatedUser.firstName, organization.companyName, email, password];
     } else {
-      templateName = 'loginsuccessadmin'; // Template for new orgAdmin
+      templateName = 'loginsuccessadmin2'; // Template for new orgAdmin
       bodyVariables = [savedUser.firstName, organization.companyName]; // Different body variables
     }
 
@@ -247,7 +247,7 @@ export async function POST(request: NextRequest) {
     let emailHtml;
 
     if (authenticatedUser) {
-      templateName = 'loginsuccessmember'; // Template for new member
+      templateName = 'loginsuccessmember2'; // Template for new member
       emailSubject = `Business Workspace Invitation to Team - ${organization.companyName}`;
       emailText = `Dear ${reqBody.firstName},\n\nYou've been added to ${organization.companyName} on Zapllo! ...`;
       emailHtml = `<body style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
@@ -276,7 +276,7 @@ export async function POST(request: NextRequest) {
     </div>
   </body>`;
     } else {
-      templateName = 'loginsuccessadmin'; // Template for new orgAdmin 1st message with heading and no illustration
+      templateName = 'loginsuccessadmin2'; // Template for new orgAdmin 1st message with heading and no illustration
       emailSubject = `Business Workspace Creation for Team - ${organization.companyName}!`;
       emailText = `Dear ${reqBody.firstName},\n\nThank you for signing up at Zapllo! ...`;
       emailHtml = `<body style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
