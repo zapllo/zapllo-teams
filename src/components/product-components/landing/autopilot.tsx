@@ -6,11 +6,11 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { ChevronRight, Clock, BarChart, CalendarDays, MessageSquare } from 'lucide-react'
 
-const FeatureCard = ({ 
-    icon, 
-    title, 
-    description, 
-    link, 
+const FeatureCard = ({
+    icon,
+    title,
+    description,
+    link,
     badge = null,
     delay = 0
 }: {
@@ -66,41 +66,41 @@ export default function Autopilot() {
                     </h2>
                     <h3 className='text-center text-2xl mb-6'>For Your Everyday Business needs</h3>
                 </motion.div>
-                
+
                 <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8'>
-                    <FeatureCard 
+                    <FeatureCard
                         icon={<img src='/landing/tasks.png' className="h-6 w-6 text-[#815bf5]" />}
                         title="Task Delegation App"
                         description="Boost productivity, saving up to 5 hours per day. Prioritize, schedule, and delegate tasks efficiently, ensuring smoother workflows and timely project completion."
                         link="/products/zapllo-teams"
                         delay={0.1}
                     />
-                    
-                    <FeatureCard 
+
+                    <FeatureCard
                         icon={<img src='/landing/payroll.png' className="h-6 w-6 text-[#815bf5]" />}
                         title="Zapllo Payroll"
                         description="Streamline your HR operations providing seamless leave requests, real-time attendance monitoring & payroll management with compliance automation."
                         link="/products/zapllo-payroll"
                         delay={0.2}
                     />
-                    
-                    <FeatureCard 
+
+                    <FeatureCard
                         icon={<img src='/icons/Group.png' className="h-6 w-6 text-[#815bf5]" />}
                         title="Official WhatsApp API"
                         description="Accelerate your business growth with Official WhatsApp API, doubling your conversion rates & making your business run 24X7 with automated customer support."
                         link="#"
                         delay={0.3}
                     />
-                    
-                    <FeatureCard 
+
+                    <FeatureCard
                         icon={<img src='/icons/crm.png' className="h-6 w-6 text-[#815bf5]" />}
                         title="Zapllo CRM"
                         description="Take control of your finances and save upto 40% expenses by optimizing spending through streamlined tracking, approval workflows, and insightful reporting."
-                        link="#"
+                        link="https://crm.zapllo.com"
                         delay={0.4}
                     />
                 </div>
-                
+
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}

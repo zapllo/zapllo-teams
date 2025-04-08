@@ -1051,22 +1051,22 @@ export default function Home() {
                                 transition={{ duration: 0.5, delay: index * 0.1 }}
                                 viewport={{ once: true }}
                             >
-                                <Card className="h-full border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300">
+                                <Card className="h-full border bg-transparent border-gray-100 shadow-md hover:shadow-lg transition-all duration-300">
                                     <CardContent className="pt-6">
                                         <div className="flex space-x-1 mb-2">
                                             {[...Array(testimonial.rating)].map((_, i) => (
                                                 <Star key={i} className="w-5 h-5 fill-amber-400 stroke-amber-400" />
                                             ))}
                                         </div>
-                                        <p className="text-gray-200 italic mb-6">&quot;{testimonial.content}&quot;</p>
+                                        <p className="text-gray-800 italic mb-6">&quot;{testimonial.content}&quot;</p>
                                         <div className="flex items-center">
                                             <Avatar className="h-12 w-12 mr-4">
                                                 <AvatarImage src={testimonial.avatar} alt={testimonial.name} />
                                                 <AvatarFallback>{testimonial.name.charAt(0)}</AvatarFallback>
                                             </Avatar>
                                             <div>
-                                                <h4 className="font-semibold text-gray-100">{testimonial.name}</h4>
-                                                <p className="text-sm text-gray-200">{testimonial.role}, {testimonial.company}</p>
+                                                <h4 className="font-semibold text-gray-700">{testimonial.name}</h4>
+                                                <p className="text-sm text-gray-800">{testimonial.role}, {testimonial.company}</p>
                                             </div>
                                         </div>
                                     </CardContent>
@@ -1171,12 +1171,12 @@ export default function Home() {
                                 transition={{ duration: 0.5, delay: index * 0.1 }}
                                 viewport={{ once: true }}
                             >
-                                <Card className="h-full border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300">
+                                <Card className="h-full border border-gray-100 bg-transparent shadow-sm hover:shadow-md transition-all duration-300">
                                     <CardHeader>
-                                        <CardTitle className="text-lg font-semibold text-gray-100">{faq.question}</CardTitle>
+                                        <CardTitle className="text-lg font-semibold text-gray-900">{faq.question}</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <p className="text-gray-400">{faq.answer}</p>
+                                        <p className="text-gray-600">{faq.answer}</p>
                                     </CardContent>
                                 </Card>
                             </motion.div>
