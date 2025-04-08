@@ -74,7 +74,7 @@ export const MovingCards = ({
         <div
             ref={containerRef}
             className={cn(
-                "scroller relative z-20   max-w-7xl overflow-hidden   [mask-image:linear-gradient(to_right,transparent,white_20%,white_80%,transparent)]",
+                "scroller relative z-20   max-w-7xl overflow-hidden bg-white   [mask-image:linear-gradient(to_right,transparent,white_20%,white_80%,transparent)]",
                 className
             )}
         >
@@ -88,7 +88,7 @@ export const MovingCards = ({
             >
                 {items.map((item, idx) => (
                     <li
-                        className="w-[350px] max-w-full border-r-0 border-l-0  relative rounded-2xl border border-b-0 flex-shrink-0 border-slate-700 bg-gradient-to-b from-[#0A0D28]  to-[#05071E] px-8 py-6 md:w-[450px]"
+                        className="w-[350px] max-w-full border-r-0 border-l-0  relative rounded-2xl border border-b-0 flex-shrink-0 border-slate-200 bg-white px-8 py-6 md:w-[450px]"
 
                         key={item.name}
                     >
@@ -99,7 +99,7 @@ export const MovingCards = ({
                             ></div>
                             <div className="flex mb-6  gap-4">
                                 <img src={item.image} className="h-20 w-20 object-cover rounded-full" />
-                                <span className=" text-lg leading-[1.6] text-white -400 font-normal">
+                                <span className=" text-lg leading-[1.6] text-black -400 font-normal">
                                     {item.name}
                                     <br />
                                     {item.title}
@@ -110,7 +110,7 @@ export const MovingCards = ({
                             </div>
 
 
-                            <span className=" relative z-20 mt-12 text-sm leading-[1.6] text-gray-100 font-normal">
+                            <span className=" relative z-20 mt-12 text-sm leading-[1.6] text-gray-800 font-normal">
                                 {item.quote}
                             </span>
 

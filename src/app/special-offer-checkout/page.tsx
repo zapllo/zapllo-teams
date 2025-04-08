@@ -253,7 +253,7 @@ const formatTime = (time: number) => {
                         </motion.div>
 
                         {/* Plan Details */}
-                        {/* <motion.div 
+                        {/* <motion.div
                             ref={featureRef}
                             initial={{ opacity: 0, x: 20 }}
                             animate={featuresInView ? { opacity: 1, x: 0 } : {}}
@@ -272,24 +272,24 @@ const formatTime = (time: number) => {
                                         </CardDescription>
                                     </CardHeader>
                                 </div>
-                                
+
                                 <CardContent className="pt-6">
                                     <div className="flex items-baseline mb-6">
                                         <span className="text-lg text-gray-500 line-through mr-2">₹6,000</span>
                                         <span className="text-4xl font-bold text-gray-900">₹2,399</span>
                                         <span className="text-gray-600 ml-2">/user/year</span>
                                     </div>
-                                    
+
                                     <div className="bg-purple-50 p-4 rounded-lg mb-6">
                                         <p className="text-purple-800 text-sm">
-                                            <span className="font-semibold">LIMITED TIME OFFER:</span> Complete 
+                                            <span className="font-semibold">LIMITED TIME OFFER:</span> Complete
                                             your order in the next {formatTime(timeLeft)} to lock in this special price!
                                         </p>
                                     </div>
-                                    
+
                                     <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
                                         <h3 className="font-semibold text-gray-900 mb-2">What's Included:</h3>
-                                        
+
                                         {selectedPlan === 'Zapllo Money Saver Bundle' ? (
                                             <>
                                                 <div className="mb-4">
@@ -303,7 +303,7 @@ const formatTime = (time: number) => {
                                                         </div>
                                                     ))}
                                                 </div>
-                                                
+
                                                 <div className="mb-4">
                                                     <h4 className="font-medium text-purple-700 mb-2">
                                                         Zapllo Payroll:
@@ -315,7 +315,7 @@ const formatTime = (time: number) => {
                                                         </div>
                                                     ))}
                                                 </div>
-                                                
+
                                                 <div>
                                                     <h4 className="font-medium text-purple-700 mb-2">
                                                         WhatsApp Marketing & Automation:
@@ -340,22 +340,22 @@ const formatTime = (time: number) => {
                                         )}
                                     </div>
                                 </CardContent>
-                                
+
                                 <CardFooter className="bg-gray-50 p-6 flex flex-col">
-                                    <Button 
+                                    <Button
                                         className="w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-orange-500 hover:from-indigo-600 hover:via-purple-600 hover:to-orange-600 text-white font-medium py-5 rounded-xl shadow-md"
                                         onClick={() => document.getElementById('checkout-form')?.scrollIntoView({ behavior: 'smooth' })}
                                     >
                                         Proceed to Checkout
                                         <ArrowRight className="ml-2 h-5 w-5" />
                                     </Button>
-                                    
+
                                     <p className="text-center text-gray-500 text-sm mt-4">
                                         By proceeding, you agree to our Terms of Service and Privacy Policy
                                     </p>
                                 </CardFooter>
                             </Card>
-                            
+
                             <div className="mt-8 space-y-4">
                                 <Card className="border border-gray-200">
                                     <CardHeader className="pb-2">
@@ -379,7 +379,7 @@ const formatTime = (time: number) => {
                                         </div>
                                     </CardContent>
                                 </Card>
-                                
+
                                 <Card className="border border-gray-200">
                                     <CardHeader className="pb-2">
                                         <CardTitle className="text-lg font-medium">

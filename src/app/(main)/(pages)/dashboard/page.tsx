@@ -413,7 +413,7 @@ const DashboardPage = () => {
               <h1 className='text-lg font-medium'>Zapllo WABA</h1>
               <p className='text-xs font-medium'>Get the Official Whatsapp API</p>
               <div className='pt-2'>
-                <Link href='https://waba.zapllo.com/signup'>
+                <Link href='https://waba.zapllo.com/signup' target="_blank" rel="noopener noreferrer">
                   <Button className='bg-[#815BF5] py-1 hover:bg-[#5f31e9]  text-xs' >Go To WhatsApp API</Button>
                 </Link>
               </div>
@@ -430,8 +430,9 @@ const DashboardPage = () => {
               <h1 className='text-lg font-medium'>Zapllo CRM</h1>
               <p className='text-xs font-medium'>Track, Convert & Assign Leads to your Sales Team</p>
               <div className='pt-2'>
-
-                <Button className='bg-[#815BF5] py-1 hover:bg-[#5f31e9] opacity-50 text-xs' >Coming Soon</Button>
+                <Link href='https://crm.zapllo.com/login' target="_blank" rel="noopener noreferrer">
+                  <Button className='bg-[#815BF5] py-1 hover:bg-[#5f31e9]  text-xs' >Go To  CRM</Button>
+                </Link>
               </div>
             </div>
           </div>

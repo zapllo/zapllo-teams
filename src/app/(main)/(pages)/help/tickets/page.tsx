@@ -1,8 +1,18 @@
 "use client";
 
-import DeleteConfirmationDialog from "@/components/modals/deleteConfirmationDialog";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { toast } from "sonner";
+
+// Icons
+import { Eye, Trash2, UploadCloud } from "lucide-react";
+import { CrossCircledIcon } from "@radix-ui/react-icons";
+
+// Components
 import ChecklistSidebar from "@/components/sidebar/checklistSidebar";
-import { Button } from "@/components/ui/button";
+import DeleteConfirmationDialog from "@/components/modals/deleteConfirmationDialog";
 import {
   Dialog,
   DialogClose,
@@ -10,17 +20,36 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import Loader from "@/components/ui/loader";
-import { DialogPortal } from "@radix-ui/react-dialog";
-import { Separator } from "@radix-ui/react-separator";
-import axios from "axios";
-import { X, Eye, Trash, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import React, { useState, useEffect } from "react";
-import { FaUpload } from "react-icons/fa";
-import { toast, Toaster } from "sonner";
-import { CrossCircledIcon } from "@radix-ui/react-icons";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Badge,
+} from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Ticket = {
   _id: string;
@@ -29,8 +58,8 @@ type Ticket = {
   subject: string;
   status: string;
   description: string;
-  fileUrl?: string[]; // Add fileUrl
-  user: { name: string }; // Assuming user has a 'name' field
+  fileUrl?: string[];
+  user: { name: string };
   createdAt: string;
 };
 
@@ -45,11 +74,10 @@ export default function Tickets() {
   const [userId, setUserId] = useState<string>("");
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false); // Track submission
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false); // For delete confirmation
-  const [ticketToDelete, setTicketToDelete] = useState<Ticket | null>(null); // Store the ticket to delete
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState<boolean>(false);
+  const [ticketToDelete, setTicketToDelete] = useState<Ticket | null>(null);
 
   useEffect(() => {
     const getUserDetails = async () => {
@@ -65,12 +93,17 @@ export default function Tickets() {
 
   useEffect(() => {
     const fetchTickets = async () => {
-      setLoading(true); // Set loading to true before fetching
-      const response = await fetch("/api/tickets/get");
-      const data = await response.json();
-      console.log("Fetched Tickets:", data); // Log the data to check its structure
-      setTickets(data);
-      setLoading(false); // Set loading to true before fetching
+      setLoading(true);
+      try {
+        const response = await fetch("/api/tickets/get");
+        const data = await response.json();
+        setTickets(data);
+      } catch (error) {
+        console.error("Error fetching tickets:", error);
+        toast.error("Failed to load tickets");
+      } finally {
+        setLoading(false);
+      }
     };
     fetchTickets();
   }, []);
@@ -122,14 +155,12 @@ export default function Tickets() {
         if (allowedTypes.includes(file.type)) {
           validFiles.push(file);
         } else {
-          alert(
-            `File "${file.name}" is not a valid type. Please upload only images or videos.`
-          );
+          toast.error(`"${file.name}" is not a valid type. Please upload only images or videos.`);
         }
       }
 
       if (validFiles.length > 0) {
-        setFiles(validFiles); // Update state with valid files
+        setFiles(validFiles);
       }
     }
   };
@@ -137,14 +168,19 @@ export default function Tickets() {
   const removeFile = (index: number) => {
     setFiles((prevFiles) =>
       prevFiles.filter((_, fileIndex) => fileIndex !== index)
-    ); // Remove the file at the selected index
+    );
   };
 
   const handleSubmit = async () => {
-    setIsSubmitting(true); // Start loader
+    if (!category || !subcategory || !subject || !description) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    setIsSubmitting(true);
     let fileUrl = [];
+
     if (files && files.length > 0) {
-      // Upload files to S3 and get the URLs
       const formData = new FormData();
       files.forEach((file) => formData.append("files", file));
 
@@ -156,16 +192,16 @@ export default function Tickets() {
 
         if (s3Response.ok) {
           const s3Data = await s3Response.json();
-          console.log("S3 Data:", s3Data); // Log the response from S3
           fileUrl = s3Data.fileUrls;
         } else {
-          console.error("Failed to upload files to S3");
-          setIsSubmitting(false); // End loader in case of error
+          toast.error("Failed to upload files");
+          setIsSubmitting(false);
           return;
         }
       } catch (error) {
         console.error("Error uploading files:", error);
-        setIsSubmitting(false); // End loader in case of error
+        toast.error("Error uploading files");
+        setIsSubmitting(false);
         return;
       }
     }
@@ -176,10 +212,8 @@ export default function Tickets() {
       subject,
       description,
       user: userId,
-      fileUrl, // Include array of fileUrls
+      fileUrl,
     };
-
-    console.log("Ticket Data:", ticketData); // Log the ticket data
 
     try {
       const response = await fetch("/api/tickets", {
@@ -193,417 +227,305 @@ export default function Tickets() {
       if (response.ok) {
         const newTicket = await response.json();
         setTickets([...tickets, newTicket]);
-        toast(<div className=" w-full mb-6 gap-2 m-auto  ">
-          <div className="w-full flex  justify-center">
-            <DotLottieReact
-              src="/lottie/tick.lottie"
-              loop
-              autoplay
-            />
+        toast.custom((t) => (
+          <div className="w-full mb-6 gap-2 m-auto bg-white dark:bg-gray-900 p-4 rounded-lg shadow-lg">
+            <div className="w-full flex justify-center">
+              <DotLottieReact
+                src="/lottie/tick.lottie"
+                loop
+                autoplay
+                style={{ height: "80px", width: "80px" }}
+              />
+            </div>
+            <h1 className="text-black dark:text-white text-center font-medium text-lg">
+              Ticket raised successfully
+            </h1>
           </div>
-          <h1 className="text-black text-center font-medium text-lg">Ticket raised successfully</h1>
-        </div>);
+        ));
+
+        // Reset form
         setCategory("");
         setSubcategory("");
         setSubject("");
-        setIsDialogOpen(false);
         setDescription("");
-        setFiles([]); // Clear files after submission
+        setFiles([]);
+        setIsDialogOpen(false);
       } else {
-        console.error("Failed to create ticket");
+        toast.error("Failed to create ticket");
       }
     } catch (error) {
       console.error("Error creating ticket:", error);
+      toast.error("Error creating ticket");
     }
-    setIsSubmitting(false); // End loader after submission
+
+    setIsSubmitting(false);
   };
 
   const handleViewDetails = (ticket: Ticket) => {
-    router.push(`/help/tickets/${ticket._id}`); // Navigate to the ticket details page
+    router.push(`/help/tickets/${ticket._id}`);
   };
 
+  function getStatusBadgeColor(status: string) {
+    switch (status) {
+      case "Pending":
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
+      case "In Resolution":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
+      case "Closed":
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+      default:
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
+    }
+  }
+
   return (
-    <div className="flex mt-24">
-      <ChecklistSidebar />
-      {/* <Toaster /> */}
-      <div className="flex-1 p-4">
-        <div className="w-full -ml-2  mx-auto">
-          <div className="gap-2 flex mb-6 w-full">
-            <div className="-mt-2 w-full">
-              {loading ? (
-                <Loader />
-              ) : (
-                <div className="p-10    flex justify-center -mt-16 l w-full max-w-8xl  ml-52">
-                  <div className="overflow-x-auto scrollbar-hide  w-full max-w-4xl -ml-56 ">
-                    <div className="w-full max-w-8xl mb-4 flex  justify-center">
-                      <Dialog
-                        open={isDialogOpen}
-                        onOpenChange={setIsDialogOpen}
+    <div className="flex mt-12 h-screen">
+      <div className="mt-12 h-full">
+        <ChecklistSidebar />
+      </div>
+      <div className="flex-1 ml-52 p-6">
+        <Card className="w-full max-w-6xl bg-transparent mx-auto">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-2xl font-bold">Support Tickets</CardTitle>
+                <CardDescription>
+                  View and manage your support tickets
+                </CardDescription>
+              </div>
+              <Dialog
+                open={isDialogOpen}
+                onOpenChange={setIsDialogOpen}
+              >
+                <DialogTrigger asChild>
+                  <Button className="bg-primary hover:bg-primary/90">
+                    Raise a Ticket
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[500px] p-6 z-[100] h-full max-h-screen m-auto">
+                  <div className="flex justify-between items-center">
+                  <DialogTitle className="text-xl font-semibold mb-2">
+                    Raise a Ticket
+                  </DialogTitle>
+                  <DialogClose className="  ">
+                    <CrossCircledIcon className='scale-150  hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]' />
+                  </DialogClose>
+                  </div>
+                  {/* <Separator className="my-2" /> */}
+
+                  <div className="grid gap-4 ">
+                    <div className="grid gap-2">
+                      <Select
+                        value={category}
+                        onValueChange={setCategory}
                       >
-                        <div className="flex mb-2 gap-2 items-center justify-between w-full">
-                          <h1 className="text-lg">Support Tickets</h1>
-                          <div className="">
-                            <DialogTrigger asChild>
-                              <Button className="bg-transparent border  bg-[#017a5b] hover:bg-[#12614d] border-[#017a5b] text-[#ffffff]  px-4 py-1 rounded" >
-                                Raise a Ticket
-                              </Button>
-                            </DialogTrigger>
-                          </div>
-                        </div>
-                        <Separator className="bg-[#0A0D28]" />
-
-                        <DialogContent className="z-[100]">
-                          <div className="   shadow-lg w-full   max-w-lg  rounded-lg">
-                            <div className="flex border-b py-2  w-full justify-between">
-                              <DialogTitle className="text-md   px-6 py-2 font-medium">
-                                Raise a Ticket
-                              </DialogTitle>
-                              <DialogClose className="px-6 py-2">
-                                <CrossCircledIcon className="scale-150 mt-1 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
-                              </DialogClose>
-                            </div>
-
-                            <form className="space-y-4 p-6">
-                              {/* Select Category */}
-                              <div className="relative">
-                                {/* <label htmlFor='category' className='block text-xs font-medium text-white -700'>
-                                                            Select Category
-                                                        </label> */}
-
-                                <select
-                                  id="category"
-                                  value={category}
-                                  onChange={(e) =>
-                                    setCategory(e.target.value)
-                                  }
-                                  className="w-full text-xs p-2 dark:text-white   outline-none border rounded bg-transparent"
-                                 
-                                >
-                                  <option
-                                    className="dark:bg-[#1A1C20]  dark:text-[#787CA5] -mt-1"
-                                    disabled
-                                    value=""
-                                  >
-                                    Select a category
-                                  </option>
-                                  <option
-                                    className="dark:bg-[#1A1C20]"
-                                    value="Report An Error"
-                                  >
-                                    Report An Error
-                                  </option>
-                                  <option
-                                    className="dark:bg-[#1A1C20]"
-                                    value="Provide Feedback"
-                                  >
-                                    Provide Feedback
-                                  </option>
-                                  <option
-                                    className="dark:bg-[#1A1C20]"
-                                    value="Payment/Subscription Issue"
-                                  >
-                                    Payment/Subscription Issue
-                                  </option>
-                                  <option
-                                    className="dark:bg-[#1A1C20]"
-                                    value="Delete My Account"
-                                  >
-                                    Delete My Account
-                                  </option>
-                                </select>
-                              </div>
-
-                              {/* Select a subcategory */}
-                              <div>
-                                {/* <label htmlFor='subcategory' className='block text-xs font-medium text-white -700'>
-                                                            Select Subcategory
-                                                        </label> */}
-                                <select
-                                  id="subcategory"
-                                  value={subcategory}
-                                  onChange={(e) =>
-                                    setSubcategory(e.target.value)
-                                  }
-                                  className="w-full text-xs p-2 border dark:text-white    bg-transparent outline-none rounded"
-                         
-                                >
-                                  <option
-                                    disabled
-                                    className="dark:bg-[#1A1C20]"
-                                    value=""
-                                  >
-                                    Select a subcategory
-                                  </option>
-                                  <option
-                                    className="dark:bg-[#1A1C20]"
-                                    value="Task Delegation"
-                                  >
-                                    Task Delegation
-                                  </option>
-                                  <option
-                                    className="dark:bg-[#1A1C20]"
-                                    value="My Team"
-                                  >
-                                    My Team
-                                  </option>
-                                  <option
-                                    className="dark:bg-[#1A1C20]"
-                                    value="Intranet"
-                                  >
-                                    Intranet
-                                  </option>
-                                  <option
-                                    className="dark:bg-[#1A1C20]"
-                                    value="Leaves"
-                                  >
-                                    Leaves
-                                  </option>
-                                  <option
-                                    className="dark:bg-[#1A1C20]"
-                                    value="Attendance"
-                                  >
-                                    Attendance
-                                  </option>
-                                  <option
-                                    className="dark:bg-[#1A1C20]"
-                                    value="Other"
-                                  >
-                                    Other
-                                  </option>
-                                </select>
-                              </div>
-
-                              {/* Subject */}
-
-                              <div className="relative">
-                                <label
-                                  htmlFor="subject"
-                                  className="absolute bg-white dark:bg-[#0b0d29] dark:text-[#787CA5] ml-2 text-xs -mt-2 px-1"
-                                >
-                                  Subject
-                                </label>
-                                <input
-                                  type="text"
-                                  id="subject"
-                                  value={subject}
-                                  onChange={(e) => setSubject(e.target.value)}
-                                  className="w-full focus:border-[#815bf5] text-sm p-2 border bg-transparent outline-none rounded"
-                                />
-                              </div>
-
-                              {/* Description */}
-                              <div className="relative">
-                                <label
-                                  htmlFor="subject"
-                                  className="absolute bg-white dark:bg-[#0b0d29] text-[#787CA5] ml-2 text-xs -mt-2 px-1"
-                                >
-                                  Description
-                                </label>
-                                <textarea
-                                  id="description"
-                                  rows={4}
-                                  value={description}
-                                  onChange={(e) =>
-                                    setDescription(e.target.value)
-                                  }
-                                  className="w-full focus:border-[#815bf5] text-sm p-2 border bg-transparent outline-none rounded"
-                                />
-                              </div>
-
-                              {/* Attach File */}
-
-                              <div className="flex items-center space-x-2">
-                                <input
-                                  id="file-upload"
-                                  type="file"
-                                  multiple
-                                  onChange={handleFileUpload}
-                                  style={{ display: "none" }} // Hide the file input
-                                />
-
-                                <label
-                                  htmlFor="file-upload"
-                                  className="cursor-pointer flex items-center space-x-2"
-                                >
-                                  <FaUpload className="h-3 w-3" />
-                                  <span className="text-xs">
-                                    Attach Files
-                                  </span>
-                                </label>
-                              </div>
-
-                              {/* Display selected file names */}
-                              <div>
-                                {files.length > 0 && (
-                                  <ul className="list-disc list-inside">
-                                    {files.map((file, index) => (
-                                      <li
-                                        className="text-xs flex justify-between ml-4"
-                                        key={index}
-                                      >
-                                        {file.name}
-                                        <div>
-                                          {/* <button
-                                              onClick={() => removeFile(index)}
-                                              className="ml- text-red-600 hover:text-red-800 text-xs "
-                                            >
-                                              <X className="h-4 w-4" />
-                                            </button> */}
-                                          <CrossCircledIcon
-                                            onClick={() => removeFile(index)}
-                                            className="h-4 w-4 text-xs text-red-600 ml- hover:text-red-800 rounded-full cursor-pointer "
-                                          />
-                                        </div>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                )}
-                              </div>
-
-                              {/* Submit Ticket button */}
-                              <div className="flex justify-center">
-
-                                <Button
-                                  onClick={handleSubmit}
-                                  className="bg-[#815BF5] w-full text-sm cursor-pointer  text-white px-4 mt-6  py-2 rounded"
-                                >
-                                  {isSubmitting ? <Loader /> : "Submit Ticket"}
-                                </Button>
-
-                              </div>
-                            </form>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent className="z-[100]">
+                          <SelectItem className='hover:bg-accent'  value="Report An Error">Report An Error</SelectItem>
+                          <SelectItem  className='hover:bg-accent' value="Provide Feedback">Provide Feedback</SelectItem>
+                          <SelectItem  className='hover:bg-accent' value="Payment/Subscription Issue">Payment/Subscription Issue</SelectItem>
+                          <SelectItem  className='hover:bg-accent' value="Delete My Account">Delete My Account</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
-                    <div className="dark:bg-[#0B0D29] text-sm w-full rounded-2xl  border overflow-hidden">
-                      <table className="w-full">
-                        <thead className="dark:bg-[#0B0D29] ">
-                          <tr className=" ">
-                            {/* <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-white -500 uppercase tracking-wider'>
-                                                        Category
-                                                    </th> */}
-                            <th
-                              scope="col"
-                              className="px-6 py-3 text-left text-xs font-medium dark:dark:text-gray-400 -500 uppercase tracking-wider"
-                            >
-                              Subject
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-6 py-3 text-left text-xs font-medium dark:text-gray-400 -500 uppercase tracking-wider"
-                            >
-                              Status
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-6 py-3 text-left text-xs font-medium dark:text-gray-400 -500 uppercase tracking-wider"
-                            >
-                              Created At
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-6 py-3 text-left text-xs font-medium dark:text-gray-400 -500 uppercase tracking-wider"
-                            >
-                              Action
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="dark:bg-[#0B0D29] divide-y">
-                          {tickets.map((ticket) => (
-                            <tr key={ticket._id}>
-                              {/* <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-white -900'>
-                                                            {ticket.category}
-                                                        </td> */}
-                              <td className="px-6 py-4 whitespace-nowrap text-sm dark:text-white -500">
-                                {ticket.subject}
-                              </td>
-                              <td
-                                className={`px-6 py-4 whitespace-nowrap  text-sm   -500 ${ticket.status === "Pending"
-                                  ? "text-red-500"
-                                  : ticket.status === "In Resolution"
-                                    ? "text-blue-400"
-                                    : ticket.status === "Closed"
-                                      ? "text-green-500"
-                                      : "text-yellow-500"
-                                  }`}
-                              >
-                                <div className="border w-fit px-2 dark:bg-gray-800 rounded-full flex items-center">
-                                  {ticket.status}
 
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm dark:text-white -500">
-                                {new Date(ticket.createdAt).toLocaleDateString()}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div className="flex gap-2 items-center">
-                                  <div
-                                    onClick={() => handleViewDetails(ticket)}
-                                    className="text-[#] -600 cursor-pointer hover:text-[#815bf5] -900"
-                                  >
-                                    <Eye className="h-5 w-5" />
-                                  </div>
-                                  <div
-                                    onClick={() => handleOpenDeleteDialog(ticket)}
-                                    className="text-red-500 cursor-pointer hover:text-red-800"
-                                  >
-                                    <Trash2 className="h-5 w-5" />
-                                  </div>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                    <div className="grid gap-2">
+                      <Select
+                        value={subcategory}
+                        onValueChange={setSubcategory}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select subcategory" />
+                        </SelectTrigger>
+                        <SelectContent className='z-[100]'>
+                          <SelectItem className='hover:bg-accent' value="Task Delegation">Task Delegation</SelectItem>
+                          <SelectItem className='hover:bg-accent' value="My Team">My Team</SelectItem>
+                          <SelectItem className='hover:bg-accent' value="Intranet">Intranet</SelectItem>
+                          <SelectItem className='hover:bg-accent' value="Leaves">Leaves</SelectItem>
+                          <SelectItem className='hover:bg-accent' value="Attendance">Attendance</SelectItem>
+                          <SelectItem className='hover:bg-accent' value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="grid gap-2">
+                      <label htmlFor="subject" className="text-sm font-medium">
+                        Subject
+                      </label>
+                      <Input
+                        id="subject"
+                        value={subject}
+                        className="text-black dark:text-white"
+                        onChange={(e) => setSubject(e.target.value)}
+                        placeholder="Enter ticket subject"
+                      />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <label htmlFor="description" className="text-sm font-medium">
+                        Description
+                      </label>
+                      <Textarea
+                        id="description"
+                        rows={4}
+                        value={description}
+                        className="text-black dark:text-white"
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Describe your issue in detail"
+                      />
+                    </div>
+
+                    <div className="grid gap-2">
+                      <label className="text-sm font-medium">
+                        Attachments
+                      </label>
+                      <div className="border border-dashed rounded-md p-6 text-center">
+                        <input
+                          id="file-upload"
+                          type="file"
+                          multiple
+                          onChange={handleFileUpload}
+                          className="hidden"
+                        />
+                        <label
+                          htmlFor="file-upload"
+                          className="cursor-pointer flex flex-col items-center gap-2"
+                        >
+                          <UploadCloud className="h-8 w-8 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">
+                            Drop files here or click to upload
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            (Images and videos only)
+                          </span>
+                        </label>
+                      </div>
+
+                      {files.length > 0 && (
+                        <div className="mt-2">
+                          <h4 className="text-sm font-medium mb-2">Selected files:</h4>
+                          <ul className="space-y-2">
+                            {files.map((file, index) => (
+                              <li
+                                className="flex items-center justify-between bg-muted/30 p-2 rounded text-sm"
+                                key={index}
+                              >
+                                <span className="truncate max-w-[300px]">{file.name}</span>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => removeFile(index)}
+                                  className="h-6 w-6 rounded-full"
+                                >
+                                  <CrossCircledIcon className="h-4 w-4 text-destructive" />
+                                </Button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  <DeleteConfirmationDialog
-                    isOpen={isDeleteDialogOpen}
-                    onClose={() => setIsDeleteDialogOpen(false)}
-                    onConfirm={handleDeleteTicket}
-                  />
-
-                  {selectedTicket && (
-                    <Dialog
-                      open={isViewDialogOpen}
-                      onOpenChange={() => setIsViewDialogOpen(false)}
+                  <div className="flex justify-end gap-3 mt-4">
+                    <DialogClose asChild>
+                      <Button variant="outline">Cancel</Button>
+                    </DialogClose>
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={isSubmitting}
                     >
-                      <DialogContent className="p-6 space-y-4 text-sm">
-                        <DialogClose asChild>
-                          <button className="absolute top-4 right-4 text-white hover:text-gray-400">
-                            <X className="h-6 w-6" />
-                          </button>
-                        </DialogClose>
-                        <h1>Ticket : {selectedTicket.subject}</h1>
-                        <h2 className=" font-semibold">
-                          Subject: {selectedTicket.subject}
-                        </h2>
-                        <p>
-                          <strong>Category:</strong> {selectedTicket.category}
-                        </p>
-                        <p>
-                          <strong>Description:</strong>{" "}
-                          {selectedTicket.description}
-                        </p>
-                        {/* {selectedTicket.fileUrl && (
-                                                <div>
-                                                    <p><strong>Attachment:</strong></p>
-                                                    <a href={selectedTicket.fileUrl} target='_blank' rel='noopener noreferrer'>
-                                                        <img src={selectedTicket.fileUrl} alt='Attachment' className='max-w-full h-full max-h-32 rounded-lg ' />
-                                                    </a>
-                                                </div>
-                                            )} */}
-                      </DialogContent>
-                    </Dialog>
-                  )}
-                </div>
-              )}
+                      {isSubmitting ? "Submitting..." : "Submit Ticket"}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
-          </div>
-        </div>
+          </CardHeader>
+
+          <CardContent>
+            {loading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center space-x-4">
+                    <Skeleton className="h-12 w-full" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[40%]">Subject</TableHead>
+                      <TableHead className="w-[20%]">Status</TableHead>
+                      <TableHead className="w-[20%]">Created</TableHead>
+                      <TableHead className="w-[20%] text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {tickets.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center py-10 text-muted-foreground">
+                          No tickets found. Create your first support ticket to get help.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      tickets.map((ticket) => (
+                        <TableRow key={ticket._id} className="hover:bg-muted/50">
+                          <TableCell className="font-medium">{ticket.subject}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className={getStatusBadgeColor(ticket.status)}>
+                              {ticket.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {new Date(ticket.createdAt).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            })}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleViewDetails(ticket)}
+                                title="View Details"
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleOpenDeleteDialog(ticket)}
+                                className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+                                title="Delete Ticket"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={handleDeleteTicket}
+      />
     </div>
   );
 }

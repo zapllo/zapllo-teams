@@ -73,7 +73,7 @@ export default function Footer() {
     ]
 
     return (
-        <footer className='w-full pt-20 pb-8 overflow-hidden'>
+        <footer className='w-full pt-20 pb-8 bg-[#04061e] overflow-hidden'>
             {/* Top CTA section */}
             <div className="max-w-7xl mx-auto px-4 mb-20">
                 <motion.div

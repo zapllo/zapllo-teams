@@ -1,6 +1,5 @@
 'use client'
 
-// pages/special-offer.js
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -24,10 +23,12 @@ import {
     CardTitle
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Check, Clock, Search, Tag, Wallet } from 'lucide-react'; import { AsYouType, CountryCode, getCountryCallingCode } from 'libphonenumber-js';
+import { AlertCircle, Check, Clock, Search, Tag, Wallet } from 'lucide-react';
+import { AsYouType, CountryCode, getCountryCallingCode } from 'libphonenumber-js';
 import { getData as getCountryData } from 'country-list';
 import Flag from "react-world-flags";
 import { toast } from "sonner";
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 
 interface Country {
@@ -42,14 +43,15 @@ export default function SpecialOfferPage() {
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [companyName, setCompanyName] = useState('');
-    const [phoneNumber, setPhoneNumber] = useState('');
+    const [industry, setIndustry] = useState('');
+    const [whatsappNo, setWhatsappNo] = useState('');
     const [country, setCountry] = useState('');
     const [state, setState] = useState('');
     const [city, setCity] = useState('');
     const [pincode, setPincode] = useState('');
     const [billingAddress, setBillingAddress] = useState('');
     const [gstin, setGstin] = useState('');
-const [errors, setErrors] = useState<Record<string, string>>({});
+    const [errors, setErrors] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(false);
 
     // Country selection related states
@@ -85,11 +87,14 @@ const [errors, setErrors] = useState<Record<string, string>>({});
         setIsDropdownOpen(false);
     };
 
+    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const phoneNumber = new AsYouType().input(e.target.value);
+        setWhatsappNo(phoneNumber);
+    };
+
     const filteredCountries = countries.filter(country =>
         country.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
-
-
 
     const plans = [
         {
@@ -118,29 +123,30 @@ const [errors, setErrors] = useState<Record<string, string>>({});
         },
     ];
 
-const selectedPlanDetails = plans.find(plan => plan.id === selectedPlan) || plans[1]; // Default to 1 Lakh plan
+    const selectedPlanDetails = plans.find(plan => plan.id === selectedPlan) || plans[1]; // Default to 1 Lakh plan
     const totalAmount = selectedPlan === 'pay50k' ? 59000 :
         selectedPlan === 'pay1Lakh' ? 118000 :
             selectedPlan === 'pay1.5Lakh' ? 177000 : 236000;
 
     const handleInputChange = (setter: React.Dispatch<React.SetStateAction<string>>, field: string, value: string) => {
         setter(value);
-setErrors(prev => {
-  const newErrors = { ...prev };
-  delete newErrors[field];
-  return newErrors;
-});
+        setErrors(prev => {
+            const newErrors = { ...prev };
+            delete newErrors[field];
+            return newErrors;
+        });
     };
 
-const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+    const validateForm = () => {
+        const newErrors: Record<string, string> = {};
 
-    if (!firstName.trim()) newErrors.firstName = "First name is required";
+        if (!firstName.trim()) newErrors.firstName = "First name is required";
         if (!lastName.trim()) newErrors.lastName = "Last name is required";
         if (!email.trim()) newErrors.email = "Email is required";
-if (email && !/^\S+@\S+\.\S+$/.test(email)) newErrors.email = "Invalid email format";
+        if (email && !/^\S+@\S+\.\S+$/.test(email)) newErrors.email = "Invalid email format";
         if (!companyName.trim()) newErrors.companyName = "Company name is required";
-        if (!phoneNumber.trim()) newErrors.phoneNumber = "Phone number is required";
+        if (!industry.trim()) newErrors.industry = "Industry is required";
+        if (!whatsappNo.trim()) newErrors.whatsappNo = "Phone number is required";
         if (!country.trim()) newErrors.country = "Country is required";
         if (!state.trim()) newErrors.state = "State is required";
         if (!city.trim()) newErrors.city = "City is required";
@@ -172,7 +178,7 @@ if (email && !/^\S+@\S+\.\S+$/.test(email)) newErrors.email = "Invalid email for
                     lastName,
                     email,
                     companyName,
-                    phoneNumber,
+                    phoneNumber: whatsappNo,
                     country,
                     state,
                     city,
@@ -196,9 +202,10 @@ if (email && !/^\S+@\S+\.\S+$/.test(email)) newErrors.email = "Invalid email for
                 name: "Zapllo",
                 description: `Special Wallet Deal - ${selectedPlanDetails.title}`,
                 order_id: orderData.id,
-handler: async function (response: any) {
+                handler: async function (response: any) {
                     try {
-                        const verifyResponse = await fetch('/api/payment-success', {
+                        // Call onboardingSuccess instead of payment-success
+                        const verifyResponse = await fetch('/api/onboardingSuccess', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -207,9 +214,15 @@ handler: async function (response: any) {
                                 razorpay_payment_id: response.razorpay_payment_id,
                                 razorpay_order_id: response.razorpay_order_id,
                                 razorpay_signature: response.razorpay_signature,
-                                userId: orderData.userId,
+                                firstName: firstName,
+                                lastName: lastName,
+                                companyName: companyName,
+                                industry: industry,
+                                email: email,
+                                countryCode: selectedCountry,
+                                whatsappNo: whatsappNo,
                                 amount: totalAmount,
-                                planName: selectedPlanDetails.title,
+                                planName: `Wallet Deal - ${selectedPlanDetails.title}`,
                                 subscribedUserCount: "Wallet Package",
                             }),
                         });
@@ -218,7 +231,18 @@ handler: async function (response: any) {
                             throw new Error('Payment verification failed');
                         }
 
-                        toast.success("Payment Successful! Your wallet has been credited. Welcome to Zapllo!");
+                        toast(
+                            <div className="w-full mb-6 gap-2 m-auto">
+                                <div className="w-full flex justify-center">
+                                    <DotLottieReact
+                                        src="/lottie/tick.lottie"
+                                        loop
+                                        autoplay
+                                    />
+                                </div>
+                                <h1 className="text-black text-center font-medium text-lg">Payment successful</h1>
+                            </div>
+                        );
 
                         router.push('/dashboard');
                     } catch (error) {
@@ -229,14 +253,14 @@ handler: async function (response: any) {
                 prefill: {
                     name: `${firstName} ${lastName}`,
                     email: email,
-                    contact: phoneNumber,
+                    contact: whatsappNo,
                 },
                 theme: {
                     color: "#7451F8",
                 },
             };
 
-const razorpay = new (window as any).Razorpay(options);
+            const razorpay = new (window as any).Razorpay(options);
             razorpay.open();
         } catch (error) {
             console.error('Checkout error:', error);
@@ -266,7 +290,6 @@ const razorpay = new (window as any).Razorpay(options);
                     <img
                         src="https://res.cloudinary.com/dndzbt8al/image/upload/v1743846882/logo-01_1_a2qvzt.png"
                         alt="Zapllo Logo"
-                        
                         className="mx-auto h-12 mb-4"
                     />
                     <h1 className="text-3xl font-bold text-slate-900">Put Your Business On Autopilot with Zapllo</h1>
@@ -277,7 +300,7 @@ const razorpay = new (window as any).Razorpay(options);
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Left Column - Plans */}
                     <div className="lg:col-span-2">
-                        <Card className="shadow-lg  border-0">
+                        <Card className="shadow-lg border-0">
                             <CardHeader className="pb-4">
                                 <CardTitle className="text-xl font-bold text-black flex items-center">
                                     <Tag className="mr-2 text-primary" size={20} />
@@ -372,8 +395,8 @@ const razorpay = new (window as any).Razorpay(options);
                                 {/* User Information */}
                                 <div className="mt-8 text-black">
                                     <h3 className="text-lg font-semibold mb-4 flex items-center">
-                                        <div className="bg-primary/10 p-2 rounded-full mr-2">
-                                            <div className="text-primary">1</div>
+                                        <div className="bg-primary/10 flex p-2 h-12 w-12 items-center rounded-full mr-2">
+                                            <div className="text-primary flex items-center m-auto">1</div>
                                         </div>
                                         Your Basic Information
                                     </h3>
@@ -388,7 +411,7 @@ const razorpay = new (window as any).Razorpay(options);
                                                 value={firstName}
                                                 onChange={(e) => handleInputChange(setFirstName, 'firstName', e.target.value)}
                                                 placeholder="First Name"
-                                                className={errors.firstName ? "border-destructive" : ""}
+                                                className={errors.firstName ? "border-destructive text-black" : "text-black"}
                                             />
                                             {errors.firstName && (
                                                 <p className="text-destructive text-xs mt-1">{errors.firstName}</p>
@@ -404,7 +427,7 @@ const razorpay = new (window as any).Razorpay(options);
                                                 value={lastName}
                                                 onChange={(e) => handleInputChange(setLastName, 'lastName', e.target.value)}
                                                 placeholder="Last Name"
-                                                className={errors.lastName ? "border-destructive" : ""}
+                                                className={errors.lastName ? "border-destructive text-black" : "text-black"}
                                             />
                                             {errors.lastName && (
                                                 <p className="text-destructive text-xs mt-1">{errors.lastName}</p>
@@ -421,7 +444,7 @@ const razorpay = new (window as any).Razorpay(options);
                                                 value={email}
                                                 onChange={(e) => handleInputChange(setEmail, 'email', e.target.value)}
                                                 placeholder="Email Address"
-                                                className={errors.email ? "border-destructive" : ""}
+                                                className={errors.email ? "border-destructive text-black" : " text-black"}
                                             />
                                             {errors.email && (
                                                 <p className="text-destructive text-xs mt-1">{errors.email}</p>
@@ -437,35 +460,95 @@ const razorpay = new (window as any).Razorpay(options);
                                                 value={companyName}
                                                 onChange={(e) => handleInputChange(setCompanyName, 'companyName', e.target.value)}
                                                 placeholder="Company Name"
-                                                className={errors.companyName ? "border-destructive" : ""}
+                                                className={errors.companyName ? "border-destructive text-black" : " text-black"}
                                             />
                                             {errors.companyName && (
                                                 <p className="text-destructive text-xs mt-1">{errors.companyName}</p>
                                             )}
                                         </div>
 
+                                        {/* Industry Field */}
+                                        <div className="space-y-2">
+                                            <Label htmlFor="industry" className="flex items-center">
+                                                Industry <span className="text-destructive ml-1">*</span>
+                                            </Label>
+                                            <Select
+                                                value={industry}
+                                                onValueChange={(value) => handleInputChange(setIndustry, 'industry', value)}
+                                            >
+                                                <SelectTrigger className={errors.industry ? "border-destructive text-black" : " text-black"}>
+                                                    <SelectValue placeholder="Select an industry" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="Retail/E-Commerce">Retail/E-Commerce</SelectItem>
+                                                    <SelectItem value="Technology">Technology</SelectItem>
+                                                    <SelectItem value="Service Provider">Service Provider</SelectItem>
+                                                    <SelectItem value="Healthcare">Healthcare</SelectItem>
+                                                    <SelectItem value="Logistics">Logistics</SelectItem>
+                                                    <SelectItem value="Financial Consultants">Financial Consultants</SelectItem>
+                                                    <SelectItem value="Trading">Trading</SelectItem>
+                                                    <SelectItem value="Education">Education</SelectItem>
+                                                    <SelectItem value="Manufacturing">Manufacturing</SelectItem>
+                                                    <SelectItem value="Real Estate/Construction">Real Estate/Construction</SelectItem>
+                                                    <SelectItem value="Other">Other</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            {errors.industry && (
+                                                <p className="text-destructive text-xs mt-1">{errors.industry}</p>
+                                            )}
+                                        </div>
+
                                         <div className="space-y-2 md:col-span-2">
-                                            <Label htmlFor="phoneNumber" className="flex items-center">
-                                                Phone Number <span className="text-destructive ml-1">*</span>
+                                            <Label htmlFor="whatsappNo" className="flex items-center">
+                                                WhatsApp Number <span className="text-destructive ml-1">*</span>
                                             </Label>
                                             <div className="flex">
-                                                <div className="w-16">
-                                                    <Select value="+91" disabled>
-                                                        <SelectTrigger className="rounded-r-none">
-                                                            <SelectValue>+91</SelectValue>
-                                                        </SelectTrigger>
-                                                    </Select>
+                                                <div className="w-24">
+                                                    <div
+                                                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                                        className="flex w-full h-full items-center cursor-pointer border rounded-l-md p-2 relative"
+                                                    >
+                                                        {selectedCountry && (
+                                                            <Flag code={selectedCountry} className="w-6 h-4 mr-1" />
+                                                        )}
+                                                        <span className="text-xs ">+{getCountryCallingCode(selectedCountry)}</span>
+                                                    </div>
+
+                                                    {isDropdownOpen && (
+                                                        <div className="absolute left-0 top-full mt-1 w-64 max-h-60 overflow-y-auto bg-white p-2 border rounded z-50 shadow-md">
+                                                            <div className="flex items-center p-2 border rounded mb-2 bg-white">
+                                                                <Search className="h-4 w-4 mr-2 text-gray-400" />
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Search Country"
+                                                                    value={searchQuery}
+                                                                    onChange={e => setSearchQuery(e.target.value)}
+                                                                    className="w-full text-xs focus:outline-none bg-transparent"
+                                                                />
+                                                            </div>
+                                                            {filteredCountries.map(country => (
+                                                                <div
+                                                                    key={country.code}
+                                                                    className="flex  items-center p-2  text-sm cursor-pointer hover:bg-gray-100 hover:text-gray-900 rounded"
+                                                                    onClick={() => handleCountryChange(country.code)}
+                                                                >
+                                                                    <Flag code={country.code} className="w-6 h-4 mr-2" />
+                                                                    {country.name} (+{getCountryCallingCode(country.code)})
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <Input
-                                                    id="phoneNumber"
-                                                    value={phoneNumber}
-                                                    onChange={(e) => handleInputChange(setPhoneNumber, 'phoneNumber', e.target.value)}
-                                                    placeholder="Phone Number"
-                                                    className={`flex-1 rounded-l-none ${errors.phoneNumber ? "border-destructive" : ""}`}
+                                                    id="whatsappNo"
+                                                    value={whatsappNo}
+                                                    onChange={handlePhoneChange}
+                                                    placeholder="WhatsApp Number"
+                                                    className={`flex-1 rounded-l-none h-10 text-black ${errors.whatsappNo ? "border-destructive text-black" : ""}`}
                                                 />
                                             </div>
-                                            {errors.phoneNumber && (
-                                                <p className="text-destructive text-xs mt-1">{errors.phoneNumber}</p>
+                                            {errors.whatsappNo && (
+                                                <p className="text-destructive text-xs mt-1">{errors.whatsappNo}</p>
                                             )}
                                         </div>
                                     </div>
@@ -474,8 +557,8 @@ const razorpay = new (window as any).Razorpay(options);
                                 {/* Billing Address */}
                                 <div className="mt-8">
                                     <h3 className="text-lg font-semibold mb-4 flex items-center">
-                                        <div className="bg-primary/10 p-2 rounded-full mr-2">
-                                            <div className="text-primary">2</div>
+                                    <div className="bg-primary/10 flex p-2 h-12 w-12 items-center rounded-full mr-2">
+                                            <div className="text-primary flex items-center m-auto">2</div>
                                         </div>
                                         Billing Address
                                     </h3>
@@ -540,7 +623,7 @@ const razorpay = new (window as any).Razorpay(options);
                                                     value={state}
                                                     onChange={(e) => handleInputChange(setState, 'state', e.target.value)}
                                                     placeholder="State"
-                                                    className={errors.state ? "border-destructive" : ""}
+                                                    className={errors.state ? "border-destructive text-black" : " text-black"}
                                                 />
                                                 {errors.state && (
                                                     <p className="text-destructive text-xs mt-1">{errors.state}</p>
@@ -555,7 +638,7 @@ const razorpay = new (window as any).Razorpay(options);
                                                     value={city}
                                                     onChange={(e) => handleInputChange(setCity, 'city', e.target.value)}
                                                     placeholder="City"
-                                                    className={errors.city ? "border-destructive" : ""}
+                                                    className={errors.city ? "border-destructive text-black" : " text-black"}
                                                 />
                                                 {errors.city && (
                                                     <p className="text-destructive text-xs mt-1">{errors.city}</p>
@@ -568,6 +651,7 @@ const razorpay = new (window as any).Razorpay(options);
                                             <Input
                                                 id="pincode"
                                                 value={pincode}
+                                                className='text-black'
                                                 onChange={(e) => handleInputChange(setPincode, 'pincode', e.target.value)}
                                                 placeholder="Pincode"
                                             />
@@ -582,7 +666,7 @@ const razorpay = new (window as any).Razorpay(options);
                                                 value={billingAddress}
                                                 onChange={(e) => handleInputChange(setBillingAddress, 'billingAddress', e.target.value)}
                                                 placeholder="Billing address"
-                                                className={errors.billingAddress ? "border-destructive" : ""}
+                                                className={errors.billingAddress ? "border-destructive text-black" : " text-black"}
                                             />
                                             {errors.billingAddress && (
                                                 <p className="text-destructive text-xs mt-1">{errors.billingAddress}</p>
@@ -594,6 +678,7 @@ const razorpay = new (window as any).Razorpay(options);
                                             <Input
                                                 id="gstin"
                                                 value={gstin}
+                                                className='text-black'
                                                 onChange={(e) => handleInputChange(setGstin, 'gstin', e.target.value)}
                                                 placeholder="GSTIN (optional)"
                                             />
@@ -602,15 +687,13 @@ const razorpay = new (window as any).Razorpay(options);
                                 </div>
 
                                 {/* Payment Method */}
-                                <div className="mt-8">                              
+                                <div className="mt-8">
                                     <div className="border rounded-lg p-4">
                                         <div className="flex items-center">
                                             <img src="/brands/razorpay.png" alt="Razorpay" className="h-8 mr-2" />
                                             <span className="font-medium">Secure payment via Razorpay</span>
                                         </div>
-
                                         <div className="mt-4 flex flex-wrap gap-2">
-                                          
                                             <img src="/brands/payment.png" alt="Net Banking" className="h-6" />
                                         </div>
                                     </div>
@@ -724,6 +807,22 @@ const razorpay = new (window as any).Razorpay(options);
                     </div>
                 </div>
             </div>
+
+            {/* Loading overlay */}
+            {isLoading && (
+                <div className="fixed inset-0  backdrop-blur-md flex items-center justify-center z-50">
+                    <Card className="max-w-md w-full p-8 border-0 shadow-2xl">
+                        <DotLottieReact
+                            src="/lottie/loader.lottie"
+                            loop
+                            className="h-32 mx-auto"
+                            autoplay
+                        />
+                        <h1 className="text-center text-2xl font-bold mt-4 text-black -100">Processing Your Payment</h1>
+                        <p className="text-black -200 text-center mt-2">Please wait while we confirm your transaction</p>
+                    </Card>
+                </div>
+            )}
         </div>
     );
 }

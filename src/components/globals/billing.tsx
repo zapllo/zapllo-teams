@@ -14,7 +14,7 @@ import { CrossCircledIcon } from '@radix-ui/react-icons';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
-type PlanKeys = 'Zapllo Tasks' | 'Money Saver Bundle';
+type PlanKeys = 'Zapllo Tasks' | 'Money Saver Bundle' | 'Zapllo CRM' | 'Zapllo Quotations';
 
 export default function Billing() {
     const [activeTab, setActiveTab] = useState('Active');
@@ -32,8 +32,8 @@ export default function Billing() {
     const [rechargeModalStep, setRechargeModalStep] = useState(1);
     const [gstNumber, setGstNumber] = useState('');
     const [rechargeGstNumber, setRechargeGstNumber] = useState('');
-    const [subscribedUserCount, setSubscribedUserCount] = useState<number>(0); // State for subscribed user  
-    const [orgCredits, setOrgCredits] = useState<number>(0); // State for subscribed user  
+    const [subscribedUserCount, setSubscribedUserCount] = useState<number>(0); // State for subscribed user
+    const [orgCredits, setOrgCredits] = useState<number>(0); // State for subscribed user
     const [additionalUserCount, setAdditionalUserCount] = useState<number | null>(null);
     const [totalUserCount, setTotalUserCount] = useState<number>(0); // Total after adding
     const [renewsOn, setRenewsOn] = useState<any>();
@@ -84,6 +84,8 @@ export default function Billing() {
     const plans = {
         'Zapllo Tasks': 1999,
         'Money Saver Bundle': 2999,
+        'Zapllo CRM': 5999,
+        'Zapllo Quotations': 2999,
     };
 
     const handleOpenDialog = () => {
@@ -995,12 +997,12 @@ export default function Billing() {
                             <div className="max-w-5xl mx-auto">
 
                                 {planTab === "Zapllo Sales" ? (
-                                    <div className='grid grid-cols-3 gap-4'>
-                                        <Card className="w-full  border-none dark:bg-[#0B0D26] h-fit px-4  rounded-3xl">
-                                            <CardHeader className=" rounded border-b text-">
+                                    <div className='grid grid-cols-3 h-full max-h-screen mb-24 gap-4'>
+                                        <Card className="w-full border-none dark:bg-[#0B0D26] h-fit px-4 rounded-3xl">
+                                            <CardHeader className="rounded border-b text-">
                                                 <CardTitle className="text-md font-thin">Zapllo CRM</CardTitle>
                                                 <CardDescription className="text- w-64 relative flex items-center gap-1 dark:text-white text-sm ">
-                                                    <h1 className='text-5xl font-extrabold'>  ₹ 2999</h1>
+                                                    <h1 className='text-5xl font-extrabold'>₹ 5999</h1>
                                                     <h1 className="text-md absolute right-0 bottom-0 text-[#646783] italic">/Per User Per Year</h1>
                                                 </CardDescription>
                                                 {displayedPlan === 'Zapllo CRM' && (
@@ -1020,22 +1022,99 @@ export default function Billing() {
                                                     </div>
                                                 )}
                                                 <div className=''>
-                                                    {/* <h1 className='mt-4 text-[#9296bf]'>Manage your Tasks like a pro</h1> */}
+                                                    <h1 className='mt-4 text-[#9296bf]'>Never miss a Lead Again!</h1>
                                                 </div>
                                                 <div className="flex justify-center py-2 w-full">
-
-                                                    {displayedPlan === 'Zapllo Tasks' ? (
+                                                    {displayedPlan === 'Zapllo CRM' ? (
                                                         <Button
-                                                            className="w-full hover:bg-[#815BF5] text-black dark:text-white border-[#A58DE8] border bg-transparent opacity-70  rounded-2xl px-6"
-                                                        // onClick={() => {
-                                                        //     setSelectedPlan(planTab); // Set the selected 
-                                                        //     setIsAddUserOpen(true); // Open the dialog to add more users
-                                                        // }}
+                                                            className="w-full border-[#A58DE8] text-black dark:text-white border bg-transparent hover:bg-[#815BF5] hover:text-white rounded-2xl px-6"
+                                                            onClick={() => {
+                                                                setSelectedPlan("Zapllo CRM");
+                                                                setIsAddUserOpen(true);
+                                                            }}
                                                         >
-                                                            Coming Soon
+                                                            <UserPlus2 className='h-4' /> Add Users
                                                         </Button>
                                                     ) : (
-                                                        <Button className="w-full h-10 mt-2 hover:bg-[#815BF5] text-black dark:text-white border-[#A58DE8] border bg-transparent  rounded-2xl " >Coming Soon</Button>
+                                                        <Button
+                                                            className="w-full h-10 mt-2 hover:bg-[#815BF5] text-black dark:text-white border-[#A58DE8] border bg-transparent hover:text-white rounded-2xl"
+                                                            onClick={() => handleSubscribeClick("Zapllo CRM")}
+                                                        >
+                                                            Subscribe
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </CardHeader>
+                                            <div className="mt-4">
+                                                <CardContent className="bg-transparent">
+                                                    <ul className="list-disc space-y-2 w-full items-center text-sm">
+                                                        {[
+                                                            "Contact management",
+                                                            "Lead management",
+                                                            "Deal tracking",
+                                                            "Email integration",
+                                                            "Task management",
+                                                            "Sales pipeline visualization",
+                                                            "Reporting and analytics",
+                                                            "Mobile access",
+                                                            "File sharing",
+                                                            "Custom fields and filters"
+                                                        ].map((item, index) => (
+                                                            <li key={index} className="flex gap-2 items-center">
+                                                                <img src="/icons/tick.png" />
+                                                                <span className="text-sm font-medium">
+                                                                    {item}
+                                                                </span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </CardContent>
+                                            </div>
+                                            <CardFooter />
+                                        </Card>
+
+                                        <Card className="w-full dark:bg-[#0B0D26] h-fit px-4 border-none rounded-3xl">
+                                            <CardHeader className=" rounded border-b text-">
+                                                <CardTitle className="text-md font-thin">Zapllo Quotation</CardTitle>
+                                                <CardDescription className="text- w-64 relative flex items-center gap-1 dark:text-white text-sm ">
+                                                    <h1 className='text-5xl font-extrabold'>  ₹ 2999</h1>
+                                                    <h1 className="text-md absolute right-0 bottom-0 text-[#646783] italic">/Per User Per Year</h1>
+                                                </CardDescription>
+                                                {displayedPlan === 'Zapllo Quotation' && (
+                                                    <div>
+                                                        <p className="mt-2 text-sm justify-start flex gap-1">
+                                                            <Clock className="h-5" />
+                                                            Renews on:{" "}
+                                                            <span className="text-[#3281F6]">{formatDate(renewsOn)}</span>
+                                                        </p>
+                                                        {subscribedUserCount && (
+                                                            <p className="mt-1 flex justify-start gap-1 text-sm">
+                                                                <Users2 className="h-5" />
+                                                                Subscribed Users:{" "}
+                                                                <span className="text-[#3281F6]">{subscribedUserCount}</span>
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                )}
+                                                <div className=''>
+                                                    <h1 className='mt-4 text-[#9296bf]'>Quotations in a Zap</h1>
+                                                </div>
+                                                <div className="flex justify-center py-2 w-full">
+                                                    {displayedPlan === 'Zapllo Quotation' ? (
+                                                        <Button
+                                                            className="w-full border-[#A58DE8] text-black dark:text-white border bg-transparent hover:bg-[#815BF5] hover:text-white rounded-2xl px-6"
+                                                            onClick={() => {
+                                                                setSelectedPlan("Zapllo Quotations");
+                                                                setIsAddUserOpen(true);
+                                                            }}
+                                                        >
+                                                            <UserPlus2 className='h-4' />  Add Users
+                                                        </Button>
+                                                    ) : (
+                                                        <Button className="w-full h-10 mt-2 hover:bg-[#815BF5] text-black dark:text-white border-[#A58DE8] border bg-transparent hover:text-white rounded-2xl"
+                                                            onClick={() => handleSubscribeClick("Zapllo Quotations")}>
+                                                            Subscribe
+                                                        </Button>
                                                     )}
                                                 </div>
                                             </CardHeader>
@@ -1043,8 +1122,14 @@ export default function Billing() {
                                                 <CardContent className="bg-transparent">
                                                     <ul className="list-disc space-y-2 w-full items-center text-sm">
                                                         {[
-
-
+                                                            "Custom quotation templates",
+                                                            "Digital signatures",
+                                                            "Product catalog integration",
+                                                            "Pricing management",
+                                                            "Approval workflows",
+                                                            "Client portal access",
+                                                            "PDF export",
+                                                            "Quotation tracking"
                                                         ].map((item, index) => (
                                                             <li key={index} className="flex gap-2 items-center">
                                                                 <img src="/icons/tick.png" />
@@ -1092,7 +1177,7 @@ export default function Billing() {
                                                         <Button
                                                             className="w-full border-[#A58DE8] text-black dark:text-white border bg-transparent opacity-70 hover:bg-[#815BF5] rounded-2xl px-6"
                                                         // onClick={() => {
-                                                        //     setSelectedPlan(planTab); // Set the selected 
+                                                        //     setSelectedPlan(planTab); // Set the selected
                                                         //     setIsAddUserOpen(true); // Open the dialog to add more users
                                                         // }}
                                                         >
@@ -1124,70 +1209,7 @@ export default function Billing() {
                                             </div>
                                             <CardFooter />
                                         </Card>
-                                        <Card className="w-full border-none dark:bg-[#0B0D26] h-fit px-4  rounded-3xl">
-                                            <CardHeader className=" rounded border-b text-">
-                                                <CardTitle className="text-md font-thin">Zapllo Quotation</CardTitle>
-                                                <CardDescription className="text- w-64 relative flex items-center gap-1 dark:text-white text-sm ">
-                                                    <h1 className='text-5xl font-extrabold'>  ₹ 1999</h1>
-                                                    <h1 className="text-md absolute right-0 bottom-0 text-[#646783] italic">/Per User Per Year</h1>
-                                                </CardDescription>
-                                                {displayedPlan === 'Zapllo CRM' && (
-                                                    <div>
-                                                        <p className="mt-2 text-sm justify-start flex gap-1">
-                                                            <Clock className="h-5" />
-                                                            Renews on:{" "}
-                                                            <span className="text-[#3281F6]">{formatDate(renewsOn)}</span>
-                                                        </p>
-                                                        {subscribedUserCount && (
-                                                            <p className="mt-1 flex justify-start gap-1 text-sm">
-                                                                <Users2 className="h-5" />
-                                                                Subscribed Users:{" "}
-                                                                <span className="text-[#3281F6]">{subscribedUserCount}</span>
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                )}
-                                                <div className=''>
-                                                    {/* <h1 className='mt-4 text-[#9296bf]'>Manage your Tasks like a pro</h1> */}
-                                                </div>
-                                                <div className="flex justify-center py-2 w-full">
 
-                                                    {displayedPlan === 'Zapllo Tasks' ? (
-                                                        <Button
-                                                            className="w-full border-[#A58DE8] border bg-transparent opacity-70 hover:bg-[#815BF5] rounded-2xl px-6"
-                                                        // onClick={() => {
-                                                        //     setSelectedPlan(planTab); // Set the selected 
-                                                        //     setIsAddUserOpen(true); // Open the dialog to add more users
-                                                        // }}
-                                                        >
-                                                            Coming Soon
-                                                        </Button>
-                                                    ) : (
-                                                        <Button className="w-full h-10 mt-2  text-black dark:text-white hover:bg-[#815BF5] border-[#A58DE8] border bg-transparent  rounded-2xl " >Coming Soon</Button>
-                                                    )}
-                                                </div>
-                                            </CardHeader>
-                                            <div className="mt-4 ">
-                                                <CardContent className="bg-transparent">
-                                                    <ul className="list-disc space-y-2 w-full items-center text-sm">
-                                                        {[
-
-
-                                                        ].map((item, index) => (
-                                                            <li key={index} className="flex gap-2 items-center">
-                                                                <img src="/icons/tick.png" />
-                                                                <span
-                                                                    className="text-sm font-medium"
-                                                                >
-                                                                    {item}
-                                                                </span>
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </CardContent>
-                                            </div>
-                                            <CardFooter />
-                                        </Card>
                                     </div>
                                 ) : (
                                     <div className='grid grid-cols-2 mb-24 gap-4'>
@@ -1225,7 +1247,7 @@ export default function Billing() {
                                                             <Button
                                                                 className="w-full border-[#A58DE8] dark:text-white border bg-transparent hover:bg-[#815BF5] hover:text-white rounded-2xl px-6"
                                                                 onClick={() => {
-                                                                    setSelectedPlan("Zapllo Tasks"); // Set the selected 
+                                                                    setSelectedPlan("Zapllo Tasks"); // Set the selected
                                                                     setIsAddUserOpen(true); // Open the dialog to add more users
                                                                 }}
                                                             >
@@ -1306,7 +1328,7 @@ export default function Billing() {
                                                             <Button
                                                                 className="border-[#A58DE8] dark:text-white hover:text-white  text-black hover:bg-[#815BF5] bg-transparent border  w-full rounded-2xl h-10 px-6"
                                                                 onClick={() => {
-                                                                    setSelectedPlan("Money Saver Bundle"); // Set the selected 
+                                                                    setSelectedPlan("Money Saver Bundle"); // Set the selected
                                                                     setIsAddUserOpen(true); // Open the dialog to add more users
                                                                 }}
                                                             >

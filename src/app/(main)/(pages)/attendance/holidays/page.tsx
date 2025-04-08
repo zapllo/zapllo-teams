@@ -180,7 +180,7 @@ const HolidayManager: React.FC = () => {
           {/* <h3 className="text-sm font-bold mb-4">Upcoming Holidays</h3> */}
           {/* <Toaster /> */}
           {holidays.length > 0 ? (
-            <div className="dark:bg-[#0B0D29] text-sm w-full rounded-2xl  border overflow-hidden">
+            <div className="dark:bg-[#0B0D29] text-sm w-full rounded-lg  border overflow-hidden">
               <table className="w-full">
                 <thead className="dark:bg-[#0B0D29] ">
                   <tr>

@@ -36,6 +36,7 @@ import { useRouter } from "next/navigation";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 import Link from "next/link";
+import { Skeleton } from "../ui/skeleton";
 
 interface User {
   _id: string;
@@ -114,7 +115,7 @@ export default function TeamTabs() {
     whatsappNo: "",
     password: "",
   });
-
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   const handleUserClick = (userId: string) => {
@@ -184,6 +185,7 @@ export default function TeamTabs() {
 
 
   const fetchUsers = async () => {
+    setIsLoading(true)
     try {
       const response = await fetch("/api/users/organization");
       const result = await response.json();
@@ -197,6 +199,8 @@ export default function TeamTabs() {
       }
     } catch (error) {
       console.error("Error fetching users:", error);
+    } finally {
+      setIsLoading(false); // Set loading to false when fetching completes
     }
   };
   useEffect(() => {
@@ -499,7 +503,42 @@ export default function TeamTabs() {
   //   }
   // }, [selectedUser]);
 
+
   console.log(editedUser, 'edited user')
+
+  // Add this skeleton loader component
+  const UserCardSkeleton = () => (
+    <Card className="flex rounded-xl border items-center justify-between w-full p-2">
+      <div className="items-center flex gap-4">
+        <div className="flex gap-2">
+          <Skeleton className="h-10 w-10 rounded-full" />
+          <div>
+            <Skeleton className="h-4 w-[210px] mt-2" />
+          </div>
+        </div>
+        <div className="-ml-6 items-center flex gap-2">
+          <Skeleton className="h-4 w-4" />
+          <Skeleton className="h-4 w-4" />
+          <Skeleton className="h-4 w-[150px]" />
+          <Skeleton className="h-4 w-1" />
+          <Skeleton className="h-4 w-4" />
+          <Skeleton className="h-4 w-[100px]" />
+          <Skeleton className="h-4 w-1" />
+          <Skeleton className="h-4 w-4" />
+          <Skeleton className="h-4 w-[100px]" />
+        </div>
+      </div>
+      <div className="justify-end px-8 w-full flex">
+        <Skeleton className="h-6 w-20" />
+      </div>
+      <div className="flex gap-2">
+        <Skeleton className="h-5 w-5" />
+        <Skeleton className="h-5 w-5" />
+      </div>
+    </Card>
+  );
+
+
   return (
     <div className="w-full max-w-5xl overflow-y-scroll  overflow-x-hidden h-screen mb-12 scrollbar-hide mt-16 mx-auto">
       {/* <Toaster /> */}
@@ -772,133 +811,140 @@ export default function TeamTabs() {
           </div>
         </div>
         <div className="grid  text-sm w-full py-4 -ml-44  gap-4">
-          {filteredUsers
-            .filter((user) => {
-              if (activeTab === "all") return true;
-              return user.role.toLowerCase().includes(activeTab.toLowerCase());
-            })
-            .map((user) => (
-              <div key={user._id}>
-                <Card onClick={() => handleUserClick(user._id)} key={user.firstName} className="flex  rounded-xl bg-[#] hover:border-[#815bf5] border cursor-pointer items-center justify-between w-full p-2">
-                  <div className="items-center flex gap-4">
-                    <div className="flex gap-2">
-                      <Avatar className="scale-75">
-                        <AvatarImage src="/placeholder-user.jpg" />
-                        {user.profilePic ? (
-                          <img
-                            src={user.profilePic}
-                            alt={`${user.firstName} ${user.lastName}`}
-                            className="h-full w-full rounded-full object-cover"
-                          />
-                        ) : (
-                          <AvatarFallback className="bg-[#815BF5] text-white">{user.firstName.charAt(0)}{user.lastName.charAt(0)}</AvatarFallback>
-                        )}
+          {isLoading ? (
+            // Show skeleton loaders when loading
+            Array(5).fill(0).map((_, index) => (
+              <UserCardSkeleton key={`skeleton-${index}`} />
+            ))
+          ) : (
+            filteredUsers
+              .filter((user) => {
+                if (activeTab === "all") return true;
+                return user.role.toLowerCase().includes(activeTab.toLowerCase());
+              })
+              .map((user) => (
+                <div key={user._id}>
+                  <Card onClick={() => handleUserClick(user._id)} key={user.firstName} className="flex  rounded-xl bg-[#] hover:border-[#815bf5] border cursor-pointer items-center justify-between w-full p-2">
+                    <div className="items-center flex gap-4">
+                      <div className="flex gap-2">
+                        <Avatar className="scale-75">
+                          <AvatarImage src="/placeholder-user.jpg" />
+                          {user.profilePic ? (
+                            <img
+                              src={user.profilePic}
+                              alt={`${user.firstName} ${user.lastName}`}
+                              className="h-full w-full rounded-full object-cover"
+                            />
+                          ) : (
+                            <AvatarFallback className="bg-[#815BF5] text-white">{user.firstName.charAt(0)}{user.lastName.charAt(0)}</AvatarFallback>
+                          )}
 
-                      </Avatar>
-                      <div>
-                        <p className="font-medium w-[210px] mt-2 text-sm">
-                          {`${(user.firstName + ' ' + user.lastName).slice(0, 20)}${(user.firstName + ' ' + user.lastName).length > 20 ? '' : ''}`}
-                        </p>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium w-[210px] mt-2 text-sm">
+                            {`${(user.firstName + ' ' + user.lastName).slice(0, 20)}${(user.firstName + ' ' + user.lastName).length > 20 ? '' : ''}`}
+                          </p>
 
-                      </div>
-                    </div>
-                    <div className="-ml-6 items-center flex gap-2">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Link
-                              href={`https://wa.me/${user.whatsappNo}`}    // or http://
-                              onClick={(e) => e.stopPropagation()}         // prevents card's onClick
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <span className="flex items-center">
-                                <FaTelegramPlane className="h-5 dark:text-muted-foreground -600 cursor-pointer" />
-                              </span>
-                            </Link>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom">
-                            {/* Content shown when hovering over the arrow icon */}
-                            <span>Send Message</span>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      <Mail className="h-5 text-red-800" />
-                      <p className="dark:text-[#E0E0E0]">{user.email}</p>
-                      <h1 className="text-[#E0E0E066]">|</h1>
-                      <div className="flex gap-2 items-center mt-[1px]">
-                        <FaWhatsapp className="h-5 mt-[1px] text-green-500" />
-                        <p className="dark:text-[#E0E0E0]">{user.whatsappNo}</p>
-                      </div>
-                      <h1 className="text-[#E0E0E066]">|</h1>
-                      {reportingManagerNames[user._id] && (
-                        <div className="flex gap-1 mt-[1px]">
-                          <UserCircle className="h-5" />
-                          <p className="text-[#E0E0E0]">{reportingManagerNames[user._id]}</p>
                         </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="justify-end px-8 w-full flex">
-                    <div
-                      className={`w-fit px-4 py-1 text-white rounded text-xs ${user.role === "orgAdmin"
-                        ? "bg-[#B4173B]"
-                        : user.role === "manager"
-                          ? "bg-blue-600"
-                          : user.role === "member"
-                            ? "bg-[#007A5A]"
-                            : "bg-gray-500"
-                        }`}
-                    >
-                      {user.role === "orgAdmin"
-                        ? "Admin"
-                        : user.role === "member"
-                          ? "Member"
-                          : user.role === "manager"
-                            ? "Manager"
-                            : user.role}
-                    </div>
-                  </div>
-
-                  {loggedInUserRole == "orgAdmin" && (
-                    <div className=" flex gap-2">
-                      <div className="bg-transparent  hover:bg-transparent" onClick={(event) => {
-                        event.stopPropagation(); // Prevent the parent click event
-                        setEditedUser({
-                          _id: user._id,
-                          email: user.email,
-                          role: user.role,
-                          password: "",
-                          firstName: user.firstName,
-                          lastName: user.lastName,
-                          whatsappNo: user.whatsappNo,
-                          country: user?.country,
-                          reportingManager: user.reportingManager,
-                          profilePic: user.profilePic,
-                          isLeaveAccess: user.isLeaveAccess,
-                          isTaskAccess: user.isTaskAccess,
-                        });
-                        setIsEditModalOpen(true); // Open the edit modal
-                      }}
-                      >
-                        <Pencil className="h-5 text-blue-500" />
                       </div>
-                      {/* Delete Button */}
+                      <div className="-ml-6 items-center flex gap-2">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Link
+                                href={`https://wa.me/${user.whatsappNo}`}    // or http://
+                                onClick={(e) => e.stopPropagation()}         // prevents card's onClick
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <span className="flex items-center">
+                                  <FaTelegramPlane className="h-5 dark:text-muted-foreground -600 cursor-pointer" />
+                                </span>
+                              </Link>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom">
+                              {/* Content shown when hovering over the arrow icon */}
+                              <span>Send Message</span>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        <Mail className="h-5 text-red-800" />
+                        <p className="dark:text-[#E0E0E0]">{user.email}</p>
+                        <h1 className="text-[#E0E0E066]">|</h1>
+                        <div className="flex gap-2 items-center mt-[1px]">
+                          <FaWhatsapp className="h-5 mt-[1px] text-green-500" />
+                          <p className="dark:text-[#E0E0E0]">{user.whatsappNo}</p>
+                        </div>
+                        <h1 className="text-[#E0E0E066]">|</h1>
+                        {reportingManagerNames[user._id] && (
+                          <div className="flex gap-1 mt-[1px]">
+                            <UserCircle className="h-5" />
+                            <p className="text-[#E0E0E0]">{reportingManagerNames[user._id]}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="justify-end px-8 w-full flex">
                       <div
-                        className="bg-transparent hover:bg-transparent"
-                        onClick={(event) => {
-                          event.stopPropagation(); // Prevent the parent click event
-                          openDeleteDialog(user); // Open the delete confirmation dialog
-                        }}
+                        className={`w-fit px-4 py-1 text-white rounded text-xs ${user.role === "orgAdmin"
+                          ? "bg-[#B4173B]"
+                          : user.role === "manager"
+                            ? "bg-blue-600"
+                            : user.role === "member"
+                              ? "bg-[#007A5A]"
+                              : "bg-gray-500"
+                          }`}
                       >
-                        <Trash2 className="text-[#9C2121] h-5" />
+                        {user.role === "orgAdmin"
+                          ? "Admin"
+                          : user.role === "member"
+                            ? "Member"
+                            : user.role === "manager"
+                              ? "Manager"
+                              : user.role}
                       </div>
                     </div>
-                  )}
-                </Card>
-              </div>
-            ))}
+
+                    {loggedInUserRole == "orgAdmin" && (
+                      <div className=" flex gap-2">
+                        <div className="bg-transparent  hover:bg-transparent" onClick={(event) => {
+                          event.stopPropagation(); // Prevent the parent click event
+                          setEditedUser({
+                            _id: user._id,
+                            email: user.email,
+                            role: user.role,
+                            password: "",
+                            firstName: user.firstName,
+                            lastName: user.lastName,
+                            whatsappNo: user.whatsappNo,
+                            country: user?.country,
+                            reportingManager: user.reportingManager,
+                            profilePic: user.profilePic,
+                            isLeaveAccess: user.isLeaveAccess,
+                            isTaskAccess: user.isTaskAccess,
+                          });
+                          setIsEditModalOpen(true); // Open the edit modal
+                        }}
+                        >
+                          <Pencil className="h-5 text-blue-500" />
+                        </div>
+                        {/* Delete Button */}
+                        <div
+                          className="bg-transparent hover:bg-transparent"
+                          onClick={(event) => {
+                            event.stopPropagation(); // Prevent the parent click event
+                            openDeleteDialog(user); // Open the delete confirmation dialog
+                          }}
+                        >
+                          <Trash2 className="text-[#9C2121] h-5" />
+                        </div>
+                      </div>
+                    )}
+                  </Card>
+                </div>
+              ))
+          )}
         </div>
       </div>
 

@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import Testimonials2 from "@/components/globals/testimonials2";
 import OtherFooter from "@/components/globals/other-footer";
 import Confetti from 'react-canvas-confetti';
+import Footer from "@/components/globals/Footer";
 
 const golos = Golos_Text({ subsets: ["latin"], weight: ["400", "500", "600", "700"] });
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], weight: ["400", "500", "600", "700"] });
@@ -202,7 +203,7 @@ export default function Home() {
                             <Button
                                 size="lg"
                                 onClick={() => scrollToProduct('tasks')}
-                                className="bg-gradient-to-r from-indigo-500 via-purple-500 to-orange-500 hover:from-indigo-600 hover:via-purple-600 hover:to-orange-600 text-white font-bold px-8 py-6 rounded-full text-lg shadow-lg"
+                                className="bg-gradient-to-r mt-4 from-indigo-500 via-purple-500 to-orange-500 hover:from-indigo-600 hover:via-purple-600 hover:to-orange-600 text-white font-bold px-8 py-6 rounded-full text-lg shadow-lg"
                             >
                                 View Special Offers Now
                                 <ArrowRight className="w-5 h-5 ml-2" />
@@ -980,10 +981,10 @@ export default function Home() {
                                 transition={{ duration: 0.5, delay: index * 0.1 }}
                                 viewport={{ once: true }}
                             >
-                                <Card className="h-full shadow-sm hover:shadow-md transition-shadow duration-300">
+                                <Card className="h-full bg-transparent border-gray-200 border shadow-sm hover:shadow-md transition-shadow duration-300">
                                     <CardHeader>
                                         <CardTitle className="flex justify-between items-center">
-                                            <span>{item.title}</span>
+                                            <span className='text-black'>{item.title}</span>
                                             <Badge variant="outline" className="text-purple-600 border-purple-200 bg-purple-50">
                                                 {item.value}
                                             </Badge>
@@ -1008,7 +1009,7 @@ export default function Home() {
                                     and operational efficiency.
                                 </p>
                                 <Button
-                                    className="bg-gradient-to-r from-indigo-500 via-purple-500 to-orange-500 hover:from-indigo-600 hover:via-purple-600 hover:to-orange-600 text-white py-6 px-8 rounded-full font-bold text-lg shadow-md"
+                                    className="bg-gradient-to-r  from-indigo-500 via-purple-500 to-orange-500 hover:from-indigo-600 hover:via-purple-600 hover:to-orange-600 text-white py-6 px-8 rounded-full font-bold text-lg shadow-md"
                                     onClick={() => scrollToProduct('tasks')}
                                 >
                                     View Special Offers Again
@@ -1096,7 +1097,7 @@ export default function Home() {
                                 {[...Array(6)].map((_, index) => (
                                     <div key={index} className="bg-gray-100 rounded-lg p-4 h-20 flex items-center justify-center">
                                         <Image
-                                            src={`/logos/client-${index + 1}.svg`}
+                                            src={`/brands/${index + 1}.webp`}
                                             alt={`Client ${index + 1}`}
                                             width={80}
                                             height={40}
@@ -1263,8 +1264,8 @@ export default function Home() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {[
                                 {
-                                    title: "30-Day Money-Back Guarantee",
-                                    description: "Risk-free purchase with our full refund policy"
+                                    title: "Save 5+ Hours Daily",
+                                    description: "Automate repetitive tasks and free up your team's valuable time"
                                 },
                                 {
                                     title: "Premium Support Included",
@@ -1286,7 +1287,7 @@ export default function Home() {
             </section>
 
             {/* Footer */}
-            <OtherFooter />
+            <Footer />
         </main>
     );
 }
