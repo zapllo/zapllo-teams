@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import Testimonials2 from "@/components/globals/testimonials2";
 import OtherFooter from "@/components/globals/other-footer";
 import Confetti from 'react-canvas-confetti';
+import Footer from "@/components/globals/Footer";
 
 const golos = Golos_Text({ subsets: ["latin"], weight: ["400", "500", "600", "700"] });
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], weight: ["400", "500", "600", "700"] });
@@ -580,7 +581,7 @@ const formatTime = (time: number) => {
             </section>
 
             {/* Footer */}
-            <OtherFooter />
+            <Footer />
         </main>
     );
 }
