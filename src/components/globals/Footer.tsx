@@ -239,10 +239,10 @@ export default function Footer() {
                         <Link href='/disclaimer' className='text-[#676B93] text-sm hover:text-white transition-colors'>
                             Disclaimer
                         </Link>
-                        <span className='text-[#676B93]'>•</span>
+                        {/* <span className='text-[#676B93]'>•</span>
                         <Link href='/refundpolicy' className='text-[#676B93] text-sm hover:text-white transition-colors'>
                             Refund Policy
-                        </Link>
+                        </Link> */}
                     </div>
                 </div>
 

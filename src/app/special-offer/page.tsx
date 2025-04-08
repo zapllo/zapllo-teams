@@ -151,12 +151,12 @@ export default function Home() {
 
     return (
         <main className={`bg-white w-full mx-auto min-h-screen overflow-x-hidden ${golos.className}`}>
-            <FloatingNavbar />
+            {/* <FloatingNavbar /> */}
 
             {showConfetti && <Confetti className="w-full h-full fixed top-0 left-0 z-50" />}
 
             {/* Hero Section */}
-            <section className="relative pt-20 overflow-hidden">
+            <section className="relative pt-8 overflow-hidden">
                 <div className="absolute top-0 right-0 -z-10 w-full h-full bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 opacity-70">
                     {/* Adding a subtle pattern overlay */}
                     <div className="absolute inset-0 bg-grid-slate-200/50 [mask-image:linear-gradient(0deg,#fff,rgba(255,255,255,0.6))]" /></div>

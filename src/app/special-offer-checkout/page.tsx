@@ -119,8 +119,8 @@ const formatTime = (time: number) => {
         const seatsInterval = setInterval(() => {
             setCountdown((prev) => {
                 const newCount = prev > 3 ? prev - 1 : 3;
-                // Update progress based on countdown
-                setProgress(((20 - newCount) / (20 - 3)) * 100);
+                // Update progress based on countdown and ensure it's a whole number
+                setProgress(Math.round(((20 - newCount) / (20 - 3)) * 100));
                 return newCount;
             });
         }, intervalDuration * 1000);
@@ -133,18 +133,20 @@ const formatTime = (time: number) => {
 
     return (
         <main className={`bg-white w-full mx-auto min-h-screen overflow-x-hidden ${golos.className}`}>
-            <FloatingNavbar />
+            {/* <FloatingNavbar /> */}
 
             {showConfetti && <Confetti className="w-full h-full fixed top-0 left-0 z-50" />}
-
+            <div className='flex items-center py-8 justify-center'>
+                <img className="h-12" src='https://res.cloudinary.com/dndzbt8al/image/upload/v1743846882/logo-01_1_a2qvzt.png' />
+            </div>
             {/* Hero Section with Offer Banner */}
-            <section className="relative pt-20">
+            <section className="relative pt-4">
                 <div className="absolute top-0 right-0 -z-10 w-full h-full bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 opacity-50">
                     <div className="absolute inset-0 bg-grid-slate-200/50 [mask-image:linear-gradient(0deg,#fff,rgba(255,255,255,0.6))]" />
                 </div>
 
                 {/* Offer Banner */}
-                <div className="w-full py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-orange-500 flex flex-col sm:flex-row items-center justify-center gap-4 px-4 mt-16">
+                <div className="w-full py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-orange-500 flex flex-col sm:flex-row items-center justify-center gap-4 px-4 ">
                     <p className="text-white font-medium">
                         Limited Time Offer! Complete Your Purchase
                     </p>
