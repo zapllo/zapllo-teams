@@ -81,7 +81,7 @@ export default function ModernTestimonials() {
                   <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                 ))}
               </div>
-              <p className="text-muted-foreground">"{testimonial.quote}"</p>
+              <p className="text-muted-foreground">&quot;{testimonial.quote}&quot;</p>
             </CardContent>
           </Card>
         ))}
