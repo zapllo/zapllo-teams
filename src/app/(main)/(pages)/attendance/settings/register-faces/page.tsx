@@ -528,7 +528,7 @@ export default function RegisterFace() {
           <CheckCheck className="text-green-500 h-4" />
           Approved ({countRequests("approved")})
         </button>
-        {/* 
+        {/*
         <button
           className={`px-4 py-2 flex text-xs rounded gap-2 ${
             activeTab === "rejected"
@@ -615,7 +615,7 @@ export default function RegisterFace() {
                             onClick={() =>
                               handleStatusChange(request._id, "approved")
                             }
-                            className="bg-transparent flex gap-2 hover:border-green-600 border text-white py-2 px-4 rounded"
+                            className="bg-transparent flex gap-2 hover:border-green-600 border dark:text-white py-2 px-4 rounded"
                             disabled={updating}
                           >
                             {request.isApproving ? (
@@ -631,7 +631,7 @@ export default function RegisterFace() {
                             onClick={() =>
                               handleStatusChange(request._id, "rejected")
                             }
-                            className="border flex gap-2 bg-transparent hover:border-red-600 text-white py-2 px-4 rounded"
+                            className="border flex gap-2 bg-transparent hover:border-red-600 dark:text-white py-2 px-4 rounded"
                             disabled={updating}
                           >
                             {request.isRejecting ? (
@@ -742,7 +742,7 @@ export default function RegisterFace() {
                             onClick={() =>
                               handleStatusChange(request._id, "approved")
                             }
-                            className="bg-transparent flex gap-2 hover:border-green-600 border text-white py-2 px-4 rounded"
+                            className="bg-transparent flex items-center gap-2 hover:border-green-600 border dark:text-white py-2 px-4 rounded"
                             disabled={updating}
                           >
                             {request.isApproving ? (
@@ -758,7 +758,7 @@ export default function RegisterFace() {
                             onClick={() =>
                               handleStatusChange(request._id, "rejected")
                             }
-                            className="border flex gap-2 bg-transparent hover:border-red-600 text-white py-2 px-4 rounded"
+                            className="border flex items-center gap-2 bg-transparent hover:border-red-600 dark:text-white py-2 px-4 rounded"
                             disabled={updating}
                           >
                             {request.isRejecting ? (

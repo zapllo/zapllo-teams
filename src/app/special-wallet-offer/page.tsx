@@ -26,6 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertCircle, Check, Clock, Search, Tag, Wallet } from 'lucide-react';
 import { AsYouType, CountryCode, getCountryCallingCode } from 'libphonenumber-js';
 import { getData as getCountryData } from 'country-list';
+import { Country as ICountry, State } from 'country-state-city';
 import Flag from "react-world-flags";
 import { toast } from "sonner";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
@@ -47,6 +48,8 @@ export default function SpecialOfferPage() {
     const [whatsappNo, setWhatsappNo] = useState('');
     const [country, setCountry] = useState('');
     const [state, setState] = useState('');
+    const [stateCode, setStateCode] = useState('');
+    const [states, setStates] = useState<any[]>([]);
     const [city, setCity] = useState('');
     const [pincode, setPincode] = useState('');
     const [billingAddress, setBillingAddress] = useState('');
@@ -77,7 +80,19 @@ export default function SpecialOfferPage() {
                 }
             });
         setCountries(countryList);
+
+        // Initialize states for default country (India)
+        const indianStates = State.getStatesOfCountry("IN");
+        setStates(indianStates);
     }, []);
+
+    // Update states when country changes
+    useEffect(() => {
+        if (selectedCountry) {
+            const countryStates = State.getStatesOfCountry(selectedCountry);
+            setStates(countryStates);
+        }
+    }, [selectedCountry]);
 
     const handleCountryChange = (code: CountryCode) => {
         const phoneCode = getCountryCallingCode(code);
@@ -85,6 +100,29 @@ export default function SpecialOfferPage() {
         setSelectedCountry(code);
         setCountry(countries.find(c => c.code === code)?.name || '');
         setIsDropdownOpen(false);
+
+        // Reset state when country changes
+        setState('');
+        setStateCode('');
+
+        // Update states for the new country
+        const countryStates = State.getStatesOfCountry(code);
+        setStates(countryStates);
+    };
+
+    const handleStateChange = (value: string) => {
+        const selectedState = states.find(s => s.isoCode === value);
+        if (selectedState) {
+            setState(selectedState.name);
+            setStateCode(value);
+        }
+
+        // Clear state-related errors
+        setErrors(prev => {
+            const newErrors = { ...prev };
+            delete newErrors.state;
+            return newErrors;
+        });
     };
 
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,25 +137,25 @@ export default function SpecialOfferPage() {
     const plans = [
         {
             id: 'pay50k',
-            title: 'Pay 50K+gst',
+            title: 'Pay 50K+GST',
             get: '₹62.5K in Wallet',
             recommended: false
         },
         {
             id: 'pay1Lakh',
-            title: 'Pay 1 Lakh+gst',
+            title: 'Pay 1 Lakh+GST',
             get: '₹1.5 Lakh in Wallet',
             recommended: true
         },
         {
             id: 'pay1.5Lakh',
-            title: 'Pay 1.5 Lakh+gst',
+            title: 'Pay 1.5 Lakh+GST',
             get: '₹2.25 Lakhs in Wallet',
             recommended: false
         },
         {
             id: 'pay2Lakh',
-            title: 'Pay 2 Lakh+gst',
+            title: 'Pay 2 Lakh+GST',
             get: '₹3 Lakhs in Wallet',
             recommended: false
         },
@@ -293,7 +331,7 @@ export default function SpecialOfferPage() {
                         className="mx-auto h-12 mb-4"
                     />
                     <h1 className="text-3xl font-bold text-slate-900">Put Your Business On Autopilot with Zapllo</h1>
-                    <p className="text-slate-600 mt-2">Save more than 70% with our Special Wallet Deal</p>
+                    <p className="text-slate-600 mt-2">Save more than 50% with our Special Wallet Deal</p>
                 </div>
 
                 {/* Main Content */}
@@ -304,7 +342,7 @@ export default function SpecialOfferPage() {
                             <CardHeader className="pb-4">
                                 <CardTitle className="text-xl font-bold text-black flex items-center">
                                     <Tag className="mr-2 text-primary" size={20} />
-                                    Select a Plan - Save More than 70% on Yearly Plan
+                                    Select a Plan - Save More than 50%
                                 </CardTitle>
                             </CardHeader>
 
@@ -557,7 +595,7 @@ export default function SpecialOfferPage() {
                                 {/* Billing Address */}
                                 <div className="mt-8">
                                     <h3 className="text-lg font-semibold mb-4 flex items-center">
-                                    <div className="bg-primary/10 flex p-2 h-12 w-12 items-center rounded-full mr-2">
+                                        <div className="bg-primary/10 flex p-2 h-12 w-12 items-center rounded-full mr-2">
                                             <div className="text-primary flex items-center m-auto">2</div>
                                         </div>
                                         Billing Address
@@ -618,13 +656,27 @@ export default function SpecialOfferPage() {
                                                 <Label htmlFor="state" className="flex items-center">
                                                     State <span className="text-destructive ml-1">*</span>
                                                 </Label>
-                                                <Input
-                                                    id="state"
-                                                    value={state}
-                                                    onChange={(e) => handleInputChange(setState, 'state', e.target.value)}
-                                                    placeholder="State"
-                                                    className={errors.state ? "border-destructive text-black" : " text-black"}
-                                                />
+                                                <Select
+                                                    value={stateCode}
+                                                    onValueChange={handleStateChange}
+                                                >
+                                                    <SelectTrigger className={errors.state ? "border-destructive text-black" : "text-black"}>
+                                                        <SelectValue placeholder="Select a state" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {states.length > 0 ? (
+                                                            states.map((state) => (
+                                                                <SelectItem key={state.isoCode} value={state.isoCode}>
+                                                                    {state.name}
+                                                                </SelectItem>
+                                                            ))
+                                                        ) : (
+                                                            <SelectItem value="no-states" disabled>
+                                                                No states available for this country
+                                                            </SelectItem>
+                                                        )}
+                                                    </SelectContent>
+                                                </Select>
                                                 {errors.state && (
                                                     <p className="text-destructive text-xs mt-1">{errors.state}</p>
                                                 )}
