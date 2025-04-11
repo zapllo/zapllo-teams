@@ -90,7 +90,7 @@ export default function AccountDeletionPage() {
           </h1>
 
           <p className="text-[#676B93] max-w-md mx-auto text-sm">
-            We're sorry to see you go. Please review the information below before proceeding.
+            We&apos;re sorry to see you go. Please review the information below before proceeding.
           </p>
         </div>
 
@@ -272,7 +272,7 @@ export default function AccountDeletionPage() {
                   </li>
                   <li className="flex items-start">
                     <span className="h-5 w-5 rounded-full bg-gradient-to-r from-[#815BF5]/20 to-[#FC8929]/20 flex items-center justify-center text-[10px] mr-2 flex-shrink-0 mt-0.5">2</span>
-                    <span>You'll receive a confirmation email with details about the deletion process</span>
+                    <span>You&apos;ll receive a confirmation email with details about the deletion process</span>
                   </li>
                   <li className="flex items-start">
                     <span className="h-5 w-5 rounded-full bg-gradient-to-r from-[#815BF5]/20 to-[#FC8929]/20 flex items-center justify-center text-[10px] mr-2 flex-shrink-0 mt-0.5">3</span>
@@ -336,10 +336,10 @@ export default function AccountDeletionPage() {
 
             <div className="mt-8 text-center">
               <p className="text-sm text-[#676B93] mb-3">
-                We're on a mission to help 10 Million MSMEs automate their business operations
+                We&apos;re on a mission to help 10 Million MSMEs automate their business operations
               </p>
               <Link href="/contact" className="text-sm text-[#815BF5] hover:underline">
-                Have feedback? We'd love to hear from you
+                Have feedback? We&apos;d love to hear from you
               </Link>
             </div>
           </div>
@@ -398,7 +398,7 @@ export default function AccountDeletionPage() {
                 </li>
                 <li className="flex items-start">
                   <span className="h-5 w-5 rounded-full bg-gradient-to-r from-[#815BF5]/10 to-[#FC8929]/10 flex items-center justify-center text-[10px] mr-2 flex-shrink-0 mt-0.5">C</span>
-                  <span><strong>Email:</strong> Contact support@zapllo.com with subject "Account Deletion Request"</span>
+                  <span><strong>Email:</strong> Contact support@zapllo.com with subject &quot;Account Deletion Request&quot;</span>
                 </li>
               </ul>
             </div>
