@@ -200,7 +200,7 @@ Zapllo Support Team`,
                             <div style="border-radius:8px; margin-top:4px; color:#000000; padding:10px; background-color:#ECF1F6">
                           <p><strong>Company Name:</strong> ${organization.companyName}</p>
                           <p><strong>Total Users Subscribed:</strong> ${subscribedUserCount}</p>
-                          <p><strong>Subscription Email ID:</strong> ${user.email}</p> 
+                          <p><strong>Subscription Email ID:</strong> ${user.email}</p>
                            </div>
                              <p style="margin-top:4px;">One of our onboarding specialists will connect with you soon and get your workspace up and running.</p>
                   Regards,</br>

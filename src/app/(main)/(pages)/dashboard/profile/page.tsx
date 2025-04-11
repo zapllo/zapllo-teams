@@ -149,7 +149,7 @@ export default function Profile({ }: Props) {
     }
     getUserDetails();
   }, []);
- 
+
   const logout = async () => {
     try {
       await axios.get('/api/users/logout');
@@ -335,6 +335,7 @@ export default function Profile({ }: Props) {
               <h1 className="text-sm">Change Password</h1>
             </div>
           </Link>
+
         </div>
 
         {/* Support and Logout */}
@@ -417,7 +418,11 @@ export default function Profile({ }: Props) {
               <h1 className="text-sm">Change Language (Coming Soon)</h1>
             </div>
           </Link>
-
+          <Link href="/account-deletion">
+          <div className="p-2 border-b mt-2 h-10">
+              <h1 className="text-sm">Delete My Account</h1>
+            </div>
+            </Link>
           <div className="flex mt-4 justify-center">
             <div
               onClick={logout}
