@@ -518,7 +518,7 @@ export default function TaskTemplateDialog({ open, setOpen, existingTemplate, on
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="dark:bg-[#0B0D29] bg-white z-[100] h-full  m-auto scrollbar-hide text-[#000000] border dark:text-[#D0D3D3] rounded-lg">
+      <DialogContent className="dark:bg-[#0B0D29] bg-white z-[100] h-fit  max-h-screen overflow-y-scroll m-auto scrollbar-hide text-[#000000] border dark:text-[#D0D3D3] rounded-lg">
         {/* Header */}
         <div className="flex justify-between items-center px-8 py-3 border-b w-full">
           <h2 className=" dark:font-bold">
@@ -532,7 +532,7 @@ export default function TaskTemplateDialog({ open, setOpen, existingTemplate, on
 
         <form
           onSubmit={handleCreateOrEditTemplate}
-          className="text-sm space-y-2  px-8 h-screen pb-4  scrollbar-hide max-h-[80vh]"
+          className="text-sm space-y-2  px-8 pb-4  scrollbar-hide h-fit"
         >
           {/* Title */}
           <div className="grid grid-cols-1 gap-2">
@@ -809,7 +809,7 @@ export default function TaskTemplateDialog({ open, setOpen, existingTemplate, on
           </div>
 
           {/* "Create More Templates" toggle */}
-          <div className="flex items-center justify-end space-x-4">
+          {/* <div className="flex items-center justify-end space-x-4">
             <Switch
               id="create-more-templates"
               className="scale-125"
@@ -819,7 +819,7 @@ export default function TaskTemplateDialog({ open, setOpen, existingTemplate, on
             <Label htmlFor="create-more-templates" className="dark:text-white">
               Create More Templates
             </Label>
-          </div>
+          </div> */}
 
           {/* Link Modal */}
           <Dialog open={isLinkModalOpen} onOpenChange={setIsLinkModalOpen}>
@@ -949,12 +949,12 @@ export default function TaskTemplateDialog({ open, setOpen, existingTemplate, on
                     onChange={(e) =>
                       setReminderType(e.target.value as "email" | "whatsapp")
                     }
-                    className="border bg-transparent outline-none p-2 dark:bg-[#1A1C20] bg-[#0a0c29] rounded h-full"
+                    className="border bg-transparent outline-none p-2 dark:bg-[#1A1C20] rounded h-full"
                   >
-                    <option className="dark:bg-[#1A1C20] bg-[#0a0c29]" value="email">
+                    <option className="dark:bg-[#1A1C20] " value="email">
                       Email
                     </option>
-                    <option className="dark:bg-[#1A1C20] bg-[#0a0c29]" value="whatsapp">
+                    <option className="dark:bg-[#1A1C20] b" value="whatsapp">
                       WhatsApp
                     </option>
                   </select>
@@ -1117,9 +1117,9 @@ export default function TaskTemplateDialog({ open, setOpen, existingTemplate, on
   );
 }
 
-/* 
+/*
   Below are your "popup" components for selecting users & categories.
-  The only difference is: we pass in the `users` and `categories` 
+  The only difference is: we pass in the `users` and `categories`
   that we fetched in useEffect above.
 */
 interface UserSelectPopupProps {
@@ -1133,7 +1133,7 @@ interface UserSelectPopupProps {
 }
 
 // ...
-// (Keep your existing `UserSelectPopup` code as-is, just ensure 
+// (Keep your existing `UserSelectPopup` code as-is, just ensure
 //  you pass in the `users` array from the parent.)
 
 interface CategorySelectPopupProps {
@@ -1151,7 +1151,7 @@ interface CategorySelectPopupProps {
 }
 
 // ...
-// (Keep your existing `CategorySelectPopup` code as-is, just ensure 
+// (Keep your existing `CategorySelectPopup` code as-is, just ensure
 //  you're using the `categories` from the parent.)
 
 

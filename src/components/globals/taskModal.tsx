@@ -98,11 +98,19 @@ interface TaskModalProps {
     _id: string;
     title?: string;
     description?: string;
-    category?: { _id: string; name: string };
+    category?: { _id: string; name: string } | string;
+    assignedUser?: { _id: string; firstName: string; lastName?: string };
     priority?: string;
     repeat?: boolean;
     repeatType?: string;
+    repeatInterval?: number;
     days?: string[];
+    dates?: number[];
+    dueDate?: string;
+    links?: string[];
+    reminders?: Reminder[];
+    attachment?: string[];
+    audioUrl?: string;
   } | null;
 }
 interface Reminder {
@@ -301,18 +309,81 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal, prefillData }) => {
 
   useEffect(() => {
     if (prefillData) {
-      // Set each local state to the relevant template data:
+      // Basic fields
       setTitle(prefillData.title || "");
       setDescription(prefillData.description || "");
-      setCategory(prefillData.category?._id || "");
       setPriority(prefillData.priority || "High");
-      setRepeat(prefillData.repeat ?? false);
+
+      // Category
+      if (prefillData.category) {
+        if (typeof prefillData.category === 'string') {
+          setCategory(prefillData.category);
+        } else if (prefillData.category._id) {
+          setCategory(prefillData.category._id);
+          setPopoverCategoryInputValue(prefillData.category.name || "");
+        }
+      }
+
+      // Assigned user if provided
+      if (prefillData.assignedUser && typeof prefillData.assignedUser === 'object') {
+        setAssignedUser(prefillData.assignedUser._id || "");
+        setPopoverInputValue(prefillData.assignedUser.firstName || "");
+      }
+
+      // Repeat settings - important to set these in the correct order
+      setRepeat(prefillData.repeat || false);
       setRepeatType(prefillData.repeatType || "");
-      setDays(prefillData.days || []);
-      // etc. for all fields you want to prefill
+
+      // Days for weekly repeat
+      if (prefillData.days && Array.isArray(prefillData.days)) {
+        setDays(prefillData.days);
+      }
+
+      // Repeat interval for periodic repeats
+      if (prefillData.repeatInterval) {
+        setRepeatInterval(prefillData.repeatInterval);
+      }
+
+      // Monthly repeat settings
+      if (prefillData.dates && Array.isArray(prefillData.dates)) {
+        setRepeatMonthlyDays(prefillData.dates);
+      }
+
+      // Due date and time
+      if (prefillData.dueDate) {
+        const dueDateObj = new Date(prefillData.dueDate);
+        setDueDate(dueDateObj);
+
+        // Extract time from date object
+        const hours = dueDateObj.getHours().toString().padStart(2, '0');
+        const minutes = dueDateObj.getMinutes().toString().padStart(2, '0');
+        setDueTime(`${hours}:${minutes}`);
+      }
+
+      // Links
+      if (prefillData.links && prefillData.links.length > 0) {
+        setLinks(prefillData.links);
+        setLinkInputs(prefillData.links);
+      }
+
+      // Reminders
+      if (prefillData.reminders && prefillData.reminders.length > 0) {
+        setReminders(prefillData.reminders);
+        setTempReminders(prefillData.reminders);
+      }
+
+      // Attachments
+      if (prefillData.attachment && prefillData.attachment.length > 0) {
+        // For attachments we can only prefill the URLs
+        // This would be handled separately in the UI
+      }
+
+      // Audio URL
+      if (prefillData.audioUrl) {
+        setAudioURL(prefillData.audioUrl);
+      }
     }
   }, [prefillData]);
-
 
   // Trigger the animation when the component mounts
   useEffect(() => {
@@ -1093,7 +1164,7 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal, prefillData }) => {
                 <div className="ml-4">
                   <div className="bg-transparent">
                     {/* <Label htmlFor="repeatType" className="block font-semibold">Repeat Type</Label> */}
-                    <ShadcnSelect  value={repeatType} onValueChange={setRepeatType}>
+                    <ShadcnSelect value={repeatType} onValueChange={setRepeatType}>
                       <SelectTrigger className="w-48 dark:bg-[#292d33] border text-xs h-fit outline-none rounded px-3 ">
                         <SelectValue placeholder="Select Repeat Type" />
                       </SelectTrigger>
