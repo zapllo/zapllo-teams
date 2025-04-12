@@ -10,7 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs3 as Tabs, TabsContent3 as TabsContent, TabsList3 as TabsList, TabsTrigger3 as TabsTrigger } from '@/components/ui/tabs3';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { toast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
@@ -65,7 +65,7 @@ export default function TutorialDetails() {
     };
 
     const handleRelatedTutorialClick = (tutorialId: string) => {
-        router.push(`/help/tutorials/${tutorialId}`);
+        router.push(`/tutorials-zapllo/${tutorialId}`);
     };
 
     if (loading) {
@@ -109,7 +109,7 @@ export default function TutorialDetails() {
                 <Button
                     variant="outline"
                     className="mt-4"
-                    onClick={() => router.push('/help/tutorials')}
+                    onClick={() => router.push('/tutorials-zapllo')}
                 >
                     <ArrowLeft className="mr-2 h-4 w-4" /> Back to Tutorials
                 </Button>
@@ -182,10 +182,10 @@ export default function TutorialDetails() {
                             <h2 className="text-xl font-semibold">About this tutorial</h2>
                             <p className="text-gray-700 dark:text-gray-300">
                                 This tutorial guides you through using the {tutorial.category} effectively.
-                                You'll learn the core features and best practices to maximize your productivity.
+                                You&apos;ll learn the core features and best practices to maximize your productivity.
                             </p>
 
-                            <h3 className="text-lg font-semibold mt-6">What you'll learn</h3>
+                            <h3 className="text-lg font-semibold mt-6">What you&apos;ll learn</h3>
                             <ul className="space-y-2">
                                 <li className="flex items-start">
                                     <CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5" />

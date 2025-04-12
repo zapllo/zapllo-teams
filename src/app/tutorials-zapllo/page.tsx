@@ -80,7 +80,7 @@ export default function Tutorials() {
     };
 
     const handleTutorialClick = (id: string) => {
-        router.push(`/help/tutorials/${id}`);
+        router.push(`/tutorials-zapllo/${id}`);
     };
 
     if (loading) {
