@@ -131,7 +131,7 @@ export default function Contact() {
                                     </a>
 
                                     <a
-                                        href="tel:+1234567890"
+                                        href="tel:+918910748670"
                                         className="flex items-center p-4 bg-slate-800/50 hover:bg-slate-800 rounded-lg transition-colors group"
                                     >
                                         <div className="p-2.5 rounded-full bg-green-500/10 text-green-400 mr-3 group-hover:bg-green-500/20 transition-colors">
@@ -139,7 +139,7 @@ export default function Contact() {
                                         </div>
                                         <div>
                                             <p className="text-sm font-medium text-white">Call Sales</p>
-                                            <p className="text-xs text-slate-400">+1 (234) 567-890</p>
+                                            <p className="text-xs text-slate-400">+91 89107 48670</p>
                                         </div>
                                     </a>
                                 </div>

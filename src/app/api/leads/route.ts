@@ -5,7 +5,7 @@ import { SendEmailOptions, sendEmail } from '@/lib/sendEmail';
 
 export const dynamic = 'force-dynamic'; // Ensures the route is always dynamic
 
-const sendWebhookNotification = async (phoneNumber: string, country: string, templateName: string, firstName: string,) => {
+const sendWebhookNotification = async (phoneNumber: string, country: string, firstName: string, templateName: string,) => {
     const payload = {
         phoneNumber,
         country,
@@ -43,11 +43,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
         }
 
-        const existingLead = await Lead.findOne({ email });
-
-        if (existingLead) {
-            return NextResponse.json({ error: 'Email already subscribed' }, { status: 400 });
-        }
+       
 
         const newLead = new Lead({ email, firstName, lastName, message, mobNo, subscribedStatus });
         await newLead.save();
@@ -102,18 +98,94 @@ export async function POST(request: NextRequest) {
         await sendEmail(supportEmailOptions);
 
         const mediaUrl = "https://res.cloudinary.com/dndzbt8al/image/upload/v1732650791/50_t0ypt5.png";
-        const templateName = 'leadenquirycontactus';
+        const templateName = 'leadenquirycontactus_2g';
         try {
-            await sendWebhookNotification(mobNo, "IN", templateName, firstName);
+            await sendWebhookNotification(mobNo, "IN", firstName, templateName,);
         } catch (error) {
             console.warn("WhatsApp notification failed, but proceeding with response:", error);
         }
+        // 6) PUBLIC CRM Contact & Lead creation
+        //    Make sure you have the correct pipeline _id, stage, etc.
+        const CRM_PIPELINE_ID = '67fccd4d766941bdf794b92c' // e.g. "64b0d3..."
+        const CRM_FIRST_STAGE_NAME = 'New Leads'                          // or whatever stage is relevant
+        const CRM_COMPANY_ID = '67fc08f621d4100351058362'           // from your question
+        const CRM_ASSIGNED_TO = '67fa4aab3c2eea8c712b5861'          // from your question
+        const CRM_SOURCE_ID = '67fcce22766941bdf794b9ee'       // if needed
 
-        return NextResponse.json({ message: 'Lead Captured successfully!' }, { status: 201 });
+        // A) Create the contact using the new "public" endpoint
+        const contactPayload = {
+            companyId: CRM_COMPANY_ID,
+            firstName,
+            lastName,
+            email,
+            country: 'IN',        // Hardcoded or from user input
+            whatsappNumber: mobNo,
+            state: '',
+            city: '',
+            pincode: '',
+            address: '',
+        }
 
+        let createdContactId: string | null = null
+        try {
+            const contactRes = await fetch('https://crm.zapllo.com/api/public-contacts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(contactPayload),
+            })
+
+            const contactData = await contactRes.json()
+            if (!contactRes.ok) {
+                console.error('[CRM] Error creating contact:', contactData.error || contactData)
+            } else {
+                console.log('[CRM] Successfully created contact:', contactData)
+                createdContactId = contactData._id
+            }
+        } catch (err) {
+            console.error('[CRM] Unexpected error creating contact:', err)
+        }
+
+        // B) Create the lead in CRM if contact creation succeeded
+        if (createdContactId) {
+            const leadPayload = {
+                pipeline: CRM_PIPELINE_ID,
+                stage: CRM_FIRST_STAGE_NAME,
+                title: firstName,   // e.g. "John"
+                description: message,
+                contact: createdContactId,
+                assignedTo: CRM_ASSIGNED_TO,
+                source: CRM_SOURCE_ID,       // e.g. "Zapllo" if you have a Source doc
+                estimateAmount: 0,
+                closeDate: null,
+            }
+
+            try {
+                const leadRes = await fetch('https://crm.zapllo.com/api/public-leads', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(leadPayload),
+                })
+
+                const leadData = await leadRes.json()
+                if (!leadRes.ok) {
+                    console.error('[CRM] Error creating lead:', leadData.error || leadData)
+                } else {
+                    console.log('[CRM] Successfully created lead:', leadData)
+                }
+            } catch (err) {
+                console.error('[CRM] Unexpected error creating lead:', err)
+            }
+        }
+
+        // 7) Return success to the original form
+        return NextResponse.json({ message: 'Lead captured and CRM updated!' }, { status: 201 })
     } catch (error) {
-        console.error(error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        console.error('Error in POST /api/leads:', error)
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }
 
