@@ -10,9 +10,9 @@ export default function ClientThemeProvider({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  
+
   // Special case for the wallet offer page - force light theme
-  if (pathname.startsWith("/special-wallet-offer")) {
+  if (pathname.startsWith("/special-wallet-offer") || pathname.startsWith("/tutorials-zapllo"))  {
     return (
       <ThemeProvider
         forcedTheme="light"
@@ -24,7 +24,7 @@ export default function ClientThemeProvider({
       </ThemeProvider>
     );
   }
-  
+
   // For dashboard and other specified paths, don't force a theme, otherwise force dark
   const forcedTheme = pathname.startsWith("/dashboard") || pathname.startsWith("/attendance") || pathname.startsWith("/help") || pathname.startsWith("/intranet") ? undefined : "dark";
 

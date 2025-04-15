@@ -127,8 +127,8 @@ export default function TutorialDetails() {
                         className="rounded-full"
                         asChild
                     >
-                        <Link href="/help/tutorials">
-                        <ArrowLeft className="h-4 w-4" />
+                        <Link href="/tutorials-zapllo">
+                            <ArrowLeft className="h-4 w-4" />
                         </Link>
                     </Button>
                     <h1 className="text-2xl font-bold">{tutorial.title}</h1>
@@ -282,7 +282,9 @@ export default function TutorialDetails() {
                                 <p className="text-sm mb-4">
                                     Having trouble following this tutorial or need additional assistance?
                                 </p>
-                                <Button className="w-full">Contact Support</Button>
+                                <Link href='/contact'>
+                                    <Button className="w-full">Contact Support</Button>
+                                </Link>
                             </CardContent>
                         </Card>
                     </div>
