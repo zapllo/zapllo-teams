@@ -227,22 +227,26 @@ export default function Footer() {
                         </p>
                     </div>
 
-                    <div className='flex flex-wrap gap-4 items-center'>
-                        <Link href='/privacypolicy' className='text-[#676B93] text-sm hover:text-white transition-colors'>
+                    <div className='flex text-xs text-nowrap gap-4 items-center'>
+                        <Link href='/privacypolicy' className='text-[#676B93] text-xs hover:text-white transition-colors'>
                             Privacy Policy
                         </Link>
                         <span className='text-[#676B93]'>•</span>
-                        <Link href='/terms' className='text-[#676B93] text-sm hover:text-white transition-colors'>
+                        <Link href='/terms' className='text-[#676B93] text-xs hover:text-white transition-colors'>
                             Terms of Service
                         </Link>
                         <span className='text-[#676B93]'>•</span>
-                        <Link href='/disclaimer' className='text-[#676B93] text-sm hover:text-white transition-colors'>
+                        <Link href='/disclaimer' className='text-[#676B93] text-xs hover:text-white transition-colors'>
                             Disclaimer
                         </Link>
-                        {/* <span className='text-[#676B93]'>•</span>
-                        <Link href='/refundpolicy' className='text-[#676B93] text-sm hover:text-white transition-colors'>
+                        <span className='text-[#676B93]'>•</span>
+                        <Link href='/refundpolicy' className='text-[#676B93] text-xs hover:text-white transition-colors'>
                             Refund Policy
-                        </Link> */}
+                        </Link>
+                        <span className='text-[#676B93]'>•</span>
+                        <Link href='/payment-terms' className='text-[#676B93] text-xs hover:text-white transition-colors'>
+                            Payment Terms
+                        </Link>
                     </div>
                 </div>
 

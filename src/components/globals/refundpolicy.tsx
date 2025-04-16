@@ -4,7 +4,6 @@ import { BookCall } from "../ui/bookcall";
 import ShineBorder from "../magicui/shine-border";
 
 export default function RefundPolicy() {
-    
     return (
         <main className="bg- py-16   px-4 sm:px-6 lg:px-8 shadow-lg rounded-lg">
         <div className="max-w-4xl mx-auto">
@@ -48,7 +47,7 @@ export default function RefundPolicy() {
                             </div>
                             <div className="">
                                 <h2 className="text-lg font-bold mb-2">Refund Request Window:</h2>
-                                <p>A refund must be requested within 30 days of service completion. Requests beyond this period will not be eligible.</p>
+                                <p>A refund must be requested within 7 days of service completion. Requests beyond this period will not be eligible.</p>
                             </div>
                             <div className="">
                                 <h2 className="text-lg font-bold mb-2">Requesting a Refund:</h2>
@@ -61,7 +60,7 @@ export default function RefundPolicy() {
                         <p>
                             Digital or downloadable items.
                             Services that have been fully rendered.
-                            Services delivered or concluded outside the 30-day window.
+                            Services delivered or concluded outside the 7-day window.
                         </p>
                     </section>
                     <section>
