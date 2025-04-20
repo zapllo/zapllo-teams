@@ -4,6 +4,7 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { usePathname, useRouter } from 'next/navigation';
 import { File, Wallet } from 'lucide-react';
+import { FaWhatsapp } from 'react-icons/fa';
 
 const BillingSidebar: React.FC = () => {
     const pathname = usePathname();
@@ -34,6 +35,15 @@ const BillingSidebar: React.FC = () => {
                         onClick={() => handleNavigation('/dashboard/billing/wallet-logs')}
                     >
                         <Wallet className='h-5' /> Billing Logs
+                    </Button>
+                </div>
+                <div className='flex justify-center'>
+                    <Button
+                        variant={isActive('/dashboard/wallet-recharge') ? 'default' : 'default'}
+                        className={`w-[90%] rounded-lg gap-2 ml-2 shadow-none bg-transparent justify-start hover:bg-accent dark:hover:bg-[#815BF5] hover:rounded-lg mb-2 ${isActive('/dashboard/bwallet-recharge') ? 'bg-[#815BF5] hover:bg-[#815BF5] rounded-lg text-white' : 'text-black dark:text-gray-400'}`}
+                        onClick={() => handleNavigation('/dashboard/wallet-recharge')}
+                    >
+                        <FaWhatsapp className='h-5' /> WABA Wallet
                     </Button>
                 </div>
                 {/* <div className='flex justify-center'>

@@ -111,7 +111,7 @@ const InfoBar = (props: Props) => {
           });
           // Also update the individual states so the inputs are prepopulated:
           setSubscribedPlan(org.subscribedPlan);
-  
+
         } catch (error) {
           console.error("Error fetching organization data", error);
         }
@@ -183,6 +183,8 @@ const InfoBar = (props: Props) => {
       return "Ticket Details";
     } else if (pathName === "/dashboard/profile") {
       return "My Profile";
+    } else if (pathName === "/dashboard/wallet-recharge") {
+      return "Recharge WhatsApp Wallet";
     } else if (pathName === "/dashboard/integrations") {
       return "Integrations";
     } else if (pathName === "/intranet") {
