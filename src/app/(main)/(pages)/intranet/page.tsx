@@ -1,22 +1,36 @@
-// pages/intranet.tsx
 "use client";
 
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { toast } from "sonner";
+import { LinkIcon, ExternalLink, Globe } from "lucide-react";
+
+// Components
 import IntranetTable from "@/components/tables/intranetTable";
+import Loader from "@/components/ui/loader";
+
+// UI Components
 import {
   Dialog,
-  DialogClose,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import axios from "axios";
-import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
-import { CrossCircledIcon } from "@radix-ui/react-icons";
-import { motion, useAnimation } from "framer-motion";
-import Loader from "@/components/ui/loader";
-import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs3 as Tabs, TabsContent3 as TabsContent, TabsList3 as TabsList, TabsTrigger3 as TabsTrigger } from "@/components/ui/tabs3";
 
 interface Category {
   _id: string;
@@ -35,227 +49,330 @@ interface IntranetEntry {
 }
 
 const IntranetPage: React.FC = () => {
+  // Dialog state
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Form state
   const [loading, setLoading] = useState(false);
-  const [linkUrl, setLinkUrl] = useState("");
-  const [description, setDescription] = useState("");
-  const [linkName, setLinkName] = useState("");
-  const [category, setCategory] = useState<string>("");
+  const [formData, setFormData] = useState({
+    linkUrl: "",
+    description: "",
+    linkName: "",
+    category: "",
+  });
+
+  // Data state
   const [categories, setCategories] = useState<Category[]>([]);
   const [entries, setEntries] = useState<IntranetEntry[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>(""); // State for selected category
-  const [searchQuery, setSearchQuery] = useState<string>(""); // State for search query
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Filter state
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  // Tab state
+  const [activeTab, setActiveTab] = useState("all");
+  // Stats
+  const [stats, setStats] = useState({
+    totalLinks: 0,
+    categoryCounts: {} as Record<string, number>,
+  });
+
+  // Fetch data on component mount
   useEffect(() => {
-    fetchEntries();
-    fetchCategories();
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        await Promise.all([fetchEntries(), fetchCategories()]);
+      } catch (error) {
+        console.error("Error loading initial data:", error);
+        toast.error("Failed to load data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
   }, []);
+
+  // Update stats when entries or categories change
+  useEffect(() => {
+    if (entries.length > 0 && categories.length > 0) {
+      const categoryCounts: Record<string, number> = {};
+
+      // Initialize counts for all categories
+      categories.forEach(cat => {
+        categoryCounts[cat._id] = 0;
+      });
+
+      // Count entries per category
+      entries.forEach(entry => {
+        if (entry.category && entry.category._id) {
+          categoryCounts[entry.category._id] = (categoryCounts[entry.category._id] || 0) + 1;
+        }
+      });
+
+      setStats({
+        totalLinks: entries.length,
+        categoryCounts,
+      });
+    }
+  }, [entries, categories]);
 
   async function fetchEntries() {
     try {
       const response = await axios.get("/api/intranet");
       setEntries(response.data);
+      return response.data;
     } catch (error) {
       console.error("Failed to fetch intranet entries:", error);
+      toast.error("Failed to load links");
+      throw error;
     }
   }
+
   const fetchCategories = async () => {
     try {
       const response = await fetch("/api/category/get");
       const result = await response.json();
       if (response.ok) {
         setCategories(result.data);
+        return result.data;
       } else {
         console.error("Error fetching categories:", result.error);
+        throw new Error(result.error);
       }
     } catch (error) {
       console.error("Error fetching categories:", error);
+      toast.error("Failed to load categories");
+      throw error;
     }
+  };
+
+  const handleFormChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!formData.linkUrl || !formData.linkName || !formData.category) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
     try {
       setLoading(true);
-      await axios.post("/api/intranet", {
-        linkUrl,
-        description,
-        linkName,
-        category,
-      });
-      // Handle success (e.g., reset form, show message, etc.)
-      setLinkName("");
-      setLinkUrl("");
-      setDescription("");
-      setCategory("");
-      setLoading(false);
-      setIsDialogOpen(false); // Close dialog
-      toast.success("Link Added Successfully")
-      fetchEntries();
+      await axios.post("/api/intranet", formData);
+
+      // Reset form and close dialog
+      setFormData({ linkUrl: "", description: "", linkName: "", category: "" });
+      setIsDialogOpen(false);
+      toast.success("Link added successfully");
+
+      // Refresh data
+      await fetchEntries();
     } catch (error) {
       console.error("Failed to create intranet entry:", error);
-      // Handle error (e.g., show error message)
+      toast.error("Failed to add link");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const controls = useAnimation();
-
-  const modalVariants = {
-    hidden: {
-      opacity: 0,
-      y: "100%",
-    },
-    visible: {
-      opacity: 1,
-      y: "0%",
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 40,
-      },
-    },
+  const handleAddNewClick = () => {
+    setIsDialogOpen(true);
+  };
+  // Function to handle category card clicks
+  const handleCategoryCardClick = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+    setActiveTab("all");
   };
 
-  // Trigger the animation when the component mounts
-  useEffect(() => {
-    controls.start("visible");
-  }, [controls]);
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader />
+      </div>
+    );
+  }
 
   return (
-    <div className="flex w-full justify-center ">
-      <div className="p-6 mt-12 w-full">
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <div className=" px-2 py-4">
-            <div className="flex items-center justify-center">
+    <div className="container py-8 mt-12 space-y-6">
+      <div className="flex flex-col space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+          <Globe className="h-8 w-8 text-primary" />
+          Link Manager
+        </h1>
+        <p className="text-muted-foreground">
+          Organize and manage all your important links in one place
+        </p>
+      </div>
 
-              <div className="flex items-center justify-end w-full space-x-4">
-              <select
-                  className="p-2 px-4  dark:bg-[#0B0D29] border  outline-none h-[35px] rounded-sm text-xs border-gray-400 dark:border-gray-700 "
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                >
-                  <option value="">Select Category</option>
-                  {categories.map((cat) => (
-                    <option key={cat._id} value={cat._id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
-                <DialogTrigger asChild>
-                  {/* <button className="px-4 py-2 bg-[#017A5B] text-xs text-white rounded hover:bg-[#017A5B]">
-                New Links
-              </button> */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="bg-transparent border font-semibold hover:bg-[#145d4a] bg-[#017a5b] text-[#ffffff]  px-4 py-1 rounded"
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <div className="flex justify-between items-center mb-4">
+          <TabsList>
+            <TabsTrigger value="all">All Links</TabsTrigger>
+            <TabsTrigger value="stats">Statistics</TabsTrigger>
+          </TabsList>
+          <Button onClick={handleAddNewClick}>
+            <LinkIcon className="h-4 w-4 mr-2" /> Add New Link
+          </Button>
+        </div>
 
-                  >
-                    New Link </Button>
-                </DialogTrigger>
-               
-
-              </div>
-              {/* <input
-              type="text"
-              className="px-4 py-2 text-xs outline-none"
-              placeholder="Search Link Name"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            /> */}
-            </div>
-          </div>
-
-          {/* Add New Link Modal */}
-          <DialogContent className="z-[100]   ">
-            <div className="mb-6 ">
-              <div className="flex items-center justify-between border-b  p-6  ">
-                <DialogTitle className="text-md font-semibold dark:text-white">
-                  Add New Link
-                </DialogTitle>
-                <DialogClose className="">
-                  <CrossCircledIcon className="scale-150 h-4 w-4  hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
-                </DialogClose>
-              </div>
-
-              <form onSubmit={handleSubmit} className="px-6 mt-4 space-y-4">
-                <div>
-                  {/* <label htmlFor="linkUrl" className="block text-xs font-medium text-white -700">Link URL</label> */}
-                  <input
-                    type="url"
-                    placeholder="Link URL"
-                    id="linkUrl"
-                    value={linkUrl}
-                    onChange={(e) => setLinkUrl(e.target.value)}
-                    required
-                    className="  px-4 focus-within:border-[#815BF5]  block text-xs w-full  bg-transparent outline-none p-2 border rounded-md"
-                  // className="w-full h-12 px-4 bg-transparent text-white  rounded-md border-0 outline-none"
-                  />
-                </div>
-
-                <div>
-                  {/* <label htmlFor="description" className="block text-xs font-medium text-white -700">Description</label> */}
-                  <textarea
-                    id="description"
-                    value={description}
-                    placeholder="Description"
-                    onChange={(e) => setDescription(e.target.value)}
-                    required
-                    className=" w-full focus-within:border-[#815BF5] h-24 px-4  block text-xs bg-transparent outline-none  p-2 border rounded-md"
-                  />
-                </div>
-
-                <div>
-                  {/* <label htmlFor="linkName" className="block text-xs font-medium text-white -700">Link Name</label> */}
-                  <input
-                    type="text"
-                    id="linkName"
-                    value={linkName}
-                    onChange={(e) => setLinkName(e.target.value)}
-                    required
-                    placeholder="Link Name"
-                    className="w-full px-4 focus-within:border-[#815BF5] bg-transparent text-xs outline-none block  p-2 border rounded-md"
-                  />
-                </div>
-
-                <div>
-                  {/* <label htmlFor="category" className="block text-xs font-medium text-white -700">Category</label> */}
-                  <select
-                    id="category"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    required
-                    className=" h-9 px-4  dark:bg-[#0b0d29] block text-xs  outline-none w-full p-2 border rounded-md"
-                  >
-                    <option value="">Select a category</option>
-                    {categories.map((cat) => (
-                      <option key={cat._id} value={cat._id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <button
-                  type="submit"
-                  className="bg-[#815BF5] w-full  mt-2 py-2 mb-4 text-xs cursor-pointer  text-white rounded-md"
-                >
-                  {loading ? <Loader /> : "Submit Now"}
-                </button>
-              </form>
-            </div>
-          </DialogContent>
-        </Dialog>
-        <div className="w-full  ">
+        <TabsContent value="all" className="mt-0">
           <IntranetTable
             entries={entries}
             fetchEntries={fetchEntries}
             selectedCategory={selectedCategory}
             searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            categories={categories}
+            onCategoryChange={setSelectedCategory}
+            onAddNewClick={handleAddNewClick}
           />
-        </div>
-      </div>
+        </TabsContent>
+
+
+        <TabsContent value="stats" className="mt-0">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <Card
+              className="cursor-pointer transition-all hover:shadow-md hover:border-primary/30"
+              onClick={() => {
+                setSelectedCategory("all");
+                setActiveTab("all");
+              }}
+            >
+              <CardHeader className="pb-2">
+                <CardTitle className="text-2xl font-bold">
+                  {stats.totalLinks}
+                </CardTitle>
+                <CardDescription className="flex items-center justify-between">
+                  Total Links
+                  <Button variant="ghost" size="sm" className="h-6 text-xs">View All</Button>
+                </CardDescription>
+              </CardHeader>
+            </Card>
+
+            {categories.map(category => (
+              <Card
+                key={category._id}
+                className="cursor-pointer transition-all hover:shadow-md hover:border-primary/30"
+                onClick={() => handleCategoryCardClick(category._id)}
+              >
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-2xl font-bold">
+                    {stats.categoryCounts[category._id] || 0}
+                  </CardTitle>
+                  <CardDescription className="flex items-center justify-between">
+                    {category.name}
+                    <Button variant="ghost" size="sm" className="h-6 text-xs">View Links</Button>
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      {/* Add New Link Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[525px] p-6 ">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <LinkIcon className="h-5 w-5" />
+              Add New Link
+            </DialogTitle>
+            <DialogDescription>
+              Enter the details of the link you want to save.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="linkName">Link Name <span className="text-red-500">*</span></Label>
+              <Input
+                id="linkName"
+                value={formData.linkName}
+                onChange={handleFormChange}
+                className="text-muted-foreground"
+                placeholder="Enter a name for this link"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="linkUrl">URL <span className="text-red-500">*</span></Label>
+              <div className="flex items-center space-x-2">
+                <Input
+                  id="linkUrl"
+                  type="url"
+                  value={formData.linkUrl}
+                  className="text-muted-foreground"
+                  onChange={handleFormChange}
+                  placeholder="https://example.com"
+                  required
+                />
+                {formData.linkUrl && (
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="outline"
+                    onClick={() => window.open(formData.linkUrl, "_blank")}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={handleFormChange}
+
+                placeholder="Enter a description (optional)"
+                className="min-h-[80px] text-muted-foreground"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="category">Category <span className="text-red-500">*</span></Label>
+              <Select
+                value={formData.category}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+              >
+                <SelectTrigger id="category">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent className="z-[100]">
+                  {categories.map((cat) => (
+                    <SelectItem className="hover:bg-accent" key={cat._id} value={cat._id}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <DialogFooter className="mt-6">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? <Loader /> : "Save Link"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
