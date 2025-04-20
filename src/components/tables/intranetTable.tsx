@@ -210,7 +210,7 @@ const IntranetTable: React.FC<IntranetTableProps> = ({
             <div className="p-8 text-center">
               <h3 className="text-lg font-semibold">No matching links</h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                Try adjusting your search or filter to find what you're looking for.
+                Try adjusting your search or filter to find what you&apos;re looking for.
               </p>
               <Button
                 variant="outline"
