@@ -244,6 +244,9 @@ export default function Footer() {
                             Refund Policy
                         </Link>
                         <span className='text-[#676B93]'>•</span>
+                        <Link href='/cancellation-policy' className='text-[#676B93] text-xs hover:text-white transition-colors'>
+                           Cancellation Policy
+                        </Link>  <span className='text-[#676B93]'>•</span>
                         <Link href='/payment-terms' className='text-[#676B93] text-xs hover:text-white transition-colors'>
                             Payment Terms
                         </Link>
