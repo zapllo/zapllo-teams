@@ -100,6 +100,10 @@ const organizationSchema = new mongoose.Schema({
   lateLoginThreshold: { type: Number, default: 0 },
   penaltyLeaveType: { type: String, enum: ["","half day", "Full Day", "quarter day"], default: "half day" },
   penaltySalaryAmount: { type: Number, default: 0 },
+  isEnterprise: {
+    type: Boolean,
+    default: false,
+  },
   whatsAppWallet: {
     balance: { type: Number, default: 0 },
     lastRecharge: { type: Date },

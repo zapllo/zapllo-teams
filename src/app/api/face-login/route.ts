@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import AWS from 'aws-sdk';
 import User from '@/models/userModel';
-import Organization from '@/models/organizationModel'; // Import the Organization model
+import Organization from '@/models/organizationModel';
 import FaceRegistrationRequest from '@/models/faceRegistrationRequest';
 import LoginEntry from '@/models/loginEntryModel';
 import { getDataFromToken } from '@/helper/getDataFromToken';
@@ -40,11 +40,11 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 
 export async function POST(request: NextRequest) {
   try {
-    // Extract userId from token
-    const userId = await getDataFromToken(request);
+    // Extract userId from token (this is the admin user in enterprise mode)
+    const adminUserId = await getDataFromToken(request);
 
     // Parse request body
-    const { imageUrl, lat, lng, action, workFromHome } = await request.json();
+    const { imageUrl, lat, lng, action, workFromHome, targetUserId, enterpriseMode } = await request.json();
 
     // Validate inputs
     if (!imageUrl || lat === undefined || lng === undefined || !action) {
@@ -54,19 +54,55 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Fetch the user
-    const user = await User.findById(userId);
-    if (!user) {
+    // Fetch the admin user who is making the request
+    const adminUser = await User.findById(adminUserId);
+    if (!adminUser) {
       return NextResponse.json(
-        { success: false, error: 'User not found' },
+        { success: false, error: 'Admin user not found' },
         { status: 404 }
       );
     }
-    const organization = await Organization.findById(user.organization);
 
-    const skipGeofencing = workFromHome === true && user.workFromHomeAllowed === true;
+    const organization = await Organization.findById(adminUser.organization);
 
-    // If NOT skipping geofencing, proceed with geofencing checks:
+    // Determine which user's attendance to log
+    let targetUser = adminUser;
+    let isEnterpriseLogin = false;
+
+    // If this is an enterprise login and a target user is specified
+    if (enterpriseMode && targetUserId && organization?.isEnterprise) {
+      // Verify the admin has proper role
+      if (adminUser.role !== 'manager' && adminUser.role !== 'orgAdmin') {
+        return NextResponse.json(
+          { success: false, error: 'Only admins can manage attendance for other users' },
+          { status: 403 }
+        );
+      }
+
+      // Fetch the target user
+      const fetchedTargetUser = await User.findById(targetUserId);
+      if (!fetchedTargetUser) {
+        return NextResponse.json(
+          { success: false, error: 'Target user not found' },
+          { status: 404 }
+        );
+      }
+
+      // Verify target user belongs to same organization
+      if (fetchedTargetUser.organization?.toString() !== adminUser.organization?.toString()) {
+        return NextResponse.json(
+          { success: false, error: 'Target user is not part of your organization' },
+          { status: 403 }
+        );
+      }
+
+      isEnterpriseLogin = true;
+      targetUser = fetchedTargetUser;
+    }
+
+    const skipGeofencing = workFromHome === true && targetUser.workFromHomeAllowed === true;
+
+    // If NOT skipping geofencing, proceed with geofencing checks
     if (!skipGeofencing) {
       // Geofencing is enforced only if the organization's settings say so
       if (organization && organization.allowGeofencing && organization.location) {
@@ -88,7 +124,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Continue with face recognition as before...
+    // In enterprise mode, we need to check the face of the target user
+    // Otherwise, we check the admin's face
+    const userId = isEnterpriseLogin ? targetUserId : adminUserId;
+
+    // Look for face registration for the appropriate user
     const faceRegistration = await FaceRegistrationRequest.findOne({
       userId,
       status: 'approved',
@@ -136,12 +176,18 @@ export async function POST(request: NextRequest) {
     if (matchFound) {
       const timestamp = new Date();
       const loginEntryData: any = {
-        userId,
+        userId: targetUser._id, // The user whose attendance we're tracking
         lat,
         lng,
         action,
         timestamp,
       };
+
+      // For enterprise logins, track the admin who initiated it
+      if (isEnterpriseLogin) {
+        loginEntryData.enterpriseMode = true;
+        loginEntryData.managedBy = adminUserId;
+      }
 
       if (action === 'login') {
         loginEntryData.loginTime = timestamp.toISOString();
@@ -155,6 +201,7 @@ export async function POST(request: NextRequest) {
       // --- Penalty Logic (for login actions) ---
       // Only process penalties on login
       if (action === 'login' && organization) {
+        // Existing penalty logic for late logins
         // Construct cutoff time for today using organization's allowed loginTime.
         // Assume organization.loginTime is in "HH:mm" format.
         const todayStr = dayjs(timestamp).format("YYYY-MM-DD");
@@ -166,7 +213,7 @@ export async function POST(request: NextRequest) {
           const startOfMonth = dayjs(timestamp).startOf('month').toDate();
           const endOfMonth = dayjs(timestamp).endOf('month').toDate();
           const loginEntries = await LoginEntry.find({
-            userId,
+            userId: targetUser._id, // Use target user's ID for penalties
             action: 'login',
             timestamp: { $gte: startOfMonth, $lte: endOfMonth }
           });
@@ -208,10 +255,10 @@ export async function POST(request: NextRequest) {
 
               // Create a penalty leave request.
               const penaltyLeave = new Leave({
-                user: userId,
-                leaveType: penaltyLeaveTypeDoc._id,  // Use the "Earned Leave" leave type ID
-                fromDate: new Date(), // Penalty leave for today
-                toDate: new Date(),   // Same day leave
+                user: targetUser._id, // Apply penalty to target user
+                leaveType: penaltyLeaveTypeDoc._id,
+                fromDate: new Date(),
+                toDate: new Date(),
                 appliedDays,
                 leaveDays: [
                   {
@@ -220,39 +267,49 @@ export async function POST(request: NextRequest) {
                     status: 'Pending'
                   }
                 ],
-                leaveReason: "Penalty", // Tag this leave request as a penalty
+                leaveReason: "Penalty",
                 status: "Pending"
               });
               await penaltyLeave.save();
             } else if (organization.penaltyOption === 'salary') {
-              // Salary Penalty Logic: update the user's deductionDetails.
+              // Salary Penalty Logic
               let deductionUpdated = false;
-              if (user.deductionDetails && Array.isArray(user.deductionDetails)) {
-                for (let i = 0; i < user.deductionDetails.length; i++) {
-                  if (user.deductionDetails[i].name === "Penalties") {
-                    user.deductionDetails[i].amount += organization.penaltySalaryAmount;
+              if (targetUser.deductionDetails && Array.isArray(targetUser.deductionDetails)) {
+                for (let i = 0; i < targetUser.deductionDetails.length; i++) {
+                  if (targetUser.deductionDetails[i].name === "Penalties") {
+                    targetUser.deductionDetails[i].amount += organization.penaltySalaryAmount;
                     deductionUpdated = true;
                     break;
                   }
                 }
               }
               if (!deductionUpdated) {
-                user.deductionDetails = user.deductionDetails || [];
-                user.deductionDetails.push({
+                targetUser.deductionDetails = targetUser.deductionDetails || [];
+                targetUser.deductionDetails.push({
                   name: "Penalties",
                   amount: organization.penaltySalaryAmount,
                 });
               }
-              await user.save();
+              await targetUser.save();
             }
           }
         }
       }
 
+      // Format the response based on whether it's enterprise mode or not
+      const responseMessage = isEnterpriseLogin
+        ? `${action === 'login' ? 'Login' : 'Logout'} successful for ${targetUser.firstName} ${targetUser.lastName}.`
+        : `${action === 'login' ? 'Login' : 'Logout'} successful.`;
+
       return NextResponse.json({
         success: true,
-        message: `Face match found. ${action === 'login' ? 'Login' : 'Logout'} successful.`,
+        message: responseMessage,
         confidence: matchConfidence,
+        enterpriseMode: isEnterpriseLogin,
+        targetUser: isEnterpriseLogin ? {
+          id: targetUser._id,
+          name: `${targetUser.firstName} ${targetUser.lastName}`
+        } : undefined,
         lat,
         lng,
       });

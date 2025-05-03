@@ -14,10 +14,13 @@ import {
   CalendarClock,
   Camera,
   CheckCircle,
+  ChevronDown,
   Clock,
   Globe,
   MapPin,
   MapPinIcon,
+  UserIcon,
+  Users,
   Users2,
   X,
 } from "lucide-react";
@@ -48,6 +51,7 @@ import axios from "axios";
 import { FaHouseUser } from "react-icons/fa";
 import { Tabs3, TabsList3, TabsTrigger3 } from "@/components/ui/tabs3";
 import Cookies from 'js-cookie';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const mapContainerStyle = {
   height: "400px",
@@ -95,6 +99,14 @@ const groupEntriesByDay = (
 };
 
 export default function MyAttendance() {
+
+  const [organization, setOrganization] = useState<any>(null);
+  const [orgUsers, setOrgUsers] = useState<any[]>([]);
+  const [enterpriseMode, setEnterpriseMode] = useState(false);
+  const [selectedTargetUser, setSelectedTargetUser] = useState<string | null>(null);
+  const [userSearchQuery, setUserSearchQuery] = useState("");
+  const [filteredUsers, setFilteredUsers] = useState<any[]>([]);
+
   const [loginEntries, setLoginEntries] = useState<LoginEntry[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isBreakOpen, setIsBreakOpen] = useState(false);
@@ -197,7 +209,80 @@ export default function MyAttendance() {
   const [isStartPickerOpen, setIsStartPickerOpen] = useState(false); // For triggering the start date picker
   const [isEndPickerOpen, setIsEndPickerOpen] = useState(false); // For triggering the end date picker
   const [user, setUser] = useState<any>(null);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [showBreakUserDropdown, setShowBreakUserDropdown] = useState(false);
 
+  // Add these state variables to your component
+  const [workerStatuses, setWorkerStatuses] = useState<Record<string, { isLoggedIn: boolean; isBreakOpen: boolean }>>({});
+  const [currentAction, setCurrentAction] = useState<'login' | 'logout' | 'break_started' | 'break_ended'>('login');
+
+  // Add this function to check a worker's status when selected
+  const checkWorkerStatus = async (workerId: string) => {
+    try {
+      const response = await fetch('/api/check-worker-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workerId })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update the worker's status in our state
+        setWorkerStatuses(prev => ({
+          ...prev,
+          [workerId]: {
+            isLoggedIn: data.isLoggedIn,
+            isBreakOpen: data.isBreakOpen
+          }
+        }));
+
+        // Determine the appropriate action based on worker's status
+        if (!data.isLoggedIn) {
+          setCurrentAction('login');
+        } else if (data.isBreakOpen) {
+          setCurrentAction('break_ended');
+        } else {
+          // Worker is logged in but not on break, show logout/break options
+          // The actual button press will determine which action to take
+        }
+      }
+    } catch (error) {
+      console.error('Error checking worker status:', error);
+    }
+  };
+
+  // Update the function that runs when a worker is selected
+  const handleWorkerSelect = (workerId: string | null) => {
+    setSelectedTargetUser(workerId);
+
+    if (workerId) {
+      checkWorkerStatus(workerId);
+    } else {
+      // Reset to admin's own status when "Myself" is selected
+      setCurrentAction(isLoggedIn ? (isBreakOpen ? 'break_ended' : 'logout') : 'login');
+    }
+  };
+  // Add effect to close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const dropdown = document.getElementById('user-dropdown');
+      const breakDropdown = document.getElementById('break-user-dropdown');
+
+      if (dropdown && !dropdown.contains(event.target as Node) && showUserDropdown) {
+        setShowUserDropdown(false);
+      }
+
+      if (breakDropdown && !breakDropdown.contains(event.target as Node) && showBreakUserDropdown) {
+        setShowBreakUserDropdown(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showUserDropdown, showBreakUserDropdown]);
 
   const [mapCoords, setMapCoords] = useState<{
     lat: number;
@@ -280,6 +365,7 @@ export default function MyAttendance() {
 
   console.log(isBreakOpen, 'isBreakOpen?')
 
+  // In the main component, update the useEffect that checks login status
   useEffect(() => {
     const fetchLoginStatus = async () => {
       try {
@@ -290,7 +376,7 @@ export default function MyAttendance() {
         if (data.success) {
           setIsLoggedIn(data.isLoggedIn);
           setIsBreakOpen(data.isBreakOpen);
-
+          setIsEnterpriseAdmin(data.isEnterpriseAdmin); // Add this state variable
           setHasRegisteredFaces(data.hasRegisteredFaces);
         } else {
           alert(data.error || "Failed to fetch login status.");
@@ -303,7 +389,10 @@ export default function MyAttendance() {
     };
 
     fetchLoginStatus();
-  }, [isLoggedIn, isBreakOpen]);
+  }, []);
+
+  // Add this state variable at the top of the component
+  const [isEnterpriseAdmin, setIsEnterpriseAdmin] = useState(false);
 
   useEffect(() => {
     const fetchLoginEntriesAndStatus = async () => {
@@ -708,74 +797,42 @@ export default function MyAttendance() {
     setIsBreakModalOpen(isOpen);
   };
 
+  // Add this useEffect to fetch org data and check for enterprise status
+  useEffect(() => {
+    const fetchOrgData = async () => {
+      try {
+        const res = await axios.get("/api/organization/getById");
+        setOrganization(res.data.data);
+
+        // If it's an enterprise organization and user is admin, fetch all users
+        if (res.data.data?.isEnterprise && (user?.role === 'admin' || user?.role === 'orgAdmin')) {
+          setEnterpriseMode(true);
+          const usersRes = await axios.get("/api/organization/getOrgUsers");
+          setOrgUsers(usersRes.data.data || []);
+          setFilteredUsers(usersRes.data.data || []);
+        }
+      } catch (error) {
+        console.error("Error fetching organization data", error);
+      }
+    };
+    fetchOrgData();
+  }, [user]);
+
   // When the user clicks "Take a Break"
-  const captureImageAndSubmitBreakStart = async () => {
-    // Capture image
-    const imageSrc = webcamRef.current?.getScreenshot();
-    if (imageSrc) {
-      setCapturedBreakImage(imageSrc);
-    }
-    if (!imageSrc || !location) {
-      toast.error("Please capture an image and ensure location is available.");
+  // Add a useEffect to filter users based on search query
+  useEffect(() => {
+    if (!userSearchQuery) {
+      setFilteredUsers(orgUsers);
       return;
     }
 
-    setIsLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("files", dataURLtoBlob(imageSrc, "captured_image.jpg"));
+    const filtered = orgUsers.filter(user =>
+      `${user.firstName} ${user.lastName}`.toLowerCase().includes(userSearchQuery.toLowerCase())
+    );
+    setFilteredUsers(filtered);
+  }, [userSearchQuery, orgUsers]);
 
-      const uploadResponse = await fetch("/api/upload", { method: "POST", body: formData });
-      const uploadData = await uploadResponse.json();
-      const imageUrl = uploadData.fileUrls[0];
-
-      if (!uploadResponse.ok) {
-        throw new Error("Image upload failed.");
-      }
-
-      // Determine the action based on login state
-      const action = isBreakOpen ? "break_ended" : "break_started";
-
-      const loginResponse = await fetch("/api/face-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          imageUrl,
-          lat: location.lat,
-          lng: location.lng,
-          action,
-        }),
-      });
-
-      const loginData = await loginResponse.json();
-      if (loginResponse.ok && loginData.success) {
-        // Show appropriate toast message based on the action performed.
-        if (action === "break_started") {
-          toast.success("Break Started.");
-        } else if (action === "break_ended") {
-          toast.success("Break Ended.");
-        }
-        // Close the break modal after success.
-        setIsBreakModalOpen(false);
-        if (action === "break_started") {
-          setIsBreakOpen(true);
-        } else {
-          setIsBreakOpen(false);
-        }
-      } else {
-        if (action === "break_started") {
-          toast.error(loginData.error || "Break start failed.");
-        } else {
-          toast.error(loginData.error || "Break end failed.");
-        }
-      }
-    } catch (err: any) {
-      toast.error(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  // Update captureImageAndSubmitLogin to handle enterprise mode
   const captureImageAndSubmitLogin = async () => {
     // Capture image
     const imageSrc = webcamRef.current?.getScreenshot();
@@ -809,28 +866,48 @@ export default function MyAttendance() {
       // Determine the action based on login state
       const action = isLoggedIn ? "logout" : "login";
 
+      // Create the request body
+      const requestBody: any = {
+        imageUrl,
+        lat: location.lat,
+        lng: location.lng,
+        action,
+        workFromHome: isWorkFromHome,
+      };
+
+      // If in enterprise mode and a target user is selected, add those details
+      if (enterpriseMode && selectedTargetUser) {
+        requestBody.enterpriseMode = true;
+        requestBody.targetUserId = selectedTargetUser;
+      }
+
       const loginResponse = await fetch("/api/face-login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          imageUrl,
-          lat: location.lat,
-          lng: location.lng,
-          action,
-          workFromHome: isWorkFromHome,  // <-- Pass it here
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const loginData = await loginResponse.json();
 
       if (loginResponse.ok && loginData.success) {
-        toast.success(`${action === "login" ? "Login" : "Logout"} successful.`);
-        setIsLoggedIn(action === "login");
-        setIsModalOpen(false); // Close the modal on successful login/logout
+        // Customize success message for enterprise mode
+        if (loginData.enterpriseMode) {
+          toast.success(`${action === "login" ? "Login" : "Logout"} successful for ${loginData.targetUser.name}.`);
+        } else {
+          toast.success(`${action === "login" ? "Login" : "Logout"} successful.`);
+          setIsLoggedIn(action === "login");
+        }
+
+        setIsModalOpen(false); // Close the modal
+
+        // Refresh login entries
+        const resEntries = await fetch("/api/loginEntries");
+        const dataEntries = await resEntries.json();
+        setLoginEntries(dataEntries.entries);
       } else {
-        // Check for geofencing error message
+        // Handle various error scenarios...
         if (loginData.error === "You are outside the allowed geofencing area.") {
           toast(<div className=" w-full mb-6 gap-2 m-auto  ">
             <div className="w-full flex  justify-center">
@@ -855,6 +932,97 @@ export default function MyAttendance() {
       setIsLoading(false);
     }
   };
+
+  // Update captureImageAndSubmitBreakStart similarly
+  const captureImageAndSubmitBreakStart = async () => {
+    // Capture image
+    const imageSrc = webcamRef.current?.getScreenshot();
+    if (imageSrc) {
+      setCapturedBreakImage(imageSrc);
+    }
+    if (!imageSrc || !location) {
+      toast.error("Please capture an image and ensure location is available.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Upload image
+      const formData = new FormData();
+      formData.append("files", dataURLtoBlob(imageSrc, "captured_image.jpg"));
+
+      const uploadResponse = await fetch("/api/upload", { method: "POST", body: formData });
+      const uploadData = await uploadResponse.json();
+      const imageUrl = uploadData.fileUrls[0];
+
+      if (!uploadResponse.ok) {
+        throw new Error("Image upload failed.");
+      }
+
+      // Determine the action based on break state
+      const action = isBreakOpen ? "break_ended" : "break_started";
+
+      // Create the request body
+      const requestBody: any = {
+        imageUrl,
+        lat: location.lat,
+        lng: location.lng,
+        action,
+      };
+
+      // If in enterprise mode and a target user is selected, add those details
+      if (enterpriseMode && selectedTargetUser) {
+        requestBody.enterpriseMode = true;
+        requestBody.targetUserId = selectedTargetUser;
+      }
+
+      const loginResponse = await fetch("/api/face-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+      });
+
+      const loginData = await loginResponse.json();
+
+      if (loginResponse.ok && loginData.success) {
+        // Show appropriate toast message based on the action and mode
+        if (loginData.enterpriseMode) {
+          if (action === "break_started") {
+            toast.success(`Break started for ${loginData.targetUser.name}.`);
+          } else {
+            toast.success(`Break ended for ${loginData.targetUser.name}.`);
+          }
+        } else {
+          if (action === "break_started") {
+            toast.success("Break started.");
+            setIsBreakOpen(true);
+          } else {
+            toast.success("Break ended.");
+            setIsBreakOpen(false);
+          }
+        }
+
+        // Close the break modal after success
+        setIsBreakModalOpen(false);
+
+        // Refresh login entries
+        const resEntries = await fetch("/api/loginEntries");
+        const dataEntries = await resEntries.json();
+        setLoginEntries(dataEntries.entries);
+      } else {
+        if (action === "break_started") {
+          toast.error(loginData.error || "Break start failed.");
+        } else {
+          toast.error(loginData.error || "Break end failed.");
+        }
+      }
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
 
 
 
@@ -1204,43 +1372,83 @@ export default function MyAttendance() {
           </div>
         </div>
       )}
-      <div className="login-section   flex justify-center ">
-        <div className="flex justify-center m-auto mt-4">
+      <div className="login-section flex justify-center">
+        <div className="flex flex-col items-center m-auto mt-4">
+          {/* Enterprise Mode Indicator */}
+          {organization?.isEnterprise && (user?.role === 'admin' || user?.role === 'orgAdmin') && (
+            <div className="mb-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-amber-50 to-amber-100 border border-amber-200 rounded-full shadow-sm">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
+                  <span className="text-xs font-medium text-amber-800">Enterprise Mode</span>
+                </div>
+                <span className="text-xs text-amber-600">Manage worker attendance</span>
+              </div>
+            </div>
+          )}
+
           {hasRegisteredFaces ? (
             <div>
-              {isLoggedIn ? (
-                <div className="flex gap-2">
-                  {isBreakOpen ? (
-                    <button
-                      onClick={() => handleBreaks()}
-                      className="bg-[#FD8928] text-white py-2 px-4 rounded text-sm"
-                    >
-                      End Break
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleBreaks()}
-                      className="bg-yellow-500 text-white py-2 px-4 rounded text-sm"
-                    >
-                      Take a Break
-                    </button>
-                  )}
-                  <button
-                    onClick={() => handleLoginLogout()}
-                    className="bg-red-800 text-white py-2 px-4 rounded text-sm"
-                  >
-                    Logout
-                  </button>
-                </div>
-              ) : (
-                <div>
+              {/* Enterprise mode - always show all buttons */}
+              {organization?.isEnterprise && (user?.role === 'admin' || user?.role === 'orgAdmin') ? (
+                <div className="flex flex-wrap gap-2 justify-center">
                   <button
                     onClick={handleLoginLogout}
                     className="bg-[#017a5b] text-white py-2 px-4 rounded text-sm"
                   >
-                    Login
+                    Login Worker
+                  </button>
+                  <button
+                    onClick={() => handleBreaks()}
+                    className={isBreakOpen ? "bg-[#FD8928] text-white py-2 px-4 rounded text-sm" : "bg-yellow-500 text-white py-2 px-4 rounded text-sm"}
+                  >
+                    {isBreakOpen ? "End Break" : "Take a Break"}
+                  </button>
+                  <button
+                    onClick={handleLoginLogout}
+                    className="bg-red-800 text-white py-2 px-4 rounded text-sm"
+                  >
+                    Logout Worker
                   </button>
                 </div>
+              ) : (
+                /* Regular mode - conditional buttons based on login state */
+                <>
+                  {isLoggedIn ? (
+                    <div className="flex gap-2">
+                      {isBreakOpen ? (
+                        <button
+                          onClick={() => handleBreaks()}
+                          className="bg-[#FD8928] text-white py-2 px-4 rounded text-sm"
+                        >
+                          End Break
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleBreaks()}
+                          className="bg-yellow-500 text-white py-2 px-4 rounded text-sm"
+                        >
+                          Take a Break
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleLoginLogout()}
+                        className="bg-red-800 text-white py-2 px-4 rounded text-sm"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  ) : (
+                    <div>
+                      <button
+                        onClick={handleLoginLogout}
+                        className="bg-[#017a5b] text-white py-2 px-4 rounded text-sm"
+                      >
+                        Login
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           ) : (
@@ -1253,9 +1461,7 @@ export default function MyAttendance() {
               </button>
             </div>
           )}
-
         </div>
-
       </div>
       {/* Login/Logout Button */}
       {/* <div className="login-section flex justify-center mb-6">
@@ -1667,6 +1873,110 @@ export default function MyAttendance() {
                   <CrossCircledIcon className="scale-150 -mt-1 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
                 </Dialog.DialogClose> */}
             </div>
+
+            {/* Modern Enterprise Mode UI with Working Search */}
+            {organization?.isEnterprise && (user?.role === 'admin' || user?.role === 'orgAdmin') && (
+              <div className="mt-3 mb-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="h-2 w-2 bg-amber-400 rounded-full animate-pulse"></div>
+                  <h3 className="text-sm font-medium text-amber-700 dark:text-amber-400">Enterprise Mode</h3>
+                </div>
+
+                {/* Custom Select with Search */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowUserDropdown(!showUserDropdown)}
+                    className="w-full flex justify-between items-center px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-sm"
+                  >
+                    <span className={selectedTargetUser ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-gray-400"}>
+                      {selectedTargetUser
+                        ? `${orgUsers.find(u => u._id === selectedTargetUser)?.firstName} ${orgUsers.find(u => u._id === selectedTargetUser)?.lastName}`
+                        : "Select worker to manage attendance..."}
+                    </span>
+                    <ChevronDown className="h-4 w-4 text-gray-500" />
+                  </button>
+
+                  {/* Custom Dropdown with Search */}
+                  {showUserDropdown && (
+                    <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
+                      <div className="p-2 border-b border-gray-200 dark:border-gray-700">
+                        <input
+                          type="text"
+                          value={userSearchQuery}
+                          onChange={(e) => setUserSearchQuery(e.target.value)}
+                          placeholder="Search workers..."
+                          className="w-full p-2 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-[#815BF5] dark:bg-gray-800 dark:border-gray-700"
+                          autoFocus
+                        />
+                      </div>
+
+                      <div className="max-h-60 overflow-y-auto py-1">
+                        {/* Myself option */}
+                        <div
+                          className={`px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center ${!selectedTargetUser ? 'bg-[#815BF5] bg-opacity-10 text-[#815BF5]' : ''}`}
+                          onClick={() => {
+                            setSelectedTargetUser(null);
+                            setShowUserDropdown(false);
+                          }}
+                        >
+                          <UserIcon className="h-5 w-5 mr-2" />
+                          <span>Myself (Admin)</span>
+                        </div>
+
+                        {/* Filtered workers */}
+                        {filteredUsers.length === 0 ? (
+                          <div className="px-3 py-2 text-center text-sm text-gray-500">
+                            No workers found
+                          </div>
+                        ) : (
+                          filteredUsers.map(user => (
+                            <div
+                              key={user._id}
+                              className={`px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center ${selectedTargetUser === user._id ? 'bg-[#815BF5] bg-opacity-10 text-[#815BF5]' : ''}`}
+                              onClick={() => {
+                                setSelectedTargetUser(user._id);
+                                setShowUserDropdown(false);
+                              }}
+                            >
+                              <div className="h-6 w-6 rounded-full text-white bg-[#815BF5] flex items-center justify-center text-xs mr-2">
+                                {user.firstName?.[0]}{user.lastName?.[0]}
+                              </div>
+                              <span>{user.firstName} {user.lastName}</span>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {selectedTargetUser && (
+                  <div className="mt-2 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-full text-white bg-[#815BF5] flex items-center justify-center text-xs">
+                      {orgUsers.find(u => u._id === selectedTargetUser)?.firstName?.[0]}
+                      {orgUsers.find(u => u._id === selectedTargetUser)?.lastName?.[0]}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium dark:text-white">
+                        {orgUsers.find(u => u._id === selectedTargetUser)?.firstName} {orgUsers.find(u => u._id === selectedTargetUser)?.lastName}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {isLoggedIn ? `Recording logout for this worker` : `Recording login for this worker`}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setSelectedTargetUser(null)}
+                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+
             {/* Webcam or Captured Image Display */}
             <div className="relative w-full h-auto mb-4">
               {capturedImage ? (
@@ -1760,7 +2070,7 @@ export default function MyAttendance() {
           </div>
         </DialogContent>
       </Dialog>
-      {/* Radix UI Dialog for Face Login */}
+      {/* Radix UI Dialog for Break Login */}
       <Dialog open={isBreakModalOpen} onOpenChange={handleBreakModalChange}>
         <DialogContent className="z-[100] flex items-center justify-center ">
           <div className=" z-[100] p-6 rounded-lg max-w-lg w-full relative">
@@ -1785,6 +2095,120 @@ export default function MyAttendance() {
                   <CrossCircledIcon className="scale-150 -mt-1 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
                 </Dialog.DialogClose> */}
             </div>
+
+
+            <div className="w-full flex mb-4 justify-between">
+              <h3 className="text-sm dark:text-white text-center ">
+                {isBreakOpen
+                  ? `End Break at ${new Date().toLocaleTimeString()}`
+                  : `Take a Break at ${new Date().toLocaleTimeString()}`}
+              </h3>
+            </div>
+
+            {/* Modern Enterprise Mode UI for Break Management with Working Search */}
+            {organization?.isEnterprise && (user?.role === 'admin' || user?.role === 'orgAdmin') && (
+              <div className="mt-3 mb-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="h-2 w-2 bg-amber-400 rounded-full animate-pulse"></div>
+                  <h3 className="text-sm font-medium text-amber-700 dark:text-amber-400">Enterprise Mode</h3>
+                </div>
+
+                {/* Custom Select with Search */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setShowBreakUserDropdown(!showBreakUserDropdown)}
+                    className="w-full flex justify-between items-center px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-sm"
+                  >
+                    <span className={selectedTargetUser ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-gray-400"}>
+                      {selectedTargetUser
+                        ? `${orgUsers.find(u => u._id === selectedTargetUser)?.firstName} ${orgUsers.find(u => u._id === selectedTargetUser)?.lastName}`
+                        : "Select worker to manage breaks..."}
+                    </span>
+                    <ChevronDown className="h-4 w-4 text-gray-500" />
+                  </button>
+
+                  {/* Custom Dropdown with Search */}
+                  {showBreakUserDropdown && (
+                    <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
+                      <div className="p-2 border-b border-gray-200 dark:border-gray-700">
+                        <input
+                          type="text"
+                          value={userSearchQuery}
+                          onChange={(e) => setUserSearchQuery(e.target.value)}
+                          placeholder="Search workers..."
+                          className="w-full p-2 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-[#815BF5] dark:bg-gray-800 dark:border-gray-700"
+                          autoFocus
+                        />
+                      </div>
+
+                      <div className="max-h-60 overflow-y-auto py-1">
+                        {/* Myself option */}
+                        <div
+                          className={`px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center ${!selectedTargetUser ? 'bg-[#815BF5] bg-opacity-10 text-[#815BF5]' : ''}`}
+                          onClick={() => {
+                            setSelectedTargetUser(null);
+                            setShowBreakUserDropdown(false);
+                          }}
+                        >
+                          <UserIcon className="h-5 w-5 mr-2" />
+                          <span>Myself (Admin)</span>
+                        </div>
+
+                        {/* Filtered workers */}
+                        {filteredUsers.length === 0 ? (
+                          <div className="px-3 py-2 text-center text-sm text-gray-500">
+                            No workers found
+                          </div>
+                        ) : (
+                          filteredUsers.map(user => (
+                            <div
+                              key={user._id}
+                              className={`px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center ${selectedTargetUser === user._id ? 'bg-[#815BF5] bg-opacity-10 text-[#815BF5]' : ''}`}
+                              onClick={() => {
+                                setSelectedTargetUser(user._id);
+                                setShowBreakUserDropdown(false);
+                              }}
+                            >
+                              <div className="h-6 w-6 rounded-full text-white bg-[#815BF5] flex items-center justify-center text-xs mr-2">
+                                {user.firstName?.[0]}{user.lastName?.[0]}
+                              </div>
+                              <span>{user.firstName} {user.lastName}</span>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {selectedTargetUser && (
+                  <div className="mt-2 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-full text-white bg-[#815BF5] flex items-center justify-center text-xs">
+                      {orgUsers.find(u => u._id === selectedTargetUser)?.firstName?.[0]}
+                      {orgUsers.find(u => u._id === selectedTargetUser)?.lastName?.[0]}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium dark:text-white">
+                        {orgUsers.find(u => u._id === selectedTargetUser)?.firstName} {orgUsers.find(u => u._id === selectedTargetUser)?.lastName}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {isBreakOpen ? "End break" : "Start break"} for this worker
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setSelectedTargetUser(null)}
+                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Webcam or Captured Image Display section follows */}
+
             {/* Webcam or Captured Image Display */}
             <div className="relative w-full h-auto mb-4">
               {capturedBreakImage ? (

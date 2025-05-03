@@ -13,7 +13,15 @@ export interface ILoginEntry extends Document {
     logoutTime?: string;
     remarks?: string;
     notes?: string;
-
+    // Add to your LoginEntry model schema
+    enterpriseMode: {
+        type: Boolean,
+        default: false
+    },
+    managedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "users"
+    }
     // New Fields for Approval
     approvalStatus?: 'Pending' | 'Approved' | 'Rejected';
     approvedBy?: IUser | mongoose.Types.ObjectId; // Approver's User ID (either manager or orgAdmin)

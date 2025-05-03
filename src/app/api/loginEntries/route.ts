@@ -29,30 +29,39 @@ export async function GET(request: NextRequest) {
         }));
 
         // Format entries to ensure timestamp is in ISO and populate necessary fields
+        // Update this in the loginEntries/route.ts GET function
         const formattedEntries = populatedEntries.map((entry) => {
             const populatedUser = entry.userId as IUser;
             return {
                 ...entry.toObject(),
                 timestamp: new Date(entry.timestamp).toISOString(),
                 userId: {
+                    _id: populatedUser._id, // Include the _id
                     firstName: populatedUser.firstName,
                     lastName: populatedUser.lastName,
                     reportingManager: populatedUser.reportingManager
                         ? {
-                              firstName: (populatedUser.reportingManager as unknown as IUser).firstName,
-                              lastName: (populatedUser.reportingManager as unknown as IUser).lastName,
-                          }
+                            firstName: (populatedUser.reportingManager as unknown as IUser).firstName,
+                            lastName: (populatedUser.reportingManager as unknown as IUser).lastName,
+                        }
                         : null,
                 },
                 approvedBy: entry.approvedBy
                     ? {
-                          firstName: (entry.approvedBy as IUser).firstName,
-                          lastName: (entry.approvedBy as IUser).lastName,
-                      }
+                        firstName: (entry.approvedBy as IUser).firstName,
+                        lastName: (entry.approvedBy as IUser).lastName,
+                    }
+                    : null,
+                // Include enterprise fields
+                enterpriseMode: entry.enterpriseMode || false,
+                managedBy: entry.managedBy
+                    ? {
+                        firstName: (entry.managedBy as unknown as IUser).firstName,
+                        lastName: (entry.managedBy as unknown as IUser).lastName,
+                    }
                     : null,
             };
         });
-
         return NextResponse.json({ success: true, entries: formattedEntries });
     } catch (error) {
         console.error('Error fetching entries:', error);

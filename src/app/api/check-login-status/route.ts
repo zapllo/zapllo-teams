@@ -3,6 +3,8 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import LoginEntry from '@/models/loginEntryModel';
 import FaceRegistrationRequest from '@/models/faceRegistrationRequest';
+import User from '@/models/userModel';
+import Organization from '@/models/organizationModel';
 import { getDataFromToken } from '@/helper/getDataFromToken';
 import dayjs from 'dayjs';
 
@@ -10,6 +12,16 @@ export async function GET(request: NextRequest) {
   try {
     // Extract userId from token
     const userId = await getDataFromToken(request);
+
+    // Find the user and check if they're an admin in an enterprise org
+    const user = await User.findById(userId);
+    if (!user) {
+      return NextResponse.json({ success: false, error: 'User not found' });
+    }
+
+    const organization = await Organization.findById(user.organization);
+    const isEnterpriseAdmin = organization?.isEnterprise &&
+      (user.role === 'orgAdmin');
 
     // Fetch the latest login entry for the user
     const lastEntry = await LoginEntry.findOne({ userId }).sort({ timestamp: -1 }).exec();
@@ -22,6 +34,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         isLoggedIn: false,
+        isEnterpriseAdmin,
         hasRegisteredFaces: Boolean(hasApprovedFaceRegistration),
         message: 'No login history found'
       });
@@ -35,6 +48,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         isLoggedIn: false,
+        isEnterpriseAdmin,
         hasRegisteredFaces: Boolean(hasApprovedFaceRegistration),
         message: 'Last entry is not from today'
       });
@@ -61,6 +75,7 @@ export async function GET(request: NextRequest) {
       success: true,
       isLoggedIn,
       isBreakOpen,
+      isEnterpriseAdmin,
       hasRegisteredFaces: Boolean(hasApprovedFaceRegistration)
     });
   } catch (error) {
