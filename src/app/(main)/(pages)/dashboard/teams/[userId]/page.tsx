@@ -408,7 +408,7 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
                         <FaLock className="h-12 w-12 text-red-500 mb-4" />
                         <h1 className="text-xl font-semibold text-center mb-2">Access Denied</h1>
                         <p className="text-muted-foreground text-center">
-                            You're not authorized to access Employee Details
+                            You are not authorized to access Employee Details
                         </p>
                         <Button
                             className="mt-6"
