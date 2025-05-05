@@ -3,21 +3,32 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ArrowLeft, Calendar } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+
+// Shadcn Components
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+
+// Component imports
 import EmployeeProfile from "@/components/teams/profile/page";
 import Loader from "@/components/ui/loader";
 import CustomDatePicker from "@/components/globals/date-picker";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import SalaryMenu from "@/components/teams/salary/page";
 import DeductionMenu from "@/components/teams/deductions/page";
 import PersonalDetails from "@/components/teams/personal-details/page";
 import PayslipPage from "@/components/teams/payslip/page";
 import UserLogs from "@/components/teams/logs/userLogs";
+
+// Icons
 import { FaCalendarAlt, FaFileAlt, FaFileInvoice, FaHistory, FaLock, FaMinusCircle, FaUser, FaWallet } from "react-icons/fa";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner";
 
 interface UserDetails {
     _id: string;
@@ -41,30 +52,37 @@ interface UserDetails {
     asset: string;
     branch: string;
     status: string;
-    employeeId: string; // EMP1, EMP2, etc.
+    employeeId: string;
 }
+
+const tabs = [
+    { id: "profile", name: "Profile", icon: <FaUser className="h-4 w-4" /> },
+    { id: "personal-details", name: "Personal Details", icon: <FaFileAlt className="h-4 w-4" /> },
+    { id: "attendance", name: "Attendance", icon: <FaCalendarAlt className="h-4 w-4" /> },
+    { id: "salary-overview", name: "Salary Overview", icon: <FaWallet className="h-4 w-4" /> },
+    { id: "deductions", name: "Deductions", icon: <FaMinusCircle className="h-4 w-4" /> },
+    { id: "payslip", name: "Payslip", icon: <FaFileInvoice className="h-4 w-4" /> },
+    { id: "user-logs", name: "User Logs", icon: <FaHistory className="h-4 w-4" /> },
+];
 
 export default function UserDetailPage({ params }: { params: { userId: string } }) {
     const { userId } = params;
+    const router = useRouter();
+
     const [user, setUser] = useState<UserDetails | null>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<string>("Profile"); // Active section state
+    const [activeTab, setActiveTab] = useState("profile");
     const [attendanceData, setAttendanceData] = useState<any>(null);
     const [attendanceLoading, setAttendanceLoading] = useState(false);
     const [startDate, setStartDate] = useState<Date | null>(null);
     const [endDate, setEndDate] = useState<Date | null>(null);
     const [isDateDialogOpen, setIsDateDialogOpen] = useState(false);
     const [datePickerTarget, setDatePickerTarget] = useState<'start' | 'end'>('start');
-    const [month, setMonth] = useState<number>(new Date().getMonth() + 1); // Default to current month
-    const [year, setYear] = useState<number>(new Date().getFullYear()); // Default to current year
+    const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
+    const [year, setYear] = useState<number>(new Date().getFullYear());
     const [uniqueLink, setUniqueLink] = useState<string | null>(null);
-    const [leavesTrialExpires, setLeavesTrialExpires] = useState<Date | null>(null);
-    const [attendanceTrialExpires, setAttendanceTrialExpires] = useState<Date | null>(null);
-    const [subscribedPlan, setSubscribedPlan] = useState<string | null>(null);
     const [isPlanEligible, setIsPlanEligible] = useState<boolean>(false);
-    const [currentUserRole, setCurrentUserRole] = useState<string | null>(null); // Role of the logged-in user
-
-    const router = useRouter();
+    const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchUserDetails = async () => {
@@ -96,37 +114,16 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
         const fetchPlanStatus = async () => {
             try {
                 const response = await axios.get("/api/organization/getById");
-                const {
-                    leavesTrialExpires: leavesExpire,
-                    attendanceTrialExpires: attendanceExpire,
-                    subscribedPlan: plan,
-                } = response.data.data;
-
+                const { subscribedPlan: plan } = response.data.data;
                 const eligiblePlans = ["Money Saver Bundle", "Zapllo Payroll"];
-                setLeavesTrialExpires(leavesExpire ? new Date(leavesExpire) : null);
-                setAttendanceTrialExpires(attendanceExpire ? new Date(attendanceExpire) : null);
-                setSubscribedPlan(plan);
                 setIsPlanEligible(eligiblePlans.includes(plan));
             } catch (error) {
                 console.error("Error fetching plan status:", error);
-            } finally {
-                setLoading(false);
             }
         };
 
         fetchPlanStatus();
     }, []);
-    console.log(subscribedPlan, 'plan?')
-    const handleTabClick = (tabName: string) => {
-        const lockedTabs = ["Attendance", "Salary Overview", "Deductions", "Payslip", "User Logs"];
-        const isLocked = !isPlanEligible && lockedTabs.includes(tabName);
-
-        if (isLocked) {
-            toast.error("Purchase Money Saver Bundle to unlock");
-        } else {
-            setActiveTab(tabName);
-        }
-    };
 
     // Fetch attendance report
     const fetchAttendanceReport = async () => {
@@ -149,112 +146,10 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
     };
 
     useEffect(() => {
-        if (activeTab === "Attendance") {
+        if (activeTab === "attendance") {
             fetchAttendanceReport();
         }
     }, [activeTab]);
-
-    const renderAttendanceSection = () => {
-        return (
-            <div>
-                <h2 className="text-lg font-semibold mb-4">Attendance Report</h2>
-
-                {/* Date Selection and Fetch Button */}
-                <div className="flex gap-4 mb-4">
-                    <button
-                        className="px-4 py-2 flex items-center text-sm gap-2 bg-transparent border dark:text-white rounded"
-                        onClick={() => {
-                            setDatePickerTarget("start");
-                            setIsDateDialogOpen(true);
-                        }}
-                    >
-                        <Calendar className="h-5" /> {startDate ? startDate.toDateString() : "Select Start Date"}
-                    </button>
-                    <button
-                        className="px-4 py-2 flex text-sm items-center gap-2 bg-transparent border dark:text-white rounded"
-                        onClick={() => {
-                            setDatePickerTarget("end");
-                            setIsDateDialogOpen(true);
-                        }}
-                    >
-                        <Calendar className="h-5" /> {endDate ? endDate.toDateString() : "Select End Date"}
-                    </button>
-                    <div className="ml-auto">
-                        <button
-                            className="px-4 text-sm py-2 bg-[#017a5b] -600 text-white rounded"
-                            onClick={fetchAttendanceReport}
-                            disabled={!startDate || !endDate}
-                        >
-                            Fetch Report
-                        </button>
-                    </div>
-                </div>
-
-                {/* Attendance Report */}
-                {attendanceLoading ? (
-                    <Loader />
-                ) : attendanceData ? (
-                    <div className="border mt-2 rounded-xl p-4">
-                        <div className="flex gap-4">
-                            <div>
-                                <span className="border text-xs text-blue-400 text-= p-2 rounded">Total Days: {attendanceData.totalDays}</span>
-                            </div>
-                            <div>
-                                <span className="border text-xs text-yellow-400  p-2 rounded">Working: {attendanceData.workingDays}</span>
-                            </div>
-                            <div>
-                                <span className="border text-xs text-green-400  p-2 rounded">Week Offs: {attendanceData.weekOffs}</span>
-                            </div>
-                            <div>
-                                <span className="border text-xs text-red-500  p-2 rounded">Holidays: {attendanceData.holidays.length}</span>
-                            </div>
-                        </div>
-
-                        <table className="w-full mt-4 border-collapse border">
-                            <thead>
-                                <tr>
-                                    <th className="border px-4 py-2 text-left">User</th>
-                                    <th className="border px-4 py-2 text-left">Present</th>
-                                    <th className="border px-4 py-2 text-left">Absent</th>
-                                    <th className="border px-4 py-2 text-left">Leave</th>
-                                    <th className="border px-4 py-2 text-left">Reporting Manager</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {attendanceData.report.map((entry: any, index: number) => (
-                                    <tr key={index}>
-                                        <td className="border px-4 py-2">{entry.user}</td>
-                                        <td className="border px-4 py-2">{entry.present}</td>
-                                        <td className="border px-4 py-2">{entry.absent}</td>
-                                        <td className="border px-4 py-2">{entry.leave}</td>
-                                        <td className="border px-4 py-2">{entry.reportingManager}</td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                ) : (
-                    <div className="flex w-full justify-center -ml-4">
-                        <div className="mt-2">
-                            <DotLottieReact
-                                src="/lottie/empty.lottie"
-                                loop
-                                className="h-56"
-                                autoplay
-                            />
-                            <h1 className="text-center font-bold text-md  -ml-4">
-                                No Attendance Records Found
-                            </h1>
-                            <p className="text-center text-sm -ml-4 p-2">
-                                The list is currently empty for the selected date range.
-                            </p>
-                        </div>
-                    </div>
-                )}
-            </div>
-        );
-    };
-
 
     const handleGeneratePayslip = async () => {
         setLoading(true);
@@ -271,125 +166,6 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
         }
     };
 
-
-    const renderTabs = () => {
-        return tabs.map((tab) => {
-            const lockedTabs = ["Attendance", "Salary Overview", "Deductions", "Payslip", "User Logs"];
-            const isLocked = !isPlanEligible && lockedTabs.includes(tab.name);
-
-            return (
-                <button
-                    key={tab.name}
-                    onClick={() => handleTabClick(tab.name)}
-                    className={`relative flex items-center gap-4 px-4 text-sm py-2 border rounded-2xl text-left ${activeTab === tab.name && !isLocked
-                        ? "bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white"
-                        : ""
-                        }`}
-                >
-                    {/* Tab Content */}
-                    <div
-                        className={`flex items-center gap-4 ${isLocked ? "blur-" : "blur-none"
-                            }`}
-                    >
-                        {tab.icon}
-                        {tab.name}
-                    </div>
-
-                    {/* Lock Overlay */}
-                    {isLocked && (
-                        <div
-                            className="absolute inset-0 flex  items-center justify-start bg-black/60 bg-opacity-80 rounded-2xl"
-                            style={{ pointerEvents: "auto" }}
-                        >
-                            <FaLock
-                                className="text-white dark:text-gray-400 ml-4 text-lg cursor-pointer"
-                                onClick={(e) => {
-                                    e.stopPropagation(); // Prevent tab click
-                                    toast.error("Purchase Money Saver Bundle to unlock");
-                                }}
-                            />
-                        </div>
-                    )}
-                </button>
-            );
-        });
-    };
-
-
-    const renderActiveSection = () => {
-        switch (activeTab) {
-            case "Profile":
-                return <EmployeeProfile userId={userId} />;
-            case "Personal Details":
-                return <PersonalDetails userId={userId} />;
-            case "Attendance":
-                return renderAttendanceSection();
-            case "Salary Overview":
-                return <SalaryMenu userId={userId} />;
-            case "Deductions":
-                return <DeductionMenu userId={userId} />;
-            case "Payslip":
-                return (<div className="p-6">
-                    <h1 className="text-lg font-bold mb-4">Generate Payslip</h1>
-                    <div className="flex gap-4 mb-4">
-                        {/* Month Dropdown */}
-                        <select
-                            className="p-2 border dark:bg-[#04061E] outline-none rounded"
-                            value={month}
-                            onChange={(e) => setMonth(parseInt(e.target.value))}
-                        >
-                            {Array.from({ length: 12 }, (_, i) => (
-                                <option key={i + 1} value={i + 1}>
-                                    {new Date(0, i).toLocaleString("default", { month: "long" })}
-                                </option>
-                            ))}
-                        </select>
-
-                        {/* Year Dropdown */}
-                        <select
-                            className="p-2 border outline-none dark:bg-[#04061E] rounded"
-                            value={year}
-                            onChange={(e) => setYear(parseInt(e.target.value))}
-                        >
-                            {Array.from({ length: 5 }, (_, i) => (
-                                <option key={i} value={new Date().getFullYear() - i}>
-                                    {new Date().getFullYear() - i}
-                                </option>
-                            ))}
-                        </select>
-                        {/* Generate Button */}
-                        <button
-                            className={`px-4 py-2 text-white rounded ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-[#017a5b] hover:bg-green-800 text-sm -600"
-                                }`}
-                            onClick={handleGeneratePayslip}
-                            disabled={loading}
-                        >
-                            {loading ? "Generating..." : "Generate"}
-                        </button>
-                    </div>
-
-                    {/* Display Generated Link */}
-                    {uniqueLink && (
-                        <div className="mt-4">
-                            <p className="text-sm text-gray-600">Payslip generated successfully:</p>
-                            <a
-                                href={uniqueLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-500 underline"
-                            >
-                                View Payslip
-                            </a>
-                        </div>
-                    )}
-                </div>)
-            case "User Logs":
-                return <UserLogs userId={userId} />
-            default:
-                return null;
-        }
-    };
-
     const handleUpdateField = async (field: string, value: string) => {
         if (!user) return;
 
@@ -402,25 +178,22 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
 
             // Send the PATCH request to update the user
             const response = await axios.patch(`/api/users/update`, {
-                _id: user._id, // Pass the user's ID
-                [field]: value, // Pass the updated field and value
+                _id: user._id,
+                [field]: value,
             });
 
             if (response.data.success) {
-                // Update the user state with the response from the database.
                 setUser(response.data.user);
                 toast.success(`User status changed successfully to ${response.data.user.status}`);
             } else {
                 console.error("Failed to update user:", response.data.error);
-                // Revert the UI update if the API call fails
                 setUser((prevUser) => ({
                     ...prevUser!,
-                    [field]: user[field as keyof UserDetails], // Restore original value
+                    [field]: user[field as keyof UserDetails],
                 }));
             }
         } catch (error) {
             console.error("Error updating user:", error);
-            // Revert the UI update in case of an error
             setUser((prevUser) => ({
                 ...prevUser!,
                 [field]: user[field as keyof UserDetails],
@@ -428,180 +201,409 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
         }
     };
 
-
-    const tabs = [
-        { name: "Profile", icon: <FaUser className="h-4 w-4" /> },
-        { name: "Personal Details", icon: <FaFileAlt className="h-4 w-4" /> },
-        { name: "Attendance", icon: <FaCalendarAlt className="h-4 w-4" /> },
-        { name: "Salary Overview", icon: <FaWallet className="h-4 w-4" /> },
-        { name: "Deductions", icon: <FaMinusCircle className="h-4 w-4" /> },
-        { name: "Payslip", icon: <FaFileInvoice className="h-4 w-4" /> },
-        { name: "User Logs", icon: <FaHistory className="h-4 w-4" /> },
-    ];
-
-    if (loading) return <p><Loader /></p>;
-
-
-    if (currentUserRole !== "orgAdmin") {
+    const renderAttendanceSection = () => {
         return (
-            <div className="w-full max-w-5xl overflow-y-scroll overflow-x-hidden h-full scrollbar-hide mt-16 mx-auto">
-                {/* Header */}
-                {/* User Summary */}
-                <div className="border rounded-xl relative mt-4 p-6 ">
-                    <div className="flex items-center absolute left-0 scale-75 p-1 top-0">
-                        <button onClick={() => router.back()}>
-                            <div className="flex items-center gap-2 font-medium text-xl cursor-pointer">
-                                <ArrowLeft className="h-7 rounded-full border-white border w-7 hover:bg-white hover:text-black" />
+            <div className="space-y-4">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-lg font-semibold">Attendance Report</h2>
+                </div>
+
+                <div className="flex flex-wrap gap-4 mb-6">
+                    <Button
+                        variant="outline"
+                        className="flex items-center gap-2"
+                        onClick={() => {
+                            setDatePickerTarget("start");
+                            setIsDateDialogOpen(true);
+                        }}
+                    >
+                        <FaCalendarAlt className="h-4 w-4" />
+                        {startDate ? startDate.toLocaleDateString() : "Select Start Date"}
+                    </Button>
+
+                    <Button
+                        variant="outline"
+                        className="flex items-center gap-2"
+                        onClick={() => {
+                            setDatePickerTarget("end");
+                            setIsDateDialogOpen(true);
+                        }}
+                    >
+                        <FaCalendarAlt className="h-4 w-4" />
+                        {endDate ? endDate.toLocaleDateString() : "Select End Date"}
+                    </Button>
+
+                    <Button
+                        variant="default"
+                        className="ml-auto bg-emerald-600 hover:bg-emerald-700"
+                        onClick={fetchAttendanceReport}
+                        disabled={!startDate || !endDate}
+                    >
+                        Fetch Report
+                    </Button>
+                </div>
+
+                {attendanceLoading ? (
+                    <div className="flex justify-center p-8">
+                        <Loader />
+                    </div>
+                ) : attendanceData ? (
+                    <Card>
+                        <CardContent className="p-6">
+                            <div className="flex flex-wrap gap-3 mb-6">
+                                <Badge variant="outline" className="px-3 py-1 text-blue-500 border-blue-200">
+                                    Total Days: {attendanceData.totalDays}
+                                </Badge>
+                                <Badge variant="outline" className="px-3 py-1 text-amber-500 border-amber-200">
+                                    Working: {attendanceData.workingDays}
+                                </Badge>
+                                <Badge variant="outline" className="px-3 py-1 text-green-500 border-green-200">
+                                    Week Offs: {attendanceData.weekOffs}
+                                </Badge>
+                                <Badge variant="outline" className="px-3 py-1 text-rose-500 border-rose-200">
+                                    Holidays: {attendanceData.holidays.length}
+                                </Badge>
                             </div>
-                        </button>
-                    </div>
-                    <div className="flex justify-between w-full items-center gap-4">
-                        <div>
 
+                            <div className="rounded-lg overflow-hidden border">
+                                <table className="w-full">
+                                    <thead className="bg-muted/50">
+                                        <tr>
+                                            <th className="p-3 text-left font-medium">User</th>
+                                            <th className="p-3 text-left font-medium">Present</th>
+                                            <th className="p-3 text-left font-medium">Absent</th>
+                                            <th className="p-3 text-left font-medium">Leave</th>
+                                            <th className="p-3 text-left font-medium">Reporting Manager</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {attendanceData.report.map((entry: any, index: number) => (
+                                            <tr key={index} className="border-t">
+                                                <td className="p-3">{entry.user}</td>
+                                                <td className="p-3">{entry.present}</td>
+                                                <td className="p-3">{entry.absent}</td>
+                                                <td className="p-3">{entry.leave}</td>
+                                                <td className="p-3">{entry.reportingManager}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <Card className="flex flex-col items-center justify-center p-8 bg-muted/10">
+                        <DotLottieReact
+                            src="/lottie/empty.lottie"
+                            loop
+                            className="h-40"
+                            autoplay
+                        />
+                        <h3 className="text-lg font-semibold mt-4">No Attendance Records Found</h3>
+                        <p className="text-muted-foreground text-center mt-2">
+                            The list is currently empty for the selected date range.
+                        </p>
+                    </Card>
+                )}
+            </div>
+        );
+    };
+
+    const renderPayslipSection = () => {
+        return (
+            <div className="space-y-6">
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-lg font-semibold">Generate Payslip</h2>
+                </div>
+
+                <Card>
+                    <CardContent className="p-6">
+                        <div className="flex flex-wrap gap-4 mb-6">
+                            <Select
+                                value={month.toString()}
+                                onValueChange={(value) => setMonth(parseInt(value))}
+                            >
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="Select month" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Array.from({ length: 12 }, (_, i) => (
+                                        <SelectItem key={i + 1} value={(i + 1).toString()}>
+                                            {new Date(0, i).toLocaleString("default", { month: "long" })}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                            <Select
+                                value={year.toString()}
+                                onValueChange={(value) => setYear(parseInt(value))}
+                            >
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="Select year" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Array.from({ length: 5 }, (_, i) => (
+                                        <SelectItem key={i} value={(new Date().getFullYear() - i).toString()}>
+                                            {new Date().getFullYear() - i}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                            <Button
+                                className="bg-emerald-600 hover:bg-emerald-700 ml-auto"
+                                onClick={handleGeneratePayslip}
+                                disabled={loading}
+                            >
+                                {loading ? "Generating..." : "Generate Payslip"}
+                            </Button>
                         </div>
-                    </div>
 
-                    <div className="mt-8 text-center">
-                        <h1 className="text-xl font-semibold text-red-500">
-                            You&apos;re not authorized to access Employee Details
-                        </h1>
+                        {uniqueLink && (
+                            <div className="mt-6 p-4 border rounded-lg bg-muted/20">
+                                <p className="text-sm text-muted-foreground mb-2">Payslip generated successfully:</p>
+                                <a
+                                    href={uniqueLink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-primary hover:underline flex items-center gap-2"
+                                >
+                                    <FaFileInvoice className="h-4 w-4" />
+                                    View Payslip
+                                </a>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+
+                {/* <PayslipPage userId={userId} /> */}
+            </div>
+        );
+    };
+
+    if (loading) {
+        return (
+            <div className="w-full max-w-5xl mx-auto p-6 space-y-6">
+                <div className="flex items-center space-x-4">
+                    <Skeleton className="h-12 w-12 rounded-full" />
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-[250px]" />
+                        <Skeleton className="h-4 w-[200px]" />
                     </div>
+                </div>
+                <div className="grid grid-cols-4 gap-6">
+                    <Skeleton className="h-[600px] col-span-1" />
+                    <Skeleton className="h-[600px] col-span-3" />
                 </div>
             </div>
         );
     }
 
-    if (!user) return <p>User not found.</p>;
+    if (currentUserRole !== "orgAdmin") {
+        return (
+            <div className="w-full max-w-5xl mx-auto p-6">
+                <Card>
+                    <CardContent className="p-8 flex flex-col items-center justify-center min-h-[300px]">
+                        <FaLock className="h-12 w-12 text-red-500 mb-4" />
+                        <h1 className="text-xl font-semibold text-center mb-2">Access Denied</h1>
+                        <p className="text-muted-foreground text-center">
+                            You're not authorized to access Employee Details
+                        </p>
+                        <Button
+                            className="mt-6"
+                            variant="outline"
+                            onClick={() => router.back()}
+                        >
+                            <ArrowLeft className="mr-2 h-4 w-4" /> Go Back
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
+
+    if (!user) {
+        return (
+            <div className="w-full max-w-5xl  mx-auto p-6">
+                <Card>
+                    <CardContent className="p-8 flex flex-col items-center justify-center">
+                        <h1 className="text-xl font-semibold text-center">User not found</h1>
+                        <Button
+                            className="mt-6"
+                            variant="outline"
+                            onClick={() => router.back()}
+                        >
+                            <ArrowLeft className="mr-2 h-4 w-4" /> Go Back
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
+
+    const getRoleBadgeColor = (role: string) => {
+        switch(role) {
+            case "orgAdmin": return "bg-rose-600 text-white";
+            case "manager": return "bg-blue-600 text-white";
+            case "member": return "bg-emerald-600 text-white";
+            default: return "bg-gray-500 text-white";
+        }
+    };
+
+    const getRoleDisplayName = (role: string) => {
+        switch(role) {
+            case "orgAdmin": return "Admin";
+            case "manager": return "Manager";
+            case "member": return "Member";
+            default: return role;
+        }
+    };
 
     return (
-        <div className="w-full max-w-5xl overflow-y-scroll overflow-x-hidden h-full scrollbar-hide mt-16 mx-auto">
-            {/* Header */}
-            {/* User Summary */}
-            <div className="border rounded-xl relative mt-4 p-6 ">
-                <div className="flex items-cente absolute left-0 scale-75  p-1 top-0 r mb-4">
-                    <button onClick={() => router.back()}>
-                        <div className="flex items-center gap-2 font-medium text-xl cursor-pointer">
-                            <ArrowLeft className="h-7 rounded-full border-white border w-7 hover:bg-white hover:text-black" />
-                            {/* <h1>Back</h1> */}
-                        </div>
-                    </button>
-                </div>
-                <div className="flex justify-between w-full items-center gap-4">
-                    <div>
-                        <div className="flex items-center gap-2 relative">
-                            <img src='/branding/badge.png' className="absolute -bottom-2 scale-90  left-6   z-[40]  h-6" />
+        <div className="w-full max-w-7xl mt-12 h-screen overflow-y-scroll scrollbar-hide mx-auto p-4 pb-24">
+            <Card className="mb-6">
+                <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <Button
+                                variant="ghost"
+                                className="rounded-full p-2"
+                                onClick={() => router.back()}
+                            >
+                                <ArrowLeft className="h-5 w-5" />
+                            </Button>
 
-                            <div className='p-[2px] scale-90  rounded-full bg-gradient-to-r from-[#815BF5] to-[#FC8929]'>
-                                <div className='p-1 rounded-full bg-white dark:bg-[#04061e] '>
-                                    <Avatar className="rounded-full h-16 w-16 flex bg-[#815BF5] items-center ">
-
-                                        {user.profilePic ? (
-                                            <img
-                                                src={user.profilePic}
-                                                alt={`${user.firstName} ${user.lastName}`}
-                                                className="h-full w-full rounded-full object-cover"
-                                            />
-                                        ) : (
-                                            <AvatarFallback className="">
-                                                <h1 className="text-2xl dark:text-white">
+                            <div className="relative">
+                                <div className='p-[2px] rounded-full bg-gradient-to-r from-[#815BF5] to-[#FC8929]'>
+                                    <div className='p-1 rounded-full bg-white dark:bg-[#04061e]'>
+                                        <Avatar className="h-16 w-16">
+                                            {user.profilePic ? (
+                                                <AvatarImage
+                                                    src={user.profilePic}
+                                                    alt={`${user.firstName} ${user.lastName}`}
+                                                />
+                                            ) : (
+                                                <AvatarFallback className="bg-[#815BF5] text-white">
                                                     {`${user.firstName}`.slice(0, 1)}
                                                     {`${user.lastName}`.slice(0, 1)}
-                                                </h1>
-                                            </AvatarFallback>
-                                        )}
-                                    </Avatar>
+                                                </AvatarFallback>
+                                            )}
+                                        </Avatar>
+                                    </div>
                                 </div>
+                                <img
+                                    src='/branding/badge.png'
+                                    className="absolute -bottom-2 -right-2 z-10 h-6"
+                                    alt="Badge"
+                                />
                             </div>
 
                             <div>
-                                <h1 className="text-lg font-semibold">{`${user.firstName} ${user.lastName}`}</h1>
-                                <div className="flex items-center gap-2  ">
-                                    <div
-                                        className={`w-fit px-4 py-1 rounded text-white text-xs ${user.role === "orgAdmin"
-                                            ? "bg-[#B4173B]"
-                                            : user.role === "manager"
-                                                ? "bg-blue-600"
-                                                : user.role === "member"
-                                                    ? "bg-[#007A5A]"
-                                                    : "bg-gray-500"
-                                            }`}
-                                    >
-                                        {user.role === "orgAdmin"
-                                            ? "Admin"
-                                            : user.role === "member"
-                                                ? "Member"
-                                                : user.role === "manager"
-                                                    ? "Manager"
-                                                    : user.role}
-
-                                    </div>
-                                    <p className="text-gray-500">ID: {user.employeeId}</p>
-
+                                <h1 className="text-xl font-semibold">
+                                    {`${user.firstName} ${user.lastName}`}
+                                </h1>
+                                <div className="flex items-center gap-3 mt-1">
+                                    <Badge className={getRoleBadgeColor(user.role)}>
+                                        {getRoleDisplayName(user.role)}
+                                    </Badge>
+                                    <span className="text-sm text-muted-foreground">
+                                        ID: {user.employeeId}
+                                    </span>
                                 </div>
-
                             </div>
-
                         </div>
-                    </div>
-                    <div className="relative">
+
                         <Select
                             value={user?.status || "Active"}
                             onValueChange={(value) => handleUpdateField("status", value)}
                         >
-                            <SelectTrigger className=" bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white outline-none focus:ring-[#815BF5]">
+                            <SelectTrigger className="w-[180px] bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white">
                                 <SelectValue placeholder="Select status" />
                             </SelectTrigger>
-                            <SelectContent className="p-1 dark:bg-[#04061E] dark:text-white rounded-xl shadow-lg">
-                                <SelectItem value="Active" className="hover:bg-[#815BF5] font-medium">
+                            <SelectContent>
+                                <SelectItem value="Active" className="hover:bg-[#815BF5]/10">
                                     Active
                                 </SelectItem>
-                                <SelectItem
-                                    value="Deactivated"
-                                    className="hover:bg-[#FC8929] font-medium"
-                                >
+                                <SelectItem value="Deactivated" className="hover:bg-[#FC8929]/10">
                                     Deactivated
                                 </SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
+                </CardContent>
+            </Card>
 
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <Card className="lg:col-span-1 overflow-hidden">
+                    <CardHeader className="pb-3">
+                        <h3 className="font-medium">Employee Details</h3>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                        <div className="space-y-1">
+                            {tabs.map((tab) => {
+                                const isLocked = !isPlanEligible &&
+                                  ["attendance", "salary-overview", "deductions", "payslip", "user-logs"].includes(tab.id);
 
-                </div>
-            </div>
+                                return (
+                                    <div key={tab.id} className="relative">
+                                        <Button
+                                            variant={activeTab === tab.id ? "default" : "ghost"}
+                                            className={`w-full justify-start px-4 py-2 text-sm font-medium ${
+                                                activeTab === tab.id ? "bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white" : ""
+                                            } ${isLocked ? "opacity-60" : ""}`}
+                                            onClick={() => {
+                                                if (isLocked) {
+                                                    toast.error("Purchase Money Saver Bundle to unlock");
+                                                    return;
+                                                }
+                                                setActiveTab(tab.id);
+                                            }}
+                                        >
+                                            <span className="mr-3">{tab.icon}</span>
+                                            {tab.name}
+                                        </Button>
 
-            {/* Tabs */}
-            <div className="grid mb-24 grid-cols-4 gap-6 mt-6">
-                <div className="col-span-1 rounded-xl p-4 border">
-                    <div className="flex flex-col gap-4">
-                        {renderTabs()}
-                    </div>
-                </div>
-
-                {/* Active Section */}
-                <div className="col-span-3">
-                    <div className="border p-6 rounded-xl shadow-md">{renderActiveSection()}</div>
-                </div>
-                <Dialog open={isDateDialogOpen} onOpenChange={setIsDateDialogOpen}>
-                    <DialogContent className="z-[100] bg-black scale-90  flex justify-center ">
-                        <div className="z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
-                            <div className="w-full flex mb-4 justify-between">
-                                <CustomDatePicker
-                                    selectedDate={datePickerTarget === 'start' ? startDate : endDate}
-                                    onDateChange={(date) => {
-                                        if (datePickerTarget === 'start') {
-                                            setStartDate(date);
-                                        } else {
-                                            setEndDate(date);
-                                        }
-                                    }}
-                                    onCloseDialog={() => setIsDateDialogOpen(false)}
-                                />
-                            </div>
+                                        {isLocked && (
+                                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                                <FaLock className="h-3 w-3 text-muted-foreground" />
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
-                    </DialogContent>
-                </Dialog>
+                    </CardContent>
+                </Card>
 
+                <Card className="lg:col-span-3">
+                    <CardContent className="p-6">
+                        {activeTab === "profile" && <EmployeeProfile userId={userId} />}
+                        {activeTab === "personal-details" && <PersonalDetails userId={userId} />}
+                        {activeTab === "attendance" && renderAttendanceSection()}
+                        {activeTab === "salary-overview" && <SalaryMenu userId={userId} />}
+                        {activeTab === "deductions" && <DeductionMenu userId={userId} />}
+                        {activeTab === "payslip" && renderPayslipSection()}
+                        {activeTab === "user-logs" && <UserLogs userId={userId} />}
+                    </CardContent>
+                </Card>
             </div>
+
+            <Dialog open={isDateDialogOpen} onOpenChange={setIsDateDialogOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <CustomDatePicker
+                        selectedDate={datePickerTarget === 'start' ? startDate : endDate}
+                        onDateChange={(date) => {
+                            if (datePickerTarget === 'start') {
+                                setStartDate(date);
+                            } else {
+                                setEndDate(date);
+                            }
+                        }}
+                        onCloseDialog={() => setIsDateDialogOpen(false)}
+                    />
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

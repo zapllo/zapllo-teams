@@ -2,15 +2,29 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Loader from "@/components/ui/loader";
 import { CrossCircledIcon } from "@radix-ui/react-icons";
 import axios from "axios";
-import { Mail, Phone } from "lucide-react";
+import { Mail, Phone, LogOut, HelpCircle, Lock, Languages, Clock, Trash2, Paperclip, Edit, UploadCloud, Globe, Users, FileCog, PanelLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { FaWhatsapp } from "react-icons/fa";
+import { FaMobile, FaWhatsapp } from "react-icons/fa";
 import { IoPersonAddSharp } from "react-icons/io5";
 import { toast, Toaster } from "sonner";
 
@@ -22,7 +36,7 @@ interface Category {
   organization: string;
 }
 
-export default function Profile({ }: Props) {
+export default function Profile({}: Props) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [newCategory, setNewCategory] = useState("");
   const router = useRouter();
@@ -39,33 +53,68 @@ export default function Profile({ }: Props) {
   const [whatsappNotifications, setWhatsappNotifications] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [profilePic, setProfilePic] = useState<string>('');
-  const [userProfile, setUserProfile] = useState<string>('');
+  const [profilePic, setProfilePic] = useState<string>("");
+  const [userProfile, setUserProfile] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
   const [isRemoving, setIsRemoving] = useState(false);
-
   const [timezone, setTimezone] = useState<string>("");
   const [availableTimezones, setAvailableTimezones] = useState<string[]>([]);
 
+  // Fetch user timezone
   useEffect(() => {
-    // Detect the user's current timezone
     const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     setTimezone(detectedTimezone);
-
-    // Set a list of all available timezones
     setAvailableTimezones(Intl.supportedValuesOf("timeZone"));
   }, []);
 
-  const handleTimezoneChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setTimezone(e.target.value);
+  const handleTimezoneChange = (value: string) => {
+    setTimezone(value);
   };
 
-
-
+  // Fetch user data
   useEffect(() => {
-    // Fetch categories from the server
+    const getUserDetails = async () => {
+      try {
+        const res = await axios.get('/api/users/me');
+        const user = res.data.data;
+        setFirstName(user.firstName);
+        setLastName(user.lastName);
+        setUserProfile(user.profilePic);
+        setRole(user.role);
+        setEmail(user.email);
+        setWhatsAppNo(user.whatsappNo);
+        setEmailNotifications(user.notifications?.email || true);
+        setWhatsappNotifications(user.notifications?.whatsapp || true);
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    };
+    getUserDetails();
+  }, []);
+
+  // Fetch organization data
+  useEffect(() => {
+    const getOrganizationDetails = async () => {
+      try {
+        const res = await axios.get('/api/organization/getById');
+        const org = res.data.data;
+        setOrganizationName(org.companyName);
+        setIndustry(org.industry);
+        setTeamSize(org.teamSize);
+
+        // Check trial status
+        const isExpired = org.trialExpires && new Date(org.trialExpires) <= new Date();
+        setIsTrialExpired(isExpired);
+      } catch (error) {
+        console.error('Error fetching organization details:', error);
+      }
+    };
+    getOrganizationDetails();
+  }, []);
+
+  // Fetch categories
+  useEffect(() => {
     const fetchCategories = async () => {
       try {
         const response = await fetch('/api/category/get');
@@ -81,93 +130,23 @@ export default function Profile({ }: Props) {
     };
     fetchCategories();
   }, []);
-  useEffect(() => {
-    // Fetch the current settings
-    axios.get('/api/users/me').then(response => {
-      setEmailNotifications(response.data.notifications.email);
-      setWhatsappNotifications(response.data.notifications.whatsapp);
-    });
-  }, []);
-  useEffect(() => {
-    const getOrganizationDetails = async () => {
-      const res = await axios.get('/api/organization/getById');
-      const org = res.data.data;
-      setOrganizationName(org.companyName);
-      setIndustry(org.industry);
-      setTeamSize(org.teamSize);
-    };
-    getOrganizationDetails();
-  }, []);
-  const handleUpdateOrganization = async () => {
-    try {
-      const response = await axios.patch('/api/organization/update', {
-        companyName: organizationName,
-        industry,
-        teamSize,
-      });
-      if (response.status === 200) {
-        alert('Organization updated successfully');
-      } else {
-        alert('Failed to update organization');
-      }
-    } catch (error) {
-      console.error('Error updating organization:', error);
-      alert('An error occurred while updating the organization');
-    }
-  };
-  useEffect(() => {
-    const getUserDetails = async () => {
-      const res = await axios.get('/api/users/me');
-      const user = res.data.data;
-      console.log(user)
-      setFirstName(user.firstName);
-      setLastName(user.lastName);
-      setUserProfile(user.profilePic);
-      setRole(user.role);
-      setEmail(user.email);
-      setWhatsAppNo(user.whatsappNo);
-      const trialStatusRes = await axios.get('/api/organization/trial-status');
-      setIsTrialExpired(trialStatusRes.data.isExpired);
-    };
-    getUserDetails();
-  }, []);
-  useEffect(() => {
-    const getUserDetails = async () => {
-      try {
-        // Fetch trial status
-        const response = await axios.get('/api/organization/getById');
-        console.log(response.data.data); // Log the organization data
-        const organization = response.data.data;
-        // Check if the trial has expired
-        const isExpired = organization.trialExpires && new Date(organization.trialExpires) <= new Date();
-        console.log('isExpired:', isExpired);
-        console.log('trialExpires:', organization.trialExpires);
-        setIsTrialExpired(isExpired); // Set to true if expired, false otherwise
-      } catch (error) {
-        console.error('Error fetching user details or trial status:', error);
-      }
-    }
-    getUserDetails();
-  }, []);
 
   const logout = async () => {
     try {
       await axios.get('/api/users/logout');
-      router.push('/login')
+      router.push('/login');
     } catch (error: any) {
-      console.log(error.message)
+      console.log(error.message);
     }
-  }
+  };
 
-
-
-
+  // Profile picture handling
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file));
-      setIsRemoving(false); // Reset isRemoving to false when a new file is selected
+      setIsRemoving(false);
     }
   };
 
@@ -179,260 +158,433 @@ export default function Profile({ }: Props) {
 
     try {
       setLoading(true);
-
-      // Upload the file to S3 using the existing upload endpoint
       const uploadResponse = await axios.post('/api/upload', formData);
       const uploadedImageUrl = uploadResponse.data.fileUrls[0];
-
-      // Update the user's profilePic field in the database
       await axios.patch('/api/users/profilePic', { profilePic: uploadedImageUrl });
       setProfilePic(uploadedImageUrl);
+      setUserProfile(uploadedImageUrl);
       setLoading(false);
       toast.success("Profile picture updated successfully!");
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error uploading profile picture:", error);
       toast.error("Failed to upload profile picture.");
+      setLoading(false);
     }
   };
 
-  console.log(userProfile, 'profile')
-
-
   const handleRemoveProfilePic = async () => {
     try {
+      setLoading(true);
       await axios.delete('/api/users/profilePic');
-      setUserProfile('');  // Clear the profile picture in the UI
+      setUserProfile('');
       setProfilePic('');
       setPreviewUrl(null);
       setIsRemoving(false);
       setIsModalOpen(false);
+      setLoading(false);
       toast.success("Profile picture removed successfully!");
     } catch (error) {
       console.error("Error removing profile picture:", error);
       toast.error("Failed to remove profile picture.");
+      setLoading(false);
     }
   };
 
+  // Get initials for avatar fallback
+  const getInitials = () => {
+    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`;
+  };
 
   return (
-    <div className="mt-16 h-full overflow-y-scroll scrollbar-hide  ">
-      <div className="flex justify-center items-center  w-full p-2">
-        <div className="flex cursor-pointer bg-transparent border border-lg  w-fit rounded-xl text-xs px-4 py-2 items-center justify-center">
-          <div className="flex items-center dark:text-[#E0E0E0] gap-4">
-            {/* Dialog to open Modal */}
-            {/* <Toaster /> */}
-            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-              <DialogTrigger asChild>
-                <div
-                  className="w-[40px] h-[40px] flex items-center justify-center rounded-full bg-[#815BF5]"
-                  onClick={() => setIsModalOpen(true)}
-                >
-                  {userProfile ? (
-                    <img src={userProfile} className="w-full h-full border rounded-full" alt="Profile" />
-                  ) : (
-                    <IoPersonAddSharp className="h-4 w-4 text-white" />
-                  )}
-                </div>
-              </DialogTrigger>
+    <div className="container mx-auto py-6 h-screen overflow-y-scroll scrollbar-hide mt-12 max-w-6xl">
+      <Toaster position="top-right" />
 
-              {/* Fullscreen Modal */}
-              <DialogContent className="   z-[100]">
-                <div className="dark:bg-[#0b0d29] overflow-y-scroll max- scrollbar-hide h-fit   shadow-lg w-full   max-w-lg  rounded-lg">
-                  <div className="flex border-b py-2  w-full justify-between ">
-                    <DialogTitle className="text-lg   px-6 py-2 font-medium">Update Profile Pic</DialogTitle>
-                    <DialogClose className=" px-6 py-2">
-                      <CrossCircledIcon className='scale-150 mt-1 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]' />
-                    </DialogClose>
-                  </div>
-                  <div className="dark:bg-[#0b0d29] p-8 flex flex-col items-center">
-                    {previewUrl || userProfile ? (
-                      <div className="relative">
-                        <img
-                          src={previewUrl || userProfile}
-                          alt="Preview"
-                          className="w-24 h-24 rounded-full object-cover mb-4"
-                        />
-                        <button
-                          onClick={() => {
-                            setPreviewUrl(null);
-                            setSelectedFile(null);
-                            setUserProfile('');
-                            setIsRemoving(true); // Change button to "Remove Profile Picture"
-                          }}
-                          className="absolute top-0 right-0 p-1  text-white "
-                          aria-label="Remove profile picture"
-                        >
-                          <CrossCircledIcon className="w-4 h-4 rounded-full hover:bg-red-600 bg-red-500" />
-                        </button>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight">Profile Settings</h1>
+        <p className="text-muted-foreground mt-1">
+          Manage your account settings and preferences
+        </p>
+      </div>
+
+      {/* Profile Header Card */}
+      <Card className="mb-6">
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
+            <div className="relative group">
+              <Avatar className="h-24 w-24 border-4 border-primary/10">
+                {userProfile ? (
+                  <AvatarImage src={userProfile} alt={`${firstName} ${lastName}`} />
+                ) : (
+                  <AvatarFallback className="text-xl font-semibold bg-primary/10 text-primary">
+                    {getInitials()}
+                  </AvatarFallback>
+                )}
+              </Avatar>
+
+              <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="absolute bottom-0 right-0 rounded-full h-8 w-8 shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => setIsModalOpen(true)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+
+                <DialogContent className="p-6">
+                  <DialogHeader>
+                    <DialogTitle>Update Profile Picture</DialogTitle>
+                    <DialogDescription>
+                      Upload a new profile picture or remove your current one.
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <div className="flex flex-col items-center py-4">
+                    <div className="relative mb-6">
+                      {previewUrl || userProfile ? (
+                        <div className="relative">
+                          <Avatar className="h-32 w-32">
+                            <AvatarImage
+                              src={previewUrl || userProfile}
+                              alt="Profile preview"
+                              className="object-cover"
+                            />
+                            <AvatarFallback className="text-2xl">{getInitials()}</AvatarFallback>
+                          </Avatar>
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            className="absolute -top-2 -right-2 h-8 w-8 rounded-full"
+                            onClick={() => {
+                              setPreviewUrl(null);
+                              setSelectedFile(null);
+                              setIsRemoving(true);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="h-32 w-32 border-2 border-dashed rounded-full flex items-center justify-center bg-muted">
+                          <UploadCloud className="h-10 w-10 text-muted-foreground" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="grid w-full max-w-sm gap-2">
+                      <Label htmlFor="picture" className="text-center">Choose a profile picture</Label>
+                      <div className="flex gap-2">
+                        <Button asChild variant="outline" className="w-full">
+                          <label className="cursor-pointer">
+                            Browse
+                            <input
+                              type="file"
+                              id="picture"
+                              onChange={handleFileChange}
+                              className="hidden"
+                              accept="image/*"
+                            />
+                          </label>
+                        </Button>
                       </div>
-                    ) : (
-                      <div className="w-24 h-24 border border-dashed rounded-full flex items-center justify-center text-gray-400">
-                        No Preview
-                      </div>
-                    )}
-                    <label className="text-white bg-[#815BF5] hover:bg-[#815BF5] rounded-lg px-4 py-2 cursor-pointer mt-4">
-                      Choose a Picture
-                      <input type="file" onChange={handleFileChange} className="hidden" />
-                    </label>
-                    <div className="flex gap-2 mt-6 w-full">
-                      <Button className="bg-[#017a5b] hover:bg-[#018a5b] w-full" onClick={isRemoving ? handleRemoveProfilePic : handleUploadProfilePic}>
-                        {loading ? (
-                          <Loader />
-                        ) : isRemoving ? (
-                          "Remove Profile Picture"
-                        ) : (
-                          "Update Profile Picture"
-                        )}
-                      </Button>
                     </div>
                   </div>
-                </div>
-              </DialogContent>
-            </Dialog>
 
-            <div>
-              <p className="font-medium text-sm">
+                  <DialogFooter>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsModalOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={isRemoving ? handleRemoveProfilePic : handleUploadProfilePic}
+                      variant={isRemoving ? "destructive" : "default"}
+                      disabled={loading || (!selectedFile && !isRemoving)}
+                    >
+                      {loading ? (
+                        <><Loader /> Processing...</>
+                      ) : isRemoving ? (
+                        <>Remove Picture</>
+                      ) : (
+                        <>Save Changes</>
+                      )}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <div className="space-y-1 text-center md:text-left">
+              <h2 className="text-2xl font-bold">
                 {firstName} {lastName}
-              </p>
+              </h2>
+              <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                <Badge variant="outline" className="font-normal">
+                  {role === "orgAdmin" ? "Admin" :
+                   role === "member" ? "Member" :
+                   role === "manager" ? "Manager" : role}
+                </Badge>
+                <Badge variant="outline" className="font-normal flex items-center gap-1">
+                  <Mail className="h-3 w-3" />
+                  {email}
+                </Badge>
+                {whatsappNo && (
+                  <Badge variant="outline" className="font-normal flex items-center gap-1">
+                    <FaWhatsapp className="h-3 w-3 text-green-500" />
+                    {whatsappNo}
+                  </Badge>
+                )}
+              </div>
+              {organizationName && (
+                <p className="text-muted-foreground text-sm mt-1">
+                  {organizationName} • {industry} • {teamSize} team members
+                </p>
+              )}
+              {isTrialExpired && (
+                <Badge variant="destructive" className="mt-2">
+                  Trial Expired
+                </Badge>
+              )}
             </div>
-            <div>
-              <p className="font-medium text-xs">
-                Role:{" "}
-                {role === "orgAdmin"
-                  ? "Admin"
-                  : role === "member"
-                    ? "Member"
-                    : role === "manager"
-                      ? "Manager"
-                      : role}
-              </p>
-            </div>
-            <h1>|</h1>
-            <div className="flex items-center text-xs gap-1">
-              <Mail className="h-4 text-red-800" />
-              <p className="">{email}</p>
-            </div>
-            <h1>|</h1>
 
-            <p className="flex items-center gap-2 text-xs">
-              <FaWhatsapp className="h-4 text-green-500" />
-              {whatsappNo}
+            <div className="ml-auto hidden md:block">
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={logout}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Account Settings */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>
+            <div className="flex items-center">
+              <Users className="h-5 w-5 mr-2" />
+              Account Settings
+            </div>
+          </CardTitle>
+          <CardDescription>
+            Manage your account information and password
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1">
+            <div className="font-medium flex items-center">
+              <Lock className="h-4 w-4 mr-2" />
+              Password Management
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Change your password to keep your account secure
             </p>
           </div>
-        </div>
-      </div>
-
-      {/* Other UI Content */}
-      <div className="p-4 mb-12">
-        {/* Account Information */}
-        <div>
-          <div className="border dark:bg-[#0A0D28] rounded-lg p-2 mt-2 h-10">
-            <h1 className="text-sm font-semibold dark:text-muted-foreground"> Account Information</h1>
-          </div>
-          <Link href="/dashboard/settings/changePassword">
-            <div className="border-b p-2 mt-2 h-10">
-              <h1 className="text-sm">Change Password</h1>
-            </div>
-          </Link>
-
-        </div>
-
-        {/* Support and Logout */}
-        <div className="py-4">
-          <div className="border dark:bg-[#0A0D28] rounded-lg p-2 mt-2 h-10">
-            <h1 className="text-sm font-semibold dark:text-muted-foreground">Support</h1>
-          </div>
-          <Link href="/help/tutorials">
-            <div className="border-b p-2 mt-2 h-10">
-              <h1 className="text-sm">Tutorials</h1>
-            </div>
-          </Link>
-          <Link href="/help/tickets">
-            <div className="border-b p-2 mt-2 h-10 rounded-lg">
-              <h1 className="text-sm">My Tickets</h1>
-            </div>
-          </Link>
-          <Link href="/help/tickets">
-            <div className="p-2 border-b mt-2 h-10">
-              <h1 className="text-sm">Raise a Ticket</h1>
-            </div>
-          </Link>
-          <Link href="/help/mobile-app">
-            <div className="p-2 border-b mt-2 h-10">
-              <h1 className="text-sm">Mobile App</h1>
-            </div>
-          </Link>
-          <Link href="/help/events">
-            <div className="p-2 border-b mt-2 h-10">
-              <h1 className="text-sm">Events</h1>
-            </div>
-          </Link>
-
-          <div className="p-2 mt-2 border-b cursor-pointer h-10">
-            <Dialog>
-              {/* Trigger for Dialog */}
-              <DialogTrigger asChild>
-                <h1 className="text-sm">Timezone</h1>
-              </DialogTrigger>
-
-              {/* Dialog Content */}
-              <DialogContent className="p-6">
-                <DialogHeader>
-                  <DialogTitle>Timezone</DialogTitle>
-
-                </DialogHeader>
-                <div className="p-4">
-                  {/* Add your timezone options or logic here */}
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h1> Timezone</h1>
-                    </div>
-                    <div>
-                      <label className="absolute bg-white dark:bg-[#0b0d29] ml-2 text-xs dark:text-[#787CA5] -mt-2 px-1">
-                        Timezone </label>
-                      <select
-                        value={timezone}
-                        onChange={handleTimezoneChange}
-                        className="w-full border bg-white dark:bg-[#0B0D29] text-sm overflow-y-scroll scrollbar-thin scrollbar-thumb-[#815BF5] hover:scrollbar-thumb-[#815BF5] active:scrollbar-thumb-[#815BF5] scrollbar-track-gray-800   p-2 rounded bg-transparent outline-none focus-within:border-[#815BF5]"
-                      >
-                        {availableTimezones.map((tz) => (
-                          <option className="bg-white dark:bg-[#0B0D29] text-sm" key={tz} value={tz}>
-                            {tz}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button className="w-full bg-[#017a5b] hover:bg-[#23ac8a]">Save</Button>
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-          <Link href="#">
-            <div className="p-2 border-b mt-2 h-10">
-              <h1 className="text-sm">Change Language (Coming Soon)</h1>
-            </div>
-          </Link>
-          <Link href="/account-deletion">
-          <div className="p-2 border-b mt-2 h-10">
-              <h1 className="text-sm">Delete My Account</h1>
-            </div>
+          <div>
+            <Link href="/dashboard/settings/changePassword">
+              <Button variant="outline">Change Password</Button>
             </Link>
-          <div className="flex mt-4 justify-center">
-            <div
-              onClick={logout}
-              className="border cursor-pointer w-fit bg-red-700 hover:bg-red-900 px-8 mt-4 py-2 rounded-lg"
-            >
-              <h1 className="text-sm text-white">Logout</h1>
+          </div>
+
+          <Separator className="my-6" />
+
+          <div className="space-y-1">
+            <div className="font-medium flex items-center">
+              <Trash2 className="h-4 w-4 mr-2" />
+              Account Deletion
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Permanently delete your account and all associated data
+            </p>
+          </div>
+          <div>
+            <Link href="/account-deletion">
+              <Button variant="destructive">Delete My Account</Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Preferences */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>
+            <div className="flex items-center">
+              <FileCog className="h-5 w-5 mr-2" />
+              Preferences
+            </div>
+          </CardTitle>
+          <CardDescription>
+            Customize your application experience
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-3">
+            <div className="font-medium flex items-center">
+              <Globe className="h-4 w-4 mr-2" />
+              Timezone
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="timezone">Select your timezone</Label>
+              <Select value={timezone} onValueChange={handleTimezoneChange}>
+                <SelectTrigger id="timezone">
+                  <SelectValue placeholder="Select timezone" />
+                </SelectTrigger>
+                <SelectContent className="max-h-80">
+                  {availableTimezones.map((tz) => (
+                    <SelectItem key={tz} value={tz}>
+                      {tz}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
-        </div>
+
+          <Separator />
+
+          <div className="space-y-3">
+            <div className="font-medium flex items-center">
+              <Languages className="h-4 w-4 mr-2" />
+              Language
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="language">Application language</Label>
+              <Select disabled defaultValue="en">
+                <SelectTrigger id="language">
+                  <SelectValue placeholder="Select language" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="en">English (Default)</SelectItem>
+                  <SelectItem value="es">Spanish (Coming Soon)</SelectItem>
+                  <SelectItem value="fr">French (Coming Soon)</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                Additional languages will be available soon
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Support */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>
+            <div className="flex items-center">
+              <HelpCircle className="h-5 w-5 mr-2" />
+              Support
+            </div>
+          </CardTitle>
+          <CardDescription>
+            Find help and resources for using the application
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Link href="/help/tutorials">
+              <Card className="h-full hover:bg-accent/50 transition-colors cursor-pointer">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center">
+                    <PanelLeft className="h-4 w-4 mr-2" />
+                    Tutorials
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Learn how to use the application with step-by-step guides
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/help/tickets">
+              <Card className="h-full hover:bg-accent/50 transition-colors cursor-pointer">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center">
+                    <Paperclip className="h-4 w-4 mr-2" />
+                    My Tickets
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    View and manage your support tickets
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/help/tickets">
+              <Card className="h-full hover:bg-accent/50 transition-colors cursor-pointer">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center">
+                    <HelpCircle className="h-4 w-4 mr-2" />
+                    Raise a Ticket
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Get help from our support team
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/help/mobile-app">
+              <Card className="h-full hover:bg-accent/50 transition-colors cursor-pointer">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg flex items-center">
+                    <FaMobile className="h-4 w-4 mr-2" />
+                    Mobile App
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    Access the application on your mobile device
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+
+          <Link href="/help/events" className="block mt-4">
+            <Card className="hover:bg-accent/50 transition-colors cursor-pointer">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <Clock className="h-4 w-4 mr-2" />
+                  Events
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Stay updated with upcoming webinars and training sessions
+                </p>
+              </CardContent>
+            </Card>
+          </Link>
+        </CardContent>
+      </Card>
+
+      {/* Mobile logout button */}
+      <div className="md:hidden flex justify-center mb-6">
+        <Button
+          variant="destructive"
+          onClick={logout}
+          className="w-full max-w-md"
+        >
+          <LogOut className="h-4 w-4 mr-2" />
+          Logout
+        </Button>
       </div>
-    </div >
+    </div>
   );
 }

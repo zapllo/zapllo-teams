@@ -207,7 +207,7 @@ export default function EmployeeProfile({ userId }: { userId: string }) {
           </label>
           <div className=" ml-2 ">
             <Switch
-              // Safely convert to boolean if uncertain. 
+              // Safely convert to boolean if uncertain.
               // If your data definitely has a boolean, user.workFromHomeAllowed is fine.
               checked={Boolean(user.workFromHomeAllowed)}
               onCheckedChange={(checked) => handleUpdateField("workFromHomeAllowed", checked)}

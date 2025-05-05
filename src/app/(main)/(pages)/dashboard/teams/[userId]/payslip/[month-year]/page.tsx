@@ -44,14 +44,6 @@ interface PayslipData {
     emailOrWebsite: string;
 }
 
-interface PayslipData {
-    logo: string;
-    name: string;
-    address: string;
-    contact: string;
-    emailOrWebsite: string;
-}
-
 interface PayslipLogData {
     salaryDetails: {
         name: string;
@@ -105,6 +97,8 @@ export default function PayslipPage({
     const [totalWorkingDays, setTotalWorkingDays] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
     const [loadingPrint, setLoadingPrint] = useState(false); // Loader state for print
+    const [loadingEmail, setLoadingEmail] = useState(false); // Add loading state for email
+    const [loadingWhatsapp, setLoadingWhatsapp] = useState(false); // Add loading state for WhatsApp
     const router = useRouter();
 
     const printRef = useRef<HTMLDivElement>(null);
@@ -148,35 +142,7 @@ export default function PayslipPage({
             setLoadingPrint(false); // Hide loader after print
         }
         window.location.reload();
-
     };
-
-
-
-
-
-
-    // useEffect(() => {
-    //     const fetchPayslipData = async () => {
-    //         try {
-    //             const [payslipResponse, userResponse, generateResponse] = await Promise.all([
-    //                 axios.get(`/api/payslip/${userId}`),
-    //                 axios.get(`/api/users/${userId}`),
-    //                 axios.post(`/api/payslip/generate`, { userId, month, year }),
-    //             ]);
-
-    //             setPayslipData(payslipResponse.data.payslip);
-    //             setUserData(userResponse.data.user);
-    //             setTotalWorkingDays(generateResponse.data.totalWorkingDays);
-    //         } catch (error) {
-    //             console.error("Error fetching payslip data:", error);
-    //         } finally {
-    //             setLoading(false);
-    //         }
-    //     };
-
-    //     fetchPayslipData();
-    // }, [userId, month, year]);
 
     useEffect(() => {
         const fetchPayslipDetails = async () => {
@@ -215,21 +181,9 @@ export default function PayslipPage({
     }, [userId, month, year]);
 
     console.log(userData, 'user data')
-    if (loadingPrint) {
-        return (
-            <div className="flex justify-center items-center h-screen">
-                <DotLottieReact
-                    src="/lottie/loader.lottie"
-                    loop
-                    autoplay
-                    className="h-56"
-                />
-            </div>
-        );
-    }
-
 
     const handleEmailShare = async () => {
+        setLoadingEmail(true); // Start loading
         try {
             const response = await axios.post(`/api/payslip/share`, {
                 userId,
@@ -237,15 +191,16 @@ export default function PayslipPage({
                 year
             });
             toast.success("Email Sent Successfully");
-
-            setLoading(false);
         } catch (error) {
-            console.error("Error fetching payslip data:", error);
-            setLoading(false);
+            console.error("Error sending email:", error);
+            toast.error("Failed to send email");
+        } finally {
+            setLoadingEmail(false); // End loading regardless of result
         }
     };
 
     const handleWhatsappShare = async () => {
+        setLoadingWhatsapp(true); // Start loading
         try {
             const response = await axios.post(`/api/payslip/share/whatsapp`, {
                 userId,
@@ -253,16 +208,16 @@ export default function PayslipPage({
                 year
             });
             toast.success("WhatsApp Message Sent Successfully");
-            setLoading(false);
         } catch (error) {
-            console.error("Error fetching payslip data:", error);
-            setLoading(false);
+            console.error("Error sending WhatsApp message:", error);
+            toast.error("Failed to send WhatsApp message");
+        } finally {
+            setLoadingWhatsapp(false); // End loading regardless of result
         }
     };
 
-
-
-    if (loading) {
+    // Combined loading state for any ongoing operation
+    if (loading || loadingPrint || loadingEmail || loadingWhatsapp) {
         return (
             <div className="flex justify-center items-center h-screen">
                 <DotLottieReact
@@ -291,63 +246,63 @@ export default function PayslipPage({
 
     return (
         <div className="mt-16 mb-12 h-screen mx-4 flex flex-col overflow-y-scroll scrollbar-hide">
-        {/* Beautified Actions Tab */}
-        <div className="mb-8 mt-4 max-w-5xl mx-auto w-full">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border p-6 w-full">
-                <h1 className="font-bold text-xl mb-4 text-gray-800 dark:text-gray-100 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    Payslip Actions
-                </h1>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Print Button */}
-                    <Button
-                        onClick={handlePrint}
-                        disabled={loadingPrint}
-                        className={`w-full px-4 py-6 flex justify-center text-gray-700 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 items-center gap-3 rounded-lg border hover:shadow-md transition-all ${loadingPrint ? "bg-gray-200 dark:bg-gray-600 cursor-not-allowed" : "hover:bg-white dark:hover:bg-gray-600"}`}
-                    >
-                        <div className="rounded-full bg-blue-100 dark:bg-blue-900 p-2 flex items-center justify-center">
-                            <Printer className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                        </div>
-                        <div className="flex flex-col items-start">
-                            <span className="font-medium">{loadingPrint ? "Printing..." : "Print Payslip"}</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">Generate a printable version</span>
-                        </div>
-                    </Button>
+            {/* Beautified Actions Tab */}
+            <div className="mb-8 mt-4 max-w-5xl mx-auto w-full">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border p-6 w-full">
+                    <h1 className="font-bold text-xl mb-4 text-gray-800 dark:text-gray-100 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Payslip Actions
+                    </h1>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Print Button */}
+                        <Button
+                            onClick={handlePrint}
+                            disabled={loadingPrint}
+                            className={`w-full px-4 py-6 flex justify-center text-gray-700 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 items-center gap-3 rounded-lg border hover:shadow-md transition-all ${loadingPrint ? "bg-gray-200 dark:bg-gray-600 cursor-not-allowed" : "hover:bg-white dark:hover:bg-gray-600"}`}
+                        >
+                            <div className="rounded-full bg-blue-100 dark:bg-blue-900 p-2 flex items-center justify-center">
+                                <Printer className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <div className="flex flex-col items-start">
+                                <span className="font-medium">{loadingPrint ? "Printing..." : "Print Payslip"}</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">Generate a printable version</span>
+                            </div>
+                        </Button>
 
-                    {/* Email Button */}
-                    <Button
-                        onClick={handleEmailShare}
-                        disabled={loadingPrint}
-                        className={`w-full px-4 py-6 flex justify-center text-gray-700 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 items-center gap-3 rounded-lg border hover:shadow-md transition-all ${loadingPrint ? "bg-gray-200 dark:bg-gray-600 cursor-not-allowed" : "hover:bg-white dark:hover:bg-gray-600"}`}
-                    >
-                        <div className="rounded-full bg-red-100 dark:bg-red-900 p-2 flex items-center justify-center">
-                            <Mail className="h-5 w-5 text-red-600 dark:text-red-400" />
-                        </div>
-                        <div className="flex flex-col items-start">
-                            <span className="font-medium">Send Email</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">Deliver payslip via email</span>
-                        </div>
-                    </Button>
+                        {/* Email Button */}
+                        <Button
+                            onClick={handleEmailShare}
+                            disabled={loadingEmail}
+                            className={`w-full px-4 py-6 flex justify-center text-gray-700 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 items-center gap-3 rounded-lg border hover:shadow-md transition-all ${loadingEmail ? "bg-gray-200 dark:bg-gray-600 cursor-not-allowed" : "hover:bg-white dark:hover:bg-gray-600"}`}
+                        >
+                            <div className="rounded-full bg-red-100 dark:bg-red-900 p-2 flex items-center justify-center">
+                                <Mail className="h-5 w-5 text-red-600 dark:text-red-400" />
+                            </div>
+                            <div className="flex flex-col items-start">
+                                <span className="font-medium">{loadingEmail ? "Sending Email..." : "Send Email"}</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">Deliver payslip via email</span>
+                            </div>
+                        </Button>
 
-                    {/* WhatsApp Button */}
-                    <Button
-                        onClick={handleWhatsappShare}
-                        disabled={loadingPrint}
-                        className={`w-full px-4 py-6 flex justify-center text-gray-700 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 items-center gap-3 rounded-lg border hover:shadow-md transition-all ${loadingPrint ? "bg-gray-200 dark:bg-gray-600 cursor-not-allowed" : "hover:bg-white dark:hover:bg-gray-600"}`}
-                    >
-                        <div className="rounded-full bg-green-100 dark:bg-green-900 p-2 flex items-center justify-center">
-                            <FaWhatsapp className="h-5 w-5 text-green-600 dark:text-green-400" />
-                        </div>
-                        <div className="flex flex-col items-start">
-                            <span className="font-medium">Send WhatsApp</span>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">Share via WhatsApp message</span>
-                        </div>
-                    </Button>
+                        {/* WhatsApp Button */}
+                        <Button
+                            onClick={handleWhatsappShare}
+                            disabled={loadingWhatsapp}
+                            className={`w-full px-4 py-6 flex justify-center text-gray-700 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 items-center gap-3 rounded-lg border hover:shadow-md transition-all ${loadingWhatsapp ? "bg-gray-200 dark:bg-gray-600 cursor-not-allowed" : "hover:bg-white dark:hover:bg-gray-600"}`}
+                        >
+                            <div className="rounded-full bg-green-100 dark:bg-green-900 p-2 flex items-center justify-center">
+                                <FaWhatsapp className="h-5 w-5 text-green-600 dark:text-green-400" />
+                            </div>
+                            <div className="flex flex-col items-start">
+                                <span className="font-medium">{loadingWhatsapp ? "Sending Message..." : "Send WhatsApp"}</span>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">Share via WhatsApp message</span>
+                            </div>
+                        </Button>
+                    </div>
                 </div>
             </div>
-        </div>
 
             <div ref={printRef} className="p-8 border w-full scrollbar-hide h- rounded-xl bg-white text-black max-w-5xl mx-auto shadow-md">
                 {/* Header */}
@@ -526,8 +481,6 @@ export default function PayslipPage({
                 <div className="mt-8 text-xs text-gray-500 border-t pt-4">
                     <p>This is a computer-generated document. No signature is required.</p>
                 </div>
-
-
             </div>
         </div>
     );

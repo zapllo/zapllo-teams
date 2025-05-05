@@ -17,13 +17,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                         {label}
                     </label>
                 )}
-                
+
                 {/* Input Field */}
                 <input
                     type={type}
                     ref={ref}
                     className={cn(
-                        "peer flex h-9   w-full rounded-md border bg-transparent px-3 py-2 text-white shadow-sm transition-all placeholder-transparent  focus:border-[#815bf5] focus:outline-none",
+                        "peer flex h-9   w-full rounded-md border bg-transparent px-3 py-2 text- shadow-sm transition-all placeholder-transparent placeholder:text-black dark:placeholder:text-white  focus:border-[#815bf5] focus:outline-none",
                         className
                     )}
                     placeholder={label} // Placeholder needed for peer styles
