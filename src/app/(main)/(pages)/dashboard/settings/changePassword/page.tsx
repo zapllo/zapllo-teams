@@ -44,41 +44,47 @@ const ChangePassword = () => {
   };
 
   return (
-    <Card className="p-6  bg-transparent m-6 s">
-      <CardTitle className="text-start">Change Your Password</CardTitle>
-      {/* <Toaster /> */}
-      <form className="space-y-2" onSubmit={handleSubmit}>
-        <div className="mt-4 ">
-          {/* <Label htmlFor="currentPassword">Current Password</Label> */}
-          <input
+    <div style={{
+      maxHeight: 'calc(100vh - 16px)', // Adjust based on your layout
+      scrollBehavior: 'auto' // Prevent smooth scrolling which can interfere
+    }}
+      className="w-full  pb-16 px-4 mt-4 h-full overflow-y-auto scrollbar-hide ">
+      <Card className="p-6  bg-transparent m-6 s">
+        <CardTitle className="text-start">Change Your Password</CardTitle>
+        {/* <Toaster /> */}
+        <form className="space-y-2" onSubmit={handleSubmit}>
+          <div className="mt-4 ">
+            {/* <Label htmlFor="currentPassword">Current Password</Label> */}
+            <input
 
-            id="currentPassword"
-            value={currentPassword}
-            placeholder="Current Password"
-            className="mt-2 p-2 w-full focus:border-[#815bf5] text-xs rounded outline-none bg-transparent border"
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          {/* <Label htmlFor="newPassword">New Password</Label> */}
-          <input
+              id="currentPassword"
+              value={currentPassword}
+              placeholder="Current Password"
+              className="mt-2 p-2 w-full focus:border-[#815bf5] text-xs rounded outline-none bg-transparent border"
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            {/* <Label htmlFor="newPassword">New Password</Label> */}
+            <input
 
-            id="newPassword"
-            value={newPassword}
-            className="mt-2 p-2 w-full focus:border-[#815bf5] mb-4  text-xs rounded outline-none bg-transparent border"
-            placeholder="New Password"
-            onChange={(e) => setNewPassword(e.target.value)}
-            required
-          />
-        </div>
-        <Button className="mt-8 bg-[#017a5b] hover:bg-[#12614d] text-xs" type="submit">
-          {loading ? <Loader /> : "Change Password"}
-        </Button>
-        {/* {message && <p>{message}</p>} */}
-      </form>
+              id="newPassword"
+              value={newPassword}
+              className="mt-2 p-2 w-full focus:border-[#815bf5] mb-4  text-xs rounded outline-none bg-transparent border"
+              placeholder="New Password"
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+            />
+          </div>
+          <Button className="mt-8 bg-[#017a5b] hover:bg-[#12614d] text-xs" type="submit">
+            {loading ? <Loader /> : "Change Password"}
+          </Button>
+          {/* {message && <p>{message}</p>} */}
+        </form>
 
-    </Card>
+      </Card>
+    </div>
   );
 };
 

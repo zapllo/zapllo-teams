@@ -3,12 +3,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Input } from "@/components/ui/input";
-import { Edit, Edit3, Plus, Trash } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { businessCategories } from "@/lib/constants";
-import { toast, Toaster } from "sonner";
 import Loader from "@/components/ui/loader";
 import DeleteConfirmationDialog from "@/components/modals/deleteConfirmationDialog";
 import {
@@ -17,11 +13,45 @@ import {
   DialogContent,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Separator } from "@/components/ui/separator";
 import { CrossCircledIcon } from "@radix-ui/react-icons";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import {
+  Check,
+  Edit,
+  Edit3,
+  Filter,
+  Folder,
+  FolderPlus,
+  HelpCircle,
+  InfoIcon,
+  Lightbulb,
+  Plus,
+  Search,
+  Sparkles,
+  Tag,
+  Trash,
+  X,
+} from "lucide-react";
+import { toast } from "sonner";
 
 interface Category {
   _id: string;
@@ -33,12 +63,8 @@ const Categories: React.FC = () => {
   const [newCategory, setNewCategory] = useState<string>("");
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
-  const [suggestedCategories, setSuggestedCategories] = useState<Category[]>(
-    []
-  );
-  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(
-    null
-  );
+  const [suggestedCategories, setSuggestedCategories] = useState<string[]>([]);
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [editCategoryName, setEditCategoryName] = useState<string>("");
   const [role, setRole] = useState("role");
   const [isTrialExpired, setIsTrialExpired] = useState(false);
@@ -47,19 +73,23 @@ const Categories: React.FC = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteEntryId, setDeleteEntryId] = useState<string | null>(null);
   const [industry, setIndustry] = useState<string>("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false); // State to control the dialog
-  const [loadingAI, setLoadingAI] = useState(false); // State for AI loader
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [loadingAI, setLoadingAI] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
 
   const fetchCategories = async () => {
     try {
       const response = await axios.get("/api/category/get");
       if (response.status === 200) {
         setCategories(response.data.data);
+        setPageLoading(false);
       } else {
         console.error("Error fetching categories:", response.data.error);
+        setPageLoading(false);
       }
     } catch (error) {
       console.error("Error fetching categories:", error);
+      setPageLoading(false);
     }
   };
 
@@ -67,13 +97,13 @@ const Categories: React.FC = () => {
     fetchCategories();
   }, []);
 
-  console.log(categories, "categories??????");
-
   const handleCreateCategory = async () => {
-    if (!newCategory) return;
+    if (!newCategory) {
+      toast.error("Please enter a category name");
+      return;
+    }
 
     setLoading(true);
-
     try {
       const response = await axios.post("/api/category/create", {
         name: newCategory,
@@ -83,28 +113,29 @@ const Categories: React.FC = () => {
         setCategories([...categories, response.data.data]);
         fetchCategories();
         setNewCategory("");
-        toast(<div className=" w-full mb-6 gap-2 m-auto  ">
-          <div className="w-full flex  justify-center">
-            <DotLottieReact
-              src="/lottie/tick.lottie"
-              loop
-              autoplay
-            />
-          </div>
-          <h1 className="text-black text-center font-medium text-lg">Category created successfully</h1>
-        </div>);
+        toast.success("Category created successfully", {
+          description: `"${newCategory}" has been added to your categories`
+        });
         setLoading(false);
       } else {
         console.error("Error creating category:", response.data.error);
+        toast.error("Failed to create category");
+        setLoading(false);
       }
     } catch (error) {
       console.error("Error creating category:", error);
+      toast.error("Failed to create category");
+      setLoading(false);
     }
   };
 
   const handleEditCategory = async (categoryId: string) => {
-    if (!editCategoryName) return;
+    if (!editCategoryName) {
+      toast.error("Category name cannot be empty");
+      return;
+    }
 
+    setLoading(true);
     try {
       const response = await axios.patch("/api/category/edit", {
         categoryId,
@@ -118,35 +149,37 @@ const Categories: React.FC = () => {
           )
         );
         setEditingCategoryId(null);
-        toast(<div className=" w-full mb-6 gap-2 m-auto  ">
-          <div className="w-full flex  justify-center">
-            <DotLottieReact
-              src="/lottie/tick.lottie"
-              loop
-              autoplay
-            />
-          </div>
-          <h1 className="text-black text-center font-medium text-lg">Category updated successfully</h1>
-        </div>);
+        toast.success("Category updated successfully");
         setEditCategoryName("");
+        setLoading(false);
       } else {
         console.error("Error updating category:", response.data.error);
+        toast.error("Failed to update category");
+        setLoading(false);
       }
     } catch (error) {
       console.error("Error updating category:", error);
+      toast.error("Failed to update category");
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     const getUserDetails = async () => {
-      const res = await axios.get("/api/users/me");
-      const user = res.data.data;
-      setRole(user.role);
-      const response = await axios.get("/api/organization/getById");
-      const organization = response.data.data;
-      setIndustry(organization.industry);
-      const trialStatusRes = await axios.get("/api/organization/trial-status");
-      setIsTrialExpired(trialStatusRes.data.isExpired);
+      try {
+        const res = await axios.get("/api/users/me");
+        const user = res.data.data;
+        setRole(user.role);
+
+        const response = await axios.get("/api/organization/getById");
+        const organization = response.data.data;
+        setIndustry(organization.industry);
+
+        const trialStatusRes = await axios.get("/api/organization/trial-status");
+        setIsTrialExpired(trialStatusRes.data.isExpired);
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+      }
     };
     getUserDetails();
   }, []);
@@ -154,7 +187,6 @@ const Categories: React.FC = () => {
   const filteredCategories = categories.filter((cat) =>
     cat?.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
 
   const handleAddSuggestedCategories = async () => {
     setLoadingAI(true);
@@ -164,12 +196,10 @@ const Categories: React.FC = () => {
       if (response.status === 200) {
         const { categories } = response.data;
         setSuggestedCategories(categories);
-        // fetchCategories();
-        toast.success("Suggested categories generated successfully.");
-        // fetchCategories();
-        setIsDialogOpen(true); // Open the dialog when categories are fetched
+        toast.success("AI suggestions generated successfully");
+        setIsDialogOpen(true);
       } else {
-        toast.error("Failed to generate suggested categories.");
+        toast.error("Failed to generate suggested categories");
       }
     } catch (error) {
       console.error("Error suggesting categories:", error);
@@ -180,8 +210,9 @@ const Categories: React.FC = () => {
   };
 
   const handleDeleteCategory = async () => {
-    if (!deleteEntryId) return; // No ID to delete
+    if (!deleteEntryId) return;
 
+    setLoading(true);
     try {
       const response = await axios.delete("/api/category/delete", {
         data: { categoryId: deleteEntryId },
@@ -190,12 +221,18 @@ const Categories: React.FC = () => {
       if (response.status === 200) {
         setCategories(categories.filter((cat) => cat._id !== deleteEntryId));
         setIsDeleteDialogOpen(false);
-        setDeleteEntryId(null); // Clear the ID after deletion
+        setDeleteEntryId(null);
+        toast.success("Category deleted successfully");
+        setLoading(false);
       } else {
         console.error("Error deleting category:", response.data.error);
+        toast.error("Failed to delete category");
+        setLoading(false);
       }
     } catch (error) {
       console.error("Error deleting category:", error);
+      toast.error("Failed to delete category");
+      setLoading(false);
     }
   };
 
@@ -207,303 +244,445 @@ const Categories: React.FC = () => {
   const handleClose = () => {
     setSuggestedCategories([]);
     setIsDialogOpen(false);
-  }
+  };
 
   const handleCreateCategoriesFromSelection = async () => {
+    if (selectedCategories.length === 0) {
+      toast.error("Please select at least one category");
+      return;
+    }
+
     try {
       setLoading(true);
       const promises = selectedCategories.map((category) =>
-        axios.post("/api/category/create", { name: category })
+        axios.post("/api/category/create", {
+          name: typeof category === 'string' ? category : category.name
+        })
       );
       await Promise.all(promises);
 
-      setCategories([...categories, ...selectedCategories]);
-      setSelectedCategories([]); // Clear selected categories after adding
       fetchCategories();
-      setIsDialogOpen(false); // Close dialog when done
-      toast.success("Categories added successfully.");
+      setSelectedCategories([]);
+      setIsDialogOpen(false);
+      toast.success(`${selectedCategories.length} categories added successfully`);
     } catch (error) {
       console.error("Error adding categories:", error);
-      toast.error("Failed to add categories.");
+      toast.error("Failed to add categories");
     } finally {
       setLoading(false);
     }
   };
 
-
+  if (pageLoading) {
+    return (
+      <div className="container flex items-center justify-center h-screen">
+        <div className="flex flex-col items-center">
+          <Loader />
+          <p className="mt-4 text-muted-foreground">Loading categories...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-4 h-screen overflow-y-scroll scrollbar-hide ">
-      {/* <h1 className='text- text-xl font-medium bg-[#0A0D28]   py-2 rounded px-2'>Category</h1> */}
-      {/* <Toaster /> */}
-      <div className="flex justify-start bg- rounded ">
-        {role === "orgAdmin" && (
-          <div className="flex justify-center w-full">
-            <div className="mt-4  flex justify-center ">
-              {/* <Label>Add a New Category</Label> */}
-              <input
-                type="text"
-                placeholder="Add New Category"
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
-                className="w-full focus-within:border-[#815BF5] outline-none text-xs dark:text-white dark:bg-[#0A0D28] border rounded px-3 py-2"
-              />
-            </div>
-            <div className="mt-4">
-              <button
-                onClick={handleCreateCategory}
-                className="ml-2 px-3 py-2  bg-[#017a5b] hover:bg-[#15624f] text-sm text-white rounded"
-              >
-                {loading ? "Creating..." : "Create"}
-              </button>
-            </div>
-          </div>
-        )}
+    <div className="container h-screen overflow-y-scroll p-6 mx-auto max-w- scrollbar-hide space-y-8">
+      <div className="flex flex-col space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight">Categories</h1>
+        <p className="text-muted-foreground">
+          Organize your tasks with custom categories
+        </p>
       </div>
+
+      {/* AI-Powered Categories Section - Featured as Hero */}
       {role === "orgAdmin" && (
-        <div>
-          <Dialog open={isDialogOpen} onOpenChange={handleClose}>
-            <DialogTrigger asChild>
-              <div className="">
-                <div
-                  className="  rounded-lg w-72 border  mt-2 px-4 py-2 cursor-pointer"
-                  onClick={handleAddSuggestedCategories}
-                >
-                  <div className="flex gap-2  mt-4 items-center text-muted-foreground">
-                    <img src="/branding/AII.png" className="h-10 dark:block hidden" />
-                    <img src="/branding/zapllo ai.png" className="h-5 mt-2 dark:block hidden" />
-                    <img src="/branding/ai-light.png" className="h-9 dark:hidden block" />
-                  </div>
-                  <p className="dark:text-muted-foreground text-xs w-fit mt-4">
-                    Use our intelligent AI engine to analyze your industry and
-                    carefully curate a selection of categories for your workflow.
-                  </p>
-                  <Button className="flex gap-2 mt-4 h-fit mb-4 bg-[#815BF5] hover:bg-[#5e38d0]">
-                    <Plus className="h-4" />
-                    <h1 className="text-xs font-medium">
-                      {loadingAI ? <Loader /> : "Add Suggested Categories"}
-                    </h1>
-                  </Button>
-                </div>
+        <Card className="border-l-4 border-l-[#815BF5] shadow-md overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-[#815BF5]/5 to-transparent pointer-events-none"></div>
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <img src="/branding/AII.png" className="h-10 dark:block hidden" alt="AI Logo" />
+                <img src="/branding/zapllo ai.png" className="h-5 dark:block hidden" alt="Zapllo AI" />
+                <img src="/branding/ai-light.png" className="h-9 dark:hidden block" alt="Zapllo AI Light" />
               </div>
-            </DialogTrigger>
+              <Badge className="bg-[#815BF5] hover:bg-[#815BF5]/90 text-xs text-white">POWERED BY AI</Badge>
+            </div>
+            <CardTitle className="text-xl mt-2">Smart Category Suggestions</CardTitle>
+            <CardDescription className="text-sm max-w-3xl">
+              Our intelligent AI engine analyzes your industry and curates categories tailored to your business needs.
+              Save time and optimize your workflow with industry-specific category recommendations.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="bg-slate-50 dark:bg-[#0B0D29]/60 p-4 rounded-lg border">
+                  <div className="flex flex-col space-y-4">
+                    <div className="flex items-start space-x-3">
+                      <Sparkles className="h-5 w-5 text-[#815BF5] flex-shrink-0 mt-1" />
+                      <div>
+                        <h3 className="font-medium text-sm">Why use AI suggestions?</h3>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Get industry-specific categories instantly, ensuring your task management system is optimized from the start.
+                        </p>
+                      </div>
+                    </div>
 
-            <DialogContent className="z-[100] w-full p-6  max-w-5xl">
-              <div className="flex justify-between ">
-                <div className="">
-                  <div className="flex gap-2 items-center text-muted-foreground">
-                  <img src="/branding/AII.png" className="h-7 dark:block hidden" />
-                <img src="/branding/zapllo ai.png" className="h-4 mt-2 dark:block hidden" />
-                <img src="/branding/ai-light.png" className="h-9 dark:hidden block" />
+                    <div className="flex items-start space-x-3">
+                      <InfoIcon className="h-5 w-5 text-[#815BF5] flex-shrink-0 mt-1" />
+                      <div>
+                        <h3 className="font-medium text-sm">How it works</h3>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Based on your industry ({industry || "your business"}), our AI generates relevant category suggestions that you can select and add with one click.
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  {/* <DialogTitle className='text-md mt-4 '>✨ Suggested Categories
-
-                            </DialogTitle> */}
-
-                  <DialogDescription className="mt-4 ml-1 text-xs ">
-                    Our intelligent AI engine has analyzed your industry and
-                    carefully curated a selection of categories. Choose the ones
-                    that suit your business, and let’s add them to your workflow
-                    effortlessly!
-                  </DialogDescription>
                 </div>
-                <div>
-                  <DialogClose>
-                    <CrossCircledIcon className="scale-150 mt-1 cursor-pointer hover:bg-white rounded-full hover:text-[#815BF5]" />
-                  </DialogClose>
-                </div>
-              </div>
-              {loadingAI && <Loader />}{" "}
 
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      onClick={handleAddSuggestedCategories}
+                      disabled={loadingAI}
+                      className="w-full relative group overflow-hidden bg-gradient-to-r from-[#815BF5] to-[#5e38d0] hover:from-[#7651e0] hover:to-[#5432be] shadow-md border-0"
+                    >
+                      <div className="absolute inset-0 bg-[url('/subtle-pattern.png')] opacity-10"></div>
+                      {loadingAI ? (
+                        <Loader />
+                      ) : (
+                        <Sparkles className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform text-white" />
+                      )}
+                      <span className="z-10 font-medium">Generate AI-Powered Categories</span>
+                      <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
+                    </Button>
+                  </DialogTrigger>
 
-              {/* Show loader while fetching AI categories */}
-              <div className="grid grid-cols-3 gap-4 mt-6 ">
-                {suggestedCategories.map((category, index) => (
-                  <div
-                    key={index}
-                    onClick={() => {
-                      if (selectedCategories.includes(category)) {
-                        setSelectedCategories(
-                          selectedCategories.filter((cat) => cat !== category)
-                        );
-                      } else {
-                        setSelectedCategories([...selectedCategories, category]);
-                      }
-                    }}
-                    className={`cursor-pointer border-2 text-xs rounded-lg p-2 hover:shadow-lg transition-all ${selectedCategories.includes(category)
-                      ? "bg-gradient-to-l from-[#815BF5] to-purple-900 text-white border-transparent"
-                      : "border dark:text-white -700 "
-                      }`}
-                  >
-                    <h3 className="font-medium">
-                      {typeof category === "string" ? category : category.name}
-                    </h3>
-                    <p className="text-xs mt-1 text-gray-400 dark:text-muted-foreground">
-                      Tap to select
-                    </p>
-                  </div>
-                ))}
-              </div>
-              <DialogFooter>
-                <Button
-                  onClick={handleCreateCategoriesFromSelection}
-                  className="mt-6 bg-[#017a5b] text-white hover:bg-[#017a5b] w-full"
-                >
-                  {loading ? <Loader /> : "Confirm & Save"}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-      )}
-
-      <div
-        className={`${loading
-          ? "fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
-          : ""
-          }`}
-      >
-        {loading ? <Loader /> : ""}
-      </div>
-
-      <div className="flex justify-start rounded items-center border bg-muted dark:bg-[#0A0D28] w-full mt-4">
-        {/* <Label>Search Categories</Label> */}
-        <h1 className="text-start text- font-medium  p-4">Categories</h1>
-        <div className=" ml-auto">
-          <input
-            type="text"
-            placeholder="Search Categories"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className=" outline-none focus-within:border-[#815BF5] text-xs dark:text-white dark:bg-[#0B0D29] border rounded px-4 py-2 mx-4"
-          />
-        </div>
-      </div>
-
-      <div className="mt-4 grid grid-cols-3 gap-4 mb-16">
-        {filteredCategories.map((cat) => (
-          <div key={cat._id} className="border rounded-lg w-full h-12 p-2 flex gap-2 items-center text-sm">
-            {editingCategoryId === cat._id ? (
-              <Dialog open={Boolean(editingCategoryId)} onOpenChange={() => setEditingCategoryId(null)}>
-                <DialogTrigger asChild>
-                  <button onClick={() => setEditingCategoryId(cat._id)} className="py-2 bg-warning text-white rounded">
-                    <Edit3 className="h-4 text-blue-400" />
-                  </button>
-                </DialogTrigger>
-                <DialogContent className="z-[100] p-6">
-                  <div
-                    className=""
-                  >
-                    <div className="flex justify-between mb-4 items-center">
-                      <DialogTitle className=" text-md">Update Category</DialogTitle>
-                      <DialogClose asChild>
-                        <CrossCircledIcon onClick={() => setEditingCategoryId(null)} className="scale-150 cursor-pointer  hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
-
+                  {/* AI Suggestion Dialog Content */}
+                  <DialogContent className="p-6 h-fit max-h-screen overflow-y-auto w-full scrollbar-hide m-auto">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center gap-2">
+                        <img src="/branding/AII.png" className="h-10 dark:block hidden" alt="AI Logo" />
+                        <img src="/branding/zapllo ai.png" className="h-5 dark:block hidden" alt="Zapllo AI" />
+                        <img src="/branding/ai-light.png" className="h-9 dark:hidden block" alt="Zapllo AI Light" />
+                      </div>
+                      <DialogClose>
+                        <CrossCircledIcon className="scale-150 cursor-pointer hover:bg-white rounded-full hover:text-[#815BF5]" />
                       </DialogClose>
                     </div>
 
-                    <input
-                      type="text"
-                      value={editCategoryName}
-                      onChange={(e) => setEditCategoryName(e.target.value)}
-                      className="w-full text-sm focus-within:border-[#815BF5] dark:text-white outline-none bg-transparent border rounded px-3 py-2"
-                    />
-                    <div className="flex gap-2 mt-4">
-                      <button
-                        onClick={() => handleEditCategory(cat._id)}
-                        className="bg-[#007A5A] hover:bg-[#007A5A] text-sm w-full px-3 py-2 text-white rounded"
-                      >
-                        Save
-                      </button>
+                    <DialogTitle className="text-xl mt-2">AI-Suggested Categories</DialogTitle>
+                    <DialogDescription className="text-sm">
+                      Our intelligent AI engine has analyzed your industry and curated a selection of categories.
+                      Choose the ones that suit your business, and let's add them to your workflow effortlessly!
+                    </DialogDescription>
 
-
-                    </div>
-                  </div>
-                </DialogContent>
-
-              </Dialog>
-            ) : (
-              <div className=" flex justify-between w-full  ">
-                <div className="flex justify-between w-full ">
-                  <div className="flex gap-2 w-full">
-                    <div className="px-1 scale-90 flex items-center">
-                      <FallbackImage name={cat.name} />
-                    </div>
-                    <span className="text-xs w-full flex items-center">{cat.name}</span>
-                  </div>
-                  <div className="  w-full">
-                    {role === "orgAdmin" && (
-                      <div className="flex 2 justify-end gap-2 w-full">
-                        <div className="">
-                          <button
+                    {loadingAI ? (
+                      <div className="flex flex-col items-center justify-center py-16">
+                        <DotLottieReact
+                          src="/lottie/ai-loader.lottie"
+                          loop
+                          autoplay
+                          className="h-32 w-32"
+                        />
+                        <p className="mt-6 text-center text-muted-foreground">
+                          Our AI is analyzing your industry and generating the perfect categories...
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 py-6">
+                        {suggestedCategories.map((category, index) => (
+                          <div
+                            key={index}
                             onClick={() => {
-                              setEditingCategoryId(cat._id);
-                              setEditCategoryName(cat.name);
+                              const categoryObj = typeof category === 'string' ? { _id: index.toString(), name: category, organization: '' } : category;
+                              if (selectedCategories.some(c => c.name === categoryObj.name)) {
+                                setSelectedCategories(
+                                  selectedCategories.filter(c => c.name !== categoryObj.name)
+                                );
+                              } else {
+                                setSelectedCategories([...selectedCategories, categoryObj]);
+                              }
                             }}
-                            className=" py-2 bg-warning text-white rounded"
+                            className={`
+                              cursor-pointer border-2 rounded-lg p-4 transition-all duration-300
+                              hover:shadow-lg relative overflow-hidden
+${selectedCategories.some(c => c.name === (typeof category === 'string' ? category : category))
+                                ? "bg-gradient-to-l from-[#815BF5] to-purple-900 text-white border-transparent"
+                                : "border hover:border-[#815BF5]/70"
+                              }
+                            `}
                           >
-                            <Edit3 className="h-4 text-blue-400" />
-                          </button>
+                            <div className="flex justify-between items-start">
+                              <h3 className="font-medium text-sm">
+                                {typeof category === "string" ? category : category}
+                              </h3>
+                              {selectedCategories.some(c => c.name === (typeof category === 'string' ? category : category)) && (
+                                <Badge className="bg- text-[#ffffff]">
+                                  <Check />
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-xs mt-1 text-gray-400 dark:text-muted-foreground">
+                              {selectedCategories.some(c => c.name === (typeof category === 'string' ? category : category)) ? "Tap to deselect" : "Tap to select"}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <DialogFooter>
+                      <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div className="text-sm text-muted-foreground">
+                          {selectedCategories.length} categories selected
                         </div>
-                        <div>
-                          <button
-                            onClick={() => handleDeleteClick(cat._id)}
-                            className="  py-2 bg-danger text-white rounded"
-                          >
-                            <Trash className="h-4 text-red-500" />
-                          </button>
-                        </div>
+                        <Button
+                          onClick={handleCreateCategoriesFromSelection}
+                          disabled={selectedCategories.length === 0 || loading}
+                          className="w-full sm:w-auto bg-[#017a5b] hover:bg-[#017a5b]/90 relative group overflow-hidden"
+                        >
+                          {loading ? (
+                            <Loader />
+                          ) : (
+                            <Plus className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
+                          )}
+                          Confirm & Save
+                          <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
+                        </Button>
+                      </div>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              {/* Manual Category Creation Section */}
+              <div className="p-5 border rounded-lg bg-card">
+                <h3 className="text-sm font-medium mb-3 flex items-center">
+                  <FolderPlus className="mr-2 h-4 w-4 text-primary" />
+                  Manually Create Categories
+                </h3>
+                <div className="flex gap-2 mb-2">
+                  <Input
+                    type="text"
+                    placeholder="Add new category"
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value)}
+                    className="text-sm"
+                  />
+                  <Button
+                    onClick={handleCreateCategory}
+                    disabled={!newCategory.trim() || loading}
+                    className="bg-[#017a5b] hover:bg-[#017a5b]/90 relative group overflow-hidden"
+                  >
+                    {loading ? (
+                      <Loader />
+                    ) : (
+                      <Plus className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
+                    )}
+                    Create
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Define custom categories based on your specific needs
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Categories List Section */}
+      <Card className="shadow-sm">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xl flex items-center">
+              <Tag className="mr-2 h-5 w-5 text-primary" />
+              Your Categories
+            </CardTitle>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search categories"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 w-[250px]"
+              />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6"
+                  onClick={() => setSearchQuery("")}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+          <CardDescription>
+            {filteredCategories.length} {filteredCategories.length === 1 ? 'category' : 'categories'} available
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {filteredCategories.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="mb-6">
+                <DotLottieReact
+                  src="/lottie/empty-state.lottie"
+                  loop
+                  autoplay
+                  className="h-32 w-32 mx-auto"
+                />
+              </div>
+              <h3 className="text-lg font-medium">No categories found</h3>
+              <p className="text-muted-foreground mt-2 max-w-md mx-auto">
+                {searchQuery
+                  ? `No results for "${searchQuery}". Try a different search.`
+                  : "Start by creating categories manually or let our AI suggest categories for you."
+                }
+              </p>
+              {role === "orgAdmin" && !searchQuery && (
+                <Button
+                  onClick={handleAddSuggestedCategories}
+                  className="mt-4 bg-[#815BF5] hover:bg-[#815BF5]/90"
+                >
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  Generate AI Suggestions
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {filteredCategories.map((cat) => (
+                <div
+                  key={cat._id}
+                  className="border rounded-lg p-4 transition-all duration-200 hover:shadow-md bg-card"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <CategoryAvatar name={cat.name} />
+                      <h3 className="font-medium truncate max-w-[150px]" title={cat.name}>
+                        {cat.name}
+                      </h3>
+                    </div>
+
+                    {role === "orgAdmin" && (
+                      <div className="flex gap-2">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-blue-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="p-6">
+                            <DialogHeader>
+                              <DialogTitle>Update Category</DialogTitle>
+                              <DialogDescription>
+                                Make changes to your category name
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="py-4">
+                              <Input
+                                autoFocus
+                                defaultValue={cat.name}
+                                onChange={(e) => setEditCategoryName(e.target.value)}
+                                className="text-sm"
+                                placeholder="Enter category name"
+                              />
+                            </div>
+                            <DialogFooter>
+                              <Button
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingCategoryId(null);
+                                  setEditCategoryName("");
+                                }}
+                              >
+                                Cancel
+                              </Button>
+                              <Button
+                                onClick={() => handleEditCategory(cat._id)}
+                                disabled={loading || !editCategoryName.trim()}
+                              >
+                                {loading ? <Loader /> : "Save Changes"}
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30"
+                          onClick={() => handleDeleteClick(cat._id)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
                       </div>
                     )}
                   </div>
                 </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+      {/* Delete Confirmation Dialog */}
       <DeleteConfirmationDialog
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
         onConfirm={handleDeleteCategory}
-        title="Delete Task"
-        description="Are you sure you want to delete this category? This action cannot be undone."
+        title="Delete Category"
+        description="Are you sure you want to delete this category? This action cannot be undone and will affect all tasks assigned to this category."
       />
-    </div >
+
+      {/* Full screen loader */}
+      {loading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50">
+          <div className="bg-background p-6 rounded-lg shadow-lg flex flex-col items-center">
+            <Loader />
+            <p className="mt-4">Processing your request...</p>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
 export default Categories;
 
-interface FallbackImageProps {
-  name: string; // Define the type of 'name'
+interface CategoryAvatarProps {
+  name: string;
 }
 
-const FallbackImage: React.FC<FallbackImageProps> = ({ name }) => {
-  const initial = name.charAt(0).toUpperCase(); // Get the first letter of the category name
+const CategoryAvatar: React.FC<CategoryAvatarProps> = ({ name }) => {
+  // Generate a consistent color based on the name
+  const getColorFromName = (name: string) => {
+    const colors = [
+      "bg-red-500", "bg-blue-500", "bg-green-500", "bg-yellow-500",
+      "bg-purple-500", "bg-pink-500", "bg-indigo-500", "bg-teal-500",
+      "bg-orange-500", "bg-cyan-500"
+    ];
+
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    hash = Math.abs(hash);
+    return colors[hash % colors.length];
+  };
+
+  const initial = name.charAt(0).toUpperCase();
+  const bgColor = getColorFromName(name);
+
   return (
-    <div className="bg-[#282D32] rounded-full h-8 w-8 flex items-center justify-center">
-      <span className="text-white font-bold text-lg">{initial}</span>
+    <div className={`${bgColor} rounded-full h-8 w-8 flex items-center justify-center flex-shrink-0`}>
+      <span className="text-white font-bold text-sm">{initial}</span>
     </div>
   );
-};
-
-const getCategoryIcon = (categoryName: String) => {
-  switch (categoryName) {
-    case "Automation":
-      return "/icons/intranet.png";
-    case "Customer Support":
-      return "/icons/support.png";
-    case "Marketing":
-      return "/icons/marketing.png";
-    case "Operations":
-      return "/icons/operations.png";
-    case "Sales":
-      return "/icons/sales.png";
-    case "HR":
-      return "/icons/attendance.png";
-    default:
-      return null; // Or a default icon if you prefer
-  }
 };

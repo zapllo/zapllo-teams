@@ -185,7 +185,7 @@ const InfoBar = (props: Props) => {
       return "My Profile";
     } else if (pathName === "/dashboard/wallet-recharge") {
       return "Recharge WhatsApp Wallet";
-    } else if (pathName === "/dashboard/integrations") {
+    } else if (pathName === "/dashboard/settings/integrations") {
       return "Integrations";
     } else if (pathName === "/intranet") {
       return "Intranet";

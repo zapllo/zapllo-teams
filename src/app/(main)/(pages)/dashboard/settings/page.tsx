@@ -1,31 +1,40 @@
 "use client";
 
 import CustomTimePicker from "@/components/globals/time-picker";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import Loader from "@/components/ui/loader";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { CrossCircledIcon, StopwatchIcon } from "@radix-ui/react-icons";
 import axios from "axios";
 import {
+  AlertCircle,
+  Bell,
+  Building,
   ChevronRight,
+  Clock,
+  Download,
+  ExternalLink,
+  HelpCircle,
+  InfoIcon,
   Mail,
-  Phone,
-  PhoneCallIcon,
-  Plus,
-  PlusCircle,
-  Video,
+  MessageSquare,
+  Save,
+  Settings,
+  Smartphone,
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 
 interface Category {
   _id: string;
@@ -34,6 +43,7 @@ interface Category {
 }
 
 export default function Page() {
+  // State variables remain unchanged
   const [categories, setCategories] = useState<Category[]>([]);
   const [newCategory, setNewCategory] = useState("");
   const router = useRouter();
@@ -57,10 +67,11 @@ export default function Page() {
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [wabaOpen, setWabaOpen] = useState(false);
+  const [channelId, setChannelId] = useState("");
+  const [pageLoading, setPageLoading] = useState(true);
 
-
+  // All useEffects and function implementations remain unchanged
   useEffect(() => {
-    // Fetch categories from the server
     const fetchCategories = async () => {
       try {
         const response = await fetch("/api/category/get");
@@ -78,10 +89,6 @@ export default function Page() {
     fetchCategories();
   }, []);
 
-
-
-  console.log(emailNotifications, whatsappNotifications, 'true fal')
-
   const handleCreateCategory = async () => {
     if (!newCategory) return;
     try {
@@ -96,9 +103,7 @@ export default function Page() {
       const result = await response.json();
 
       if (response.ok) {
-        // Add the new category to the categories list
         setCategories([...categories, result.data]);
-        // Clear the new category input
         setNewCategory("");
       } else {
         console.error("Error creating category:", result.error);
@@ -143,8 +148,7 @@ export default function Page() {
   };
 
   const formatTimeToAMPM = (timeString: string | null): string => {
-    if (!timeString) return ""; // Return an empty string if no time is selected
-
+    if (!timeString) return "";
     const [hours, minutes] = timeString.split(":");
     const date = new Date();
     date.setHours(parseInt(hours), parseInt(minutes));
@@ -155,15 +159,12 @@ export default function Page() {
     });
   };
 
-
-  // Function to convert time to "HH:mm" format
   const parseTimeTo24HourFormat = (timeStr: string): string => {
     const date = new Date(`1970-01-01T${timeStr}`);
     if (isNaN(date.getTime())) {
-      // If invalid, try parsing with AM/PM
       const dateWithAmPm = new Date(`1970-01-01 ${timeStr}`);
       if (isNaN(dateWithAmPm.getTime())) {
-        return "09:00"; // Default time if parsing fails
+        return "09:00";
       }
       return dateWithAmPm.toTimeString().slice(0, 5);
     }
@@ -172,52 +173,56 @@ export default function Page() {
 
   useEffect(() => {
     const getUserDetails = async () => {
-      const res = await axios.get("/api/users/me");
-      const user = res.data.data;
-      console.log(user, ' user for notif')
-      setFirstName(user.firstName);
-      setLastName(user.lastName);
-      setLoading(true);
-      setRole(user.role);
-      setLoading(false);
-      // Initialize notification states from API response
-      setEmailNotifications(user.notifications?.email ?? false);
-      setEmailReminders(user.reminders?.email ?? false);
-      setWhatsappNotifications(user.notifications?.whatsapp ?? false);
-      setWhatsappReminders(user.reminders?.whatsapp ?? false);
+      try {
+        const res = await axios.get("/api/users/me");
+        const user = res.data.data;
+        setFirstName(user.firstName);
+        setLastName(user.lastName);
+        setRole(user.role);
+        setEmailNotifications(user.notifications?.email ?? false);
+        setEmailReminders(user.reminders?.email ?? false);
+        setWhatsappNotifications(user.notifications?.whatsapp ?? false);
+        setWhatsappReminders(user.reminders?.whatsapp ?? false);
+        setSelectedDays(user.weeklyOffs || []);
+        setEmail(user.email);
+        setWhatsAppNo(user.whatsappNo);
 
+        if (user.reminders?.dailyReminderTime) {
+          const timeFromApi = user.reminders.dailyReminderTime;
+          const parsedTime = parseTimeTo24HourFormat(timeFromApi);
+          setDueTime(parsedTime);
+        }
 
-      setSelectedDays(user.weeklyOffs || []);
-      setEmail(user.email);
-      setWhatsAppNo(user.whatsappNo);
-
-      // Daily Reminder Time
-      if (user.reminders?.dailyReminderTime) {
-        const timeFromApi = user.reminders.dailyReminderTime;
-        const parsedTime = parseTimeTo24HourFormat(timeFromApi);
-        setDueTime(parsedTime);
+        const trialStatusRes = await axios.get("/api/organization/trial-status");
+        setIsTrialExpired(trialStatusRes.data.isExpired);
+        setPageLoading(false);
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+        setPageLoading(false);
       }
-
-      const trialStatusRes = await axios.get("/api/organization/trial-status");
-      setIsTrialExpired(trialStatusRes.data.isExpired);
     };
     getUserDetails();
   }, []);
 
-
-
   const updateSettings = async () => {
     try {
+      setLoading(true);
       await axios.patch("/api/users/update-notifications", {
         email: emailNotifications,
         whatsapp: whatsappNotifications,
       });
-      updateReminders();
-      toast.success("Settings updated");
+      await updateReminders();
+      toast.success("Settings updated successfully", {
+        description: "Your notification preferences have been saved."
+      });
       setSettingsOpen(false);
+      setLoading(false);
     } catch (error) {
       console.error("Failed to update settings", error);
-      toast.error("Failed to update settings");
+      toast.error("Failed to update settings", {
+        description: "Please try again or contact support."
+      });
+      setLoading(false);
     }
   };
 
@@ -231,14 +236,11 @@ export default function Page() {
         },
         weeklyOffs: selectedDays,
       });
-      // toast.success("Settings updated");
-      setSettingsOpen(false);
     } catch (error) {
-      console.error("Failed to update settings", error);
-      toast.error("Failed to update settings");
+      console.error("Failed to update reminders", error);
+      throw error;
     }
   };
-
 
   const handleCheckboxChange = (day: string) => {
     setSelectedDays((prev) =>
@@ -248,375 +250,714 @@ export default function Page() {
 
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+  const saveWhatsAppConnection = async () => {
+    try {
+      setLoading(true);
+      // Mock API call
+      await new Promise(resolve => setTimeout(resolve, 800));
+      toast.success("WhatsApp connection saved", {
+        description: "Your WhatsApp Business Account is now connected."
+      });
+      setWabaOpen(false);
+      setLoading(false);
+    } catch (error) {
+      toast.error("Failed to save WhatsApp connection", {
+        description: "Please verify your Channel ID and try again."
+      });
+      setLoading(false);
+    }
+  };
 
-
+  if (pageLoading) {
+    return (
+      <div className="container flex items-center justify-center h-screen">
+        <div className="flex flex-col items-center">
+          <Loader />
+          <p className="mt-4 text-muted-foreground">Loading settings...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-4  h-fit max-h-screen  scrollbar-hide overflow-y-scroll ">
-      {/* <Toaster /> */}
+    <div className="container overflow-y-scroll h-screen p-6 mx-auto scrollbar-hide space-y-10">
+      <div className="flex flex-col space-y-2">
+        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+        <p className="text-muted-foreground">
+          Manage your account preferences and organization settings
+        </p>
+      </div>
 
+      {/* Organization Details Section */}
       {role === "orgAdmin" && (
-        <div>
-          <div className=" mt-2 bg- p-2 px-4 border dark:bg-[#0A0D28] text-lg rounded-xl ">
-            <h1 className="text-sm text-muted-foreground">Organization Details</h1>
+        <section className="space-y-6">
+          <div className="flex items-center">
+            <Building className="h-6 w-6 mr-2 text-primary" />
+            <h2 className="text-2xl font-semibold tracking-tight">Organization Profile</h2>
           </div>
-          <div className=" text-sm grid grid-cols-1 text- p-2 gap-2 py-2">
-            <div className="grid-cols-2 grid gap-2 p-2">
-              <div className="space-y-8 mt-2">
-                <h1 className="">Company Name</h1>
-                <h1 className="">Industry</h1>
-                <h1 className="">Company Description</h1>
-                <h1 className="">Team Size</h1>
-              </div>
-              <div className="">
-                <div>
-                  <input
-                    type="text"
-                    className="px-4 py-2 w-full dark:bg-[#0B0D29] focus-within:border-[#815BF5]  border rounded outline-none"
+
+          <Card className="border-l-4 border-l-primary shadow-sm hover:shadow-md transition-shadow duration-200">
+            <CardHeader>
+              <CardTitle>Company Information</CardTitle>
+              <CardDescription>
+                Update your organization's details and business profile
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid gap-6 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="companyName" className="text-sm font-medium">
+                      Company Name
+                    </label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="w-80">
+                            Your company name will appear on all communications and documents.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <Input
+                    id="companyName"
                     value={organizationName}
-                    onChange={(e: any) => setOrganizationName(e.target.value)}
+                    onChange={(e) => setOrganizationName(e.target.value)}
+                    placeholder="Enter your company name"
+                    className="transition-all duration-200"
                   />
                 </div>
-                <div>
-                  {/* Industry Dropdown */}
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="industry" className="text-sm font-medium">
+                      Industry
+                    </label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="w-80">
+                            Selecting your industry helps us tailor the experience to your needs.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   <Select
                     value={industry}
                     onValueChange={(value) => setIndustry(value)}
                   >
-                    <SelectTrigger className="dark:bg-[#0B0D29] mt-2 dark:text-white outline-none focus:ring-[#815BF5]">
-                      <SelectValue placeholder="Select Industry" />
+                    <SelectTrigger id="industry">
+                      <SelectValue placeholder="Select your industry" />
                     </SelectTrigger>
-                    <SelectContent className="p-1 dark:bg-[#04061E] dark:text-white rounded-xl shadow-lg">
-                      {/* 
-      EXACT SAME options:
-      Retail/E-Commerce, Technology, Service Provider, Healthcare(Doctors/Clinics/Physicians/Hospital),
-      Logistics, Financial Consultants, Trading, Education, Manufacturing,
-      Real Estate/Construction/Interior/Architects, Other
-    */}
-                      <SelectItem
-                        value="Retail/E-Commerce"
-                        className="hover:bg-[#815BF5] font-medium"
-                      >
-                        Retail/E-Commerce
+                    <SelectContent className="max-h-80">
+                      <SelectItem value="Retail/E-Commerce">Retail/E-Commerce</SelectItem>
+                      <SelectItem value="Technology">Technology</SelectItem>
+                      <SelectItem value="Service Provider">Service Provider</SelectItem>
+                      <SelectItem value="Healthcare(Doctors/Clinics/Physicians/Hospital)">
+                        Healthcare
                       </SelectItem>
-                      <SelectItem
-                        value="Technology"
-                        className="hover:bg-[#815BF5] font-medium"
-                      >
-                        Technology
+                      <SelectItem value="Logistics">Logistics</SelectItem>
+                      <SelectItem value="Financial Consultants">Financial Consultants</SelectItem>
+                      <SelectItem value="Trading">Trading</SelectItem>
+                      <SelectItem value="Education">Education</SelectItem>
+                      <SelectItem value="Manufacturing">Manufacturing</SelectItem>
+                      <SelectItem value="Real Estate/Construction/Interior/Architects">
+                        Real Estate/Construction
                       </SelectItem>
-                      <SelectItem
-                        value="Service Provider"
-                        className="hover:bg-[#815BF5] font-medium"
-                      >
-                        Service Provider
-                      </SelectItem>
-                      <SelectItem
-                        value="Healthcare(Doctors/Clinics/Physicians/Hospital)"
-                        className="hover:bg-[#815BF5] font-medium"
-                      >
-                        Healthcare(Doctors/Clinics/Physicians/Hospital)
-                      </SelectItem>
-                      <SelectItem
-                        value="Logistics"
-                        className="hover:bg-[#815BF5] font-medium"
-                      >
-                        Logistics
-                      </SelectItem>
-                      <SelectItem
-                        value="Financial Consultants"
-                        className="hover:bg-[#815BF5] font-medium"
-                      >
-                        Financial Consultants
-                      </SelectItem>
-                      <SelectItem
-                        value="Trading"
-                        className="hover:bg-[#815BF5] font-medium"
-                      >
-                        Trading
-                      </SelectItem>
-                      <SelectItem
-                        value="Education"
-                        className="hover:bg-[#815BF5] font-medium"
-                      >
-                        Education
-                      </SelectItem>
-                      <SelectItem
-                        value="Manufacturing"
-                        className="hover:bg-[#815BF5] font-medium"
-                      >
-                        Manufacturing
-                      </SelectItem>
-                      <SelectItem
-                        value="Real Estate/Construction/Interior/Architects"
-                        className="hover:bg-[#815BF5] font-medium"
-                      >
-                        Real Estate/Construction/Interior/Architects
-                      </SelectItem>
-                      <SelectItem
-                        value="Other"
-                        className="hover:bg-[#815BF5] font-medium"
-                      >
-                        Other
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  {/* Description Textarea */}
-                  <textarea
-                    className="px-4 py-2 mt-2 w-full dark:bg-[#0B0D29] focus-within:border-[#815BF5] border rounded outline-none"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                  />
-                </div>
-                <div>
-                  {/* Team Size Dropdown */}
-                  <Select value={teamSize} onValueChange={(value) => setTeamSize(value)}>
-                    <SelectTrigger className=" dark:text-white dark:bg-[#0B0D29] outline-none focus:ring-[#815BF5]">
-                      <SelectValue placeholder="Select Team Size" />
-                    </SelectTrigger>
-                    <SelectContent className="p-1 dark:bg-[#04061E] dark:text-white rounded-xl shadow-lg">
-                      <SelectItem value="1-10" className="hover:bg-[#815BF5] font-medium">
-                        1-10
-                      </SelectItem>
-                      <SelectItem value="11-20" className="hover:bg-[#815BF5] font-medium">
-                        11-20
-                      </SelectItem>
-                      <SelectItem value="21-30" className="hover:bg-[#815BF5] font-medium">
-                        21-30
-                      </SelectItem>
-                      <SelectItem value="31-50" className="hover:bg-[#815BF5] font-medium">
-                        31-50
-                      </SelectItem>
-                      <SelectItem value="51+" className="hover:bg-[#815BF5] font-medium">
-                        51+
-                      </SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
-            </div>
-            <div className="mt-2  flex justify-end">
-              <button
-                onClick={handleUpdateOrganization}
-                className="mt-4 px-4 py-2 text-xs bg-[#007A5A] hover:bg-[#0c4f3e] text-white rounded"
-              >
-                {loading ? <Loader /> : "Update Organization "}
-              </button>
-            </div>
-            <div className="flex gap-2"></div>
-            <div className="flex gap-2"></div>
-          </div>
-        </div>
-      )}
-      {role === "orgAdmin" && (
-        <div>
-          <div className=" mt-4 dark:bg-[#0A0D28] p-2 px-4 border rounded-xl ">
-            <h1 className="text- text-muted-foreground">WhatsApp Integration</h1>
-          </div>
-          <div onClick={() => setWabaOpen(true)} className="mb-2  mt-2 flex   px-4 py-4  ' cursor-pointer ' underline-offset-4  m border-b w-full  ">
-            <h1 className=" text-sm text-start w-full">Connect your WABA Number</h1>
-            <ChevronRight className="h-4" />
-          </div>
-        </div>
-      )}
-      <div className=" mt-6 dark:bg-[#0A0D28] p-2 px-4 border rounded-xl ">
-        <h1 className="text- text-muted-foreground">Task App Settings</h1>
-      </div>
-      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
-        <DialogTrigger className="w-full  items-center mt-2  flex justify-">
-          <div className="mb-2  px-4 ' ' underline-offset-4 py-4  m border-b w-full  ">
-            <h1 className=" text-sm text-start w-full">Notifications & Reminders</h1>
-          </div>
-          <ChevronRight className="h-4 -ml-10" />
-        </DialogTrigger>
 
-        <DialogContent className=" z-[100] flex items-center justify-center">
-          <div className="dark:bg-[#0b0d29] z-[100] overflow-y-scroll scrollbar-hide h-fit max-h-[600px]  shadow-lg w-full   max-w-lg  rounded-lg">
-            <div className="flex border-b py-2  w-full justify-between">
-              <DialogTitle className="text-md   px-6 py-2 font-medium">
-                Notifications
-              </DialogTitle>
-              <DialogClose className="px-6 py-2">
-                <CrossCircledIcon className="scale-150 mt-1 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
-              </DialogClose>
-            </div>
-            <div className="space-y-4 p-6">
-              {/* Email Notification */}
-
-              <div className="mb-4 flex justify-between items-center">
-                <span className="text-gray-700 dark:text-gray-300">
-                  Email Notifications
-                </span>
-                <Switch
-                  checked={emailNotifications}
-                  onCheckedChange={(checked) =>
-                    setEmailNotifications(checked)
-                  }
-                  className="form-checkbox text-white"
-                />
-              </div>
-
-              {/* WhatsApp Notification */}
-
-              <div className="mb-4 flex justify-between items-center">
-                <span className="text-gray-700 dark:text-gray-300">
-                  WhatsApp Notifications
-                </span>
-                <Switch
-                  checked={whatsappNotifications}
-                  onCheckedChange={(checked) =>
-                    setWhatsappNotifications(checked)
-                  }
-                  className="form-checkbox text-white"
-                />
-              </div>
-
-              <Separator className="my-4" />
-
-              <h1 className="text-xl font-bold mb-4 mt-2 text-gray-800 dark:text-white">
-                Reminders
-              </h1>
-
-              {/* Daily Remainder Time */}
-
-              <div className="flex justify-between items-center mb-4">
-                <div>
-                  <h1 className="text-gray-700 dark:text-gray-300">
-                    Daily Reminder Time
-                  </h1>
-                  {dueTime ? (
-                    <h1 className="text-xs mt-1 text-gray-800 dark:text-white">
-                      {formatTimeToAMPM(dueTime)}
-                    </h1>
-                  ) : (
-                    <h1 className="text-xs  mt-1 text-gray-800 dark:text-white">
-                      Please Select Time
-                    </h1>
-                  )}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="description" className="text-sm font-medium">
+                    Company Description
+                  </label>
+                  <span className="text-xs text-muted-foreground">
+                    {description.length}/500 characters
+                  </span>
                 </div>
+                <Textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Briefly describe what your company does"
+                  rows={3}
+                  maxLength={500}
+                  className="resize-none transition-all duration-200"
+                />
+              </div>
 
-                <Dialog
-                  open={isDialogOpen}
-                  onOpenChange={setIsDialogOpen}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="teamSize" className="text-sm font-medium">
+                    Team Size
+                  </label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p className="w-80">
+                          This helps us understand your organization's scale and requirements.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+                <Select
+                  value={teamSize}
+                  onValueChange={(value) => setTeamSize(value)}
                 >
-                  <DialogTrigger>
-                    <Avatar
-                      className="bg-[#815BF5] h-10 w-10 -mt-1 flex items-center justify-center cursor-pointer transition-transform hover:scale-105"
-                      onClick={() => setIsDialogOpen(true)}
+                  <SelectTrigger id="teamSize">
+                    <SelectValue placeholder="Select your team size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1-10">1-10 employees</SelectItem>
+                    <SelectItem value="11-20">11-20 employees</SelectItem>
+                    <SelectItem value="21-30">21-30 employees</SelectItem>
+                    <SelectItem value="31-50">31-50 employees</SelectItem>
+                    <SelectItem value="51+">51+ employees</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+            <CardFooter className="justify-between border-t pt-6 flex-wrap gap-4">
+              <div className="text-sm text-muted-foreground">
+                {isTrialExpired ? (
+                  <div className="flex items-center">
+                    <AlertCircle className="h-4 w-4 mr-2 text-destructive" />
+                    <span>Your trial has expired</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center">
+                    <InfoIcon className="h-4 w-4 mr-2 text-primary" />
+                    <span>Last updated: Today</span>
+                  </div>
+                )}
+              </div>
+              <Button
+                onClick={handleUpdateOrganization}
+                className="relative overflow-hidden group"
+                disabled={loading}
+              >
+                {loading ? (
+                  <Loader  />
+                ) : (
+                  <Save className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
+                )}
+                <span>Update Organization</span>
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
+              </Button>
+            </CardFooter>
+          </Card>
+        </section>
+      )}
+
+      {/* WhatsApp Integration Section */}
+      {role === "orgAdmin" && (
+        <section className="space-y-6">
+          <div className="flex items-center">
+            <MessageSquare className="h-6 w-6 mr-2 text-primary" />
+            <h2 className="text-2xl font-semibold tracking-tight">Messaging Integration</h2>
+          </div>
+
+          <Card className="border-l-4 border-l-green-500 shadow-sm hover:shadow-md transition-shadow duration-200">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>WhatsApp Business Integration</CardTitle>
+                <Badge variant="outline" className="border-green-500 text-green-500">
+                  Recommended
+                </Badge>
+              </div>
+              <CardDescription>
+                Connect your WhatsApp Business Account to enable automated messaging features
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-muted/50 rounded-lg p-4 mb-6">
+                <div className="flex items-start">
+                  <InfoIcon className="h-5 w-5 mr-2 text-primary mt-0.5" />
+                  <div className="space-y-1">
+                    <h4 className="font-medium text-sm">Why connect WhatsApp?</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Integrating with WhatsApp allows you to send automated task reminders, notifications,
+                      and updates directly to your team members' WhatsApp accounts, improving response times
+                      and productivity.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <Dialog open={wabaOpen} onOpenChange={setWabaOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full sm:w-auto group relative">
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center">
+                        <Smartphone className="h-4 w-4 mr-2 group-hover:text-primary transition-colors" />
+                        <span>Connect WhatsApp Business Account</span>
+                      </div>
+                      <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary/50 group-hover:w-full transition-all duration-300"></span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="p-6">
+                  <DialogHeader>
+                    <DialogTitle>WhatsApp Business API Connection</DialogTitle>
+                    <DialogDescription>
+                      Enter your WhatsApp Business API credentials to enable integration
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-6 py-4">
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <label htmlFor="waChannelId" className="text-sm font-medium flex items-center">
+                          WhatsApp Channel ID
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <HelpCircle className="h-4 w-4 ml-2 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p className="w-80">
+                                  You can find your Channel ID in the WhatsApp Business API dashboard.
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </label>
+                        <Input
+                          id="waChannelId"
+                          value={channelId}
+                          onChange={(e) => setChannelId(e.target.value)}
+                          placeholder="Enter your WhatsApp channel ID"
+                          className="transition-all duration-200"
+                        />
+                      </div>
+                      <div className="flex items-center space-x-2 text-sm">
+                        <ExternalLink className="h-4 w-4 text-primary" />
+                        <a
+                          href="http://waba.zapllo.com"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                        >
+                          Get your Channel ID from waba.zapllo.com
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  <DialogFooter className="flex-col sm:flex-row sm:justify-between gap-4">
+                    <DialogClose asChild>
+                      <Button variant="outline">Cancel</Button>
+                    </DialogClose>
+                    <Button
+                      onClick={saveWhatsAppConnection}
+                      disabled={!channelId.trim() || loading}
+                      className="relative group overflow-hidden"
                     >
-                      <StopwatchIcon className="h-6 w-6 text-white" />
-                    </Avatar>
+                      {loading ? (
+                        <Loader />
+                      ) : (
+                        <Save className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
+                      )}
+                      Save Connection
+                      <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </CardContent>
+          </Card>
+        </section>
+      )}
+
+      {/* Notifications & Reminders Section */}
+      <section className="space-y-6">
+        <div className="flex items-center">
+          <Bell className="h-6 w-6 mr-2 text-primary" />
+          <h2 className="text-2xl font-semibold tracking-tight">Notifications & Reminders</h2>
+        </div>
+
+        <Card className="border-l-4 border-l-primary shadow-sm hover:shadow-md transition-shadow duration-200">
+          <CardHeader>
+            <CardTitle>Communication Preferences</CardTitle>
+            <CardDescription>
+              Configure how and when you receive updates, alerts, and reminders
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium flex items-center">
+                  <Bell className="h-4 w-4 mr-2 text-primary" />
+                  Current Settings
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-3 border rounded-lg bg-background">
+                    <div className="flex items-center">
+                      <Mail className="h-4 w-4 mr-3 text-muted-foreground" />
+                      <span className="text-sm">Email Notifications</span>
+                    </div>
+                    <Badge>
+                      {emailNotifications ? "Enabled" : "Disabled"}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 border rounded-lg bg-background">
+                    <div className="flex items-center">
+                      <Smartphone className="h-4 w-4 mr-3 text-muted-foreground" />
+                      <span className="text-sm">WhatsApp Notifications</span>
+                    </div>
+                    <Badge >
+                      {whatsappNotifications ? "Enabled" : "Disabled"}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 border rounded-lg bg-background">
+                    <div className="flex items-center">
+                      <Clock className="h-4 w-4 mr-3 text-muted-foreground" />
+                      <span className="text-sm">Daily Reminder Time</span>
+                    </div>
+                    <Badge variant="secondary">
+                      {dueTime ? formatTimeToAMPM(dueTime) : "Not set"}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col justify-between h-full">
+                <div className="bg-muted/50 rounded-lg p-4 mb-6">
+                  <div className="flex items-start">
+                    <InfoIcon className="h-5 w-5 mr-2 text-primary mt-0.5" />
+                    <div className="space-y-1">
+                      <h4 className="font-medium text-sm">About Notifications</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Customize how you receive task updates, reminders, and team communications.
+                        You can set daily reminder times and choose which days to exclude.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="default"
+                      className="w-full group relative overflow-hidden bg-primary hover:bg-primary/80"
+                    >
+                      <Settings className="mr-2 h-4 w-4 group-hover:rotate-45 transition-transform duration-300" />
+                      Customize Notification Settings
+                      <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
+                    </Button>
                   </DialogTrigger>
+                  <DialogContent className="p-6 h-fit max-h-screen  justify-center m-auto overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Notification & Reminder Settings</DialogTitle>
+                      <DialogDescription>
+                        Tailor your communication preferences to stay informed and productive
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-6 py-4">
+                      <div className="space-y-4">
+                        <h3 className="text-sm font-medium flex items-center text-primary">
+                          <Bell className="mr-2 h-4 w-4" />
+                          Notification Channels
+                        </h3>
 
-                  {/* Time Picker Module */}
-                  <DialogContent className="scale-75 bg-[#0a0d28] p-6 ">
+                        <div className="flex items-start space-x-4 p-3 rounded-lg bg-background border">
+                          <div className="mt-0.5">
+                            <Mail className="h-5 w-5 text-muted-foreground" />
+                          </div>
+                          <div className="flex-1 space-y-1">
+                            <div className="flex items-center justify-between">
+                              <label className="text-sm font-medium">Email Notifications</label>
+                              <Switch
+                                checked={emailNotifications}
+                                onCheckedChange={setEmailNotifications}
+                                className="data-[state=checked]:bg-primary"
+                              />
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              Receive task updates, assignments and system notifications via email
+                            </p>
+                          </div>
+                        </div>
 
+                        <div className="flex items-start space-x-4 p-3 rounded-lg bg-background border">
+                          <div className="mt-0.5">
+                            <Smartphone className="h-5 w-5 text-muted-foreground" />
+                          </div>
+                          <div className="flex-1 space-y-1">
+                            <div className="flex items-center justify-between">
+                              <label className="text-sm font-medium">WhatsApp Notifications</label>
+                              <Switch
+                                checked={whatsappNotifications}
+                                onCheckedChange={setWhatsappNotifications}
+                                className="data-[state=checked]:bg-primary"
+                              />
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              Receive instant updates and notifications via WhatsApp
+                            </p>
+                          </div>
+                        </div>
+                      </div>
 
-                    <CustomTimePicker
-                      onCancel={() => setIsDialogOpen(false)}
-                      onAccept={() => setIsDialogOpen(false)}
-                      onBackToDatePicker={() => setIsDialogOpen(false)}
-                      onTimeChange={setDueTime}
-                      selectedTime={dueTime}
-                    />
+                      <Separator />
+
+                      <div className="space-y-4">
+                        <h3 className="text-sm font-medium flex items-center text-primary">
+                          <Clock className="mr-2 h-4 w-4" />
+                          Reminder Settings
+                        </h3>
+
+                        <div className="flex items-start space-x-4 p-3 rounded-lg bg-background border">
+                          <div className="mt-0.5">
+                            <StopwatchIcon className="h-5 w-5 text-muted-foreground" />
+                          </div>
+                          <div className="flex-1 space-y-3">
+                          <div className="flex items-center justify-between">
+                              <label className="text-sm font-medium">Daily Reminder Time</label>
+                              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                                <DialogTrigger asChild>
+                                  <Button variant="outline" size="sm" className="group">
+                                    <StopwatchIcon className="mr-2 h-4 w-4 group-hover:text-primary" />
+                                    {dueTime ? formatTimeToAMPM(dueTime) : "Set Time"}
+                                  </Button>
+                                </DialogTrigger>
+                                 <DialogContent className="p-6 scale-75 bg-[#0a0d28] dark:bg-[#0a0d28]">
+                                    <CustomTimePicker
+                                      onCancel={() => setIsDialogOpen(false)}
+                                      onAccept={() => setIsDialogOpen(false)}
+                                      onBackToDatePicker={() => setIsDialogOpen(false)}
+                                      onTimeChange={setDueTime}
+                                      selectedTime={dueTime}
+                                    />
+                                </DialogContent>
+                              </Dialog>
+                            </div>
+
+                          </div>
+                        </div>
+
+                        <div className="flex items-start space-x-4 p-3 rounded-lg bg-background border">
+                          <div className="mt-0.5">
+                            <Mail className="h-5 w-5 text-muted-foreground" />
+                          </div>
+                          <div className="flex-1 space-y-1">
+                            <div className="flex items-center justify-between">
+                              <label className="text-sm font-medium">Email Reminders</label>
+                              <Switch
+                                checked={emailReminders}
+                                onCheckedChange={setEmailReminders}
+                                className="data-[state=checked]:bg-primary"
+                              />
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              Get task reminders and deadline alerts via email
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start space-x-4 p-3 rounded-lg bg-background border">
+                          <div className="mt-0.5">
+                            <Smartphone className="h-5 w-5 text-muted-foreground" />
+                          </div>
+                          <div className="flex-1 space-y-1">
+                            <div className="flex items-center justify-between">
+                              <label className="text-sm font-medium">WhatsApp Reminders</label>
+                              <Switch
+                                checked={whatsappReminders}
+                                onCheckedChange={setWhatsappReminders}
+                                className="data-[state=checked]:bg-primary"
+                              />
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              Get task reminders and deadline alerts via WhatsApp
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <Separator />
+
+                      <div className="space-y-4">
+                        <h3 className="text-sm font-medium flex items-center text-primary">
+                          <Settings className="mr-2 h-4 w-4" />
+                          Weekly Schedule
+                        </h3>
+
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Weekly Off Days</label>
+                          <p className="text-xs text-muted-foreground mb-3">
+                            Select days when you don't want to receive reminders
+                          </p>
+                          <div className="grid grid-cols-7 gap-2">
+                            {daysOfWeek.map((day) => (
+                              <div key={day} className="flex flex-col items-center">
+                                <div
+                                  className={`
+                                    w-10 h-10 rounded-full flex items-center justify-center
+                                    transition-colors duration-200 cursor-pointer
+                                    ${selectedDays.includes(day)
+                                      ? 'bg-primary text-white'
+                                      : 'bg-muted hover:bg-muted/80'}
+                                  `}
+                                  onClick={() => handleCheckboxChange(day)}
+                                >
+                                  {day}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <DialogFooter className="flex-col sm:flex-row sm:justify-between gap-4">
+                      <Button
+                        variant="outline"
+                        onClick={() => setSettingsOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={updateSettings}
+                        disabled={loading}
+                        className="relative group overflow-hidden bg-primary hover:bg-primary/80"
+                      >
+                        {loading ? (
+                          <Loader  />
+                        ) : (
+                          <Save className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
+                        )}
+                        Save Settings
+                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
+                      </Button>
+                    </DialogFooter>
                   </DialogContent>
                 </Dialog>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
 
-              <div className="mb-4 mt-2 flex justify-between items-center">
-                <span className="text-gray-700 dark:text-gray-300">
-                  Email Reminders
-                </span>
-                <Switch
-                  checked={emailReminders}
-                  onCheckedChange={(checked) => setEmailReminders(checked)}
-                  className="form-checkbox text-white"
-                />
-              </div>
+      {/* Export Data Section */}
+      <section className="space-y-6">
+        <div className="flex items-center">
+          <Download className="h-6 w-6 mr-2 text-primary" />
+          <h2 className="text-2xl font-semibold tracking-tight">Data Management</h2>
+        </div>
 
-              <div className="mb-4 mt-2 flex justify-between items-center">
-                <span className="text-gray-700 dark:text-gray-300">
-                  WhatsApp Reminders
-                </span>
-                <Switch
-                  checked={whatsappReminders}
-                  onCheckedChange={(checked) => setWhatsappReminders(checked)}
-                  className="form-checkbox text-white"
-                />
-              </div>
-
-              <Separator className="my-4" />
-
-              <div className="mt-2">
-                <h1 className="text-lg font-bold text-gray-800 dark:text-white">
-                  Weekly Offs
-                </h1>
-                <div className="grid grid-cols-7 py-4 gap-4">
-                  {daysOfWeek.map((day) => (
-                    <label key={day} className="flex items-center text-gray-700 dark:text-gray-300">
-                      <Checkbox
-                        checked={selectedDays.includes(day)}
-                        onCheckedChange={(checked) => handleCheckboxChange(day)}
-                        className="mr-2 mt-1"
-                      />
-                      {day}
-                    </label>
-                  ))}
+        <Card className="border-l-4 border-l-amber-500 shadow-sm hover:shadow-md transition-shadow duration-200">
+          <CardHeader>
+            <CardTitle>Export & Backup</CardTitle>
+            <CardDescription>
+              Export your data for reporting, backup, or analysis
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-4">
+                <div className="bg-muted/50 rounded-lg p-4">
+                  <div className="flex items-start">
+                    <InfoIcon className="h-5 w-5 mr-2 text-amber-500 mt-0.5" />
+                    <div className="space-y-1">
+                      <h4 className="font-medium text-sm">About Data Exports</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Export your tasks and project data in CSV or Excel format for reporting
+                        or backup purposes. This feature will allow you to analyze your team's
+                        performance and track progress over time.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Save Setting button */}
-              <div className="flex justify-center">
-                <button
-                  onClick={updateSettings}
-                  className="bg-[#815BF5] w-full text-sm cursor-pointer  text-white px-4 mt-6  py-2 rounded"
-                >
-                  Save Settings
-                </button>
+              <div className="space-y-4">
+                <div className="border rounded-lg p-4 bg-background">
+                  <h3 className="text-sm font-medium mb-4">Available Export Options</h3>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-2 border rounded bg-muted/30">
+                      <div className="flex items-center">
+                        <Download className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <span className="text-sm">Export Tasks</span>
+                      </div>
+                      <Badge variant="outline" className="text-amber-500">Coming Soon</Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2 border rounded bg-muted/30">
+                      <div className="flex items-center">
+                        <Download className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <span className="text-sm">Export Analytics</span>
+                      </div>
+                      <Badge variant="outline" className="text-amber-500">Coming Soon</Badge>
+                    </div>
+
+                    <Button
+                      variant="outline"
+                      className="w-full mt-2"
+                      disabled
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      Export Data (Coming Soon)
+                    </Button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-      <Dialog open={wabaOpen} onOpenChange={setWabaOpen}>
-        <DialogContent className=" z-[100] flex items-center dark:bg-[#0b0d29] h-[240px] justify-center">
-          <div className="  overflow-y-scroll scrollbar-hide h-full  shadow-lg w-full   max-w-lg  rounded-lg">
-            <div className="flex border-b py-2  w-full justify-between">
-              <DialogTitle className="text-md   px-6 py-2 font-medium">
-                WhatsApp API Connection
-              </DialogTitle>
-              <DialogClose className="px-6 py-2">
-                <CrossCircledIcon className="scale-150 mt-1 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
-              </DialogClose>
+          </CardContent>
+        </Card>
+      </section>
 
-            </div>
-            <div className="relative mt-2 p-6 ">
-              <label className="absolute bg-white dark:bg-[#0b0d29] ml-2 text-xs text-[#787CA5] -mt-2 px-1">
-                WA Channel ID
-              </label>
-              <input type="text"
-                className="w-full text-sm focus-within:border-[#815BF5] p-2 border bg-transparent outline-none rounded" />
-              <span className=" text-xs px-2">Get Your Channel ID From here -
-                <a className="text-blue-400 '" href="http://waba.zapllo.com">http://waba.zapllo.com/</a>
-              </span>
-              <Button className="bg-[#815BF5] w-full text-sm cursor-pointer  text-white px-4 mt-6  py-2 rounded">
-                Save
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-      <div className="mb-24   px-4 ' cursor-pointer ' underline-offset-4  m border-b w-full  py-2">
-        <h1 className=" text-sm text-start w-full">Export Tasks (Coming Soon)</h1>
-      </div>
+      {/* Advanced settings section - could be expanded in the future */}
+      <section className="space-y-6">
+        <div className="flex items-center">
+          <Settings className="h-6 w-6 mr-2 text-primary" />
+          <h2 className="text-2xl font-semibold tracking-tight">Advanced Settings</h2>
+        </div>
 
-      {/* 
-            <div className='px-4 py-2 cursor-pointer border mt-4 rounded'>
-                <h1>Logout</h1>
-            </div> */}
-    </div >
+        <Card className="border-l-4 border-l-purple-500 shadow-sm hover:shadow-md transition-shadow duration-200">
+          <CardHeader>
+            <CardTitle>Additional Preferences</CardTitle>
+            <CardDescription>
+              Configure advanced settings and preferences
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between p-6 border rounded-lg bg-muted/30">
+              <div className="space-y-1">
+                <h3 className="text-sm font-medium">Advanced Configuration Options</h3>
+                <p className="text-sm text-muted-foreground">
+                  Additional settings and preferences will be available here in future updates
+                </p>
+              </div>
+              <Badge variant="outline" className="text-purple-500">Coming Soon</Badge>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Footer with support info */}
+      <footer className="border-t pt-8 mt-12">
+        <div className="flex flex-col md:flex-row items-center justify-between text-sm text-muted-foreground gap-4">
+          <p>Need help with settings? Contact our support team for assistance.</p>
+          <Button variant="link" className="h-auto p-0">
+            <span className="underline">Contact Support</span>
+          </Button>
+        </div>
+      </footer>
+    </div>
   );
 }

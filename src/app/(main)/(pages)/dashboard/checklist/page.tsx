@@ -4,13 +4,15 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Progress } from '@/components/ui/progress';
 import ChecklistSidebar from '@/components/sidebar/checklistSidebar';
-import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import Confetti from 'react-confetti'; // Import confetti
-import { VideoIcon } from 'lucide-react';
-import { String } from 'aws-sdk/clients/cloudsearch';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { PlayCircle, CheckCircle, AlertCircle, ListFilter } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { String } from 'aws-sdk/clients/cloudsearch';
 
 // Define types for ChecklistItem and Progress
 interface ChecklistItem {
@@ -19,30 +21,46 @@ interface ChecklistItem {
     tutorialLink?: string;
 }
 
-export default function ChecklistPage({ }) {
+export default function ChecklistPage() {
     const [progress, setProgress] = useState<String[]>([]);
-    const [userId, setUserId] = useState("");
-    const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]); // Array of ChecklistItem
+    const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
     const [showConfetti, setShowConfetti] = useState(false);
-
-
-    console.log(progress, 'progress')
+    const [isTrialExpired, setIsTrialExpired] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [filter, setFilter] = useState<'all' | 'completed' | 'pending'>('all');
 
     useEffect(() => {
         const fetchChecklistItems = async () => {
+            setIsLoading(true);
             try {
                 const res = await axios.get("/api/checklist/get");
                 setChecklistItems(res.data.checklistItems);
+
                 // Fetch user progress
                 const progressRes = await axios.get('/api/get-checklist-progress');
                 setProgress(progressRes.data.progress || []);
             } catch (error) {
                 console.error("Error fetching checklist items:", error);
+            } finally {
+                setIsLoading(false);
             }
         };
 
         fetchChecklistItems();
+    }, []);
 
+    useEffect(() => {
+        const getUserDetails = async () => {
+            try {
+                const response = await axios.get('/api/organization/getById');
+                const organization = response.data.data;
+                const isExpired = organization.trialExpires && new Date(organization.trialExpires) <= new Date();
+                setIsTrialExpired(isExpired);
+            } catch (error) {
+                console.error('Error fetching user details or trial status:', error);
+            }
+        }
+        getUserDetails();
     }, []);
 
     const handleObjectiveChange = async (itemId: string, isCompleted: boolean) => {
@@ -75,84 +93,168 @@ export default function ChecklistPage({ }) {
         return Math.round(progressPercentage);
     };
 
-
-    const [isTrialExpired, setIsTrialExpired] = useState(false);
-
-    useEffect(() => {
-        const getUserDetails = async () => {
-            try {
-                const response = await axios.get('/api/organization/getById');
-                const organization = response.data.data;
-                const isExpired = organization.trialExpires && new Date(organization.trialExpires) <= new Date();
-                setIsTrialExpired(isExpired);
-            } catch (error) {
-                console.error('Error fetching user details or trial status:', error);
-            }
+    // Get filtered items based on current filter
+    const getFilteredItems = () => {
+        switch (filter) {
+            case 'completed':
+                return checklistItems.filter(item => progress.includes(item._id));
+            case 'pending':
+                return checklistItems.filter(item => !progress.includes(item._id));
+            default:
+                return checklistItems;
         }
-        getUserDetails();
-    }, []);
+    };
 
+    const filteredItems = getFilteredItems();
+    const completedItems = checklistItems.filter(item => progress.includes(item._id));
+    const pendingItems = checklistItems.filter(item => !progress.includes(item._id));
+    const progressPercentage = calculateProgress();
 
     return (
-        <div className="flex mt-24 ">
+        <div className="flex h-full mt-24">
             <ChecklistSidebar />
-            <div className="flex-1 p-4">
-                <div className="ml-48 border-l  -   -mt-32 max-w-8xl mx-auto">
-                    <div className="gap-2 flex mb-6 w-full">
-                        <div className=" h-full max-h-screen  overflow-y-scroll scrollbar-hide  w-full">
-                            <div className="p-4 w-full ">
-                                {showConfetti &&
-                                    <div className=' flex items-center m-auto h-72 right-0 absolute justify-end  '>
-                                        <DotLottieReact
-                                            src="/lottie/confetti.lottie"
-                                            autoplay
+            <div className="flex-1 px-4 -mt-12 py-6">
+                <div className="ml-48 max-w-6xl mx-auto">
+                    {showConfetti && (
+                        <div className='fixed inset-0 pointer-events-none z-50'>
+                            <DotLottieReact src="/lottie/confetti.lottie" autoplay />
+                        </div>
+                    )}
 
-                                        />
+                    <div className="space-y-8 p-4 h-screen overflow-y-scroll scrollbar-hide">
+                        <Card className="mb-4 bg-muted/50 dark:bg-muted/20 pb-4">
+                            <CardHeader className="pb-3">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <CardTitle className="text-2xl font-bold">Onboarding Progress</CardTitle>
+                                        <CardDescription>Complete these tasks to get started</CardDescription>
                                     </div>
-                                } {/* Render confetti if needed */}
-                                <div className='border  mt-20  rounded-2xl p-4 w-full'>
-                                    <h1 className="text-font-bold mb-4">Checklist Progress</h1>
-                                    <Progress value={calculateProgress()} className='mb-4' />
+                                    <Badge
+                                        variant="outline"
+                                        className={`text-lg px-3 py-1 ${progressPercentage === 100 ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20' : ''}`}
+                                    >
+                                        {progressPercentage}% Complete
+                                    </Badge>
                                 </div>
-                                <div className="space-y-2 mt-4 w-full border rounded-xl  mb-12 ">
-                                    {checklistItems.map((item) => (
-                                        <div key={item._id} className="w-full border-b p-2 rounded flex items-center justify-between">
-                                            <div className='flex w-full items-center gap-2'>
-                                                <Checkbox
-                                                    checked={progress.includes(item._id)}
-                                                    onCheckedChange={(checked) =>
-                                                        handleObjectiveChange(item._id, Boolean(checked))
-                                                    }
-                                                    className="cursor-pointer"
-                                                />
-                                                {/* <span>{index + 1}.</span> Add serial number */}
-
-                                                <label className={`text-sm overflow-hidden ${progress.includes(item._id)
-                                                    ? 'line-through text-gray-400'
-                                                    : 'dark:text-white'
-                                                    }`}
-                                                >{item.text}
-                                                </label>
-                                            </div>
-
-                                            {item.tutorialLink && (
-                                                <div className='h-8 w-8 rounded-full border text-muted-foreground hover:text-white  cursor-pointer bg-transparent hover:bg-gradient-to-r from-[#815BF5] via-[#FC8929] to-[#FC8929]  flex items-center justify-center  '>
-                                                    <a className='hover:text-white' href={item.tutorialLink} target="_blank" rel="noopener noreferrer">
-                                                        <VideoIcon className=' hover:text-white h-5 w-5' />
-                                                    </a>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
+                            </CardHeader>
+                            <CardContent>
+                                <div className="mb-2 flex items-center justify-between text-sm text-muted-foreground">
+                                    <span>{completedItems.length} of {checklistItems.length} tasks completed</span>
+                                    <span>{pendingItems.length} remaining</span>
                                 </div>
+                                <Progress
+                                    value={progressPercentage}
+                                    className="h-2.5 transition-all duration-500"
+                                />
+                            </CardContent>
+                        </Card>
+
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-xl font-semibold">Checklist Tasks</h2>
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-muted-foreground">
+                                    {filter === 'all'
+                                        ? 'Showing all tasks'
+                                        : filter === 'completed'
+                                            ? 'Showing completed tasks'
+                                            : 'Showing pending tasks'
+                                    }
+                                </span>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="outline" size="sm" className="gap-2">
+                                            <ListFilter className="h-4 w-4" />
+                                            Filter
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => setFilter('all')}>
+                                            All Tasks ({checklistItems.length})
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setFilter('completed')}>
+                                            Completed ({completedItems.length})
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setFilter('pending')}>
+                                            Pending ({pendingItems.length})
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </div>
                         </div>
+
+                        <Card >
+                            <CardContent className="p-0 ">
+                                {filteredItems.length === 0 ? (
+                                    <div className="text-center py-10 text-muted-foreground">
+                                        <p>No {filter === 'all' ? '' : filter} tasks available</p>
+                                    </div>
+                                ) : (
+                                    <div className="divide-y pb-16">
+                                        {filteredItems.map((item) => (
+                                            <div
+                                                key={item._id}
+                                                className={`flex items-center justify-between p-4 transition-colors ${progress.includes(item._id)
+                                                        ? 'bg-muted/30'
+                                                        : 'hover:bg-muted/50'
+                                                    }`}
+                                            >
+                                                <div className="flex items-center gap-3 w-full">
+                                                    <Checkbox
+                                                        id={`task-${item._id}`}
+                                                        checked={progress.includes(item._id)}
+                                                        onCheckedChange={(checked) =>
+                                                            handleObjectiveChange(item._id, Boolean(checked))
+                                                        }
+                                                        className="h-5 w-5 rounded-full border-2 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+                                                    />
+                                                    <label
+                                                        htmlFor={`task-${item._id}`}
+                                                        className={`text-base flex-1 cursor-pointer ${progress.includes(item._id)
+                                                                ? 'text-muted-foreground line-through'
+                                                                : ''
+                                                            }`}
+                                                    >
+                                                        {item.text}
+                                                    </label>
+                                                </div>
+
+                                                <div className="flex items-center">
+                                                    {progress.includes(item._id) && (
+                                                        <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                                                    )}
+
+                                                    {item.tutorialLink && (
+                                                        <TooltipProvider>
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        className="h-8 w-8 rounded-full p-0"
+                                                                        onClick={() => window.open(item.tutorialLink, '_blank')}
+                                                                    >
+                                                                        <PlayCircle className="h-5 w-5 text-primary" />
+                                                                        <span className="sr-only">Watch tutorial</span>
+                                                                    </Button>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    <p>Watch tutorial</p>
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                        </TooltipProvider>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+
+
                     </div>
                 </div>
             </div>
         </div>
     );
 }
-
-
-

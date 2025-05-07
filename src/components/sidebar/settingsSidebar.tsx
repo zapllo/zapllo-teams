@@ -50,7 +50,7 @@ const SettingsSidebar: React.FC = () => {
                     <Button
                         variant="default"
                         className={`w-[90%] shadow-none rounded-lg gap-2 px-4 bg-transparent justify-start dark:hover:bg-[#37384B] hover:bg-accent hover:rounded-lg mb-2 ${isActive('/dashboard/integrations') ? 'bg-[#815BF5] text-white rounded-lg' : 'dark:text-gray-400 text-black'}`}
-                        onClick={() => handleNavigation('/dashboard/integrations')}
+                        onClick={() => handleNavigation('/dashboard/settings/integrations')}
                     >
                         <GitBranchPlusIcon className='h-5' /> Integrations
                     </Button>

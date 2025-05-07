@@ -79,6 +79,7 @@ const LeaveTypes: React.FC = () => {
         : [...prevData.unit, unit], // Add if not selected
     }));
   };
+  
   const fetchLeaveTypes = async () => {
     try {
       const response = await axios.get("/api/leaves/leaveType");
@@ -321,7 +322,7 @@ const LeaveTypes: React.FC = () => {
                     <Button className="bg-transparent dark:text-white text-black hover:border-gray-400 hover:bg-transparent border rounded">
                       Cancel
                     </Button>
-                  </DialogClose> 
+                  </DialogClose>
                   <Button onClick={handleUpdateLeaveBalance} className="bg-red-500 hover:bg-red-700 border rounded">
                     Confirm
                   </Button>
@@ -531,7 +532,7 @@ const LeaveTypes: React.FC = () => {
 
                         {/* If you want distinct content for each tab, you can include TabsContent3 components here.
         If you just want a toggle, you can omit them. */}
-                        {/* 
+                        {/*
     <TabsContent3 value="Reset">
       <p className="text-sm">When 'Reset' is chosen...</p>
     </TabsContent3>

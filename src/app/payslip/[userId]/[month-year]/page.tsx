@@ -4,10 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { format } from "date-fns";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-import { useRouter } from "next/navigation";
-import { Mail, Printer } from "lucide-react";
+import { Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FaWhatsapp } from "react-icons/fa";
 import { FloatingNavbar } from "@/components/globals/navbar";
 
 const numberToWords = (num: number): string => {
@@ -33,16 +31,8 @@ const numberToWords = (num: number): string => {
             " Thousand" +
             (num % 1000 !== 0 ? ` ${numberToWords(num % 1000)}` : "")
         );
-    return num.toString(); // Larger numbers can be handled if needed
+    return num.toString();
 };
-
-interface PayslipData {
-    logo: string;
-    name: string;
-    address: string;
-    contact: string;
-    emailOrWebsite: string;
-}
 
 interface PayslipData {
     logo: string;
@@ -65,16 +55,6 @@ interface PayslipLogData {
     year: number;
 }
 
-interface SalaryDetail {
-    name: string;
-    amount: number;
-}
-
-interface DeductionDetail {
-    name: string;
-    amount: number;
-}
-
 interface UserData {
     firstName: string;
     lastName: string;
@@ -88,8 +68,6 @@ interface UserData {
         accountNumber: string;
         ifscCode: string;
     };
-    salaryDetails: SalaryDetail[];
-    deductionDetails: DeductionDetail[];
 }
 
 export default function PayslipPage({
@@ -104,27 +82,22 @@ export default function PayslipPage({
     const [userData, setUserData] = useState<UserData | null>(null);
     const [totalWorkingDays, setTotalWorkingDays] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
-    const [loadingPrint, setLoadingPrint] = useState(false); // Loader state for print
-    const router = useRouter();
+    const [loadingPrint, setLoadingPrint] = useState(false);
 
     const printRef = useRef<HTMLDivElement>(null);
 
-    console.log(userId, 'user id')
-
     const handlePrint = () => {
-        setLoadingPrint(true); // Show loader
+        setLoadingPrint(true);
         if (printRef.current) {
+            const originalContents = document.body.innerHTML;
+            const printContents = printRef.current.innerHTML;
 
-            const originalContents = document.body.innerHTML; // Save the original document content
-            const printContents = printRef.current.innerHTML; // Get the content to print
-
-            document.body.innerHTML = printContents; // Replace body content with the content to print
             document.body.innerHTML = `
             <style>
                 @media print {
                     * {
-                        color: black !important; /* Force all text to be black */
-                        background-color:white
+                        color: black !important;
+                        background-color: white;
                         -webkit-print-color-adjust: exact;
                         print-color-adjust: exact;
                     }
@@ -136,47 +109,30 @@ export default function PayslipPage({
                         margin: 0;
                         padding: 10px;
                     }
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                    }
+                    th, td {
+                        border: 1px solid #ddd;
+                        padding: 8px;
+                        text-align: left;
+                    }
+                    @page {
+                        size: auto;
+                        margin: 10mm;
+                    }
                 }
             </style>
             <div>${printContents}</div>
         `;
 
-            window.print(); // Trigger the print dialog
-
-            document.body.innerHTML = originalContents; // Restore the original document content
-
-            setLoadingPrint(false); // Hide loader after print
+            window.print();
+            document.body.innerHTML = originalContents;
+            setLoadingPrint(false);
         }
         window.location.reload();
-
     };
-
-
-
-
-
-
-    // useEffect(() => {
-    //     const fetchPayslipData = async () => {
-    //         try {
-    //             const [payslipResponse, userResponse, generateResponse] = await Promise.all([
-    //                 axios.get(`/api/payslip/${userId}`),
-    //                 axios.get(`/api/users/${userId}`),
-    //                 axios.post(`/api/payslip/generate`, { userId, month, year }),
-    //             ]);
-
-    //             setPayslipData(payslipResponse.data.payslip);
-    //             setUserData(userResponse.data.user);
-    //             setTotalWorkingDays(generateResponse.data.totalWorkingDays);
-    //         } catch (error) {
-    //             console.error("Error fetching payslip data:", error);
-    //         } finally {
-    //             setLoading(false);
-    //         }
-    //     };
-
-    //     fetchPayslipData();
-    // }, [userId, month, year]);
 
     useEffect(() => {
         const fetchPayslipDetails = async () => {
@@ -184,9 +140,8 @@ export default function PayslipPage({
                 const response = await axios.get(`/api/payslip/${userId}/${month}-${year}`);
                 if (response.data.success) {
                     const { payslipLog, payslip } = response.data;
-                    // Update the state with fetched payslip and payslip log details
-                    setPayslipData(payslip); // Static company info
-                    setPayslipLogData(payslipLog); // Salary and deduction info
+                    setPayslipData(payslip);
+                    setPayslipLogData(payslipLog);
                 } else {
                     console.error("Error fetching payslip details:", response.data.message);
                 }
@@ -196,11 +151,12 @@ export default function PayslipPage({
                 setLoading(false);
             }
         };
+
         const fetchUserDetails = async () => {
             try {
                 const response = await axios.get(`/api/users/${userId}`);
                 if (response.status === 200) {
-                    const { user } = response.data; // `user` is directly available in the response
+                    const { user } = response.data;
                     setUserData(user);
                 } else {
                     console.error("Error fetching user details:", response.data.error);
@@ -214,8 +170,7 @@ export default function PayslipPage({
         fetchUserDetails();
     }, [userId, month, year]);
 
-    console.log(userData, 'user data')
-    if (loadingPrint) {
+    if (loading || loadingPrint) {
         return (
             <div className="flex justify-center items-center h-screen">
                 <DotLottieReact
@@ -228,170 +183,207 @@ export default function PayslipPage({
         );
     }
 
+    if (!payslipLogData || !userData || !payslipData) return (
+        <div className="h-screen w-screen items-center flex justify-center m-auto">
+            <div className="text-center">
+                <DotLottieReact
+                    src="/lottie/empty.lottie"
+                    loop
+                    className="h-56 mx-auto"
+                    autoplay
+                />
+                <h1 className="text-center text-lg">No Payslip Data Available</h1>
+            </div>
+        </div>
+    );
 
-    const handleEmailShare = async () => {
-        try {
-            const response = await axios.post(`/api/payslip/share`, {
-                userId,
-                month,
-                year
-            });
-            setLoading(false);
-        } catch (error) {
-            console.error("Error fetching payslip data:", error);
-            setLoading(false);
-        }
-    };
-
-    const handleWhatsappShare = async () => {
-        try {
-            const response = await axios.post(`/api/payslip/share/whatsapp`, {
-                userId,
-                month,
-                year
-            });
-            setLoading(false);
-        } catch (error) {
-            console.error("Error fetching payslip data:", error);
-            setLoading(false);
-        }
-    };
-
-
-
-    if (loading) return <div>Loading...</div>;
-    if (!payslipLogData || !userData || !payslipData) return <div className="ml-24 text-2xl font-bold mt-12">No data available</div>;
+    // Calculate net pay
+    const grossPay = payslipLogData.salaryDetails.reduce((total, item) => total + (item.amount || 0), 0);
+    const totalDeductions = payslipLogData.deductionDetails.reduce((total, item) => total + (item.amount || 0), 0);
+    const netPay = grossPay - totalDeductions;
 
     return (
-        <main className="bg-[#] bg-[#05071E]  mx-auto h-full z-10 overflow-hidden">
-            {/* <FloatingNavbar /> */}
-            <div className="flex items-center justify-center m-auto ">
-                <img src="/logo.png" className="h-8 mt-6" />
-            </div>
-            <div className="  mb-12  h-full mx-4   scrollbar-hide">
-                <div className="flex justify-start gap-4 mx-auto p-4">
-                    <div className="  px-4 py-2 rounded-md ">
-                        {/* <h1 className="font-bold text-lg">Actions:</h1> */}
+        <main className="bg-[#05071E] min-h-screen pb-16">
+            <FloatingNavbar />
+            <div className="container mt-24 mx-auto px-4 py-6 max-w-5xl">
+                {/* <div className="flex items-center justify-center mb-6">
+                    <img src="/logo.png" className="h-8" alt="Logo" />
+                </div> */}
 
-                    </div>
+                {/* Print Button */}
+                <div className="mb-6">
+                    <Button
+                        onClick={handlePrint}
+                        disabled={loadingPrint}
+                        className="w-full sm:w-auto bg-white hover:bg-gray-100 text-gray-800 font-semibold py-3 px-6 border border-gray-400 rounded shadow flex items-center justify-center gap-2"
+                    >
+                        <Printer className="h-5 w-5" />
+                        {loadingPrint ? "Printing..." : "Print Payslip"}
+                    </Button>
                 </div>
-                <div className="grid text-white max-w-5xl mx-auto w-full gap-4 py-2 ">
-                    <div>
-                        <Button
-                            onClick={handlePrint}
-                            disabled={loadingPrint} // Disable button while printing
-                            className={`px-4 py-2 flex bg-transparent items-center gap-2 rounded-md border shadow-md ${loadingPrint ? "bg-gray-400 cursor-not-allowed" : " hover:bg-transparent hover:border-muted-foreground "
-                                } text-`}
-                        >
-                            <Printer className="h-5" /> {loadingPrint ? "Printing..." : "Print Payslip"}
-                        </Button>
-                    </div>
-                </div>
-                <div ref={printRef} className="p-8 border  w-full  scrollbar-hide overflow-x-scroll rounded-xl bg-white text-black max-w-5xl mx-auto">
 
+                {/* Payslip Content - Mobile Responsive */}
+                <div
+                    ref={printRef}
+                    className="bg-white text-black rounded-xl shadow-lg overflow-hidden border border-gray-200"
+                >
                     {/* Header */}
-                    <div className="payslip-header">
-                        <div className="flex w-full heading justify-between gap-4">
-                            <div className="w-full">
-                                <h1 className="text-xl companyName font-bold">{payslipData.name}</h1>
-                                <p className="address">{payslipData.address}</p>
-                                <p className="mob">Mob: {payslipData.contact}</p>
-                                <p className="email">{payslipData.emailOrWebsite}</p>
+                    <div className="p-4 sm:p-6 border-b">
+                        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                            <div className="text-center sm:text-left">
+                                <h1 className="text-xl sm:text-2xl font-bold text-gray-800">{payslipData.name}</h1>
+                                <p className="text-gray-600 text-sm">{payslipData.address}</p>
+                                <p className="text-gray-600 text-sm">Mob: {payslipData.contact}</p>
+                                <p className="text-gray-600 text-sm">{payslipData.emailOrWebsite}</p>
                             </div>
-                            <div>
-                                {payslipData.logo && (
-                                    <img
-                                        src={payslipData.logo}
-                                        alt="Company Logo"
-                                        className="h-16 w-auto mx-auto mb-4"
-                                    />
-                                )}
-                            </div>
+                            {payslipData.logo && (
+                                <img
+                                    src={payslipData.logo}
+                                    alt="Company Logo"
+                                    className="h-16 sm:h-20 w-auto object-contain"
+                                />
+                            )}
                         </div>
-                        <h2 className="text-xl mb-4 tracking-widest font-semibold underline text-center mt-6">
+                        <h2 className="text-lg sm:text-xl text-center font-semibold mt-4 pt-3 text-blue-700 bg-gray-50 py-2 rounded-md">
                             PAYSLIP - {format(new Date(year, month - 1), "MMMM yyyy")}
                         </h2>
                     </div>
 
-                    {/* Employee Details */}
-                    <table className="w-full border-collapse border mb-6 text-sm">
-                        <tbody>
-                            <tr>
-                                <td className="border px-4 py-2 font-semibold">Employee Name:</td>
-                                <td className="border px-4 py-2">
-                                    {userData.firstName} {userData.lastName}
-                                </td>
-                                <td className="border px-4 py-2 font-semibold">Employee Code:</td>
-                                <td className="border px-4 py-2">{userData.employeeId}</td>
-                            </tr>
-                            <tr>
-                                <td className="border px-4 py-2 font-semibold">Payroll/Work Location:</td>
-                                <td className="border px-4 py-2">{userData.branch || "-"}</td>
-                                <td className="border px-4 py-2 font-semibold">Total Working Days:</td>
-                                <td className="border px-4 py-2">{totalWorkingDays || "-"}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    {/* Salary and Deductions Table */}
-                    <table className="w-full border-collapse border text-left mb-6">
-                        <thead>
-                            <tr>
-                                <th className="border px-4 py-2">Standard Salary</th>
-                                <th className="border px-4 py-2">Amount</th>
-                                <th className="border px-4 py-2">Deductions</th>
-                                <th className="border px-4 py-2">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {payslipLogData?.salaryDetails.map((allowance, index) => (
-                                <tr key={index}>
-                                    <td className="border px-4 py-2">{allowance.name}</td>
-                                    <td className="border px-4 py-2">₹ {allowance.amount}</td>
-                                    <td className="border px-4 py-2">
-                                        {payslipLogData.deductionDetails[index]?.name || "-"}
-                                    </td>
-                                    <td className="border px-4 py-2">
-                                        ₹ {payslipLogData.deductionDetails[index]?.amount || "-"}
-                                    </td>
-                                </tr>
-                            ))}
-                            <tr>
-                                <td className="border px-4 py-2 font-bold">Gross Pay</td>
-                                <td className="border px-4 py-2 font-bold">
-                                    ₹ {payslipLogData?.salaryDetails.reduce((total, item) => total + (item.amount || 0), 0)}
-                                </td>
-                                <td className="border px-4 py-2 font-bold">Total Deductions</td>
-                                <td className="border px-4 py-2 font-bold">
-                                    ₹ {payslipLogData?.deductionDetails.reduce((total, item) => total + (item.amount || 0), 0)}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <div className="flex justify-between">
-                        <div>
-                            <strong>Total Amount:</strong>{" "}
-                            ₹{" "}
-                            {payslipLogData?.salaryDetails?.reduce(
-                                (total, item) => total + (item.amount || 0),
-                                0
-                            ) -
-                                payslipLogData?.deductionDetails?.reduce(
-                                    (total, item) => total + (item.amount || 0),
-                                    0
-                                )}
+                    {/* Employee Information */}
+                    <div className="p-4 sm:p-6">
+                        <h3 className="text-md sm:text-lg font-semibold mb-3 text-gray-700">Employee Information</h3>
+                        <div className="overflow-x-auto">
+                            <table className="w-full border-collapse border text-sm bg-white mb-6">
+                                <tbody>
+                                    <tr>
+                                        <td className="border px-3 py-2 font-semibold bg-gray-50">Employee Name:</td>
+                                        <td className="border px-3 py-2">
+                                            {userData.firstName} {userData.lastName}
+                                        </td>
+                                        <td className="border px-3 py-2 font-semibold bg-gray-50">Employee Code:</td>
+                                        <td className="border px-3 py-2">{userData.employeeId || "-"}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="border px-3 py-2 font-semibold bg-gray-50">Designation:</td>
+                                        <td className="border px-3 py-2">{userData.designation || "-"}</td>
+                                        <td className="border px-3 py-2 font-semibold bg-gray-50">Department:</td>
+                                        <td className="border px-3 py-2">{userData.department || "-"}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="border px-3 py-2 font-semibold bg-gray-50">Work Location:</td>
+                                        <td className="border px-3 py-2">{userData.branch || "-"}</td>
+                                        <td className="border px-3 py-2 font-semibold bg-gray-50">Working Days:</td>
+                                        <td className="border px-3 py-2">{totalWorkingDays || "-"}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-                        <div className="mb-12">
-                            <strong>Amount in Words:</strong>{" "}
-                            {numberToWords(
-                                payslipLogData?.salaryDetails?.reduce((total, item) => total + (item.amount || 0), 0) -
-                                payslipLogData?.deductionDetails?.reduce(
-                                    (total, item) => total + (item.amount || 0),
-                                    0
-                                )
-                            )}{" "}
-                            Only
+
+                        {/* Bank Details if available */}
+                        {userData.bankDetails && (
+                            <div className="mt-6">
+                                <h3 className="text-md sm:text-lg font-semibold mb-3 text-gray-700">Bank Details</h3>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full border-collapse border text-sm bg-white mb-6">
+                                        <tbody>
+                                            <tr>
+                                                <td className="border px-3 py-2 font-semibold bg-gray-50">Bank Name:</td>
+                                                <td className="border px-3 py-2">{userData.bankDetails.bankName || "-"}</td>
+                                                <td className="border px-3 py-2 font-semibold bg-gray-50">Branch:</td>
+                                                <td className="border px-3 py-2">{userData.bankDetails.branchName || "-"}</td>
+                                            </tr>
+                                            <tr>
+                                                <td className="border px-3 py-2 font-semibold bg-gray-50">Account Number:</td>
+                                                <td className="border px-3 py-2">{userData.bankDetails.accountNumber || "-"}</td>
+                                                <td className="border px-3 py-2 font-semibold bg-gray-50">IFSC Code:</td>
+                                                <td className="border px-3 py-2">{userData.bankDetails.ifscCode || "-"}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Earnings & Deductions */}
+                        <div className="mt-6">
+                            <h3 className="text-md sm:text-lg font-semibold mb-3 text-gray-700">Earnings & Deductions</h3>
+                            <div className="overflow-x-auto">
+                                <table className="w-full border-collapse border text-sm bg-white mb-6">
+                                    <thead>
+                                        <tr className="bg-blue-50">
+                                            <th className="border px-3 py-2 text-blue-700 text-left">Standard Salary</th>
+                                            <th className="border px-3 py-2 text-blue-700 text-right">Amount</th>
+                                            <th className="border px-3 py-2 text-red-700 text-left">Deductions</th>
+                                            <th className="border px-3 py-2 text-red-700 text-right">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {payslipLogData.salaryDetails.map((allowance, index) => (
+                                            <tr key={index} className={index % 2 === 0 ? "bg-gray-50" : ""}>
+                                                <td className="border px-3 py-2">{allowance.name}</td>
+                                                <td className="border px-3 py-2 text-right">₹ {allowance.amount.toLocaleString('en-IN')}</td>
+                                                <td className="border px-3 py-2">
+                                                    {payslipLogData.deductionDetails[index]?.name || "-"}
+                                                </td>
+                                                <td className="border px-3 py-2 text-right">
+                                                    {payslipLogData.deductionDetails[index]?.amount ?
+                                                        `₹ ${payslipLogData.deductionDetails[index].amount.toLocaleString('en-IN')}` : "-"}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        <tr className="font-bold bg-gray-100">
+                                            <td className="border px-3 py-2">Gross Pay</td>
+                                            <td className="border px-3 py-2 text-right text-blue-700">
+                                                ₹ {grossPay.toLocaleString('en-IN')}
+                                            </td>
+                                            <td className="border px-3 py-2">Total Deductions</td>
+                                            <td className="border px-3 py-2 text-right text-red-700">
+                                                ₹ {totalDeductions.toLocaleString('en-IN')}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {/* Net Pay Summary */}
+                        <div className="bg-blue-50 p-4 rounded-md mb-6 border border-blue-100">
+                            <div className="flex flex-col sm:flex-row justify-between gap-4">
+                                <div className="mb-2 sm:mb-0">
+                                    <h3 className="font-semibold text-gray-700 mb-1">Net Pay:</h3>
+                                    <p className="text-xl sm:text-2xl font-bold text-blue-700">
+                                        ₹ {netPay.toLocaleString('en-IN')}
+                                    </p>
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold text-gray-700 mb-1">Amount in Words:</h3>
+                                    <p className="text-sm italic">
+                                        {numberToWords(netPay)} Only
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="border-t pt-4 mt-6">
+                            <div className="flex items-center justify-center space-x-2 text-xs text-gray-500 mb-4">
+                                <span className="font-medium">Powered by</span>
+                                <a
+                                    href="https://zapllo.com"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center hover:opacity-80 transition-opacity"
+                                >
+                                    <img
+                                        src="https://res.cloudinary.com/dndzbt8al/image/upload/v1743846882/logo-01_1_a2qvzt.png"
+                                        alt="Zapllo"
+                                        className="h-4"
+                                    />
+                                </a>
+                            </div>
+                            <p className="text-xs text-gray-500 text-center">
+                                This is a computer-generated document. No signature is required.
+                            </p>
                         </div>
                     </div>
                 </div>

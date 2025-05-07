@@ -30,7 +30,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         <textarea
           ref={ref}
           className={cn(
-            "peer block w-full rounded-md border border-gray-600 bg-transparent px-3 py-2 text-white shadow-sm placeholder-transparent",
+            "peer block w-full rounded-md border border-gray-600 bg-transparent px-3 py-2 text- shadow-sm placeholder-transparent",
             " focus:border-[#815bf5] focus:outline-none transition-all",
             "min-h-[60px] resize-none", // or "resize-y" if you want vertical resizing
             className

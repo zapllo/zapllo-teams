@@ -3,20 +3,31 @@
 import * as React from 'react';
 import dayjs, { Dayjs } from 'dayjs';
 import { useState, useEffect } from 'react';
+import { Calendar, ChevronLeft, ChevronRight, Check, X, ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface CustomDatePickerProps {
   selectedDate: Date | null;
   onDateChange: (date: Date) => void;
-  onCloseDialog?: () => void; // Function to close the dialog
+  onCloseDialog?: () => void;
+  onBackToDatePicker?: () => void;
 }
 
-const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ selectedDate, onDateChange, onCloseDialog }) => {
+const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
+  selectedDate,
+  onDateChange,
+  onCloseDialog,
+  onBackToDatePicker
+}) => {
   const [selectedDateValue, setSelectedDateValue] = useState<Dayjs>(
     selectedDate ? dayjs(selectedDate) : dayjs(new Date())
   );
 
-  const [currentDate, setCurrentDate] = useState(dayjs()); // For current month view
-  const [isYearPickerOpen, setIsYearPickerOpen] = useState(false); // Toggle year picker
+  const [currentDate, setCurrentDate] = useState(dayjs());
+  const [isYearPickerOpen, setIsYearPickerOpen] = useState(false);
+  const [viewTransition, setViewTransition] = useState<'in' | 'out' | null>(null);
 
   // When the selectedDate prop changes, update the local selectedDateValue state
   useEffect(() => {
@@ -25,31 +36,39 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ selectedDate, onDat
     }
   }, [selectedDate]);
 
-  const years = Array.from({ length: 120 }, (_, i) => currentDate.year() - 60 + i); // List of years
+  const years = Array.from({ length: 120 }, (_, i) => currentDate.year() - 60 + i);
 
-  // Handler for changing the selected date
   const handleDateClick = (day: number) => {
-    const newDate = currentDate.date(day); // Construct new date from current month and selected day
+    const newDate = currentDate.date(day);
     setSelectedDateValue(newDate);
   };
 
-  // Accept the selected date and pass it to the parent via onDateChange, then close the dialog
   const handleAccept = () => {
     onDateChange(selectedDateValue.toDate());
     if (onCloseDialog) {
-      onCloseDialog(); // Call onCloseDialog if provided
+      onCloseDialog();
     }
   };
 
   const daysInMonth = currentDate.daysInMonth();
-  const firstDayOfMonth = currentDate.startOf('month').day(); // Day of the week (Sunday = 0)
+  const firstDayOfMonth = currentDate.startOf('month').day();
 
   const handlePrevMonth = () => {
-    setCurrentDate(currentDate.subtract(1, 'month')); // Go to previous month
+    setViewTransition('out');
+    setTimeout(() => {
+      setCurrentDate(currentDate.subtract(1, 'month'));
+      setViewTransition('in');
+    }, 150);
+    setTimeout(() => setViewTransition(null), 300);
   };
 
   const handleNextMonth = () => {
-    setCurrentDate(currentDate.add(1, 'month')); // Go to next month
+    setViewTransition('out');
+    setTimeout(() => {
+      setCurrentDate(currentDate.add(1, 'month'));
+      setViewTransition('in');
+    }, 150);
+    setTimeout(() => setViewTransition(null), 300);
   };
 
   const handleYearChange = (year: number) => {
@@ -61,117 +80,171 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({ selectedDate, onDat
     setIsYearPickerOpen(!isYearPickerOpen);
   };
 
-  // Render the calendar days with placeholders for empty days at the start of the month
+  // Jump to current month
+  const goToToday = () => {
+    setCurrentDate(dayjs());
+    if (isYearPickerOpen) {
+      setIsYearPickerOpen(false);
+    }
+  };
+
+  const isToday = (day: number) => {
+    const today = dayjs();
+    return currentDate.month() === today.month() &&
+           currentDate.year() === today.year() &&
+           day === today.date();
+  };
+
   const renderDays = () => {
     const days = [];
+
+    // Add empty cells for days from previous month
     for (let i = 0; i < firstDayOfMonth; i++) {
-      days.push(<div key={`empty-${i}`} className="w-full h-12"></div>);
+      days.push(<div key={`empty-${i}`} className="h-9 w-9"></div>);
     }
+
+    // Add days of the current month
     for (let day = 1; day <= daysInMonth; day++) {
-      const isSelected = selectedDateValue.isSame(currentDate.date(day), 'day');
+      const date = currentDate.date(day);
+      const isSelected = selectedDateValue.format('YYYY-MM-DD') === date.format('YYYY-MM-DD');
+      const dayIsToday = isToday(day);
+
       days.push(
-        <div
+        <Button
           key={day}
-          className={`cursor-pointer flex justify-center items-center w-full h-12 rounded-full ${isSelected ? 'bg-[#017a5b] text-white' : 'hover:bg-gray-600 text-gray-300'
-            }`}
+          type="button"
+          variant="ghost"
           onClick={() => handleDateClick(day)}
+          className={cn(
+            "h-9 w-9 p-0 font-normal aria-selected:opacity-100",
+            isSelected && "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+            dayIsToday && !isSelected && "border border-primary text-primary dark:text-primary"
+          )}
         >
           {day}
-        </div>
+        </Button>
       );
     }
+
     return days;
   };
 
   return (
-    <div className="flex flex-row gap-4 mt-4 scale-105  text-gray-300 w-full rounded-lg shadow-lg">
-      {/* Selected Date Preview */}
-      <div className="flex flex-col items-center text-white mr-8">
-        {/* <div className="text-lg">Select Date</div> */}
-        <div className="text-3xl   text-center font-bold mb-2">
-          <h1 className='text-lg mt-4 text-gray-300 font-medium'>
-            Select Date
-          </h1>
-          <h1 className='mt-28 w-24'>
-            {selectedDateValue.format('ddd, MMM D')}
-          </h1>
+    <div className="flex flex-col p-4 bg-background rounded-lg w-full max-w-md">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h3 className="text-lg font-medium">Select Date</h3>
+          <p className="text-sm text-muted-foreground">
+            Click to select a date
+          </p>
         </div>
+        <Calendar className="h-5 w-5 text-muted-foreground" />
       </div>
 
-      {/* Calendar Section */}
-      <div className="flex flex-col w-full h-96 items-center">
-        {/* Month and Year Navigation */}
-        <div className="flex justify-between w-full mb-4">
-
-
-          <div className="flex items-center">
-            <div className='flex gap-2'>
-              <div className="text-xl text-white font-semibold">{currentDate.format('MMMM YYYY')}</div>
-              <button
+      <div className="border rounded-md p-4 mb-4">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-1">
+            <span className="text-lg font-medium">
+              {isYearPickerOpen ? "Select Year" : currentDate.format('MMMM YYYY')}
+            </span>
+            {!isYearPickerOpen && (
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={toggleYearPicker}
-                className={`${isYearPickerOpen ? "rotate-180 transition duration-75" : ""} text-sm  font-semibold  px-2 py-1 rounded`}
+                className="h-6 w-6 rounded-full"
               >
-                ▼
-              </button>
-            </div>
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            )}
           </div>
-          <button onClick={handlePrevMonth} className="px-2 py-1 ml-16 hover:bg-gray-600  hover:rounded-full h-10 w-10 text-white font-bold rounded-full">
-            &lt;
-          </button>
-          <button onClick={handleNextMonth} className="px-2 py-1 text-white bg-gray-600 hover:rounded-full h-10 w-10 font-bold rounded-full">
-            &gt;
-          </button>
+          <div className="flex items-center space-x-1">
+            {!isYearPickerOpen && (
+              <>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handlePrevMonth}
+                  className="h-7 w-7 rounded-full"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleNextMonth}
+                  className="h-7 w-7 rounded-full"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={goToToday}
+              className="text-xs h-7 px-2"
+            >
+              Today
+            </Button>
+          </div>
         </div>
 
-        {/* Year Picker */}
-        {isYearPickerOpen && (
-          <div className="overflow-y-auto bg-gray-800 rounded-lg p-2 h-96 w-full">
-            <div className="grid grid-cols-3 gap-1">
+        {isYearPickerOpen ? (
+          <ScrollArea className="h-[240px] rounded-md">
+            <div className="grid grid-cols-4 gap-1">
               {years.map((year) => (
-                <div
+                <Button
                   key={year}
-                  className={`cursor-pointer text-center py-2 ${currentDate.year() === year ? 'bg-[#017a5b] text-white' : 'hover:bg-gray-600 text-gray-300'
-                    }`}
+                  variant={currentDate.year() === year ? "default" : "ghost"}
                   onClick={() => handleYearChange(year)}
+                  className="text-center py-1.5"
                 >
                   {year}
-                </div>
+                </Button>
               ))}
             </div>
-          </div>
-        )}
-
-        {/* Days of the Week */}
-        {!isYearPickerOpen && (
-          <>
-            <div className="grid grid-cols-7 gap-1 text-center w-full">
+          </ScrollArea>
+        ) : (
+          <div className={cn(
+            "transition-opacity duration-150",
+            viewTransition === 'out' && "opacity-0",
+            viewTransition === 'in' && "opacity-100"
+          )}>
+            <div className="grid grid-cols-7 gap-1 text-center mb-1">
               {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day) => (
-                <div key={day} className="text-gray-500">
+                <div key={day} className="text-xs text-muted-foreground h-9 flex items-center justify-center">
                   {day}
                 </div>
               ))}
             </div>
 
-            {/* Render Calendar Days */}
-            <div className="grid grid-cols-7 gap-1 w-full">{renderDays()}</div>
-
-            {/* Cancel and Accept Buttons */}
-            <div className="flex gap-4 justify-end w-full mt-4">
-              <button
-                onClick={onCloseDialog}
-                className="px-6 py-2  text-white rounded border"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleAccept}
-                className="px-6 py-2 bg-[#017a5b] text-sm text-white rounded ="
-              >
-                OK
-              </button>
+            <div className="grid grid-cols-7 gap-1">
+              {renderDays()}
             </div>
-          </>
+          </div>
         )}
+      </div>
+
+      <div className="p-3 bg-muted/40 rounded-md mb-4">
+        <h4 className="text-sm font-medium mb-1">Selected Date</h4>
+        <p className="text-xl font-semibold">
+          {selectedDateValue.format('ddd, MMM D, YYYY')}
+        </p>
+      </div>
+
+      <div className="flex justify-end gap-2">
+        <Button
+          variant="outline"
+          onClick={onCloseDialog}
+        >
+          <X className="h-4 w-4 mr-2" />
+          Cancel
+        </Button>
+        <Button onClick={handleAccept}>
+          <Check className="h-4 w-4 mr-2" />
+          Confirm
+        </Button>
       </div>
     </div>
   );

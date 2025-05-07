@@ -36,7 +36,7 @@ interface Category {
   organization: string;
 }
 
-export default function Profile({}: Props) {
+export default function Profile({ }: Props) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [newCategory, setNewCategory] = useState("");
   const router = useRouter();
@@ -197,7 +197,11 @@ export default function Profile({}: Props) {
   };
 
   return (
-    <div className="container mx-auto py-6 h-screen overflow-y-scroll scrollbar-hide mt-12 max-w-6xl">
+    <div style={{
+      maxHeight: 'calc(100vh - 16px)', // Adjust based on your layout
+      scrollBehavior: 'auto' // Prevent smooth scrolling which can interfere
+    }}
+      className="w-full pt-12 pb-16 px-4 mt-8 h-full overflow-y-auto scrollbar-hide md:px-6 lg:px-8">
       <Toaster position="top-right" />
 
       <div className="mb-8">
@@ -325,8 +329,8 @@ export default function Profile({}: Props) {
               <div className="flex flex-wrap gap-2 justify-center md:justify-start">
                 <Badge variant="outline" className="font-normal">
                   {role === "orgAdmin" ? "Admin" :
-                   role === "member" ? "Member" :
-                   role === "manager" ? "Manager" : role}
+                    role === "member" ? "Member" :
+                      role === "manager" ? "Manager" : role}
                 </Badge>
                 <Badge variant="outline" className="font-normal flex items-center gap-1">
                   <Mail className="h-3 w-3" />
