@@ -332,7 +332,7 @@ export default function IntegrationsPage() {
             <div className="flex-1 space-y-2">
               <h3 className="text-sm font-medium">Developer API</h3>
               <p className="text-sm text-muted-foreground">
-                Our upcoming API will allow developers to build custom integrations and extend Zapllo's functionality.
+                Our upcoming API will allow developers to build custom integrations and extend Zapllo&apos;s functionality.
               </p>
               {/* <Badge variant="outline" className="mt-2">Coming Q4 2023</Badge> */}
             </div>

@@ -373,7 +373,7 @@ const Categories: React.FC = () => {
                     <DialogTitle className="text-xl mt-2">AI-Suggested Categories</DialogTitle>
                     <DialogDescription className="text-sm">
                       Our intelligent AI engine has analyzed your industry and curated a selection of categories.
-                      Choose the ones that suit your business, and let's add them to your workflow effortlessly!
+                      Choose the ones that suit your business, and let us add them to your workflow effortlessly!
                     </DialogDescription>
 
                     {loadingAI ? (

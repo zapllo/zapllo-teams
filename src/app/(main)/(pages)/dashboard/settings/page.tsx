@@ -300,7 +300,7 @@ export default function Page() {
             <CardHeader>
               <CardTitle>Company Information</CardTitle>
               <CardDescription>
-                Update your organization's details and business profile
+                Update your organization details and business profile
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -410,7 +410,7 @@ export default function Page() {
                       </TooltipTrigger>
                       <TooltipContent>
                         <p className="w-80">
-                          This helps us understand your organization's scale and requirements.
+                          This helps us understand your organization&apos;s scale and requirements.
                         </p>
                       </TooltipContent>
                     </Tooltip>
@@ -493,7 +493,7 @@ export default function Page() {
                     <h4 className="font-medium text-sm">Why connect WhatsApp?</h4>
                     <p className="text-sm text-muted-foreground">
                       Integrating with WhatsApp allows you to send automated task reminders, notifications,
-                      and updates directly to your team members' WhatsApp accounts, improving response times
+                      and updates directly to your team members&apos; WhatsApp accounts, improving response times
                       and productivity.
                     </p>
                   </div>
@@ -800,7 +800,7 @@ export default function Page() {
                         <div className="space-y-2">
                           <label className="text-sm font-medium">Weekly Off Days</label>
                           <p className="text-xs text-muted-foreground mb-3">
-                            Select days when you don't want to receive reminders
+                            Select days when you don&apos;t want to receive reminders
                           </p>
                           <div className="grid grid-cols-7 gap-2">
                             {daysOfWeek.map((day) => (
@@ -876,7 +876,7 @@ export default function Page() {
                       <h4 className="font-medium text-sm">About Data Exports</h4>
                       <p className="text-sm text-muted-foreground">
                         Export your tasks and project data in CSV or Excel format for reporting
-                        or backup purposes. This feature will allow you to analyze your team's
+                        or backup purposes. This feature will allow you to analyze your team&apos;s
                         performance and track progress over time.
                       </p>
                     </div>

@@ -543,7 +543,7 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
                         </div>
                         <h1 className="text-2xl font-semibold text-center mb-2">Access Denied</h1>
                         <p className="text-muted-foreground text-center max-w-md mb-8">
-                            You don't have permission to access employee details. Please contact your administrator.
+                            You don&apos;t have permission to access employee details. Please contact your administrator.
                         </p>
                         <Button
                             onClick={() => router.back()}
@@ -567,7 +567,7 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
                         </div>
                         <h1 className="text-2xl font-semibold text-center mb-2">User Not Found</h1>
                         <p className="text-muted-foreground text-center max-w-md mb-8">
-                            The employee you're looking for doesn't exist or has been removed from the system.
+                            The employee you&apos;re looking for doesn&apos;t exist or has been removed from the system.
                         </p>
                         <Button
                             onClick={() => router.back()}
