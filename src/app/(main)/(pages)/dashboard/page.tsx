@@ -174,9 +174,27 @@ const DashboardPage = () => {
     }
   };
 
-  if (isLoading) {
-    return <div className="flex items-center justify-center h-screen"><Loader size="lg" /></div>;
-  }
+  // ... existing code ...
+
+// Replace the simple loader implementation with a more engaging one
+if (isLoading) {
+  return (
+    <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-b from-white to-gray-50 dark:from-[#04061e] dark:to-[#080a29]">
+      <div className="relative">
+        <div className="h-24 w-24 rounded-full border-4 border-[#815BF5] border-t-transparent animate-spin"></div>
+        {/* <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <img src="/logo.png" alt="Zapllo" className="h-full w-full" />
+        </div> */}
+      </div>
+      <div className="mt-6 text-center">
+        <h3 className="text-xl font-semibold text-[#815BF5] animate-pulse">Loading your workspace</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Preparing your business tools...</p>
+      </div>
+    </div>
+  );
+}
+
+// ... existing code ...
 
   return (
     <div className="dark:bg-[#04061e] bg-[#ffffff] mb-16 overflow-y-scroll pt-2 scale-95 h-screen relative overflow-x-hidden scrollbar-hide">

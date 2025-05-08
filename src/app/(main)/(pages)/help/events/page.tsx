@@ -10,6 +10,7 @@ import Image from 'next/image';
 import { Tabs3 as Tabs, TabsContent3 as TabsContent, TabsList3 as TabsList, TabsTrigger3 as TabsTrigger } from '@/components/ui/tabs3';
 import { Button } from '@/components/ui/button';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface Event {
   _id: string;
@@ -107,24 +108,79 @@ export default function Events() {
     );
   }
 
-  if (loading) {
-    return (
-      <div className="flex mt-24">
-        <div className="flex-1 p-4">
-          <div className="w-full min-h-screen -mt-32 max-w-6xl mx-auto">
-            <div className="flex justify-center items-center h-[60vh]">
-              <DotLottieReact
-                src="/lottie/loading.lottie"
-                autoplay
-                loop
-                className="h-40"
-              />
+
+
+// Replace the loading return statement
+if (loading) {
+  return (
+    <div className="flex h-full max-h-screen overflow-y-scroll pt-24">
+      <div className="flex-1 p-4 mt-24">
+        <div className="w-full min-h-screen -mt-32 mx-auto">
+          {/* Page header skeleton */}
+          <div className="mb-10">
+            <Skeleton className="h-10 w-40 mb-2" />
+            <Skeleton className="h-5 w-96" />
+          </div>
+
+          {/* Tabs skeleton */}
+          <div className="mb-6">
+            <div className="inline-flex h-10 items-center justify-center rounded-lg p-1 bg-muted">
+              <Skeleton className="h-8 w-36 mx-1 rounded-md" />
+              <Skeleton className="h-8 w-36 mx-1 rounded-md" />
             </div>
+          </div>
+
+          {/* Event cards grid skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="overflow-hidden border rounded-lg shadow-lg bg-white dark:bg-transparent pb-4">
+                {/* Event image skeleton */}
+                <div className="h-48">
+                  <Skeleton className="h-full w-full" />
+                </div>
+
+                {/* Event content skeleton */}
+                <div className="px-5">
+                  <Skeleton className="h-7 w-4/5 mt-4 mb-2" />
+                  <Skeleton className="h-4 w-full mb-1" />
+                  <Skeleton className="h-4 w-3/4 mb-4" />
+
+                  {/* Event details skeleton */}
+                  <div className="space-y-3 mb-4">
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-4 w-4 rounded-full" />
+                      <Skeleton className="h-4 w-32" />
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-4 w-4 rounded-full" />
+                      <Skeleton className="h-4 w-48" />
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-4 w-4 rounded-full" />
+                      <Skeleton className="h-4 w-36" />
+                    </div>
+                  </div>
+
+                  {/* Event footer skeleton */}
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-4 w-4 rounded-full" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                    <Skeleton className="h-9 w-28 rounded-md" />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
+
 
   return (
     <div className="flex h-full max-h-screen overflow-y-scroll  pt-24">

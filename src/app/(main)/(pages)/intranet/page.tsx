@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs3 as Tabs, TabsContent3 as TabsContent, TabsList3 as TabsList, TabsTrigger3 as TabsTrigger } from "@/components/ui/tabs3";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Category {
   _id: string;
@@ -190,14 +191,101 @@ const IntranetPage: React.FC = () => {
     setActiveTab("all");
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader />
+if (isLoading) {
+  return (
+    <div className="container py-8 mt-12 space-y-6">
+      {/* Page header skeleton */}
+      <div className="flex flex-col space-y-2">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-8 w-8 rounded-full" />
+          <Skeleton className="h-9 w-56" />
+        </div>
+        <Skeleton className="h-5 w-full max-w-md" />
       </div>
-    );
-  }
 
+      {/* Tabs and action button skeleton */}
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex rounded-lg p-1 h-10 bg-muted">
+          <Skeleton className="h-8 w-24 mx-1 rounded-md" />
+          <Skeleton className="h-8 w-24 mx-1 rounded-md" />
+        </div>
+        <Skeleton className="h-10 w-36 rounded-md" />
+      </div>
+
+      {/* Table skeleton */}
+      <div className="rounded-md border overflow-hidden">
+        {/* Table header */}
+        <div className="bg-muted/50 p-4">
+          <div className="flex justify-between items-center">
+            <div className="flex gap-2 w-full max-w-lg">
+              <Skeleton className="h-10 w-40 rounded-md" />
+              <Skeleton className="h-10 flex-1 rounded-md" />
+            </div>
+            <Skeleton className="h-10 w-32 rounded-md" />
+          </div>
+        </div>
+
+        {/* Table header row */}
+        <div className="grid grid-cols-[1fr_2fr_1fr_auto] gap-2 px-4 py-3 border-b bg-muted/30">
+          <Skeleton className="h-5 w-24" />
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-5 w-28" />
+          <Skeleton className="h-5 w-16" />
+        </div>
+
+        {/* Table rows */}
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="grid grid-cols-[1fr_2fr_1fr_auto] gap-2 px-4 py-3 border-b items-center">
+            <div>
+              <Skeleton className="h-5 w-40 mb-1" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+
+            <div>
+              <Skeleton className="h-5 w-full max-w-lg mb-1" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+
+            <Skeleton className="h-6 w-24 rounded-full" />
+
+            <div className="flex justify-end space-x-2">
+              <Skeleton className="h-9 w-9 rounded-md" />
+              <Skeleton className="h-9 w-9 rounded-md" />
+              <Skeleton className="h-9 w-9 rounded-md" />
+            </div>
+          </div>
+        ))}
+
+        {/* Table pagination */}
+        <div className="p-4 flex items-center justify-between border-t">
+          <Skeleton className="h-5 w-32" />
+          <div className="flex gap-1">
+            <Skeleton className="h-9 w-9 rounded-md" />
+            <Skeleton className="h-9 w-9 rounded-md" />
+            <Skeleton className="h-9 w-9 rounded-md" />
+          </div>
+        </div>
+      </div>
+
+      {/* Stats tab content (hidden) */}
+      <div className="hidden mt-6">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="border rounded-lg p-4">
+              <div className="space-y-2">
+                <Skeleton className="h-8 w-16" />
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-6 w-20 rounded-md" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
   return (
     <div className="container py-8 mt-12 space-y-6">
       <div className="flex flex-col space-y-2">

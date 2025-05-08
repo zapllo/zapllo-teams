@@ -77,6 +77,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type LeaveType = {
   _id: string;
@@ -462,16 +463,132 @@ export default function AllLeaves() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex h-[80vh] w-full items-center justify-center">
-        <Loader />
-      </div>
-    );
-  }
+
+if (loading) {
+  return (
+    <div className="mx-auto p-4 max-w- mt-4">
+      <Card className="mb-8">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-8 w-56" />
+          </div>
+        </CardHeader>
+        <CardContent>
+          {/* Tab navigation skeleton */}
+          <div className="flex justify-center mb-6">
+            <div className="flex gap-2">
+              <Skeleton className="h-10 w-36 rounded-md" />
+              <Skeleton className="h-10 w-36 rounded-md" />
+            </div>
+          </div>
+
+          {/* Leave Balances Tab Skeleton */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between mb-6">
+              <Skeleton className="h-9 w-[280px] rounded-md" />
+              <Skeleton className="h-6 w-24 rounded-full" />
+            </div>
+
+            {/* Table skeleton */}
+            <div className="rounded-xl overflow-hidden border shadow-sm">
+              <div className="overflow-x-auto">
+                <div className="bg-muted/50 p-3">
+                  <div className="flex">
+                    <Skeleton className="w-[40%] h-5 mr-1" />
+                    {[...Array(4)].map((_, i) => (
+                      <Skeleton key={i} className="w-[12%] h-5 mx-1" />
+                    ))}
+                    <Skeleton className="w-[12%] h-5 ml-1" />
+                  </div>
+                </div>
+
+                {/* Table rows skeleton */}
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="p-3 border-t">
+                    <div className="flex items-center">
+                      <div className="w-[40%] flex items-center">
+                        <Skeleton className="h-9 w-9 rounded-full mr-3" />
+                        <div>
+                          <Skeleton className="h-4 w-32 mb-1" />
+                          <Skeleton className="h-3 w-20" />
+                        </div>
+                      </div>
+
+                      {/* Leave type columns */}
+                      {[...Array(4)].map((_, j) => (
+                        <div key={j} className="w-[12%] flex justify-center">
+                          <Skeleton className="h-10 w-10 rounded-lg" />
+                        </div>
+                      ))}
+
+                      {/* Actions column */}
+                      <div className="w-[12%] flex justify-end">
+                        <Skeleton className="h-8 w-16 rounded-md" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Leave Applications Tab Skeleton (hidden) */}
+          <div className="hidden space-y-4">
+            {/* Filter controls */}
+            <div className="flex flex-col md:flex-row justify-between gap-3 mb-6">
+              <div className="flex gap-2">
+                <Skeleton className="h-9 w-40 rounded-md" />
+                <Skeleton className="h-9 w-32 rounded-md" />
+              </div>
+              <Skeleton className="h-9 w-32 rounded-md" />
+            </div>
+
+            <Skeleton className="h-px w-full mb-6" />
+
+            {/* Leave cards */}
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="border rounded-lg overflow-hidden">
+                <div className="p-4">
+                  <div className="flex flex-col sm:flex-row justify-between">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-10 w-10 rounded-full" />
+                      <div>
+                        <Skeleton className="h-5 w-40 mb-2" />
+                        <div className="flex flex-wrap gap-2">
+                          <Skeleton className="h-4 w-16" />
+                          <Skeleton className="h-4 w-4 rounded-full" />
+                          <Skeleton className="h-4 w-32" />
+                          <Skeleton className="h-4 w-4 rounded-full" />
+                          <Skeleton className="h-4 w-20" />
+                          <Skeleton className="h-4 w-4 rounded-full" />
+                          <Skeleton className="h-4 w-28" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-3 sm:mt-0">
+                      <Skeleton className="h-6 w-20 rounded-full" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action buttons */}
+                <div className="bg-muted/50 p-2 flex justify-end gap-2 border-t">
+                  <Skeleton className="h-9 w-24 rounded-md" />
+                  <Skeleton className="h-9 w-24 rounded-md" />
+                  <Skeleton className="h-8 w-8 rounded-md" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 
   return (
-    <div className="container mx-auto p-4 max-w-7xl">
+    <div className=" mx-auto p-4 max-w- mt-4">
       <Card className="mb-8">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
@@ -667,61 +784,78 @@ export default function AllLeaves() {
               </div>
             </TabsContent>
 
+
             <TabsContent value="balances">
               <div className="space-y-4">
-                <div className="flex relative w-full max-w-sm items-center mb-4 space-x-2">
-                  <Search className="h-4 w-4 text-muted-foreground absolute ml-3 pointer-events-none" />
-                  <Input
-                    placeholder="Search users..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="h-9 pl-9"
-                  />
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex relative items-center max-w-sm space-x-2">
+                    <Search className="h-4 w-4 text-muted-foreground absolute ml-3 pointer-events-none" />
+                    <Input
+                      placeholder="Search users..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="h-9 pl-9 w-[280px]"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="bg-primary/10 text-sm gap-1">
+                      <WalletCards className="h-3.5 w-3.5" />
+                      <span>{filteredUsers.length} Users</span>
+                    </Badge>
+                  </div>
                 </div>
 
-                <Card>
-                  <CardContent className="p-0">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="hover:bg-transparent">
-                          <TableHead className="w-[250px]">User</TableHead>
-                          {leaveTypes.map((leaveType) => (
-                            <TableHead key={leaveType._id} className="text-left">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger className="cursor-help">
-                                    {leaveType.leaveType.substring(0, 2).toUpperCase()}
-                                  </TooltipTrigger>
-                                  <TooltipContent side="top">
-                                    <p>{leaveType.leaveType}</p>
-                                  </TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </TableHead>
-                          ))}
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredUsers.length === 0 ? (
-                          <TableRow>
-                            <TableCell colSpan={leaveTypes.length + 2} className="text-center py-6">
-                              <div className="flex flex-col items-center justify-center py-6">
-                                <p className="text-sm text-muted-foreground">No users found</p>
-                              </div>
-                            </TableCell>
+                {filteredUsers.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 bg-muted/30 rounded-lg">
+                    <DotLottieReact
+                      src="/lottie/empty.lottie"
+                      loop
+                      className="h-40"
+                      autoplay
+                    />
+                    <h2 className="text-lg font-semibold mt-4">No Users Found</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Try adjusting your search criteria
+                    </p>
+                  </div>
+                ) : (
+                  <div className=" rounded-xl overflow-hidden border shadow-sm">
+                    <div className="overflow-x-auto">
+                      <Table className="table-fixed">
+                        <TableHeader>
+                          <TableRow className="hover:bg-transparent bg-muted/50">
+                            <TableHead className="w-[40%]">Employee</TableHead>
+                            {leaveTypes.map((leaveType) => (
+                              <TableHead key={leaveType._id} className="text-center w-[12%]">
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger className="cursor-help w-full">
+                                      <span className="font-medium">{leaveType.leaveType}</span>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top">
+                                      <p>Allocated: {leaveType.allotedLeaves} days</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </TableHead>
+                            ))}
+                            <TableHead className="text-right w-[12%]">Actions</TableHead>
                           </TableRow>
-                        ) : (
-                          filteredUsers.map((user) => (
-                            <TableRow key={user.userId} className="hover:bg-muted/50">
-                              <TableCell className="font-medium">
+                        </TableHeader>
+                        <TableBody>
+                          {filteredUsers.map((user) => (
+                            <TableRow key={user.userId} className="hover:bg-muted/20 transition-colors">
+                              <TableCell>
                                 <div className="flex items-center gap-3">
-                                  <Avatar className="h-8 w-8">
-                                    <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                                  <Avatar className="h-9 w-9 border">
+                                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
                                       {user.firstName[0]}{user.lastName[0]}
                                     </AvatarFallback>
                                   </Avatar>
-                                  <span>{user.firstName} {user.lastName}</span>
+                                  <div className="flex flex-col">
+                                    <span className="font-medium text-sm">{user.firstName} {user.lastName}</span>
+                                    {/* <span className="text-xs text-muted-foreground">ID: {user.userId.substring(0, 8)}</span> */}
+                                  </div>
                                 </div>
                               </TableCell>
                               {leaveTypes.map((leaveType) => {
@@ -730,42 +864,71 @@ export default function AllLeaves() {
                                     (lb) => lb.leaveTypeId === leaveType._id
                                   )?.userLeaveBalance || 0;
 
+                                const totalAlloted = leaveType.allotedLeaves || 0;
+
+                                // Determine styling based on balance
+                                let statusClass = "";
+
+                                if (balance <= 1) {
+                                  statusClass = "from-red-500 to-red-600 shadow-red-200";
+                                } else if (balance <= 3) {
+                                  statusClass = "from-amber-500 to-amber-600 shadow-amber-200";
+                                } else if (balance <= 5) {
+                                  statusClass = "from-blue-500 to-blue-600 shadow-blue-200";
+                                } else {
+                                  statusClass = "from-emerald-500 to-emerald-600 shadow-emerald-200";
+                                }
+
                                 return (
-                                  <TableCell key={leaveType._id} className="text-left">
-                                    <Badge className="font-medium text-white bg-primary">
-                                      {balance}
-                                    </Badge>
+                                  <TableCell key={leaveType._id} className="text-center">
+                                    <div className="flex flex-col items-center justify-center">
+                                      <div className="relative group">
+                                        {/* Modern gradient number display */}
+                                        <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${statusClass} flex items-center justify-center shadow-sm transition-all hover:scale-105 cursor-default`}>
+                                          <span className="text- font-bold text-white">
+                                            {balance}
+                                          </span>
+                                        </div>
+
+                                        {/* Floating tooltip */}
+                                        <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
+                                          {balance} of {totalAlloted} days remaining
+                                        </div>
+
+                                        {/* Leave type label */}
+                                        {/* <div className="text-xs font-medium text-muted-foreground mt-1.5 whitespace-nowrap">
+                                          {leaveType.leaveType.length > 12
+                                            ? `${leaveType.leaveType.substring(0, 10)}...`
+                                            : leaveType.leaveType}
+                                        </div> */}
+                                      </div>
+                                    </div>
                                   </TableCell>
                                 );
                               })}
+
                               <TableCell className="text-right">
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() => handleEditClick(user)}
-                                        className="text-blue-500 hover:text-blue-700 hover:bg-blue-50"
-                                      >
-                                        <PencilIcon className="h-4 w-4" />
-                                      </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>Edit leave balances</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEditClick(user)}
+                                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8"
+                                >
+                                  <PencilIcon className="h-3.5 w-3.5 mr-1" />
+                                  Edit
+                                </Button>
                               </TableCell>
                             </TableRow>
-                          ))
-                        )}
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                )}
               </div>
             </TabsContent>
+
+
           </Tabs>
         </CardContent>
       </Card>

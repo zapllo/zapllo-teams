@@ -441,15 +441,69 @@ const AttendanceDashboard: React.FC = () => {
 
   // Loading state
   if (attendanceLoading) {
-    return <Loader />;
+    return (
+       <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+            <div className="flex flex-col items-center gap-6">
+              <div className="relative">
+                {/* Outer ring */}
+                <div className="absolute inset-0 rounded-full border-4 border-primary/10 animate-pulse"></div>
+
+                {/* Multiple spinning rings */}
+                <div className="h-24 w-24 rounded-full border-t-4 border-r-2 border-primary animate-spin"></div>
+                <div className="absolute inset-0 h-20 w-20 m-auto rounded-full border-b-4 border-l-2 border-primary/70 animate-spin" style={{ animationDuration: '1.5s', animationDirection: 'reverse' }}></div>
+                <div className="absolute inset-0 h-16 w-16 m-auto rounded-full border-l-4 border-t-2 border-primary/40 animate-spin" style={{ animationDuration: '2s' }}></div>
+
+                {/* Center icon */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Clock className="h-8 w-8 text-primary animate-pulse" />
+                </div>
+              </div>
+
+              <div className="space-y-2 text-center">
+                <h3 className="font-semibold text-xl">Loading Your Attendance</h3>
+                <p className="text-muted-foreground text-sm">Preparing your attendance records...</p>
+
+                {/* Progress bar */}
+                <div className="w-56 h-1.5 bg-muted rounded-full overflow-hidden mt-2">
+                  <div className="h-full bg-primary rounded-full animate-loader-progress"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+    );
   }
 
   return (
     <div className="p-6 h-screen overflow-y-auto scrollbar-hide">
       {attendanceLoading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-          <Loader />
-        </div>
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+             <div className="flex flex-col items-center gap-6">
+               <div className="relative">
+                 {/* Outer ring */}
+                 <div className="absolute inset-0 rounded-full border-4 border-primary/10 animate-pulse"></div>
+
+                 {/* Multiple spinning rings */}
+                 <div className="h-24 w-24 rounded-full border-t-4 border-r-2 border-primary animate-spin"></div>
+                 <div className="absolute inset-0 h-20 w-20 m-auto rounded-full border-b-4 border-l-2 border-primary/70 animate-spin" style={{ animationDuration: '1.5s', animationDirection: 'reverse' }}></div>
+                 <div className="absolute inset-0 h-16 w-16 m-auto rounded-full border-l-4 border-t-2 border-primary/40 animate-spin" style={{ animationDuration: '2s' }}></div>
+
+                 {/* Center icon */}
+                 <div className="absolute inset-0 flex items-center justify-center">
+                   <Clock className="h-8 w-8 text-primary animate-pulse" />
+                 </div>
+               </div>
+
+               <div className="space-y-2 text-center">
+                 <h3 className="font-semibold text-xl">Loading Your Attendance</h3>
+                 <p className="text-muted-foreground text-sm">Preparing your attendance records...</p>
+
+                 {/* Progress bar */}
+                 <div className="w-56 h-1.5 bg-muted rounded-full overflow-hidden mt-2">
+                   <div className="h-full bg-primary rounded-full animate-loader-progress"></div>
+                 </div>
+               </div>
+             </div>
+           </div>
       )}
 
       {/* Dashboard Header */}
@@ -675,8 +729,8 @@ const AttendanceDashboard: React.FC = () => {
                               entry.status === 'Present'
                                 ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                                 : entry.status === 'On Leave'
-                                ? 'bg-amber-50 text-amber-700 border-amber-200'
-                                : 'bg-rose-50 text-rose-700 border-rose-200'
+                                  ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                  : 'bg-rose-50 text-rose-700 border-rose-200'
                             }
                           >
                             {entry.status}
@@ -722,7 +776,7 @@ const AttendanceDashboard: React.FC = () => {
 
               <div className="flex items-center gap-2">
                 <Select value={period} onValueChange={setPeriod}>
-                <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Select period" />
                   </SelectTrigger>
                   <SelectContent>

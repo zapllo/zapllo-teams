@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const categories = [
   "All Tutorials",
@@ -91,17 +92,49 @@ export default function Tutorials() {
     router.push(`/help/tutorials/${id}`);
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-[calc(100vh-4rem)]">
-        <DotLottieReact
-          src="/lottie/loading.lottie"
-          loop
-          autoplay
-          className="h-56"
-        />
+ if (loading) {
+  return (
+    <div className="container mx-auto p-6">
+      {/* Page header skeleton */}
+      <div className="mb-8">
+        <Skeleton className="h-10 w-64 mb-2" />
+        <Skeleton className="h-5 w-full max-w-md" />
       </div>
-    );
+
+      {/* Search and filter controls skeleton */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <Skeleton className="h-10 w-full md:w-72 rounded-md" />
+        <Skeleton className="h-10 w-full md:w-64 rounded-md" />
+      </div>
+
+      {/* Tutorial cards grid skeleton */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-6">
+        {[...Array(8)].map((_, i) => (
+          <div key={i} className="overflow-hidden rounded-lg border">
+            {/* Thumbnail skeleton */}
+            <Skeleton className="w-full h-48" />
+
+            {/* Content skeleton */}
+            <div className="p-4">
+              <Skeleton className="h-5 w-full mb-2" />
+              <Skeleton className="h-5 w-4/5 mb-3" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Pagination skeleton */}
+      <div className="flex justify-center mt-8">
+        <div className="flex gap-1">
+          <Skeleton className="h-9 w-9 rounded-md" />
+          <Skeleton className="h-9 w-9 rounded-md" />
+          <Skeleton className="h-9 w-9 rounded-md" />
+          <Skeleton className="h-9 w-9 rounded-md" />
+        </div>
+      </div>
+    </div>
+  );
   }
 
   if (error) {

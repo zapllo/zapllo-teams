@@ -583,7 +583,7 @@ export default function Settings({ }: {}) {
 
             {/* Time Picker Dialog */}
             <Dialog open={isTimePickerOpen} onOpenChange={setIsTimePickerOpen}>
-                <DialogContent className="p-6 scale-75 bg-[#0a0d28] dark:bg-[#0a0d28]">
+                <DialogContent className=" scale-75 w-[550px] bg-transparent border-none">
                     <CustomTimePicker
                         selectedTime={selectedTime}
                         onTimeChange={handleTimeChange}
@@ -648,8 +648,8 @@ export default function Settings({ }: {}) {
 
             {/* Custom Time Picker Dialogs */}
             <Dialog open={isLoginTimePickerOpen} onOpenChange={setIsLoginTimePickerOpen}>
-                <DialogContent className="p-6 scale-75 bg-[#0a0d28] dark:bg-[#0a0d28]">
-                    <CustomTimePicker
+                <DialogContent className=" scale-75 w-[550px] bg-transparent border-none">
+                        <CustomTimePicker
                         selectedTime={loginTime}
                         onTimeChange={(time) => setLoginTime(time)}
                         onCancel={() => setIsLoginTimePickerOpen(false)}
@@ -660,8 +660,8 @@ export default function Settings({ }: {}) {
             </Dialog>
 
             <Dialog open={isLogoutTimePickerOpen} onOpenChange={setIsLogoutTimePickerOpen}>
-                <DialogContent className="p-6 scale-75 bg-[#0a0d28] dark:bg-[#0a0d28]">
-                    <CustomTimePicker
+                <DialogContent className=" scale-75 w-[550px] bg-transparent border-none">
+                        <CustomTimePicker
                         selectedTime={logoutTime}
                         onTimeChange={(time) => setLogoutTime(time)}
                         onCancel={() => setIsLogoutTimePickerOpen(false)}

@@ -54,6 +54,7 @@ import { FaHouseUser } from "react-icons/fa";
 
 // Custom Components
 import RegularizationDetails from "@/components/sheets/regularizationDetails";
+import { getBrowserLocation } from "@/lib/location";
 
 const mapContainerStyle = {
   height: "400px",
@@ -128,7 +129,8 @@ export default function MyAttendance() {
   const [attendanceLoading, setAttendanceLoading] = useState(false);
   const [displayLoader, setDisplayLoader] = useState(false);
   const [mapModalOpen, setMapModalOpen] = useState(false);
-
+  // Add a new state variable
+  const [isLocationLoading, setIsLocationLoading] = useState(false);
   // Tab states
   const [activeTab, setActiveTab] = useState("thisMonth");
   const [activeAttendanceTab, setActiveAttendanceTab] = useState("dailyReport");
@@ -172,7 +174,7 @@ export default function MyAttendance() {
   // Dropdown states
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showBreakUserDropdown, setShowBreakUserDropdown] = useState(false);
-
+  const [locationError, setLocationError] = useState<string | null>(null);
   // Expanded days for accordion
   const [expandedDays, setExpandedDays] = useState<{ [date: string]: boolean }>({});
 
@@ -295,55 +297,86 @@ export default function MyAttendance() {
     }
   };
 
-  // Fetch user location
-  const fetchLocation = () => {
-    const stored = Cookies.get('userLocation');
-    if (stored) {
-      try {
-        const { location: savedLocation, timestamp } = JSON.parse(stored);
-        const oneHour = 3600 * 1000;
-        if (Date.now() - timestamp < oneHour) {
-          setLocation(savedLocation);
-          return;
-        } else {
-          Cookies.remove('userLocation');
-        }
-      } catch (error) {
-        console.error("Error parsing stored location:", error);
-        Cookies.remove('userLocation');
+
+  // Replace the fetchLocation function completely
+const fetchLocation = async (): Promise<{ lat: number; lng: number } | null> => {
+  setIsLocationLoading(true);
+  setLocationError(null);
+
+  /* --------------------------------------------------------------------
+   * 1. Try the cached copy in the `userLocation` cookie (valid ≤1 h)
+   * ------------------------------------------------------------------*/
+  try {
+    const cached = Cookies.get("userLocation");
+    if (cached) {
+      const { location: savedLoc, timestamp } = JSON.parse(cached);
+      const ONE_HOUR = 60 * 60 * 1000;
+
+      if (Date.now() - timestamp < ONE_HOUR) {
+        setLocation(savedLoc);
+        setIsLocationLoading(false);
+        return savedLoc;
+      }
+      Cookies.remove("userLocation");
+    }
+  } catch {
+    Cookies.remove("userLocation"); // corrupted cookie – just wipe it
+  }
+
+  /* --------------------------------------------------------------------
+   * 2. Ask the Permissions API – bail early if the user already blocked us
+   * ------------------------------------------------------------------*/
+  try {
+    if ("permissions" in navigator) {
+      const { state } = await navigator.permissions.query({ name: "geolocation" });
+      if (state === "denied") {
+        const msg = "Location permission is blocked. Enable it in site settings and retry.";
+        setLocationError(msg);
+        toast.error(msg);
+        return null;                       // early exit – no point asking again
       }
     }
+  } catch {
+    /* ignore – not every browser supports Permissions API */
+  }
 
-    if (!navigator.geolocation) {
-      toast.error("Geolocation is not supported by your browser.");
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const loc = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        };
-        setLocation(loc);
-        Cookies.set('userLocation', JSON.stringify({ location: loc, timestamp: Date.now() }), { expires: 1 / 24 });
-      },
-      (error) => {
-        console.error("Error fetching location:", error);
-        toast.error("Unable to fetch location. Please allow location access.");
-      },
-      {
-        enableHighAccuracy: true,
-        maximumAge: 0,
-        timeout: 10000,
-      }
+  /* --------------------------------------------------------------------
+   * 3. Call the helper that wraps navigator.geolocation
+   * ------------------------------------------------------------------*/
+  try {
+    const loc = await getBrowserLocation();       // <-- may throw
+    setLocation(loc);
+    Cookies.set(
+      "userLocation",
+      JSON.stringify({ location: loc, timestamp: Date.now() }),
+      { expires: 1 / 24 }                         // 1 hour
     );
-  };
+    return loc;
+  } catch (err: any) {
+    /* -----------------------------------------------
+     * Map Geolocation errors to user-friendly text
+     * ---------------------------------------------*/
+    const message =
+      err.code === 1
+        ? "You blocked location permission. Enable it in your browser settings and retry."
+        : err.code === 2
+        ? "Position unavailable. Are you on a simulator or is GPS switched off?"
+        : err.code === 3
+        ? "Location request timed out. Please try again."
+        : err.message || "Failed to retrieve location.";
 
-  // Dialog handlers
-  const handleModalChange = (isOpen: boolean) => {
+    setLocationError(message);
+    toast.error(message);
+    return null;                               // always resolve ↔ never throw
+  } finally {
+    setIsLocationLoading(false);
+  }
+};
+
+  /// Dialog handlers
+  const handleModalChange = async (isOpen: boolean) => {
     if (isOpen) {
-      fetchLocation();
+      await fetchLocation();
       setCapturedImage(null);
     } else {
       setCapturedImage(null);
@@ -351,15 +384,17 @@ export default function MyAttendance() {
     setIsModalOpen(isOpen);
   };
 
-  const handleBreakModalChange = (isOpen: boolean) => {
+  const handleBreakModalChange = async (isOpen: boolean) => {
     if (isOpen) {
-      fetchLocation();
+      await fetchLocation();
       setCapturedBreakImage(null);
     } else {
       setCapturedBreakImage(null);
     }
     setIsBreakModalOpen(isOpen);
   };
+
+
 
   // Attendance action handlers
   const handleLoginLogout = () => {
@@ -394,16 +429,32 @@ export default function MyAttendance() {
     return new File([new Blob([u8arr], { type: mime })], filename);
   };
 
-  // Capture image and submit login/logout
+
   const captureImageAndSubmitLogin = async () => {
     const imageSrc = webcamRef.current?.getScreenshot();
     if (imageSrc) {
       setCapturedImage(imageSrc);
     }
 
-    if (!imageSrc || !location) {
-      toast.error("Please capture an image and ensure location is available.");
+    if (!imageSrc) {
+      toast.error("Please capture an image to proceed.");
       return;
+    }
+
+    // If location is loading, wait for it
+    if (isLocationLoading) {
+      toast.info("Please wait while we get your location...");
+      return;
+    }
+
+    // If no location, try to fetch it again
+    if (!location) {
+      toast.info("Trying to get your location...");
+      const loc = await fetchLocation();
+      if (!loc) {
+        toast.error("Unable to proceed without location. Please allow location access and try again.");
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -427,8 +478,8 @@ export default function MyAttendance() {
       const action = isLoggedIn ? "logout" : "login";
       const requestBody: any = {
         imageUrl,
-        lat: location.lat,
-        lng: location.lng,
+        lat: location?.lat,
+        lng: location?.lng,
         action,
         workFromHome: isWorkFromHome,
       };
@@ -1132,10 +1183,10 @@ export default function MyAttendance() {
                       <Badge
                         className={
                           entry.approvalStatus === "Approved"
-                            ? "bg-green-100 text-green-800 border-green-200"
+                            ? "hover:bg-green-200 bg-green-100 text-green-800 border-green-200"
                             : entry.approvalStatus === "Rejected"
-                              ? "bg-red-100 text-red-800 border-red-200"
-                              : "bg-yellow-100 text-yellow-800 border-yellow-200"
+                              ? "hover:bg-red-200 bg-red-100 text-red-800 border-red-200"
+                              : "hover:bg-yellow-200 bg-yellow-100 text-yellow-800 border-yellow-200"
                         }
                       >
                         {entry.approvalStatus}
@@ -1187,18 +1238,65 @@ export default function MyAttendance() {
   const groupedEntries = groupEntriesByDay(
     filterApprovedEntries(filteredEntries)
   );
+
+const AttendanceLoader = () => {
+  return (
+    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+      <div className="flex flex-col items-center gap-6">
+        <div className="relative">
+          {/* Outer ring */}
+          <div className="absolute inset-0 rounded-full border-4 border-primary/10 animate-pulse"></div>
+
+          {/* Multiple spinning rings */}
+          <div className="h-24 w-24 rounded-full border-t-4 border-r-2 border-primary animate-spin"></div>
+          <div className="absolute inset-0 h-20 w-20 m-auto rounded-full border-b-4 border-l-2 border-primary/70 animate-spin" style={{ animationDuration: '1.5s', animationDirection: 'reverse' }}></div>
+          <div className="absolute inset-0 h-16 w-16 m-auto rounded-full border-l-4 border-t-2 border-primary/40 animate-spin" style={{ animationDuration: '2s' }}></div>
+
+          {/* Center icon */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Clock className="h-8 w-8 text-primary animate-pulse" />
+          </div>
+        </div>
+
+        <div className="space-y-2 text-center">
+          <h3 className="font-semibold text-xl">Loading Your Attendance</h3>
+          <p className="text-muted-foreground text-sm">Preparing your attendance records...</p>
+
+          {/* Progress bar */}
+          <div className="w-56 h-1.5 bg-muted rounded-full overflow-hidden mt-2">
+            <div className="h-full bg-primary rounded-full animate-loader-progress"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Add these keyframes to the global style tag in the component
+// or you can move this to your globals.css
+const loaderStyles = `
+  @keyframes loader-progress {
+    0% { width: 0%; }
+    20% { width: 20%; }
+    40% { width: 40%; }
+    60% { width: 60%; }
+    80% { width: 80%; }
+    95% { width: 95%; }
+    100% { width: 95%; }
+  }
+
+  .animate-loader-progress {
+    animation: loader-progress 1.8s ease-in-out infinite;
+  }
+`;
+
+
+
   // Main render
   return (
     <div className="container mx-auto p-4 space-y-6">
       {/* Loading overlay */}
-      {(displayLoader || attendanceLoading) && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center">
-          <div className="flex flex-col items-center gap-2">
-            <img src="/logo/loader.png" className="h-16 animate-pulse" />
-            <p className="text-sm text-muted-foreground">Loading...</p>
-          </div>
-        </div>
-      )}
+    {(displayLoader || attendanceLoading) && <AttendanceLoader />}
 
       {/* Page header */}
       <div className="flex flex-col space-y-2">
@@ -1454,9 +1552,9 @@ export default function MyAttendance() {
                     <div className="flex items-center gap-3">
                       <Badge
                         className={
-                          entry.action === "login" ? "bg-green-100 text-green-800 border-green-200" :
-                            entry.action === "logout" ? "bg-red-100 text-red-800 border-red-200" :
-                              entry.action === "break_started" ? "bg-yellow-100 text-yellow-800 border-yellow-200" :
+                          entry.action === "login" ? "hover:bg-green-200 bg-green-100 text-green-800 border-green-200" :
+                            entry.action === "logout" ? "hover:bg-red-200 bg-red-100 text-red-800 border-red-200" :
+                              entry.action === "break_started" ? "hover:bg-yellow-200 bg-yellow-100 text-yellow-800 border-yellow-200" :
                                 "bg-blue-100 text-blue-800 border-blue-200"
                         }
                       >
@@ -1662,11 +1760,11 @@ export default function MyAttendance() {
                                 <div className="flex items-center gap-2">
                                   <Badge
                                     className={
-                                      entry.action === "login" ? "bg-green-100 text-green-800 border-green-200" :
-                                        entry.action === "logout" ? "bg-red-100 text-red-800 border-red-200" :
-                                          entry.action === "break_started" ? "bg-yellow-100 text-yellow-800 border-yellow-200" :
-                                            entry.action === "break_ended" ? "bg-blue-100 text-blue-800 border-blue-200" :
-                                              "bg-gray-100 text-gray-800 border-gray-200"
+                                      entry.action === "login" ? "hover:bg-green-200 bg-green-100 text-green-800 border-green-200" :
+                                        entry.action === "logout" ? "hover:bg-red-200 bg-red-100 text-red-800 border-red-200" :
+                                          entry.action === "break_started" ? "hover:bg-yellow-200 bg-yellow-100 text-yellow-800 border-yellow-200" :
+                                            entry.action === "break_ended" ? "hover:bg-blue-200 bg-blue-100 text-blue-800 border-blue-200" :
+                                              " hover:bg-gray-200 text-gray-800 border-gray-200"
                                     }
                                   >
                                     {entry.action === "login" ? "LOGIN" :
@@ -1852,35 +1950,93 @@ export default function MyAttendance() {
             )}
 
             {/* Webcam or Captured Image */}
-            <div className="relative overflow-hidden rounded-lg border">
-              {capturedImage ? (
-                <img
-                  src={capturedImage}
-                  alt="Captured"
-                  className="w-full h-auto aspect-video object-cover"
-                />
-              ) : (
-                <Webcam
-                  audio={false}
-                  ref={webcamRef}
-                  screenshotFormat="image/jpeg"
-                  className="w-full h-auto aspect-video object-cover"
-                />
-              )}
+          {/* Webcam or Captured Image - Enhanced Animation */}
+<div className="relative overflow-hidden rounded-lg border">
+  {capturedImage ? (
+    <div className="relative w-full">
+      <img
+        src={capturedImage}
+        alt="Captured"
+        className="w-full h-auto aspect-video object-cover"
+      />
 
-              {/* Face detection animation */}
-              {capturedImage && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-                  <DotLottieReact
-                    src="/lottie/facescan.lottie"
-                    loop
-                    className="h-36"
-                    autoplay
-                  />
-                </div>
-              )}
+      {/* Enhanced Face Detection Animation Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/60 backdrop-blur-sm flex flex-col items-center justify-center">
+        {/* Main animation in center */}
+        <div className="relative flex items-center justify-center w-full">
+          <DotLottieReact
+            src="/lottie/facescan.lottie"
+            loop
+            className="h-36 z-10"
+            autoplay
+          />
+
+          {/* Pulsing ring effect */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="h-32 w-32 rounded-full border-4 border-primary/50 animate-ping opacity-30"></div>
+          </div>
+        </div>
+
+        {/* Progress indicators */}
+        <div className="mt-4 flex flex-col items-center">
+          <div className="text-white font-medium text-sm tracking-wide mb-2">
+            Analyzing your face...
+          </div>
+
+          <div className="w-48 h-1.5 bg-white/20 rounded-full overflow-hidden">
+            <div className="h-full bg-primary rounded-full animate-progressBar"></div>
+          </div>
+
+          <div className="mt-3 flex items-center gap-1.5">
+            <div className="h-2 w-2 rounded-full bg-primary animate-pulse"></div>
+            <span className="text-xs text-white">Secure verification in progress</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  ) : (
+    <Webcam
+      audio={false}
+      ref={webcamRef}
+      screenshotFormat="image/jpeg"
+      className="w-full h-auto aspect-video object-cover"
+      videoConstraints={{
+        facingMode: "user"
+      }}
+    />
+  )}
+
+  {/* Face alignment guide when not captured yet */}
+  {/* {!capturedImage && (
+    <div className="absolute inset-0 pointer-events-none">
+      <div className="h-full w-full flex items-center justify-center">
+        <div className="w-48 h-48 border-2 border-dashed border-primary/40 rounded-full flex items-center justify-center">
+          <div className="w-36 h-36 border border-primary/30 rounded-full flex items-center justify-center">
+            <div className="text-xs text-primary/70 font-medium text-center">
+              Position your face in the center
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )} */}
+</div>
 
+{/* Add this CSS animation definition somewhere in your globals.css or a style tag */}
+<style jsx global>{`
+  @keyframes progressBar {
+    0% { width: 0%; }
+    20% { width: 20%; }
+    50% { width: 50%; }
+    70% { width: 70%; }
+    90% { width: 90%; }
+    100% { width: 98%; }
+  }
+
+  .animate-progressBar {
+    animation: progressBar 2s ease-in-out infinite;
+  }
+`}</style>
             {/* Capture button */}
             <div className="flex justify-center">
               <Button
@@ -1907,7 +2063,7 @@ export default function MyAttendance() {
                   orgData.location?.lat,
                   orgData.location?.lng
                 ) <= orgData.geofenceRadius ? (
-                  <Badge className="bg-green-100 text-green-800 border-green-200 gap-1">
+                  <Badge className="bg-green-100 text-green-800 border-green-200 gap-1 ">
                     <FaHouseUser className="h-3.5 w-3.5" />
                     You are in office reach
                   </Badge>
@@ -1919,15 +2075,37 @@ export default function MyAttendance() {
                 )}
               </div>
             )}
-
+            {/* // Then update the location display in the dialog */}
+            {/* Location info in dialog */}
             <div className="flex justify-center">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-md text-xs text-muted-foreground">
-                <MapPinIcon className="h-3.5 w-3.5 text-amber-500" />
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs ${locationError ? "bg-red-100 text-red-800" :
+                  isLocationLoading ? "bg-amber-100 text-amber-800" :
+                    location ? "bg-green-100 text-green-800" : "bg-muted text-muted-foreground"
+                }`}>
+                <MapPinIcon className={`h-3.5 w-3.5 ${isLocationLoading ? "animate-pulse" : ""
+                  }`} />
                 <span>
-                  {location
-                    ? `Lat: ${location.lat.toFixed(6)}, Long: ${location.lng.toFixed(6)}`
-                    : "Fetching location..."}
+                  {isLocationLoading
+                    ? "Getting your location..."
+                    : locationError
+                      ? locationError
+                      : location
+                        ? `Lat: ${location.lat.toFixed(6)}, Long: ${location.lng.toFixed(6)}`
+                        : "Location unavailable. Please allow location access."
+                  }
                 </span>
+
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 ml-2 px-2"
+                    onClick={() => fetchLocation()}
+                  >
+                    <RefreshCw className="h-3 w-3 mr-1" />
+                    Retry
+                  </Button>
+
               </div>
             </div>
           </div>
@@ -2066,35 +2244,77 @@ export default function MyAttendance() {
               </div>
             )}
 
-            {/* Webcam for Break */}
-            <div className="relative overflow-hidden rounded-lg border">
-              {capturedBreakImage ? (
-                <img
-                  src={capturedBreakImage}
-                  alt="Captured"
-                  className="w-full h-auto aspect-video object-cover"
-                />
-              ) : (
-                <Webcam
-                  audio={false}
-                  ref={webcamRef}
-                  screenshotFormat="image/jpeg"
-                  className="w-full h-auto aspect-video object-cover"
-                />
-              )}
+           {/* Webcam for Break - Enhanced Animation */}
+<div className="relative overflow-hidden rounded-lg border">
+  {capturedBreakImage ? (
+    <div className="relative w-full">
+      <img
+        src={capturedBreakImage}
+        alt="Captured"
+        className="w-full h-auto aspect-video object-cover"
+      />
 
-              {/* Face detection animation */}
-              {capturedBreakImage && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-                  <DotLottieReact
-                    src="/lottie/facescan.lottie"
-                    loop
-                    className="h-36"
-                    autoplay
-                  />
-                </div>
-              )}
+      {/* Enhanced Break Detection Animation Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-b from-amber-500/20 to-amber-800/60 backdrop-blur-sm flex flex-col items-center justify-center">
+        {/* Main animation in center */}
+        <div className="relative flex items-center justify-center w-full">
+          <DotLottieReact
+            src="/lottie/facescan.lottie"
+            loop
+            className="h-36 z-10"
+            autoplay
+          />
+
+          {/* Spinning clock effect for break */}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="h-40 w-40 rounded-full border-4 border-amber-400/50 animate-spin opacity-30" style={{ animationDuration: '3s' }}></div>
+          </div>
+        </div>
+
+        {/* Progress indicators */}
+        <div className="mt-4 flex flex-col items-center">
+          <div className="text-white font-medium text-sm tracking-wide mb-2">
+            {isBreakOpen ? "Ending your break..." : "Starting your break..."}
+          </div>
+
+          <div className="w-48 h-1.5 bg-white/20 rounded-full overflow-hidden">
+            <div className="h-full bg-amber-400 rounded-full animate-progressBar"></div>
+          </div>
+
+          <div className="mt-3 flex items-center gap-1.5">
+            <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></div>
+            <span className="text-xs text-white">Verifying your identity</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  ) : (
+    <Webcam
+      audio={false}
+      ref={webcamRef}
+      screenshotFormat="image/jpeg"
+      className="w-full h-auto aspect-video object-cover"
+      videoConstraints={{
+        facingMode: "user"
+      }}
+    />
+  )}
+
+  {/* Face alignment guide when not captured yet */}
+  {!capturedBreakImage && (
+    <div className="absolute inset-0 pointer-events-none">
+      <div className="h-full w-full flex items-center justify-center">
+        <div className="w-48 h-48 border-2 border-dashed border-amber-400/40 rounded-full flex items-center justify-center">
+          <div className="w-36 h-36 border border-amber-400/30 rounded-full flex items-center justify-center">
+            <div className="text-xs text-amber-500/70 font-medium text-center">
+              Center your face here
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )}
+</div>
 
             {/* Capture button for break */}
             <div className="flex justify-center">
@@ -2332,7 +2552,7 @@ export default function MyAttendance() {
 
       {/* Time Picker Dialogs */}
       <Dialog open={isTimePickerOpen} onOpenChange={setIsTimePickerOpen}>
-      <DialogContent className=" scale-75 w-[550px] bg-transparent border-none">
+        <DialogContent className=" scale-75 w-[550px] bg-transparent border-none">
           <CustomTimePicker
             selectedTime={regularizationLoginTime}
             onTimeChange={handleTimeChange}
@@ -2344,7 +2564,7 @@ export default function MyAttendance() {
       </Dialog>
 
       <Dialog open={isLogoutTimePickerOpen} onOpenChange={setIsLogoutTimePickerOpen}>
-      <DialogContent className=" scale-75 w-[550px] bg-transparent border-none">
+        <DialogContent className=" scale-75 w-[550px] bg-transparent border-none">
           <CustomTimePicker
             selectedTime={regularizationLogoutTime}
             onTimeChange={handleLogoutTimeChange}

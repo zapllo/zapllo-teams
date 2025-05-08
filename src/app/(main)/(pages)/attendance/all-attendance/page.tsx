@@ -59,6 +59,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type User = {
   _id: string;
@@ -412,13 +413,121 @@ export default function AllAttendance() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex h-[80vh] w-full items-center justify-center">
-        <Loader />
-      </div>
-    );
-  }
+
+// Replace the loader return statement
+if (loading) {
+  return (
+    <div className="container mx-auto p-4 max-w-7xl">
+      <Card className="mb-8">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-8 w-64" />
+          </div>
+        </CardHeader>
+
+        <CardContent>
+          {/* Tab navigation skeleton */}
+          <div className="flex justify-center mb-6">
+            <div className="flex gap-2">
+              <Skeleton className="h-10 w-36 rounded-md" />
+              <Skeleton className="h-10 w-40 rounded-md" />
+            </div>
+          </div>
+
+          {/* Filter controls skeleton */}
+          <div className="flex flex-col md:flex-row justify-between gap-3 mb-6">
+            <div className="flex gap-2">
+              <Skeleton className="h-9 w-40 rounded-md" />
+              <Skeleton className="h-9 w-32 rounded-md" />
+            </div>
+            <Skeleton className="h-9 w-32 rounded-md" />
+          </div>
+
+          <Skeleton className="h-px w-full mb-6" />
+
+          {/* Attendance Tab Skeleton (accordions) */}
+          <div className="space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <Card key={i}>
+                <div className="px-4 py-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-9 w-9 rounded-full" />
+                      <Skeleton className="h-5 w-32" />
+                    </div>
+                    <Skeleton className="h-5 w-5 rounded-full" />
+                  </div>
+                </div>
+
+                {/* Nested accordion content skeleton (shows for first item only) */}
+                {i === 0 && (
+                  <div className="border-t">
+                    <div className="px-4 py-2">
+                      <div className="flex justify-between items-center">
+                        <Skeleton className="h-5 w-28" />
+                        <Skeleton className="h-5 w-5 rounded-full" />
+                      </div>
+                    </div>
+
+                    <div className="border-t border-muted">
+                      <div className="divide-y">
+                        {[...Array(2)].map((_, j) => (
+                          <div key={j} className="flex justify-between items-center py-3 px-6">
+                            <div className="flex items-center gap-3">
+                              <Skeleton className="h-6 w-16 rounded-full" />
+                              <Skeleton className="h-4 w-20" />
+                            </div>
+                            <Skeleton className="h-4 w-16" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </Card>
+            ))}
+          </div>
+
+          {/* Regularization Tab Skeleton (hidden) */}
+          <div className="hidden space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <Card key={i} className="overflow-hidden">
+                <div className="p-4">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-9 w-9 rounded-full" />
+                      <div>
+                        <Skeleton className="h-5 w-40 mb-2" />
+                        <div className="flex flex-wrap gap-2">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-4 w-4 rounded-full" />
+                          <Skeleton className="h-4 w-20" />
+                          <Skeleton className="h-4 w-4 rounded-full" />
+                          <Skeleton className="h-4 w-20" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-3 sm:mt-0">
+                      <Skeleton className="h-6 w-20 rounded-full" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action buttons */}
+                <div className="bg-muted/50 p-2 flex justify-end gap-2 border-t">
+                  <Skeleton className="h-9 w-24 rounded-md" />
+                  <Skeleton className="h-9 w-24 rounded-md" />
+                  <Skeleton className="h-8 w-8 rounded-md" />
+                </div>
+              </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 
   return (
     <div className="container mx-auto p-4 max-w-7xl">

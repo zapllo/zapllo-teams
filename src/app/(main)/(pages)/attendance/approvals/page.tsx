@@ -68,6 +68,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Types remain the same
 type LeaveType = {
@@ -554,14 +555,122 @@ export default function Approvals() {
       filteredRegularizations
     );
 
-    if (loading) {
-      return (
-        <div className="flex h-[80vh] w-full items-center justify-center">
-          <Loader />
-        </div>
-      );
-    }
 
+
+// Replace the loader return statement
+if (loading) {
+  return (
+    <div className="container mx-auto p-4 max-w-7xl">
+      <Card className="mb-8">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-8 w-56" />
+            <div className="flex gap-2">
+              <Skeleton className="h-10 w-48 rounded-md" />
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {/* Filter controls skeleton */}
+          <div className="flex flex-col md:flex-row justify-between gap-3 mb-6">
+            <div className="flex flex-wrap items-center gap-2">
+              <Skeleton className="h-10 w-32 rounded-md" />
+              <Skeleton className="h-10 w-40 rounded-md" />
+            </div>
+          </div>
+
+          <Skeleton className="h-px w-full mb-6" />
+
+          {/* Request cards skeleton */}
+          <div className="space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <Card key={i} className="overflow-hidden">
+                <CardContent className="p-0">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-10 w-10 rounded-full" />
+                      <div>
+                        <Skeleton className="h-5 w-40 mb-2" />
+                        <div className="flex flex-wrap gap-2">
+                          <Skeleton className="h-4 w-20" />
+                          <Skeleton className="h-4 w-4 rounded-full" />
+                          <Skeleton className="h-4 w-32" />
+                          <Skeleton className="h-4 w-4 rounded-full" />
+                          <Skeleton className="h-4 w-16" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 mt-3 sm:mt-0">
+                      <Skeleton className="h-6 w-20 rounded-full" />
+                    </div>
+                  </div>
+
+                  {/* Action buttons skeleton */}
+                  <div className="bg-muted/50 p-2 flex justify-end gap-2 border-t">
+                    <Skeleton className="h-9 w-24 rounded-md" />
+                    <Skeleton className="h-9 w-24 rounded-md" />
+                    <Skeleton className="h-8 w-8 rounded-md" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Responsive behavior skeleton for smaller cards */}
+          <div className="mt-4 md:hidden space-y-3">
+            {[...Array(2)].map((_, i) => (
+              <Skeleton key={`mobile-${i}`} className="h-24 w-full rounded-lg" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Secondary content skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <Skeleton className="h-5 w-32" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-5/6" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <Skeleton className="h-5 w-40" />
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="flex justify-between items-center">
+              <Skeleton className="h-16 w-16 rounded-full" />
+              <div className="space-y-1 flex-1 ml-4">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Pagination skeleton */}
+      <div className="flex justify-center mt-6">
+        <div className="flex gap-1">
+          <Skeleton className="h-9 w-9 rounded-md" />
+          <Skeleton className="h-9 w-9 rounded-md" />
+          <Skeleton className="h-9 w-9 rounded-md" />
+          <Skeleton className="h-9 w-9 rounded-md" />
+          <Skeleton className="h-9 w-9 rounded-md" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Existing code continues...
     // Status color mapping helper
     const getStatusColor = (status: string) => {
       switch(status) {

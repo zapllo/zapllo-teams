@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Holiday {
   _id: string;
@@ -131,9 +132,71 @@ const HolidayManager: React.FC = () => {
     .sort((a, b) => new Date(a.holidayDate).getTime() - new Date(b.holidayDate).getTime())
     .slice(0, 5);
 
-  if (isLoading) {
-    return <Loader />;
-  }
+// Replace the loader return statement
+if (isLoading) {
+  return (
+    <div className="container mx-auto p-4 space-y-6">
+      <Card className="shadow-sm">
+        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+          <div>
+            <Skeleton className="h-7 w-48 mb-2" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+          <Skeleton className="h-9 w-32" />
+        </CardHeader>
+
+        <CardContent className="pt-4">
+          <div className="space-y-6">
+            {/* Upcoming Holidays skeleton */}
+            <div className="mb-6">
+              <Skeleton className="h-5 w-40 mb-3" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                {[...Array(5)].map((_, index) => (
+                  <Card key={index} className="bg-muted/30">
+                    <CardContent className="p-4">
+                      <Skeleton className="h-5 w-24 mb-2" />
+                      <Skeleton className="h-5 w-full" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            {/* All Holidays table skeleton */}
+            <div>
+              <Skeleton className="h-5 w-40 mb-3" />
+              <div className="border rounded-lg overflow-hidden">
+                <div className="p-1">
+                  {/* Table header skeleton */}
+                  <div className="flex py-3 px-4 border-b">
+                    <Skeleton className="h-5 w-[300px] mr-4" />
+                    <Skeleton className="h-5 w-24 mr-4" />
+                    <Skeleton className="h-5 w-24 mr-auto" />
+                    <Skeleton className="h-5 w-24" />
+                  </div>
+
+                  {/* Table rows skeleton */}
+                  {[...Array(8)].map((_, index) => (
+                    <div key={index} className="flex items-center py-3 px-4 border-b last:border-0">
+                      <Skeleton className="h-5 w-[300px] mr-4" />
+                      <Skeleton className="h-5 w-36 mr-4" />
+                      <Skeleton className="h-5 w-24 mr-auto" />
+                      <div className="flex gap-2">
+                        <Skeleton className="h-8 w-8 rounded-md" />
+                        <Skeleton className="h-8 w-8 rounded-md" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 
   return (
     <div className="container mx-auto p-4 space-y-6">

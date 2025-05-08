@@ -13,6 +13,7 @@ import { PlayCircle, CheckCircle, AlertCircle, ListFilter } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { String } from 'aws-sdk/clients/cloudsearch';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // Define types for ChecklistItem and Progress
 interface ChecklistItem {
@@ -109,6 +110,78 @@ export default function ChecklistPage() {
     const completedItems = checklistItems.filter(item => progress.includes(item._id));
     const pendingItems = checklistItems.filter(item => !progress.includes(item._id));
     const progressPercentage = calculateProgress();
+
+
+if (isLoading) {
+  return (
+    <div className="flex h-full mt-24">
+      <div className="flex-1 px-4 -mt-12 py-6">
+        <div className="mx-auto">
+          <div className="space-y-8 p-4">
+            {/* Progress Card Skeleton */}
+            <Card className="mb-4 bg-muted/50 dark:bg-muted/20 pb-4">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Skeleton className="h-8 w-48 mb-2" />
+                    <Skeleton className="h-4 w-64" />
+                  </div>
+                  <Skeleton className="h-7 w-32 rounded-full" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-2 flex items-center justify-between">
+                  <Skeleton className="h-4 w-40" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
+                <Skeleton className="h-2.5 w-full rounded-full" />
+              </CardContent>
+            </Card>
+
+            {/* Checklist Header Skeleton */}
+            <div className="flex items-center justify-between mb-4">
+              <Skeleton className="h-7 w-40" />
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-9 w-24 rounded-md" />
+              </div>
+            </div>
+
+            {/* Checklist Items Skeleton */}
+            <Card>
+              <CardContent className="p-0">
+                <div className="divide-y">
+                  {[...Array(8)].map((_, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-4 transition-colors"
+                    >
+                      <div className="flex items-center gap-3 w-full">
+                        <Skeleton className="h-5 w-5 rounded-full" />
+                        <Skeleton className="h-5 w-full max-w-[85%]" />
+                      </div>
+
+                      <div className="flex items-center">
+                        {index % 3 === 0 && ( // Randomly show the completed indicator for some items
+                          <Skeleton className="h-5 w-5 rounded-full mr-2" />
+                        )}
+                        {index % 2 === 0 && ( // Randomly show the tutorial button for some items
+                          <Skeleton className="h-8 w-8 rounded-full" />
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 
     return (
         <div className="flex h-full mt-24">

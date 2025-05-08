@@ -146,20 +146,60 @@ export default function LoginPage() {
 
     return (
         <>
-            {userLoading && (
-                <div className="absolute w-screen h-screen z-[100] inset-0 bg-black bg-opacity-90 rounded-xl flex justify-center items-center">
-                    <div className="z-[100] max-h-screen max-w-screen text-[#D0D3D3] w-[100%] rounded-lg">
-                        <div className="">
-                            <div className="absolute z-50 inset-0 flex flex-col items-center justify-center text-white font-bold px-4 pointer-events-none text-3xl text-center md:text-4xl lg:text-7xl">
-                                <img src="/logo/loader.png" className="h-[15%] animate-pulse" />
-                                <p className="bg-clip-text text-transparent drop-shadow-2xl bg-gradient-to-b text-sm from-white/80 to-white/20">
-                                    Loading...
-                                </p>
-                            </div>
-                        </div>
+
+
+
+
+{userLoading && (
+    <div className="fixed w-screen h-screen z-[100] inset-0 bg-black/95 flex justify-center items-center">
+        <div className="relative w-full max-w-md flex flex-col items-center justify-center p-6">
+            {/* Professional container with subtle border */}
+            <div className="relative bg-black/40 backdrop-blur-md rounded-xl border border-white/10 p-8 w-full max-w-sm shadow-2xl">
+                {/* Logo with professional animation */}
+                <div className="flex justify-center mb-6">
+                    <div className="relative">
+                        <img
+                            src="/logo/loader.png"
+                            className="h-16 drop-shadow-lg"
+                            alt="Zapllon"
+                        />
+                        {/* Subtle shine effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shine rounded-lg"></div>
                     </div>
                 </div>
-            )}
+
+                {/* Professional progress indicator */}
+                <div className="mb-5">
+                    <div className="w-full bg-gray-700/50 h-1 rounded-full overflow-hidden">
+                        <div className="h-full bg-[#815bf5] animate-progressBar rounded-full"></div>
+                    </div>
+                </div>
+
+                {/* Professional messaging */}
+                <div className="text-center">
+                    <h3 className="text-white font-medium text-sm mb-1">Authenticating</h3>
+                    <p className="text-white/60 text-xs">Securely accessing your account</p>
+                </div>
+
+                {/* Subtle rotating circles - professional indicators */}
+                <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] opacity-20">
+                        <div className="absolute inset-0 border border-[#815bf5]/30 rounded-full animate-spin-slow"></div>
+                        <div className="absolute inset-[10px] border border-[#815bf5]/20 rounded-full animate-reverse-spin-slow"></div>
+                        <div className="absolute inset-[20px] border border-[#815bf5]/10 rounded-full animate-spin-slower"></div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Security message for professional reassurance */}
+            <p className="text-white/50 text-xs mt-4 text-center">
+                Your session is protected with end-to-end encryption
+            </p>
+        </div>
+    </div>
+)}
+
+
             <div
                 onKeyDown={handleKeyDown}
                 tabIndex={0}
