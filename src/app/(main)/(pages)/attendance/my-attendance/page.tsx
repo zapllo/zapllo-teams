@@ -1,12 +1,30 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Loader from "@/components/ui/loader";
+import { format, parseISO } from "date-fns";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import axios from "axios";
+import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+import Cookies from 'js-cookie';
 import Webcam from "react-webcam";
-// import CustomTimePicker from "./CustomTimePicker";
-// Adjust the path to where CustomTimePicker is located
+
+// UI Components
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Tabs3 as Tabs, TabsContent3 as TabsContent, TabsList3 as TabsList, TabsTrigger3 as TabsTrigger } from "@/components/ui/tabs3";
+import { Dialog, DialogContent, DialogTitle, DialogClose, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs3, TabsList3, TabsTrigger3 } from "@/components/ui/tabs3";
+import { toast } from "sonner";
+import Loader from "@/components/ui/loader";
+import CustomDatePicker from "@/components/globals/date-picker";
 import CustomTimePicker from "@/components/globals/time-picker";
+
+// Icons
 import {
   BookIcon,
   Building,
@@ -15,43 +33,27 @@ import {
   Camera,
   CheckCircle,
   ChevronDown,
+  ChevronRight,
   Clock,
+  FileText,
   Globe,
+  LayoutDashboard,
   MapPin,
   MapPinIcon,
+  MoreHorizontal,
   UserIcon,
   Users,
   Users2,
   X,
+  ArrowRight,
+  BarChart,
+  RefreshCw
 } from "lucide-react";
-import dynamic from "next/dynamic";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogTitle,
-  DialogDescription,
-  DialogClose,
-  DialogOverlay,
-} from "@/components/ui/dialog";
-
-// Remove the top-level import of Leaflet
-// import L from 'leaflet';
-
-// Import Leaflet CSS (this is okay because CSS imports don't execute JS code)
-import { toast, Toaster } from "sonner";
-import RegularizationDetails from "@/components/sheets/regularizationDetails";
-import CustomDatePicker from "@/components/globals/date-picker";
-import { Button } from "@/components/ui/button";
 import { CrossCircledIcon } from "@radix-ui/react-icons";
-import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
-import { format, parseISO } from "date-fns";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-import axios from "axios";
 import { FaHouseUser } from "react-icons/fa";
-import { Tabs3, TabsList3, TabsTrigger3 } from "@/components/ui/tabs3";
-import Cookies from 'js-cookie';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+// Custom Components
+import RegularizationDetails from "@/components/sheets/regularizationDetails";
 
 const mapContainerStyle = {
   height: "400px",
@@ -73,7 +75,7 @@ interface LoginEntry {
   lng: number;
   timestamp: string;
   action: "login" | "logout" | "regularization" | "break_started" | "break_ended";
-  approvalStatus?: "Pending" | "Approved" | "Rejected"; // Add the approvalStatus field
+  approvalStatus?: "Pending" | "Approved" | "Rejected";
   loginTime: string;
   logoutTime: string;
   remarks: string;
@@ -85,11 +87,11 @@ const groupEntriesByDay = (
   entries: LoginEntry[] | undefined | null
 ): { [date: string]: LoginEntry[] } => {
   if (!entries || entries.length === 0) {
-    return {}; // Return an empty object if entries are undefined, null, or empty
+    return {};
   }
 
   return entries.reduce((acc: { [date: string]: LoginEntry[] }, entry) => {
-    const date = new Date(entry.timestamp).toLocaleDateString(); // Group by date
+    const date = new Date(entry.timestamp).toLocaleDateString();
     if (!acc[date]) {
       acc[date] = [];
     }
@@ -99,24 +101,39 @@ const groupEntriesByDay = (
 };
 
 export default function MyAttendance() {
-
+  // Organization & user states
   const [organization, setOrganization] = useState<any>(null);
   const [orgUsers, setOrgUsers] = useState<any[]>([]);
   const [enterpriseMode, setEnterpriseMode] = useState(false);
   const [selectedTargetUser, setSelectedTargetUser] = useState<string | null>(null);
   const [userSearchQuery, setUserSearchQuery] = useState("");
   const [filteredUsers, setFilteredUsers] = useState<any[]>([]);
+  const [workerStatuses, setWorkerStatuses] = useState<Record<string, { isLoggedIn: boolean; isBreakOpen: boolean }>>({});
+  const [user, setUser] = useState<any>(null);
+  const [role, setRole] = useState<string>("");
 
+  // Attendance states
   const [loginEntries, setLoginEntries] = useState<LoginEntry[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isBreakOpen, setIsBreakOpen] = useState(false);
+  const [isEnterpriseAdmin, setIsEnterpriseAdmin] = useState(false);
+  const [currentAction, setCurrentAction] = useState<'login' | 'logout' | 'break_started' | 'break_ended'>('login');
+  const [hasRegisteredFaces, setHasRegisteredFaces] = useState(false);
+  const [isWorkFromHome, setIsWorkFromHome] = useState(false);
+
+  // UI state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBreakModalOpen, setIsBreakModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [attendanceLoading, setAttendanceLoading] = useState(false);
+  const [displayLoader, setDisplayLoader] = useState(false);
   const [mapModalOpen, setMapModalOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("thisMonth"); // Set default to 'thisMonth'
+
+  // Tab states
+  const [activeTab, setActiveTab] = useState("thisMonth");
   const [activeAttendanceTab, setActiveAttendanceTab] = useState("dailyReport");
+
+  // Date and time states
   const [customDateRange, setCustomDateRange] = useState<{
     start: Date | null;
     end: Date | null;
@@ -125,98 +142,119 @@ export default function MyAttendance() {
     end: null,
   });
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
-
-  // Login Time
-
   const [isTimePickerOpen, setIsTimePickerOpen] = useState(false);
-  // const [regularizationLoginTime, setRegularizationLoginTime] = useState<
-  //   string | null
-  // >(null);
+  const [isLogoutTimePickerOpen, setIsLogoutTimePickerOpen] = useState(false);
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState<boolean>(false);
+  const [isStartPickerOpen, setIsStartPickerOpen] = useState(false);
+  const [isEndPickerOpen, setIsEndPickerOpen] = useState(false);
+  const [isDateSelected, setIsDateSelected] = useState<boolean>(false);
 
+  // Regularization states
+  const [isRegularizationModalOpen, setIsRegularizationModalOpen] = useState(false);
+  const [regularizationDate, setRegularizationDate] = useState("");
+  const [regularizationLoginTime, setRegularizationLoginTime] = useState("");
+  const [regularizationLogoutTime, setRegularizationLogoutTime] = useState("");
+  const [regularizationRemarks, setRegularizationRemarks] = useState("");
+  const [isSubmittingRegularization, setIsSubmittingRegularization] = useState(false);
+  const [selectedRegularization, setSelectedRegularization] = useState<LoginEntry | null>(null);
+
+  // Face registration states
+  const [isRegisterFaceModalOpen, setIsRegisterFaceModalOpen] = useState(false);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [capturedBreakImage, setCapturedBreakImage] = useState<string | null>(null);
+
+  // Location states
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [mapCoords, setMapCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [orgData, setOrgData] = useState<{ location: { lat: number; lng: number }; allowGeofencing: boolean; geofenceRadius: number; } | null>(null);
+
+  // Dropdown states
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [showBreakUserDropdown, setShowBreakUserDropdown] = useState(false);
+
+  // Expanded days for accordion
+  const [expandedDays, setExpandedDays] = useState<{ [date: string]: boolean }>({});
+
+  // References
+  const webcamRef = React.useRef<Webcam>(null);
+
+  // Formatting helper functions
+  const formatTimeForDisplay = (time: string | null): string => {
+    if (!time) return '';
+    return format(new Date(`1970-01-01T${time}:00`), 'hh:mm a');
+  };
+
+  const formatTimeToAMPM = (timeString: string | undefined): string => {
+    if (!timeString) return "";
+    const [hours, minutes] = timeString.split(":");
+    const date = new Date();
+    date.setHours(parseInt(hours), parseInt(minutes));
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
+  // Calculate distance between coordinates (for geofencing)
+  const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ): number => {
+    const R = 6371e3; // Earth's radius in meters
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+    const a = Math.sin(Δφ / 2) ** 2 +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  // Time picker handlers
   const handleTimeChange = (time: string) => {
     setRegularizationLoginTime(time);
   };
-
-  const openTimePicker = () => {
-    setIsTimePickerOpen(true); // Open the time picker
-  };
-
-  const handleCancel = () => {
-    setIsTimePickerOpen(false); // Close the time picker without changes
-  };
-
-  const handleAccept = () => {
-    setIsTimePickerOpen(false); // Close the time picker after selecting time
-  };
-
-  // Logout picker
-
-  const [isLogoutTimePickerOpen, setIsLogoutTimePickerOpen] = useState(false);
-  // const [regularizationLogoutTime, setRegularizationLogoutTime] = useState<
-  //   string | null
-  // >(null);
 
   const handleLogoutTimeChange = (time: string) => {
     setRegularizationLogoutTime(time);
   };
 
-  // Formatting the time for display
-  const formatTimeForDisplay = (time: string | null): string => {
-    if (!time) return '';
-    return format(new Date(`1970-01-01T${time}:00`), 'hh:mm a'); // Convert to 12-hour format
+  const openTimePicker = () => {
+    setIsTimePickerOpen(true);
+  };
+
+  const handleCancel = () => {
+    setIsTimePickerOpen(false);
+  };
+
+  const handleAccept = () => {
+    setIsTimePickerOpen(false);
   };
 
   const openLogoutTimePicker = () => {
-    setIsLogoutTimePickerOpen(true); // Open the time picker for logout
+    setIsLogoutTimePickerOpen(true);
   };
 
   const handleLogoutCancel = () => {
-    setIsLogoutTimePickerOpen(false); // Close the time picker without changes
+    setIsLogoutTimePickerOpen(false);
   };
 
   const handleLogoutAccept = () => {
-    setIsLogoutTimePickerOpen(false); // Close the time picker after selecting time
+    setIsLogoutTimePickerOpen(false);
   };
 
-  // For Face Login Modal
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
-  const [capturedBreakImage, setCapturedBreakImage] = useState<string | null>(null);
-  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
-    null
-  );
-  const webcamRef = React.useRef<Webcam>(null);
-  // State variables for Regularization Modal
-  const [isRegularizationModalOpen, setIsRegularizationModalOpen] =
-    useState(false);
-  const [regularizationDate, setRegularizationDate] = useState("");
-  const [regularizationLoginTime, setRegularizationLoginTime] = useState("");
-  const [regularizationLogoutTime, setRegularizationLogoutTime] = useState("");
-  const [regularizationRemarks, setRegularizationRemarks] = useState("");
-  const [isSubmittingRegularization, setIsSubmittingRegularization] =
-    useState(false);
-  const [hasRegisteredFaces, setHasRegisteredFaces] = useState(false);
-  const [isRegisterFaceModalOpen, setIsRegisterFaceModalOpen] = useState(false); // Modal for Registering Faces
-  const [selectedImages, setSelectedImages] = useState<File[]>([]); // For image selection
-  const [expandedDays, setExpandedDays] = useState<{ [date: string]: boolean }>(
-    {}
-  );
-  // Just below your other states, e.g.:
-  const [isWorkFromHome, setIsWorkFromHome] = useState(false);
+  // Map view handler
+  const handleViewMap = (lat: number, lng: number) => {
+    setMapCoords({ lat, lng });
+    setMapModalOpen(true);
+  };
 
-  const [displayLoader, setDisplayLoader] = useState(false);
-  const [isDateSelected, setIsDateSelected] = useState<boolean>(false); // Track whether the user manually selects a date
-  const [isDatePickerOpen, setIsDatePickerOpen] = useState<boolean>(false);
-  const [isStartPickerOpen, setIsStartPickerOpen] = useState(false); // For triggering the start date picker
-  const [isEndPickerOpen, setIsEndPickerOpen] = useState(false); // For triggering the end date picker
-  const [user, setUser] = useState<any>(null);
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [showBreakUserDropdown, setShowBreakUserDropdown] = useState(false);
-
-  // Add these state variables to your component
-  const [workerStatuses, setWorkerStatuses] = useState<Record<string, { isLoggedIn: boolean; isBreakOpen: boolean }>>({});
-  const [currentAction, setCurrentAction] = useState<'login' | 'logout' | 'break_started' | 'break_ended'>('login');
-
-  // Add this function to check a worker's status when selected
+  // Worker status check
   const checkWorkerStatus = async (workerId: string) => {
     try {
       const response = await fetch('/api/check-worker-status', {
@@ -228,7 +266,6 @@ export default function MyAttendance() {
       const data = await response.json();
 
       if (data.success) {
-        // Update the worker's status in our state
         setWorkerStatuses(prev => ({
           ...prev,
           [workerId]: {
@@ -237,14 +274,10 @@ export default function MyAttendance() {
           }
         }));
 
-        // Determine the appropriate action based on worker's status
         if (!data.isLoggedIn) {
           setCurrentAction('login');
         } else if (data.isBreakOpen) {
           setCurrentAction('break_ended');
-        } else {
-          // Worker is logged in but not on break, show logout/break options
-          // The actual button press will determine which action to take
         }
       }
     } catch (error) {
@@ -252,18 +285,534 @@ export default function MyAttendance() {
     }
   };
 
-  // Update the function that runs when a worker is selected
   const handleWorkerSelect = (workerId: string | null) => {
     setSelectedTargetUser(workerId);
 
     if (workerId) {
       checkWorkerStatus(workerId);
     } else {
-      // Reset to admin's own status when "Myself" is selected
       setCurrentAction(isLoggedIn ? (isBreakOpen ? 'break_ended' : 'logout') : 'login');
     }
   };
-  // Add effect to close dropdown when clicking outside
+
+  // Fetch user location
+  const fetchLocation = () => {
+    const stored = Cookies.get('userLocation');
+    if (stored) {
+      try {
+        const { location: savedLocation, timestamp } = JSON.parse(stored);
+        const oneHour = 3600 * 1000;
+        if (Date.now() - timestamp < oneHour) {
+          setLocation(savedLocation);
+          return;
+        } else {
+          Cookies.remove('userLocation');
+        }
+      } catch (error) {
+        console.error("Error parsing stored location:", error);
+        Cookies.remove('userLocation');
+      }
+    }
+
+    if (!navigator.geolocation) {
+      toast.error("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const loc = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        setLocation(loc);
+        Cookies.set('userLocation', JSON.stringify({ location: loc, timestamp: Date.now() }), { expires: 1 / 24 });
+      },
+      (error) => {
+        console.error("Error fetching location:", error);
+        toast.error("Unable to fetch location. Please allow location access.");
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 10000,
+      }
+    );
+  };
+
+  // Dialog handlers
+  const handleModalChange = (isOpen: boolean) => {
+    if (isOpen) {
+      fetchLocation();
+      setCapturedImage(null);
+    } else {
+      setCapturedImage(null);
+    }
+    setIsModalOpen(isOpen);
+  };
+
+  const handleBreakModalChange = (isOpen: boolean) => {
+    if (isOpen) {
+      fetchLocation();
+      setCapturedBreakImage(null);
+    } else {
+      setCapturedBreakImage(null);
+    }
+    setIsBreakModalOpen(isOpen);
+  };
+
+  // Attendance action handlers
+  const handleLoginLogout = () => {
+    setIsModalOpen(true);
+    setCapturedImage(null);
+  };
+
+  const handleBreaks = () => {
+    setIsBreakModalOpen(true);
+    setCapturedBreakImage(null);
+  };
+
+  // Face image handler
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const selectedFiles = Array.from(files);
+      setSelectedImages(selectedFiles.slice(0, 3)); // Limit to 3 images
+    }
+  };
+
+  // Base64 to Blob
+  const dataURLtoBlob = (dataurl: string, filename: string) => {
+    const arr = dataurl.split(",");
+    const mime = arr[0].match(/:(.*?);/)?.[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([new Blob([u8arr], { type: mime })], filename);
+  };
+
+  // Capture image and submit login/logout
+  const captureImageAndSubmitLogin = async () => {
+    const imageSrc = webcamRef.current?.getScreenshot();
+    if (imageSrc) {
+      setCapturedImage(imageSrc);
+    }
+
+    if (!imageSrc || !location) {
+      toast.error("Please capture an image and ensure location is available.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("files", dataURLtoBlob(imageSrc, "captured_image.jpg"));
+
+      const uploadResponse = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const uploadData = await uploadResponse.json();
+      const imageUrl = uploadData.fileUrls[0];
+
+      if (!uploadResponse.ok) {
+        throw new Error("Image upload failed.");
+      }
+
+      const action = isLoggedIn ? "logout" : "login";
+      const requestBody: any = {
+        imageUrl,
+        lat: location.lat,
+        lng: location.lng,
+        action,
+        workFromHome: isWorkFromHome,
+      };
+
+      if (enterpriseMode && selectedTargetUser) {
+        requestBody.enterpriseMode = true;
+        requestBody.targetUserId = selectedTargetUser;
+      }
+
+      const loginResponse = await fetch("/api/face-login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      const loginData = await loginResponse.json();
+
+      if (loginResponse.ok && loginData.success) {
+        if (loginData.enterpriseMode) {
+          toast.success(`${action === "login" ? "Login" : "Logout"} successful for ${loginData.targetUser.name}.`);
+        } else {
+          toast.success(`${action === "login" ? "Login" : "Logout"} successful.`);
+          setIsLoggedIn(action === "login");
+        }
+
+        setIsModalOpen(false);
+
+        const resEntries = await fetch("/api/loginEntries");
+        const dataEntries = await resEntries.json();
+        setLoginEntries(dataEntries.entries);
+      } else {
+        if (loginData.error === "You are outside the allowed geofencing area.") {
+          toast(<div className="w-full mb-6 gap-2 m-auto">
+            <div className="w-full flex justify-center">
+              <DotLottieReact
+                src="/lottie/error.lottie"
+                loop
+                autoplay
+              />
+            </div>
+            <h1 className="text-black text-center font-medium text-lg">You are outside the allowed<br /> Geo-Fencing Area</h1>
+            <p className="text-sm text-center text-black font-medium">Please raise a regularization request</p>
+          </div>);
+        } else if (loginData.error === "No matching face found. Please ensure you are facing the camera clearly and retry.") {
+          toast.error("Face not recognized. Please try again or contact support.");
+        } else {
+          throw new Error(loginData.error || "Face recognition failed.");
+        }
+      }
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Break management
+  const captureImageAndSubmitBreakStart = async () => {
+    const imageSrc = webcamRef.current?.getScreenshot();
+    if (imageSrc) {
+      setCapturedBreakImage(imageSrc);
+    }
+    if (!imageSrc || !location) {
+      toast.error("Please capture an image and ensure location is available.");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("files", dataURLtoBlob(imageSrc, "captured_image.jpg"));
+
+      const uploadResponse = await fetch("/api/upload", { method: "POST", body: formData });
+      const uploadData = await uploadResponse.json();
+      const imageUrl = uploadData.fileUrls[0];
+
+      if (!uploadResponse.ok) {
+        throw new Error("Image upload failed.");
+      }
+
+      const action = isBreakOpen ? "break_ended" : "break_started";
+      const requestBody: any = {
+        imageUrl,
+        lat: location.lat,
+        lng: location.lng,
+        action,
+      };
+
+      if (enterpriseMode && selectedTargetUser) {
+        requestBody.enterpriseMode = true;
+        requestBody.targetUserId = selectedTargetUser;
+      }
+
+      const loginResponse = await fetch("/api/face-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+      });
+
+      const loginData = await loginResponse.json();
+
+      if (loginResponse.ok && loginData.success) {
+        if (loginData.enterpriseMode) {
+          if (action === "break_started") {
+            toast.success(`Break started for ${loginData.targetUser.name}.`);
+          } else {
+            toast.success(`Break ended for ${loginData.targetUser.name}.`);
+          }
+        } else {
+          if (action === "break_started") {
+            toast.success("Break started.");
+            setIsBreakOpen(true);
+          } else {
+            toast.success("Break ended.");
+            setIsBreakOpen(false);
+          }
+        }
+
+        setIsBreakModalOpen(false);
+
+        const resEntries = await fetch("/api/loginEntries");
+        const dataEntries = await resEntries.json();
+        setLoginEntries(dataEntries.entries);
+      } else {
+        if (action === "break_started") {
+          toast.error(loginData.error || "Break start failed.");
+        } else {
+          toast.error(loginData.error || "Break end failed.");
+        }
+      }
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Face registration
+  const handleFaceRegistrationSubmit = async () => {
+    if (selectedImages?.length !== 3) {
+      toast.info("Please upload exactly 3 images.");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const formData = new FormData();
+      selectedImages.forEach((file) => formData.append("files", file));
+
+      const uploadResponse = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const uploadData = await uploadResponse.json();
+      if (!uploadResponse.ok) {
+        throw new Error("Image upload failed.");
+      }
+
+      const faceRegistrationResponse = await fetch(
+        "/api/face-registration-request",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            imageUrls: uploadData.fileUrls,
+          }),
+        }
+      );
+
+      const faceRegistrationData = await faceRegistrationResponse.json();
+      if (faceRegistrationResponse.ok && faceRegistrationData.success) {
+        setIsLoading(false);
+        toast.success(
+          "Face registration request submitted successfully and is pending approval."
+        );
+        setIsRegisterFaceModalOpen(false);
+        setSelectedImages([]);
+      } else {
+        throw new Error("Face registration request submission failed.");
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle regularization
+  const handleSubmitRegularization = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (
+      !regularizationDate ||
+      !regularizationLoginTime ||
+      !regularizationLogoutTime ||
+      !regularizationRemarks
+    ) {
+      toast.error("Please fill in all fields.");
+      return;
+    }
+
+    setIsSubmittingRegularization(true);
+
+    try {
+      setAttendanceLoading(true);
+      const response = await fetch("/api/regularize", {
+        method: "POST",
+        body: JSON.stringify({
+          date: regularizationDate,
+          loginTime: regularizationLoginTime,
+          logoutTime: regularizationLogoutTime,
+          remarks: regularizationRemarks,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        toast(<div className="w-full mb-6 gap-2 m-auto">
+          <div className="w-full flex justify-center">
+            <DotLottieReact
+              src="/lottie/tick.lottie"
+              loop
+              autoplay
+            />
+          </div>
+          <h1 className="text-black text-center font-medium text-lg">Regularization request submitted successfully</h1>
+        </div>);
+
+        const resEntries = await fetch("/api/loginEntries");
+        const dataEntries = await resEntries.json();
+        setLoginEntries(dataEntries.entries);
+        setAttendanceLoading(false);
+
+        setRegularizationDate("");
+        setRegularizationLoginTime("");
+        setRegularizationLogoutTime("");
+        setRegularizationRemarks("");
+        setIsRegularizationModalOpen(false);
+      } else {
+        throw new Error(
+          data.message || "Failed to submit regularization request."
+        );
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsSubmittingRegularization(false);
+      setAttendanceLoading(false);
+    }
+  };
+
+  // Toggle accordion
+  const toggleDayExpansion = (date: string) => {
+    setExpandedDays((prevState) => ({
+      ...prevState,
+      [date]: !prevState[date],
+    }));
+  };
+
+  // Handle regularization detail
+  const handleRegularizationClick = (regularization: LoginEntry) => {
+    setSelectedRegularization(regularization);
+  };
+
+  const handleSheetClose = () => {
+    setSelectedRegularization(null);
+  };
+
+  // Custom date range
+  const openCustomModal = () => {
+    setIsCustomModalOpen(true);
+  };
+
+  const handleCustomDateSubmit = (start: Date, end: Date) => {
+    setCustomDateRange({ start, end });
+    setIsCustomModalOpen(false);
+    setActiveTab("custom");
+  };
+
+  const handleClose = () => {
+    setCustomDateRange({ start: null, end: null });
+    setIsCustomModalOpen(false);
+  };
+
+  // Fetch user details
+  useEffect(() => {
+    const getUserDetails = async () => {
+      try {
+        const res = await axios.get("/api/users/me");
+        setUser(res.data.data);
+        setRole(res.data.data.role);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    getUserDetails();
+  }, []);
+
+  // Fetch organization data
+  useEffect(() => {
+    const fetchOrgData = async () => {
+      try {
+        const res = await axios.get("/api/organization/getById");
+        setOrgData(res.data.data);
+        setOrganization(res.data.data);
+
+        // If it's an enterprise organization and user is admin, fetch all users
+        if (res.data.data?.isEnterprise && (user?.role === 'admin' || user?.role === 'orgAdmin')) {
+          setEnterpriseMode(true);
+          const usersRes = await axios.get("/api/organization/getOrgUsers");
+          setOrgUsers(usersRes.data.data || []);
+          setFilteredUsers(usersRes.data.data || []);
+        }
+      } catch (error) {
+        console.error("Error fetching organization data", error);
+      }
+    };
+    fetchOrgData();
+  }, [user]);
+
+  // Fetch login status
+  useEffect(() => {
+    const fetchLoginStatus = async () => {
+      try {
+        setDisplayLoader(true);
+        const res = await fetch("/api/check-login-status");
+        const data = await res.json();
+
+        if (data.success) {
+          setIsLoggedIn(data.isLoggedIn);
+          setIsBreakOpen(data.isBreakOpen);
+          setIsEnterpriseAdmin(data.isEnterpriseAdmin);
+          setHasRegisteredFaces(data.hasRegisteredFaces);
+        } else {
+          toast.error(data.error || "Failed to fetch login status.");
+        }
+      } catch (error) {
+        console.error("Error fetching login status:", error);
+      } finally {
+        setDisplayLoader(false);
+      }
+    };
+
+    fetchLoginStatus();
+  }, []);
+
+  // Fetch login entries
+  useEffect(() => {
+    const fetchLoginEntriesAndStatus = async () => {
+      try {
+        setDisplayLoader(true);
+        const resEntries = await fetch("/api/loginEntries");
+        const dataEntries = await resEntries.json();
+        setLoginEntries(dataEntries.entries);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setDisplayLoader(false);
+      }
+    };
+
+    fetchLoginEntriesAndStatus();
+  }, [isLoggedIn, isBreakOpen]);
+
+  // Filter users based on search
+  useEffect(() => {
+    if (!userSearchQuery) {
+      setFilteredUsers(orgUsers);
+      return;
+    }
+
+    const filtered = orgUsers.filter(user =>
+      `${user.firstName} ${user.lastName}`.toLowerCase().includes(userSearchQuery.toLowerCase())
+    );
+    setFilteredUsers(filtered);
+  }, [userSearchQuery, orgUsers]);
+
+  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       const dropdown = document.getElementById('user-dropdown');
@@ -284,231 +833,7 @@ export default function MyAttendance() {
     };
   }, [showUserDropdown, showBreakUserDropdown]);
 
-  const [mapCoords, setMapCoords] = useState<{
-    lat: number;
-    lng: number;
-  } | null>(null);
-
-  const [orgData, setOrgData] = useState<{
-    location: { lat: number; lng: number };
-    allowGeofencing: boolean;
-    geofenceRadius: number;
-  } | null>(null);
-
-
-
-  const handleViewMap = (lat: number, lng: number) => {
-    setMapCoords({ lat, lng });
-    setMapModalOpen(true);
-  };
-
-  // useEffect(() => {
-  //     if (typeof window !== 'undefined') {
-  //         // Dynamically import Leaflet inside useEffect
-  //         import('leaflet').then((L) => {
-  //             // Dynamically set Leaflet icon options only after the window object is available
-  //             delete (L.Icon.Default.prototype as any)._getIconUrl;
-  //             L.Icon.Default.mergeOptions({
-  //                 iconRetinaUrl:
-  //                     'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
-  //                 iconUrl:
-  //                     'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
-  //                 shadowUrl:
-  //                     'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
-  //             });
-  //         });
-  //     }
-  // }, []);
-
-
-  useEffect(() => {
-    const getUserDetails = async () => {
-      try {
-        const res = await axios.get("/api/users/me");
-        setUser(res.data.data); // Suppose 'res.data.data' includes 'workFromHomeAllowed'
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-    getUserDetails();
-  }, []);
-
-  useEffect(() => {
-    const fetchOrgData = async () => {
-      try {
-        const res = await axios.get("/api/organization/getById");
-        setOrgData(res.data.data);
-      } catch (error) {
-        console.error("Error fetching organization data", error);
-      }
-    };
-    fetchOrgData();
-  }, []);
-
-
-  const calculateDistance = (
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number
-  ): number => {
-    const R = 6371e3; // Earth’s radius in meters
-    const φ1 = (lat1 * Math.PI) / 180;
-    const φ2 = (lat2 * Math.PI) / 180;
-    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
-    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
-    const a = Math.sin(Δφ / 2) ** 2 +
-      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) ** 2;
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  };
-
-  console.log(isBreakOpen, 'isBreakOpen?')
-
-  // In the main component, update the useEffect that checks login status
-  useEffect(() => {
-    const fetchLoginStatus = async () => {
-      try {
-        setDisplayLoader(true);
-        const res = await fetch("/api/check-login-status");
-        const data = await res.json();
-
-        if (data.success) {
-          setIsLoggedIn(data.isLoggedIn);
-          setIsBreakOpen(data.isBreakOpen);
-          setIsEnterpriseAdmin(data.isEnterpriseAdmin); // Add this state variable
-          setHasRegisteredFaces(data.hasRegisteredFaces);
-        } else {
-          alert(data.error || "Failed to fetch login status.");
-        }
-      } catch (error) {
-        console.error("Error fetching login status:", error);
-      } finally {
-        setDisplayLoader(false);
-      }
-    };
-
-    fetchLoginStatus();
-  }, []);
-
-  // Add this state variable at the top of the component
-  const [isEnterpriseAdmin, setIsEnterpriseAdmin] = useState(false);
-
-  useEffect(() => {
-    const fetchLoginEntriesAndStatus = async () => {
-      try {
-        setDisplayLoader(true);
-        // Fetch login entries
-        const resEntries = await fetch("/api/loginEntries");
-        const dataEntries = await resEntries.json();
-        setLoginEntries(dataEntries.entries);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setDisplayLoader(false);
-      }
-    };
-
-    fetchLoginEntriesAndStatus();
-  }, [isLoggedIn, isBreakOpen]);
-
-  const handleFaceRegistrationSubmit = async () => {
-    if (selectedImages?.length !== 3) {
-      toast.info("Please upload exactly 3 images.");
-      return;
-    }
-
-    try {
-      // Upload the images first
-      setIsLoading(true);
-      const formData = new FormData();
-      selectedImages.forEach((file) => formData.append("files", file));
-
-      const uploadResponse = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const uploadData = await uploadResponse.json();
-      if (!uploadResponse.ok) {
-        throw new Error("Image upload failed.");
-      }
-
-      // Send a request to save the face registration request with pending status
-      const faceRegistrationResponse = await fetch(
-        "/api/face-registration-request",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            imageUrls: uploadData.fileUrls, // URLs from the image upload
-          }),
-        }
-      );
-
-      const faceRegistrationData = await faceRegistrationResponse.json();
-      if (faceRegistrationResponse.ok && faceRegistrationData.success) {
-        setIsLoading(false);
-        toast.success(
-          "Face registration request submitted successfully and is pending approval."
-        );
-        setIsRegisterFaceModalOpen(false);
-        setSelectedImages([]); // Reset images
-      } else {
-        throw new Error("Face registration request submission failed.");
-      }
-    } catch (error: any) {
-      alert(error.message);
-    }
-  };
-
-  // Open modal for face login
-  const handleLoginLogout = () => {
-    setIsModalOpen(true);
-    setCapturedImage(null);
-    // setLocation(null);
-    setIsModalOpen(true);
-  };
-
-  const handleBreaks = () => {
-    setIsBreakModalOpen(true);
-    setCapturedBreakImage(null);
-    // setLocation(null);
-
-  }
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files) {
-      const selectedFiles = Array.from(files);
-      setSelectedImages(selectedFiles.slice(0, 3)); // Limit to 3 images
-    }
-  };
-
-  // Utility function to convert base64 to Blob
-  const dataURLtoBlob = (dataurl: string, filename: string) => {
-    const arr = dataurl.split(",");
-    const mime = arr[0].match(/:(.*?);/)?.[1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) {
-      u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new File([new Blob([u8arr], { type: mime })], filename);
-  };
-
-  // Helper functions to filter entries by date range
-  const isSameDay = (date1: Date, date2: Date) => {
-    return (
-      date1.getFullYear() === date2.getFullYear() &&
-      date1.getMonth() === date2.getMonth() &&
-      date1.getDate() === date2.getDate()
-    );
-  };
-
+  // Filtering functions for attendance entries
   const isWithinDateRange = (date: Date, startDate: Date, endDate: Date) => {
     return date >= startDate && date <= endDate;
   };
@@ -519,17 +844,6 @@ export default function MyAttendance() {
     pastDate.setDate(today.getDate() - days);
     return date >= pastDate && date <= today;
   };
-
-  const filterLastTwoDaysEntries = () => {
-    const today = new Date();
-
-    return loginEntries?.filter((entry) => {
-      const entryDate = new Date(entry.timestamp);
-      return entryDate <= today && entryDate >= today;
-    });
-  };
-
-  // Filter entries based on active tab
 
   const filterEntriesByTab = () => {
     const today = new Date();
@@ -553,6 +867,7 @@ export default function MyAttendance() {
           const entryDate = normalizeDate(new Date(entry.timestamp));
           return entryDate.getTime() === todayNormalized.getTime();
         });
+      // ... continuing the filterEntriesByTab function
       case "yesterday":
         const yesterday = new Date(today);
         yesterday.setDate(today.getDate() - 1);
@@ -619,419 +934,10 @@ export default function MyAttendance() {
 
   const filteredEntries = filterEntriesByTab();
 
-  // Open custom date range modal
-  const openCustomModal = () => {
-    setIsCustomModalOpen(true);
-  };
-
-  // Handle custom date range submit
-  const handleCustomDateSubmit = (start: Date, end: Date) => {
-    setCustomDateRange({ start, end });
-    setIsCustomModalOpen(false);
-    setActiveTab("custom");
-  };
-
-  const handleClose = () => {
-    // Reset date range when closing
-    setCustomDateRange({ start: null, end: null });
-    setIsCustomModalOpen(false);
-  };
-
-  // Handle Regularization Form Submission
-  const handleSubmitRegularization = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Basic validation
-    if (
-      !regularizationDate ||
-      !regularizationLoginTime ||
-      !regularizationLogoutTime ||
-      !regularizationRemarks
-    ) {
-      toast.error("Please fill in all fields.");
-      return;
-    }
-
-    setIsSubmittingRegularization(true);
-
-    try {
-      setAttendanceLoading(true);
-      const response = await fetch("/api/regularize", {
-        method: "POST",
-        body: JSON.stringify({
-          date: regularizationDate,
-          loginTime: regularizationLoginTime,
-          logoutTime: regularizationLogoutTime,
-          remarks: regularizationRemarks,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        toast(<div className=" w-full mb-6 gap-2 m-auto  ">
-          <div className="w-full flex  justify-center">
-            <DotLottieReact
-              src="/lottie/tick.lottie"
-              loop
-              autoplay
-            />
-          </div>
-          <h1 className="text-black text-center font-medium text-lg">Regularization request submitted successfully</h1>
-        </div>);
-        // Refresh login entries
-        const resEntries = await fetch("/api/loginEntries", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-        const dataEntries = await resEntries.json();
-        setLoginEntries(dataEntries.entries);
-        setAttendanceLoading(false);
-
-        // Reset form fields
-        setRegularizationDate("");
-        setRegularizationLoginTime("");
-        setRegularizationLogoutTime("");
-        setRegularizationRemarks("");
-        setIsRegularizationModalOpen(false);
-      } else {
-        throw new Error(
-          data.message || "Failed to submit regularization request."
-        );
-      }
-    } catch (error: any) {
-      toast.error(error.message);
-    } finally {
-      setIsSubmittingRegularization(false);
-    }
-  };
-
-  console.log(loginEntries, "login entries");
-
-  const handleRegisterFaces = () => {
-    setIsRegisterFaceModalOpen(true);
-  };
-
-
-  const fetchLocation = () => {
-    // Try to retrieve the stored location from cookies
-    const stored = Cookies.get('userLocation');
-    if (stored) {
-      try {
-        const { location: savedLocation, timestamp } = JSON.parse(stored);
-        const oneHour = 3600 * 1000; // in milliseconds
-        if (Date.now() - timestamp < oneHour) {
-          // Use the stored location if it is less than an hour old
-          setLocation(savedLocation);
-          console.log("Using stored location:", savedLocation);
-          return;
-        } else {
-          // Remove outdated cookie
-          Cookies.remove('userLocation');
-        }
-      } catch (error) {
-        console.error("Error parsing stored location:", error);
-        Cookies.remove('userLocation');
-      }
-    }
-
-    // If no valid cookie, fetch a new location
-    if (!navigator.geolocation) {
-      toast.error("Geolocation is not supported by your browser.");
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const loc = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        };
-        setLocation(loc);
-        console.log("Fetched new location:", loc);
-        // Save the location with a timestamp in a cookie that expires in 1 hour
-        // Save the location with a timestamp in a cookie that expires in 1 hour
-        Cookies.set('userLocation', JSON.stringify({ location: loc, timestamp: Date.now() }), { expires: 1 / 24 });
-      },
-      (error) => {
-        console.error("Error fetching location:", error);
-        toast.error("Unable to fetch location. Please allow location access.");
-      },
-      {
-        enableHighAccuracy: true,
-        maximumAge: 0,
-        timeout: 10000,
-      }
-    );
-  };
-
-  // Call fetchLocation on component mount or when needed.
-  // For example, you can call it inside a useEffect:
-  React.useEffect(() => {
-    fetchLocation();
-  }, []);
-
-
-  const handleModalChange = (isOpen: boolean) => {
-    if (isOpen) {
-      fetchLocation();
-      setCapturedImage(null);
-      console.log("Modal open - location:", location);
-    } else {
-      setCapturedImage(null);
-    }
-    setIsModalOpen(isOpen);
-  };
-
-  const handleBreakModalChange = (isOpen: boolean) => {
-    if (isOpen) {
-      fetchLocation();
-      setCapturedBreakImage(null);
-      console.log("Break modal open - location:", location);
-    } else {
-      setCapturedBreakImage(null);
-    }
-    setIsBreakModalOpen(isOpen);
-  };
-
-  // Add this useEffect to fetch org data and check for enterprise status
-  useEffect(() => {
-    const fetchOrgData = async () => {
-      try {
-        const res = await axios.get("/api/organization/getById");
-        setOrganization(res.data.data);
-
-        // If it's an enterprise organization and user is admin, fetch all users
-        if (res.data.data?.isEnterprise && (user?.role === 'admin' || user?.role === 'orgAdmin')) {
-          setEnterpriseMode(true);
-          const usersRes = await axios.get("/api/organization/getOrgUsers");
-          setOrgUsers(usersRes.data.data || []);
-          setFilteredUsers(usersRes.data.data || []);
-        }
-      } catch (error) {
-        console.error("Error fetching organization data", error);
-      }
-    };
-    fetchOrgData();
-  }, [user]);
-
-  // When the user clicks "Take a Break"
-  // Add a useEffect to filter users based on search query
-  useEffect(() => {
-    if (!userSearchQuery) {
-      setFilteredUsers(orgUsers);
-      return;
-    }
-
-    const filtered = orgUsers.filter(user =>
-      `${user.firstName} ${user.lastName}`.toLowerCase().includes(userSearchQuery.toLowerCase())
-    );
-    setFilteredUsers(filtered);
-  }, [userSearchQuery, orgUsers]);
-
-  // Update captureImageAndSubmitLogin to handle enterprise mode
-  const captureImageAndSubmitLogin = async () => {
-    // Capture image
-    const imageSrc = webcamRef.current?.getScreenshot();
-    if (imageSrc) {
-      setCapturedImage(imageSrc);
-    }
-
-    if (!imageSrc || !location) {
-      toast.error("Please capture an image and ensure location is available.");
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append("files", dataURLtoBlob(imageSrc, "captured_image.jpg"));
-
-      const uploadResponse = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const uploadData = await uploadResponse.json();
-      const imageUrl = uploadData.fileUrls[0];
-
-      if (!uploadResponse.ok) {
-        throw new Error("Image upload failed.");
-      }
-
-      // Determine the action based on login state
-      const action = isLoggedIn ? "logout" : "login";
-
-      // Create the request body
-      const requestBody: any = {
-        imageUrl,
-        lat: location.lat,
-        lng: location.lng,
-        action,
-        workFromHome: isWorkFromHome,
-      };
-
-      // If in enterprise mode and a target user is selected, add those details
-      if (enterpriseMode && selectedTargetUser) {
-        requestBody.enterpriseMode = true;
-        requestBody.targetUserId = selectedTargetUser;
-      }
-
-      const loginResponse = await fetch("/api/face-login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      });
-
-      const loginData = await loginResponse.json();
-
-      if (loginResponse.ok && loginData.success) {
-        // Customize success message for enterprise mode
-        if (loginData.enterpriseMode) {
-          toast.success(`${action === "login" ? "Login" : "Logout"} successful for ${loginData.targetUser.name}.`);
-        } else {
-          toast.success(`${action === "login" ? "Login" : "Logout"} successful.`);
-          setIsLoggedIn(action === "login");
-        }
-
-        setIsModalOpen(false); // Close the modal
-
-        // Refresh login entries
-        const resEntries = await fetch("/api/loginEntries");
-        const dataEntries = await resEntries.json();
-        setLoginEntries(dataEntries.entries);
-      } else {
-        // Handle various error scenarios...
-        if (loginData.error === "You are outside the allowed geofencing area.") {
-          toast(<div className=" w-full mb-6 gap-2 m-auto  ">
-            <div className="w-full flex  justify-center">
-              <DotLottieReact
-                src="/lottie/error.lottie"
-                loop
-                autoplay
-              />
-            </div>
-            <h1 className="text-black text-center font-medium text-lg">You are outside the allowed<br /> Geo-Fencing Area</h1>
-            <p className="text-sm text-center text-black font-medium">Please raise a regularization request</p>
-          </div>);
-        } else if (loginData.error === "No matching face found. Please ensure you are facing the camera clearly and retry.") {
-          toast.error("Face not recognized. Please try again or contact support.");
-        } else {
-          throw new Error(loginData.error || "Face recognition failed.");
-        }
-      }
-    } catch (err: any) {
-      toast.error(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Update captureImageAndSubmitBreakStart similarly
-  const captureImageAndSubmitBreakStart = async () => {
-    // Capture image
-    const imageSrc = webcamRef.current?.getScreenshot();
-    if (imageSrc) {
-      setCapturedBreakImage(imageSrc);
-    }
-    if (!imageSrc || !location) {
-      toast.error("Please capture an image and ensure location is available.");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      // Upload image
-      const formData = new FormData();
-      formData.append("files", dataURLtoBlob(imageSrc, "captured_image.jpg"));
-
-      const uploadResponse = await fetch("/api/upload", { method: "POST", body: formData });
-      const uploadData = await uploadResponse.json();
-      const imageUrl = uploadData.fileUrls[0];
-
-      if (!uploadResponse.ok) {
-        throw new Error("Image upload failed.");
-      }
-
-      // Determine the action based on break state
-      const action = isBreakOpen ? "break_ended" : "break_started";
-
-      // Create the request body
-      const requestBody: any = {
-        imageUrl,
-        lat: location.lat,
-        lng: location.lng,
-        action,
-      };
-
-      // If in enterprise mode and a target user is selected, add those details
-      if (enterpriseMode && selectedTargetUser) {
-        requestBody.enterpriseMode = true;
-        requestBody.targetUserId = selectedTargetUser;
-      }
-
-      const loginResponse = await fetch("/api/face-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
-      });
-
-      const loginData = await loginResponse.json();
-
-      if (loginResponse.ok && loginData.success) {
-        // Show appropriate toast message based on the action and mode
-        if (loginData.enterpriseMode) {
-          if (action === "break_started") {
-            toast.success(`Break started for ${loginData.targetUser.name}.`);
-          } else {
-            toast.success(`Break ended for ${loginData.targetUser.name}.`);
-          }
-        } else {
-          if (action === "break_started") {
-            toast.success("Break started.");
-            setIsBreakOpen(true);
-          } else {
-            toast.success("Break ended.");
-            setIsBreakOpen(false);
-          }
-        }
-
-        // Close the break modal after success
-        setIsBreakModalOpen(false);
-
-        // Refresh login entries
-        const resEntries = await fetch("/api/loginEntries");
-        const dataEntries = await resEntries.json();
-        setLoginEntries(dataEntries.entries);
-      } else {
-        if (action === "break_started") {
-          toast.error(loginData.error || "Break start failed.");
-        } else {
-          toast.error(loginData.error || "Break end failed.");
-        }
-      }
-    } catch (err: any) {
-      toast.error(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-
-
-
+  // Filter for different report types
   const filterDailyReportEntries = (entries: LoginEntry[]) => {
     return entries?.filter((entry) => {
-      if (
-        entry.action === "regularization" &&
-        entry.approvalStatus !== "Approved"
-      ) {
+      if (entry.action === "regularization" && entry.approvalStatus !== "Approved") {
         return false;
       }
       return true;
@@ -1042,132 +948,25 @@ export default function MyAttendance() {
     return entries?.filter((entry) => entry.action === "regularization");
   };
 
-  function formatTimeToAMPM(timeString: string | undefined): string {
-    if (!timeString) {
-      return ""; // Return an empty string or a placeholder if timeString is undefined
-    }
-
-
-
-    const [hours, minutes] = timeString.split(":");
-    const date = new Date();
-    date.setHours(parseInt(hours), parseInt(minutes));
-    return date.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
+  const filterTodayEntries = (entries: LoginEntry[]) => {
+    return entries?.filter((entry) => {
+      const today = new Date();
+      const entryDate = new Date(entry.timestamp);
+      return (
+        entryDate.getDate() === today.getDate() &&
+        entryDate.getMonth() === today.getMonth() &&
+        entryDate.getFullYear() === today.getFullYear() &&
+        (
+          entry.action === "login" ||
+          entry.action === "logout" ||
+          entry.action === "break_started" ||
+          entry.action === "break_ended"
+        )
+      );
     });
-  }
-
-  const [selectedRegularization, setSelectedRegularization] =
-    useState<LoginEntry | null>(null);
-
-  const handleRegularizationClick = (regularization: LoginEntry) => {
-    setSelectedRegularization(regularization);
   };
 
-  const handleSheetClose = () => {
-    setSelectedRegularization(null);
-  };
-
-  console.log(selectedRegularization, 'reg')
-
-  const renderRegularizationEntries = () => {
-    const regularizationEntries = filterRegularizationEntries(filteredEntries);
-    console.log(regularizationEntries, ' entries check');
-
-    return (
-      <>
-        {regularizationEntries?.length === 0 ? (
-          <div className='flex  justify-center w-full'>
-            <div className=' w-full mt-4  justify-center '>
-              <div className='flex justify-center'>
-                <DotLottieReact
-                  src="/lottie/empty.lottie"
-                  loop
-                  className="h-56"
-                  autoplay
-                />
-              </div>
-              <div className='text-center w-full'>
-
-                <h1 className=' text-lg font-semibold text-'>No Entries Found</h1>
-                <p className='text-sm p-2 '>It seems like you have not raised any requests yet</p>
-              </div>
-            </div>
-
-          </div>
-        ) : (
-          <ul className="space-y-4">
-            {regularizationEntries.map((entry, index) => (
-              <li
-                key={index}
-                onClick={() => handleRegularizationClick(entry)}
-                className="flex cursor-pointer border text-xs justify-between items-center px-4 py-2 rounded shadow-md"
-              >
-                {entry.userId && (
-                  <div className="flex gap-2 items-center justify-start">
-                    <div className="h-7 w-7 rounded-full text-white bg-[#815BF5]">
-                      <h1 className="text-center uppercase text-xs mt-1">
-                        {entry.userId.firstName[0]}
-                        {entry.userId.lastName[0]}
-                      </h1>
-                    </div>
-                    <h1
-                      id="userName"
-                      className="col-span-3 text-sm"
-                    >{`${entry.userId.firstName} ${entry.userId.lastName}`}</h1>
-                  </div>
-                )}
-                <span>
-                  {`Login: ${formatTimeToAMPM(
-                    entry.loginTime
-                  )} - Logout: ${formatTimeToAMPM(entry.logoutTime)}`}
-                </span>
-
-                {/* Display approvalStatus */}
-                <span
-                  className={
-                    entry.approvalStatus === "Approved"
-                      ? "bg-[#017a5b] px-2 py-1 rounded-xl"
-                      : entry.approvalStatus === "Rejected"
-                        ? "bg-red-800 rounded-xl px-2 py-1"
-                        : "bg-orange-800 px-2 py-1 rounded-xl"
-                  }
-                >
-                  {/* {`Approval Status: `} */}
-                  <strong className="text-white">{entry.approvalStatus}</strong>
-                </span>
-
-                {/* If lat and lng are present, render the map icon */}
-                {entry.lat && entry.lng && (
-                  <button
-                    onClick={() => handleViewMap(entry.lat, entry.lng)}
-                    className="underline text-blue-500 ml-2"
-                  >
-                    <MapPin />
-                  </button>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-        {selectedRegularization && (
-          <RegularizationDetails
-            selectedRegularization={selectedRegularization}
-            onClose={handleSheetClose}
-          />
-        )}
-      </>
-    );
-  };
-
-  // Filter for Daily Report or Regularization
-  const displayedEntries =
-    activeAttendanceTab === "dailyReport"
-      ? filterDailyReportEntries(filteredEntries) // Filtered entries passed here
-      : filterRegularizationEntries(filteredEntries);
-
+  // Calculate hours between login/logout
   const calculateHoursBetweenLoginLogout = (entries: LoginEntry[]): string => {
     // Sort entries by timestamp (ascending)
     const sortedEntries = entries.sort(
@@ -1227,12 +1026,14 @@ export default function MyAttendance() {
     return `${hours}h ${minutes}m`;
   };
 
+  // Prepare data for rendering
+  const displayedEntries = activeAttendanceTab === "dailyReport"
+    ? filterDailyReportEntries(filteredEntries)
+    : filterRegularizationEntries(filteredEntries);
 
+  const todayEntries = filterTodayEntries(loginEntries);
 
-
-
-
-  // Define state variables for counts and hours
+  // Calculate stats
   const [daysCount, setDaysCount] = useState(0);
   const [regularizedCount, setRegularizedCount] = useState(0);
   const [verifiedCount, setVerifiedCount] = useState(0);
@@ -1264,60 +1065,113 @@ export default function MyAttendance() {
       totalHoursAcc += parseFloat(calculateHoursBetweenLoginLogout(entriesForDay));
     });
 
-    // Ensure this section handles regularization entries if they are not included
+    // Handle regularization entries separately
     const regularizationEntriesForDay = dailyReportEntries?.filter(
       (entry) => entry.action === "regularization"
     );
 
-    if (regularizationEntriesForDay.length > 0) {
+    if (regularizationEntriesForDay?.length > 0) {
       totalHoursAcc += parseFloat(calculateHoursBetweenLoginLogout(regularizationEntriesForDay));
     }
 
     setDaysCount(uniqueDays.size);
     setRegularizedCount(totalRegularized);
     setVerifiedCount(verifiedRegularized);
-    setTotalHours(Number(totalHoursAcc.toFixed(2))); // Ensure that you're passing a number
+    setTotalHours(Number(totalHoursAcc.toFixed(2)));
   }, [filteredEntries, activeAttendanceTab]);
 
-  const isToday = (someDate: Date) => {
-    const today = new Date();
+  // Display regularization entries
+  const renderRegularizationEntries = () => {
+    const regularizationEntries = filterRegularizationEntries(filteredEntries);
+
     return (
-      someDate.getDate() === today.getDate() &&
-      someDate.getMonth() === today.getMonth() &&
-      someDate.getFullYear() === today.getFullYear()
+      <>
+        {regularizationEntries?.length === 0 ? (
+          <Card className="w-full mt-4">
+            <CardContent className="pt-6 flex flex-col items-center">
+              <DotLottieReact
+                src="/lottie/empty.lottie"
+                loop
+                className="h-56"
+                autoplay
+              />
+              <h3 className="font-semibold text-lg">No Entries Found</h3>
+              <p className="text-sm text-muted-foreground">
+                It seems like you have not raised any requests yet
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-4">
+            {regularizationEntries.map((entry, index) => (
+              <Card key={index} className="overflow-hidden">
+                <CardContent className="p-0">
+                  <button
+                    onClick={() => handleRegularizationClick(entry)}
+                    className="w-full p-4 text-left flex justify-between items-center hover:bg-muted/50 transition-colors"
+                  >
+                    {entry.userId && (
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
+                          <span className="text-xs uppercase font-semibold">
+                            {entry.userId.firstName[0]}
+                            {entry.userId.lastName[0]}
+                          </span>
+                        </div>
+                        <span className="font-medium text-sm">
+                          {`${entry.userId.firstName} ${entry.userId.lastName}`}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-muted-foreground">
+                        {`${formatTimeToAMPM(entry.loginTime)} - ${formatTimeToAMPM(entry.logoutTime)}`}
+                      </span>
+
+                      <Badge
+                        className={
+                          entry.approvalStatus === "Approved"
+                            ? "bg-green-100 text-green-800 border-green-200"
+                            : entry.approvalStatus === "Rejected"
+                              ? "bg-red-100 text-red-800 border-red-200"
+                              : "bg-yellow-100 text-yellow-800 border-yellow-200"
+                        }
+                      >
+                        {entry.approvalStatus}
+                      </Badge>
+
+                      {entry.lat && entry.lng && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewMap(entry.lat, entry.lng);
+                          }}
+                        >
+                          <MapPin className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+        {selectedRegularization && (
+          <RegularizationDetails
+            selectedRegularization={selectedRegularization}
+            onClose={handleSheetClose}
+          />
+        )}
+      </>
     );
   };
 
-  // Filter function to get today's login entries
 
-  const filterTodayEntries = (entries: LoginEntry[]) => {
-    return entries?.filter((entry) => {
-      // Exclude regularization entries and only include login and logout actions
-      return (
-        isToday(new Date(entry.timestamp)) &&
-        (
-          entry.action === "login" ||
-          entry.action === "logout" ||
-          entry.action === "break_started" ||
-          entry.action === "break_ended"
-        )
-      );
-    });
-  };
 
-  const todayEntries = filterTodayEntries(loginEntries);
-
-  // Handle accordion toggling
-  const toggleDayExpansion = (date: string) => {
-    setExpandedDays((prevState) => ({
-      ...prevState,
-      [date]: !prevState[date],
-    }));
-  };
-
-  // const groupedEntries = groupEntriesByDay(filteredEntries);
-
-  // Filter approved entries and group them by day
   const filterApprovedEntries = (entries: LoginEntry[]) => {
     return entries?.filter((entry) => {
       if (
@@ -1329,621 +1183,638 @@ export default function MyAttendance() {
       return true;
     });
   };
-
-  // Grouped entries by day
+  // Filter and group entries for display
   const groupedEntries = groupEntriesByDay(
     filterApprovedEntries(filteredEntries)
   );
-
-
-
-
-  console.log(todayEntries, 'todays');
+  // Main render
   return (
-    <div className="container m h-full overflow-y-scroll scrollbar-hide rounded-lg p-4 dark:shadow-lg">
-      {/* <Toaster /> */}
-      {displayLoader && (
-        <div className="absolute  w-screen h-screen  z-[100]  inset-0 bg-white dark:bg-[#04061e] -900  bg-opacity-90 rounded-xl flex justify-center items-center">
-          {/* <Toaster /> */}
-          <div className=" z-[100]  max-h-screen max-w-screen text-[#D0D3D3] w-[100%] rounded-lg ">
-            <div className="">
-              <div className="absolute z-50 inset-0 flex flex-col items-center justify-center dark:text-white font-bold px-4 pointer-events-none text-3xl text-center md:text-4xl lg:text-7xl">
-                <img src="/logo/loader.png" className="h-[15%] animate-pulse" />
-                <p className="bg-clip-text text-transparent drop-shadow-2xl bg-gradient-to-b text-sm from-white/80 to-white/20">
-                  Loading...
-                </p>
-              </div>
-            </div>
+    <div className="container mx-auto p-4 space-y-6">
+      {/* Loading overlay */}
+      {(displayLoader || attendanceLoading) && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="flex flex-col items-center gap-2">
+            <img src="/logo/loader.png" className="h-16 animate-pulse" />
+            <p className="text-sm text-muted-foreground">Loading...</p>
           </div>
         </div>
       )}
-      {attendanceLoading && (
-        <div className="absolute  w-screen h-screen  z-[100] bg-white  inset-0 dark:bg-[#04061e] -900  bg-opacity-90 rounded-xl flex justify-center items-center">
 
-          <div className=" z-[100]  max-h-screen max-w-screen text-[#D0D3D3] w-[100%] rounded-lg ">
-            <div className="">
-              <div className="absolute z-50 inset-0 flex flex-col items-center justify-center dark:text-white font-bold px-4 pointer-events-none text-3xl text-center md:text-4xl lg:text-7xl">
-                <img src="/logo/loader.png" className="h-[15%] animate-pulse" />
-                <p className="bg-clip-text text-transparent drop-shadow-2xl bg-gradient-to-b text-sm from-white/80 to-white/20">
-                  Loading...
-                </p>
-              </div>
-            </div>
+      {/* Page header */}
+      <div className="flex flex-col space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Clock className="h-5 w-5 text-primary" />
+            <h1 className="text-2xl font-bold tracking-tight">My Attendance</h1>
           </div>
-        </div>
-      )}
-      <div className="login-section flex justify-center">
-        <div className="flex flex-col items-center m-auto mt-4">
-          {/* Enterprise Mode Indicator */}
+
+          {/* Enterprise mode indicator */}
           {organization?.isEnterprise && (user?.role === 'admin' || user?.role === 'orgAdmin') && (
-            <div className="mb-3">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-amber-50 to-amber-100 border border-amber-200 rounded-full shadow-sm">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
-                  <span className="text-xs font-medium text-amber-800">Enterprise Mode</span>
-                </div>
-                <span className="text-xs text-amber-600">Manage worker attendance</span>
+            <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-200">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></span>
+                <span className="font-medium">Enterprise Mode</span>
               </div>
-            </div>
+            </Badge>
           )}
+        </div>
+        <p className="text-muted-foreground text-sm">
+          Track and manage your daily attendance records
+        </p>
+      </div>
 
+      {/* Action buttons */}
+      <Card className="border shadow-sm">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg">Attendance Actions</CardTitle>
+          <CardDescription>
+            Record your attendance or manage worker attendance
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
           {hasRegisteredFaces ? (
-            <div>
+            <div className="flex flex-wrap gap-3">
               {/* Enterprise mode - always show all buttons */}
               {organization?.isEnterprise && (user?.role === 'admin' || user?.role === 'orgAdmin') ? (
-                <div className="flex flex-wrap gap-2 justify-center">
-                  <button
-                    onClick={handleLoginLogout}
-                    className="bg-[#017a5b] text-white py-2 px-4 rounded text-sm"
-                  >
-                    Login Worker
-                  </button>
-                  <button
-                    onClick={() => handleBreaks()}
-                    className={isBreakOpen ? "bg-[#FD8928] text-white py-2 px-4 rounded text-sm" : "bg-yellow-500 text-white py-2 px-4 rounded text-sm"}
-                  >
-                    {isBreakOpen ? "End Break" : "Take a Break"}
-                  </button>
-                  <button
-                    onClick={handleLoginLogout}
-                    className="bg-red-800 text-white py-2 px-4 rounded text-sm"
-                  >
-                    Logout Worker
-                  </button>
-                </div>
+                <>
+                  {/* Enterprise selector */}
+                  <div className="w-full mb-4">
+                    <div className="relative">
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        className="w-full justify-between"
+                        onClick={() => setShowUserDropdown(!showUserDropdown)}
+                      >
+                        {selectedTargetUser ?
+                          `${orgUsers.find(u => u._id === selectedTargetUser)?.firstName} ${orgUsers.find(u => u._id === selectedTargetUser)?.lastName}` :
+                          "Select worker to manage attendance..."
+                        }
+                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+
+                      {showUserDropdown && (
+                        <div id="user-dropdown" className="absolute top-full mt-1 w-full z-50 max-h-[300px] overflow-auto rounded-md border bg-popover shadow-md">
+                          <div className="sticky top-0 z-10 p-2 bg-popover border-b">
+                            <Input
+                              placeholder="Search workers..."
+                              value={userSearchQuery}
+                              onChange={(e) => setUserSearchQuery(e.target.value)}
+                              className="h-8"
+                            />
+                          </div>
+                          <div className="p-1">
+                            <Button
+                              variant={!selectedTargetUser ? "secondary" : "ghost"}
+                              className="w-full justify-start text-left mb-1"
+                              onClick={() => {
+                                handleWorkerSelect(null);
+                                setShowUserDropdown(false);
+                              }}
+                            >
+                              <UserIcon className="mr-2 h-4 w-4" />
+                              <span>Myself (Admin)</span>
+                            </Button>
+
+                            {filteredUsers.length === 0 ? (
+                              <div className="py-6 text-center text-sm text-muted-foreground">
+                                No workers found
+                              </div>
+                            ) : (
+                              filteredUsers.map(user => (
+                                <Button
+                                  key={user._id}
+                                  variant={selectedTargetUser === user._id ? "secondary" : "ghost"}
+                                  className="w-full justify-start text-left mb-1"
+                                  onClick={() => {
+                                    handleWorkerSelect(user._id);
+                                    setShowUserDropdown(false);
+                                  }}
+                                >
+                                  <div className="flex items-center">
+                                    <div className="h-6 w-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs mr-2">
+                                      {user.firstName?.[0]}{user.lastName?.[0]}
+                                    </div>
+                                    <span>{user.firstName} {user.lastName}</span>
+                                  </div>
+                                </Button>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Enterprise action buttons */}
+                  <div className="flex gap-3 flex-wrap">
+                    <Button
+                      onClick={handleLoginLogout}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                    >
+                      Login Worker
+                    </Button>
+                    <Button
+                      onClick={handleBreaks}
+                      variant="outline"
+                      className={isBreakOpen ?
+                        "bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200" :
+                        "bg-amber-500 text-white hover:bg-amber-600"
+                      }
+                    >
+                      {isBreakOpen ? "End Break" : "Take a Break"}
+                    </Button>
+                    <Button
+                      onClick={handleLoginLogout}
+                      variant="destructive"
+                    >
+                      Logout Worker
+                    </Button>
+                  </div>
+                </>
               ) : (
                 /* Regular mode - conditional buttons based on login state */
-                <>
+                <div className="flex gap-3">
                   {isLoggedIn ? (
-                    <div className="flex gap-2">
+                    <>
                       {isBreakOpen ? (
-                        <button
-                          onClick={() => handleBreaks()}
-                          className="bg-[#FD8928] text-white py-2 px-4 rounded text-sm"
+                        <Button
+                          onClick={handleBreaks}
+                          className="bg-amber-500 hover:bg-amber-600 text-white"
                         >
                           End Break
-                        </button>
+                        </Button>
                       ) : (
-                        <button
-                          onClick={() => handleBreaks()}
-                          className="bg-yellow-500 text-white py-2 px-4 rounded text-sm"
+                        <Button
+                          onClick={handleBreaks}
+                          variant="outline"
+                          className="border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100"
                         >
                           Take a Break
-                        </button>
+                        </Button>
                       )}
-                      <button
-                        onClick={() => handleLoginLogout()}
-                        className="bg-red-800 text-white py-2 px-4 rounded text-sm"
+                      <Button
+                        onClick={handleLoginLogout}
+                        variant="destructive"
                       >
                         Logout
-                      </button>
-                    </div>
+                      </Button>
+                    </>
                   ) : (
-                    <div>
-                      <button
-                        onClick={handleLoginLogout}
-                        className="bg-[#017a5b] text-white py-2 px-4 rounded text-sm"
-                      >
-                        Login
-                      </button>
-                    </div>
+                    <Button
+                      onClick={handleLoginLogout}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                    >
+                      Login
+                    </Button>
                   )}
-                </>
+                </div>
               )}
             </div>
           ) : (
-            <div>
-              <button
+            <div className="flex flex-col items-center gap-3 py-4">
+              <div className="rounded-full bg-amber-100 p-3">
+                <Camera className="h-6 w-6 text-amber-600" />
+              </div>
+              <div className="text-center space-y-1">
+                <h3 className="font-medium">Face Registration Required</h3>
+                <p className="text-sm text-muted-foreground">Register your face to use the attendance system</p>
+              </div>
+              <Button
                 onClick={() => setIsRegisterFaceModalOpen(true)}
-                className="bg-[#815BF5] text-white py-2 px-6 rounded text-xs"
+                className="mt-2"
               >
                 Register Faces
-              </button>
+              </Button>
             </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Today's entries */}
+      <Card className="border shadow-sm">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-primary" />
+            Today&apos;s Activity
+          </CardTitle>
+          <CardDescription>
+            Your attendance records for {format(new Date(), 'EEEE, MMMM d, yyyy')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {todayEntries?.length === 0 ? (
+            <div className="bg-muted/30 rounded-lg p-6 text-center">
+              <div className="flex justify-center mb-4">
+                <img src="/animations/not found.gif" className="h-40" />
+              </div>
+              <h3 className="font-medium">No entries found for today</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Click on Login to record your attendance
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {todayEntries?.map((entry: LoginEntry, index: number) => {
+                const formattedLoginTime = entry.loginTime
+                  ? format(new Date(entry.loginTime), 'hh:mm a')
+                  : null;
+
+                const formattedLogoutTime = entry.logoutTime
+                  ? format(new Date(entry.logoutTime), 'hh:mm a')
+                  : null;
+
+                const formattedBreakTime = format(new Date(entry.timestamp), 'hh:mm a');
+
+                return (
+                  <div key={index} className="flex items-center justify-between px-4 py-3 bg-muted/30 rounded-lg">
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 rounded-full flex items-center justify-center bg-muted">
+                        {entry.action === "login" && <UserIcon className="h-5 w-5 text-emerald-500" />}
+                        {entry.action === "logout" && <UserIcon className="h-5 w-5 text-rose-500" />}
+                        {entry.action === "break_started" && <Clock className="h-5 w-5 text-amber-500" />}
+                        {entry.action === "break_ended" && <Clock className="h-5 w-5 text-blue-500" />}
+                      </div>
+
+                      <div>
+                        {entry.loginTime && (
+                          <div className="text-sm font-medium">Login: {formattedLoginTime}</div>
+                        )}
+                        {entry.logoutTime && (
+                          <div className="text-sm font-medium">Logout: {formattedLogoutTime}</div>
+                        )}
+                        {(entry.action === "break_started" || entry.action === "break_ended") && (
+                          <div className="text-sm font-medium">
+                            {entry.action === "break_started" ? "Break started" : "Break ended"}: {formattedBreakTime}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <Badge
+                        className={
+                          entry.action === "login" ? "bg-green-100 text-green-800 border-green-200" :
+                            entry.action === "logout" ? "bg-red-100 text-red-800 border-red-200" :
+                              entry.action === "break_started" ? "bg-yellow-100 text-yellow-800 border-yellow-200" :
+                                "bg-blue-100 text-blue-800 border-blue-200"
+                        }
+                      >
+                        {entry.action === "login" ? "LOGIN" :
+                          entry.action === "logout" ? "LOGOUT" :
+                            entry.action === "break_started" ? "BREAK STARTED" : "BREAK ENDED"}
+                      </Badge>
+
+                      {entry.lat && entry.lng && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleViewMap(entry.lat, entry.lng)}
+                          className="h-8 w-8"
+                        >
+                          <MapPin className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+        <CardFooter className="border-t px-6 py-4">
+          <Button
+            variant="outline"
+            onClick={() => setIsRegularizationModalOpen(true)}
+            className="w-full"
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            Apply for Regularization
+          </Button>
+        </CardFooter>
+      </Card>
+
+      {/* Attendance history */}
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Attendance History</h2>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setActiveTab("thisMonth")}
+            className="gap-1"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Reset Filters
+          </Button>
+        </div>
+
+        {/* Time period filters */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-4 sm:grid-cols-8 md:grid-cols-8 h-auto p-1">
+            <TabsTrigger value="today" className="text-xs h-8">Today</TabsTrigger>
+            <TabsTrigger value="yesterday" className="text-xs h-8">Yesterday</TabsTrigger>
+            <TabsTrigger value="thisWeek" className="text-xs h-8">This Week</TabsTrigger>
+            <TabsTrigger value="lastWeek" className="text-xs h-8">Last Week</TabsTrigger>
+            <TabsTrigger value="thisMonth" className="text-xs h-8">This Month</TabsTrigger>
+            <TabsTrigger value="lastMonth" className="text-xs h-8">Last Month</TabsTrigger>
+            <TabsTrigger value="allTime" className="text-xs h-8">All Time</TabsTrigger>
+            <TabsTrigger value="custom" onClick={openCustomModal} className="text-xs h-8">Custom</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        {/* Report type selector */}
+        <div className="flex justify-center">
+          <Tabs value={activeAttendanceTab} onValueChange={setActiveAttendanceTab} className="w-full max-w-md">
+            <TabsList className="grid grid-cols-2">
+              <TabsTrigger value="dailyReport" className="flex items-center gap-1.5">
+                <LayoutDashboard className="h-4 w-4" />
+                Daily Report
+              </TabsTrigger>
+              <TabsTrigger value="regularization" className="flex items-center gap-1.5">
+                <FileText className="h-4 w-4" />
+                Regularization
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+
+        {/* Report content */}
+        <div className="mt-4">
+          {activeAttendanceTab === "dailyReport" ? (
+            <>
+              {Object.keys(groupedEntries)?.length === 0 ? (
+                <Card className="border">
+                  <CardContent className="pt-6 flex flex-col items-center">
+                    <DotLottieReact
+                      src="/lottie/empty.lottie"
+                      loop
+                      className="h-56"
+                      autoplay
+                    />
+                    <h3 className="font-medium text-center">No Entries for the selected time frame</h3>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-1">
+                  {/* Stats row */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                    <Card className="shadow-sm">
+                      <CardContent className="p-4 flex gap-3 items-center">
+                        <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                          <Calendar className="h-4 w-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Days</p>
+                          <p className="text-lg font-bold">{daysCount}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="shadow-sm">
+                      <CardContent className="p-4 flex gap-3 items-center">
+                        <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+                          <CheckCircle className="h-4 w-4 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Verified</p>
+                          <p className="text-lg font-bold">{verifiedCount}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="shadow-sm">
+                      <CardContent className="p-4 flex gap-3 items-center">
+                        <div className="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center">
+                          <CalendarClock className="h-4 w-4 text-amber-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Regularized</p>
+                          <p className="text-lg font-bold">{regularizedCount}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="shadow-sm">
+                      <CardContent className="p-4 flex gap-3 items-center">
+                        <div className="h-8 w-8 rounded-full bg-orange-100 flex items-center justify-center">
+                          <Clock className="h-4 w-4 text-orange-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Hours</p>
+                          <p className="text-lg font-bold">{totalHours}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Daily entries accordion */}
+                  <div className="space-y-3">
+                    {Object.keys(groupedEntries || {}).map((date, index) => (
+                      <Card key={index} className="overflow-hidden border">
+                        <button
+                          onClick={() => toggleDayExpansion(date)}
+                          className="w-full text-left px-4 py-3 flex items-center justify-between border-b bg-muted/30 hover:bg-muted/50 transition-colors"
+                        >
+                          <div className="flex gap-4 items-center">
+                            <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                              <Calendar className="h-4 w-4 text-blue-600" />
+                            </div>
+                            <span className="font-medium">{date}</span>
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1.5 text-sm">
+                              <Clock className="h-4 w-4 text-muted-foreground" />
+                              <span>{calculateHoursBetweenLoginLogout(groupedEntries[date])}</span>
+                            </div>
+
+                            <ChevronRight className={`h-5 w-5 transition-transform duration-200 ${expandedDays[date] ? 'rotate-90' : ''}`} />
+                          </div>
+                        </button>
+
+                        {expandedDays[date] && (
+                          <div className="divide-y">
+                            {groupedEntries[date].map((entry, idx) => (
+                              <div key={idx} className="p-4 flex justify-between items-center">
+                                <div className="flex items-center gap-3">
+                                  {entry.action === "regularization" ? (
+                                    <div className="space-y-1">
+                                      <div className="flex items-center gap-1.5">
+                                        <Clock className="h-4 w-4 text-muted-foreground" />
+                                        <span className="text-sm">Login: {formatTimeToAMPM(entry.loginTime)}</span>
+                                      </div>
+                                      <div className="flex items-center gap-1.5">
+                                        <Clock className="h-4 w-4 text-muted-foreground" />
+                                        <span className="text-sm">Logout: {formatTimeToAMPM(entry.logoutTime)}</span>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-1.5">
+                                      <Clock className="h-4 w-4 text-muted-foreground" />
+                                      <span className="text-sm">
+                                        {entry.action.charAt(0).toUpperCase() + entry.action.slice(1)}: {format(new Date(entry.timestamp), 'hh:mm a')}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <Badge
+                                    className={
+                                      entry.action === "login" ? "bg-green-100 text-green-800 border-green-200" :
+                                        entry.action === "logout" ? "bg-red-100 text-red-800 border-red-200" :
+                                          entry.action === "break_started" ? "bg-yellow-100 text-yellow-800 border-yellow-200" :
+                                            entry.action === "break_ended" ? "bg-blue-100 text-blue-800 border-blue-200" :
+                                              "bg-gray-100 text-gray-800 border-gray-200"
+                                    }
+                                  >
+                                    {entry.action === "login" ? "LOGIN" :
+                                      entry.action === "logout" ? "LOGOUT" :
+                                        entry.action === "break_started" ? "BREAK STARTED" :
+                                          entry.action === "break_ended" ? "BREAK ENDED" :
+                                            "REGULARIZATION"}
+                                  </Badge>
+
+                                  {entry.lat && entry.lng && (
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => handleViewMap(entry.lat, entry.lng)}
+                                      className="h-8 w-8"
+                                    >
+                                      <MapPin className="h-4 w-4" />
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            // Render regularization entries
+            renderRegularizationEntries()
           )}
         </div>
       </div>
-      {/* Login/Logout Button */}
-      {/* <div className="login-section flex justify-center mb-6">
-                <button
-                    onClick={handleLoginLogout}
-                    className={`bg-${isLoggedIn ? 'red' : 'green'}-500 text-white py-2 px-6 rounded-lg font-semibold`}
-                >
-                    {isLoggedIn ? 'Logout' : 'Login'}
-                </button>
-            </div> */}
-      {/* Apply Regularization Button */}
 
-      <div className="last-two-days-entries p-4 w-full justify-center flex mb-6">
-        {todayEntries?.length === 0 ? (
-          <div className="bg-[#] border w-1/2 rounded p-4">
-            <div className="flex w-full justify-center">
-              <img src="/animations/not found.gif" className="h-40 " />
-            </div>
-            <h1 className="text-center text-sm">No Entries found for today!</h1>
-            <p className="text-center text-[9px]">
-              Click on Login to log your attendance
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-4 dark:bg-[#0B0D29] border bg-white shadow-sm   rounded p-4 w-[60%] mx-12">
-            {todayEntries?.map((entry: LoginEntry, index: number) => {
-              // Format login and logout times to 01:00 PM format
-              const formattedLoginTime = entry.loginTime
-                ? new Date(entry.loginTime).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: true,
-                })
-                : null;
+      {/* Dialogs and Modals */}
 
-              const formattedLogoutTime = entry.logoutTime
-                ? new Date(entry.logoutTime).toLocaleTimeString([], {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: true,
-                })
-                : null;
-
-              // For break events, always use the entry timestamp.
-              const formattedBreakTime = new Date(entry.timestamp).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-              });
-
-
-              return (
-                <div key={index} className="w-full grid grid-cols-3">
-                  {entry.loginTime && (
-                    <div>
-                      <h1 className="text-xs py-1">Login: {formattedLoginTime}</h1>
-                    </div>
-                  )}
-                  {entry.logoutTime && (
-                    <div>
-                      <h2 className="text-xs py-1">Logout: {formattedLogoutTime}</h2>
-                    </div>
-                  )}
-                  {(entry.action === "break_started" || entry.action === "break_ended") && (
-                    <div>
-                      <h1 className="text-xs py-1">
-                        {entry.action === "break_started"
-                          ? "Break start time:"
-                          : "Break end time:"}{" "}
-                        {formattedBreakTime}
-                      </h1>
-                    </div>
-                  )}
-                  <div
-                    className={`px-2 py-1 h-7 w-fit flex items-center justify-center text-xs border rounded-xl text-white ${entry.action === "login"
-                      ? "bg-green-800"
-                      : entry.action === "logout"
-                        ? "bg-red-800"
-                        : entry.action === "break_started"
-                          ? "bg-yellow-700"
-                          : entry.action === "break_ended"
-                            ? "bg-[#Fd8928]"
-                            : "bg-[#8A3D17]"
-                      }`}
-                  >
-                    <h1 className="text-xs">
-                      {entry.action === "login" || entry.action === "logout"
-                        ? entry.action.toUpperCase()
-                        : entry.action === "break_started"
-                          ? "Break Started"
-                          : "Break Ended"}
-                    </h1>
-                  </div>
-
-                  {entry.lat && entry.lng && (
-                    <div className="flex justify-end">
-                      <button
-                        onClick={() => handleViewMap(entry.lat, entry.lng)}
-                        className="underline dark:text-white h-5"
-                      >
-                        <MapPin />
-                      </button>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-
-          </div>
-        )}
-      </div>
-
-      <div className="apply-regularization-section flex justify-center mb-6">
-        <button
-          onClick={() => setIsRegularizationModalOpen(true)}
-          className="bg-[#017A5B] text-white py-2 px-4 rounded text-xs"
-        >
-          Apply Regularization
-        </button>
-      </div>
-      {/* Tabs for filtering entries */}
-      <div className="tabs mb-6 flex flex-wrap justify-center space-x-2">
-        <button
-          onClick={() => setActiveTab("today")}
-          className={`px-4 h-fit py-2 text-xs rounded ${activeTab === "today" ? "bg-[#815BF5] text-white" : "bg-[#] border "
-            }`}
-        >
-          Today
-        </button>
-        <button
-          onClick={() => setActiveTab("yesterday")}
-          className={`px-4 h-fit py-2 text-xs rounded ${activeTab === "yesterday" ? "bg-[#815BF5] text-white" : "bg-[#] border"
-            }`}
-        >
-          Yesterday
-        </button>
-        <button
-          onClick={() => setActiveTab("thisWeek")}
-          className={`px-4 py-2 h-fit text-xs rounded ${activeTab === "thisWeek" ? "bg-[#815BF5] text-white" : "bg-[#] border"
-            }`}
-        >
-          This Week
-        </button>
-        <button
-          onClick={() => setActiveTab("lastWeek")}
-          className={`px-4 py-2 text-xs h-fit rounded ${activeTab === "lastWeek" ? "bg-[#815BF5] text-white" : "bg-[#] border"
-            }`}
-        >
-          Last Week
-        </button>
-        <button
-          onClick={() => setActiveTab("thisMonth")}
-          className={`px-4 py-2 text-xs h-fit rounded ${activeTab === "thisMonth" ? "bg-[#815BF5] text-white" : "bg-[#] border"
-            }`}
-        >
-          This Month
-        </button>
-        <button
-          onClick={() => setActiveTab("lastMonth")}
-          className={`px-4 py-2 text-xs h-fit rounded ${activeTab === "lastMonth" ? "bg-[#815BF5] text-white" : "bg-[#] border"
-            }`}
-        >
-          Last Month
-        </button>
-        <button
-          onClick={() => setActiveTab("allTime")}
-          className={`px-4 py-2 text-xs h-fit rounded ${activeTab === "allTime" ? "bg-[#815BF5] text-white" : "bg-[#] border"
-            }`}
-        >
-          All Time
-        </button>
-        <button
-          onClick={openCustomModal}
-          className={`px-4 py-2 rounded bg-[#37384B] text-xs border ${customDateRange.start && customDateRange.end
-            ? "bg-[#815BF5] text-white"
-            : "bg-transparent"
-            }`}
-        >
-          Custom
-        </button>
-      </div>
-      <div className="flex items-center justify-center gap-4 mt-2 mb-6">
-        <button
-          onClick={() => setActiveAttendanceTab("dailyReport")}
-          className={`px-4 flex items-center gap-2 py-2 text-xs rounded ${activeAttendanceTab === "dailyReport"
-            ? "bg-[#815BF5] text-white"
-            : "dark:bg-[#37384B] border"
-            }`}
-        >
-          <img src="/icons/report.png" className="dark:invert-[100] h-4" />
-          Daily Report
-        </button>
-        <button
-          onClick={() => setActiveAttendanceTab("regularization")}
-          className={`px-4 flex items-center gap-2 py-2 text-xs rounded ${activeAttendanceTab === "regularization"
-            ? "bg-[#815BF5] text-white"
-            : "dark:bg-[#37384B] border"
-            }`}
-        >
-          <Users2 className="h-4" />
-          Regularization
-        </button>
-      </div>
-
-      {/* Display login/logout entries */}
-      <div className="entries-list w-full mb-36">
-        {activeAttendanceTab === "dailyReport" ? (
-          <>
-            {Object.keys(groupedEntries)?.length === 0 ? (
-              <div>
-                <div className="flex justify-center mb-4 gap-4">
-                  <div className="text-xs flex  border px-4 py-2 ">
-                    <Calendar className="h-4 text-blue-500 mt-[1px]" />
-                    <h1 className="text-xs mt-[1px] ">Days: {daysCount}</h1>
-                  </div>
-                  <div className="text-xs flex border px-4 py-2">
-                    <CheckCircle className="h-4 text-green-500 mt-[1px]" />
-                    <h1 className="text-xs mt-[1px]">
-                      {" "}
-                      Verified: {verifiedCount}
-                    </h1>
-                  </div>
-                  <div className="text-xs flex  border px-4 py-2">
-                    <CalendarClock className="h-4 dark:text-white" />
-                    <h1 className="mt-[1px]">
-                      Regularized: {regularizedCount}
-                    </h1>
-                  </div>
-                  <div className="text-xs border flex px-4 py-2">
-                    <Clock className="h-4 mt-[1px] text-orange-600" />
-                    <h1 className="text-xs mt-[1px]">Hours: {totalHours}</h1>
-                  </div>
-                </div>
-                <DotLottieReact
-                  src="/lottie/empty.lottie"
-                  loop
-                  className="h-56"
-                  autoplay
-                />
-                <p className="text-center dark:text-white -600">
-                  No Entries for the selected time frame
-                </p>
-              </div>
-            ) : (
-              <>
-                <div className="flex justify-center mb-4 gap-4">
-                  <div className="text-xs flex  border px-4 py-2 ">
-                    <Calendar className="h-4 text-blue-500 mt-[1px]" />
-                    <h1 className="text-xs mt-[1px] ">Days: {daysCount}</h1>
-                  </div>
-                  <div className="text-xs flex border px-4 py-2">
-                    <CheckCircle className="h-4 text-green-500 mt-[1px]" />
-                    <h1 className="text-xs mt-[1px]">
-                      {" "}
-                      Verified: {verifiedCount}
-                    </h1>
-                  </div>
-                  <div className="text-xs flex  border px-4 py-2">
-                    <CalendarClock className="h-4 dark:text-white" />
-                    <h1 className="mt-[1px]">
-                      Regularized: {regularizedCount}
-                    </h1>
-                  </div>
-                  <div className="text-xs border flex px-4 py-2">
-                    <Clock className="h-4 mt-[1px] text-orange-600" />
-                    <h1 className="text-xs mt-[1px]">Hours: {totalHours}</h1>
-                  </div>
-                </div>
-                {Object.keys(groupedEntries || {}).map((date, index) => (
-                  <div key={index} className="mb-4  w-full">
-                    <div
-                      onClick={() => toggleDayExpansion(date)}
-                      className="w-full grid cursor-pointer grid-cols-3 gap-2 text-xs text-left border dark:text-white px-4 py-2 rounded rounded-b-none"
-                    >
-                      <div className="flex gap-2">
-                        <Calendar className="h-4" /> {date}
-                      </div>
-                      <div className="flex gap-2">
-                        <Clock className="h-4" />{" "}
-                        {calculateHoursBetweenLoginLogout(groupedEntries[date])}{" "}
-
-                      </div>
-                      <div className="flex justify-end">
-                        <span
-                          className={`transition-transform duration-300 ${expandedDays[date] ? "rotate-180" : "rotate-0"}`}
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-5 w-5"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </span>
-                      </div>
-                    </div>
-                    {expandedDays[date] && (
-                      <div className="p-4 border rounded w-full rounded-t-none">
-                        {groupedEntries[date].map((entry, index) => (
-                          <div
-                            key={index}
-                            className="flex w-full p-2 justify-between"
-                          >
-                            <div>
-                              <span>
-                                {entry.action === "regularization"
-                                  ? `Login: ${formatTimeToAMPM(entry.loginTime)}`
-                                  : entry.action === "break_started"
-                                    ? `Break Started` : entry.action === "break_ended"
-                                      ? `Break Ended` : `${entry.action.charAt(0).toUpperCase() + entry.action.slice(1)}: ${format(new Date(entry.timestamp), 'hh:mm a')}` // Format action timestamp
-                                }
-                              </span>
-                              {entry.action === "regularization" && (
-                                <span>
-                                  Logout: {formatTimeToAMPM(entry.logoutTime)}
-                                </span>
-                              )}
-                            </div>
-
-                            <div className={`text-xs cursor-pointer border w-fit h-fit text-white flex gap-2 items-center  px-2 py-1  rounded-2xl ${entry.action === "login"
-                              ? "bg-green-800"
-                              : entry.action === "logout"
-                                ? "bg-red-800"
-                                : entry.action === "break_started"
-                                  ? "bg-yellow-700"
-                                  : entry.action === "break_ended"
-                                    ? "bg-[#Fd8928]"
-                                    : "bg-[#8A3D17]"
-                              }`}>
-                              <div className="flex items-center">
-                                {entry.action === "login" || entry.action === "logout"
-                                  ? entry.action.toUpperCase()
-                                  : entry.action === "break_started"
-                                    ? "Break Started"
-                                    : "Break Ended"}
-                              </div>
-                              <div className="flex items-center">
-                                {entry.lat && entry.lng && (
-                                  <button
-                                    onClick={() => handleViewMap(entry.lat, entry.lng)}
-                                    className="underline text-[#ffffff]"
-                                  >
-                                    <MapPinIcon className="h-4" />
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-
-              </>
-            )}
-          </>
-        ) : (
-          // Render regularization entries
-          renderRegularizationEntries()
-        )}
-      </div>
-
-      {/* Radix UI Dialog for Face Login */}
+      {/* Face Login Dialog */}
       <Dialog open={isModalOpen} onOpenChange={handleModalChange}>
-        <DialogContent className="z-[100] flex items-center justify-center ">
-          <div className=" z-[100] p-6 h-full rounded-lg max-w-lg w-full relative">
-            <div className="flex justify-between">
-              <div className="flex gap-2  items-center ">
-                <img src="/branding/AII.png" className="h-10 dark:block hidden" />
-                <img src="/branding/zapllo ai.png" className="h-5 mt-2 dark:block hidden" />
-                <img src="/branding/ai-light.png" className="h-9 dark:hidden block" />
-
+        <DialogContent className="-md p-6 ">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <img src="/branding/AII.png" className="h-8 dark:block hidden" />
+                <img src="/branding/zapllo ai.png" className="h-4 dark:block hidden" />
+                <img src="/branding/ai-light.png" className="h-7 dark:hidden block" />
               </div>
-              <DialogClose className=" ">
-                <CrossCircledIcon className="scale-150 -mt-1 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
+              <DialogClose asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <X className="h-4 w-4" />
+                </Button>
               </DialogClose>
             </div>
-            <Separator className="my-4" />
-            <div className="w-full flex items-center mb-4 justify-between">
-              <h3 className="text-sm dark:text-white text-center ">
-                {isLoggedIn
-                  ? `Logout at ${new Date().toLocaleTimeString()}`
-                  : `Login at ${new Date().toLocaleTimeString()}`}
+
+            <Separator />
+
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium">
+                {isLoggedIn ? `Logout at ${format(new Date(), 'hh:mm a')}` : `Login at ${format(new Date(), 'hh:mm a')}`}
               </h3>
+
+              {/* Work from home toggle */}
               <Tabs3
-                // If `isWorkFromHome` is true, the active tab is "work-from-home", else "office"
                 value={isWorkFromHome ? "work-from-home" : "office"}
-                onValueChange={(val) => {
-                  setIsWorkFromHome(val === "work-from-home");
-                }}
+                onValueChange={(val) => setIsWorkFromHome(val === "work-from-home")}
               >
                 <TabsList3>
                   <TabsTrigger3 value="office">Office</TabsTrigger3>
                   <TabsTrigger3
                     value="work-from-home"
                     disabled={!user?.workFromHomeAllowed}
-                  >Work From Home</TabsTrigger3>
+                  >
+                    Work From Home
+                  </TabsTrigger3>
                 </TabsList3>
               </Tabs3>
-
-              {/* <Dialog.DialogClose className="">
-                  <CrossCircledIcon className="scale-150 -mt-1 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
-                </Dialog.DialogClose> */}
             </div>
 
-            {/* Modern Enterprise Mode UI with Working Search */}
+            {/* Enterprise mode selector */}
             {organization?.isEnterprise && (user?.role === 'admin' || user?.role === 'orgAdmin') && (
-              <div className="mt-3 mb-4">
-                <div className="flex items-center gap-2 mb-3">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
                   <div className="h-2 w-2 bg-amber-400 rounded-full animate-pulse"></div>
                   <h3 className="text-sm font-medium text-amber-700 dark:text-amber-400">Enterprise Mode</h3>
                 </div>
 
-                {/* Custom Select with Search */}
                 <div className="relative">
-                  <button
-                    type="button"
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    className="w-full justify-between"
                     onClick={() => setShowUserDropdown(!showUserDropdown)}
-                    className="w-full flex justify-between items-center px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-sm"
                   >
-                    <span className={selectedTargetUser ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-gray-400"}>
-                      {selectedTargetUser
-                        ? `${orgUsers.find(u => u._id === selectedTargetUser)?.firstName} ${orgUsers.find(u => u._id === selectedTargetUser)?.lastName}`
-                        : "Select worker to manage attendance..."}
-                    </span>
-                    <ChevronDown className="h-4 w-4 text-gray-500" />
-                  </button>
+                    {selectedTargetUser ?
+                      `${orgUsers.find(u => u._id === selectedTargetUser)?.firstName} ${orgUsers.find(u => u._id === selectedTargetUser)?.lastName}` :
+                      "Select worker to manage attendance..."
+                    }
+                    <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
 
-                  {/* Custom Dropdown with Search */}
                   {showUserDropdown && (
-                    <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
-                      <div className="p-2 border-b border-gray-200 dark:border-gray-700">
-                        <input
-                          type="text"
+                    <div className="absolute z-50 mt-1 w-full bg-popover rounded-md border shadow-md">
+                      <div className="p-2 border-b">
+                        <Input
+                          placeholder="Search workers..."
                           value={userSearchQuery}
                           onChange={(e) => setUserSearchQuery(e.target.value)}
-                          placeholder="Search workers..."
-                          className="w-full p-2 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-[#815BF5] dark:bg-gray-800 dark:border-gray-700"
-                          autoFocus
+                          className="h-8"
                         />
                       </div>
 
                       <div className="max-h-60 overflow-y-auto py-1">
-                        {/* Myself option */}
-                        <div
-                          className={`px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center ${!selectedTargetUser ? 'bg-[#815BF5] bg-opacity-10 text-[#815BF5]' : ''}`}
+                        <Button
+                          variant={!selectedTargetUser ? "secondary" : "ghost"}
+                          className="w-full justify-start text-left"
                           onClick={() => {
-                            setSelectedTargetUser(null);
+                            handleWorkerSelect(null);
                             setShowUserDropdown(false);
                           }}
                         >
-                          <UserIcon className="h-5 w-5 mr-2" />
+                          <UserIcon className="mr-2 h-4 w-4" />
                           <span>Myself (Admin)</span>
-                        </div>
+                        </Button>
 
-                        {/* Filtered workers */}
                         {filteredUsers.length === 0 ? (
-                          <div className="px-3 py-2 text-center text-sm text-gray-500">
+                          <div className="px-3 py-2 text-center text-sm text-muted-foreground">
                             No workers found
                           </div>
                         ) : (
                           filteredUsers.map(user => (
-                            <div
+                            <Button
                               key={user._id}
-                              className={`px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center ${selectedTargetUser === user._id ? 'bg-[#815BF5] bg-opacity-10 text-[#815BF5]' : ''}`}
+                              variant={selectedTargetUser === user._id ? "secondary" : "ghost"}
+                              className="w-full justify-start text-left"
                               onClick={() => {
-                                setSelectedTargetUser(user._id);
+                                handleWorkerSelect(user._id);
                                 setShowUserDropdown(false);
                               }}
                             >
-                              <div className="h-6 w-6 rounded-full text-white bg-[#815BF5] flex items-center justify-center text-xs mr-2">
-                                {user.firstName?.[0]}{user.lastName?.[0]}
+                              <div className="flex items-center">
+                                <div className="h-6 w-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs mr-2">
+                                  {user.firstName?.[0]}{user.lastName?.[0]}
+                                </div>
+                                <span>{user.firstName} {user.lastName}</span>
                               </div>
-                              <span>{user.firstName} {user.lastName}</span>
-                            </div>
+                            </Button>
                           ))
                         )}
                       </div>
@@ -1952,229 +1823,213 @@ export default function MyAttendance() {
                 </div>
 
                 {selectedTargetUser && (
-                  <div className="mt-2 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full text-white bg-[#815BF5] flex items-center justify-center text-xs">
-                      {orgUsers.find(u => u._id === selectedTargetUser)?.firstName?.[0]}
-                      {orgUsers.find(u => u._id === selectedTargetUser)?.lastName?.[0]}
+                  <div className="p-2 bg-muted/50 rounded-md border flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs">
+                        {orgUsers.find(u => u._id === selectedTargetUser)?.firstName?.[0]}
+                        {orgUsers.find(u => u._id === selectedTargetUser)?.lastName?.[0]}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">
+                          {orgUsers.find(u => u._id === selectedTargetUser)?.firstName} {orgUsers.find(u => u._id === selectedTargetUser)?.lastName}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {isLoggedIn ? `Recording logout for this worker` : `Recording login for this worker`}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium dark:text-white">
-                        {orgUsers.find(u => u._id === selectedTargetUser)?.firstName} {orgUsers.find(u => u._id === selectedTargetUser)?.lastName}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {isLoggedIn ? `Recording logout for this worker` : `Recording login for this worker`}
-                      </p>
-                    </div>
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => setSelectedTargetUser(null)}
-                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                      className="h-8 w-8"
                     >
                       <X className="h-4 w-4" />
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
             )}
 
-
-            {/* Webcam or Captured Image Display */}
-            <div className="relative w-full h-auto mb-4">
+            {/* Webcam or Captured Image */}
+            <div className="relative overflow-hidden rounded-lg border">
               {capturedImage ? (
                 <img
                   src={capturedImage}
                   alt="Captured"
-                  className="w-full h-auto rounded-lg"
+                  className="w-full h-auto aspect-video object-cover"
                 />
               ) : (
                 <Webcam
                   audio={false}
                   ref={webcamRef}
                   screenshotFormat="image/jpeg"
-                  className="w-full h-auto rounded-lg"
+                  className="w-full h-auto aspect-video object-cover"
                 />
               )}
 
-              {/* Face Logging Animation (if capturedImage exists) */}
+              {/* Face detection animation */}
               {capturedImage && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  {/* Example face detection animtion */}
-                  <div className="face-animation">
-                    <DotLottieReact
-                      src="/lottie/facescan.lottie"
-                      loop
-                      className="h-56"
-                      autoplay
-                    />
-                  </div>
+                <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                  <DotLottieReact
+                    src="/lottie/facescan.lottie"
+                    loop
+                    className="h-36"
+                    autoplay
+                  />
                 </div>
               )}
             </div>
 
-            {/* Single Camera Button to Capture and Submit */}
-            <button
-              onClick={captureImageAndSubmitLogin}
-              className="bg-[#017A5B] text-white py-2 px-4 rounded-full flex items-center justify-center mx-auto mb-4"
-            >
-              <Camera className="w-6 h-6" />{" "}
-              {/* Replace with an actual camera icon */}
-            </button>
+            {/* Capture button */}
+            <div className="flex justify-center">
+              <Button
+                onClick={captureImageAndSubmitLogin}
+                size="lg"
+                className="rounded-full"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <Loader className="h-5 w-5" />
+                ) : (
+                  <Camera className="h-5 w-5 mr-2" />
+                )}
+                {capturedImage ? "Submit" : "Capture"}
+              </Button>
+            </div>
 
-            {/* Display Lat and Long */}
-
-            {/* <div className="text-center flex w-full justify-center text-xs text-white -400">
-                <p className="flex gap-2 text-sm">
-                  <MapPinIcon className="h-4" />
-                  {location
-                    ? `Lat: ${location.lat}, Long: ${location.lng}`
-                    : "Fetching location..."}
-                </p>
-              </div> */}
+            {/* Location info */}
             {orgData && orgData.allowGeofencing && location && (
-              <div className="mt-4 text-center">
+              <div className="text-center">
                 {calculateDistance(
                   location.lat,
                   location.lng,
-                  orgData.location.lat,
-                  orgData.location.lng
+                  orgData.location?.lat,
+                  orgData.location?.lng
                 ) <= orgData.geofenceRadius ? (
-                  <div className="flex justify-center">
-                    <div className="text-white flex gap-2 items-center bg-green-500 rounded-xl w-fit px-2 py-1 text-sm ">
-                      <FaHouseUser className="h-4 text-white" />
-                      You are in office reach
-                    </div>
-                  </div>
+                  <Badge className="bg-green-100 text-green-800 border-green-200 gap-1">
+                    <FaHouseUser className="h-3.5 w-3.5" />
+                    You are in office reach
+                  </Badge>
                 ) : (
-                  <div className="flex justify-center">
-                    <div className="text-white flex gap-2 items-center bg-red-500 rounded-xl w-fit px-2 py-1 text-sm ">
-                      <FaHouseUser className="h-4 text-white" />
-                      You are outside office reach
-                    </div>
-                  </div>
+                  <Badge className="bg-red-100 text-red-800 border-red-200 gap-1">
+                    <FaHouseUser className="h-3.5 w-3.5" />
+                    You are outside office reach
+                  </Badge>
                 )}
               </div>
             )}
 
-            <div className="text-center flex w-full justify-center text-xs text-white -400 mt-4">
-              <div className="dark:bg-[#1E2A38] rounded-lg py-2 px-4 flex items-center gap-2 border dark:shadow-lg">
-                <MapPinIcon className="h-4 text-[#FC8929]" />
-                <p className="text-xs dark:text-white text-black dark:font-semibold">
+            <div className="flex justify-center">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-md text-xs text-muted-foreground">
+                <MapPinIcon className="h-3.5 w-3.5 text-amber-500" />
+                <span>
                   {location
-                    ? `Lat: ${location.lat}, Long: ${location.lng}`
+                    ? `Lat: ${location.lat.toFixed(6)}, Long: ${location.lng.toFixed(6)}`
                     : "Fetching location..."}
-                </p>
+                </span>
               </div>
             </div>
-
-            {/* Show Loader if submitting */}
-            {isLoading && <Loader />}
           </div>
         </DialogContent>
       </Dialog>
-      {/* Radix UI Dialog for Break Login */}
+
+      {/* Break Dialog */}
       <Dialog open={isBreakModalOpen} onOpenChange={handleBreakModalChange}>
-        <DialogContent className="z-[100] flex items-center justify-center ">
-          <div className=" z-[100] p-6 rounded-lg max-w-lg w-full relative">
-            <div className="flex justify-between">
-              <div className="flex gap-2  items-center ">
-                <img src="/branding/AII.png" className="h-10 dark:block hidden" />
-                <img src="/branding/zapllo ai.png" className="h-5 mt-2 dark:block hidden" />
-                <img src="/branding/ai-light.png" className="h-9 dark:hidden block" />
+        <DialogContent className="sm:max-w-md p-6">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <img src="/branding/AII.png" className="h-8 dark:block hidden" />
+                <img src="/branding/zapllo ai.png" className="h-4 dark:block hidden" />
+                <img src="/branding/ai-light.png" className="h-7 dark:hidden block" />
               </div>
-              <DialogClose className=" ">
-                <CrossCircledIcon className="scale-150 -mt-1 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
+              <DialogClose asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <X className="h-4 w-4" />
+                </Button>
               </DialogClose>
             </div>
-            <Separator className="my-4" />
-            <div className="w-full flex mb-4 justify-between">
-              <h3 className="text-sm dark:text-white text-center ">
-                {isBreakOpen
-                  ? `End Break at ${new Date().toLocaleTimeString()}`
-                  : `Take a Break at ${new Date().toLocaleTimeString()}`}
+
+            <Separator />
+
+            <div className="text-center">
+              <h3 className="text-lg font-semibold">
+                {isBreakOpen ? "End Break" : "Take a Break"}
               </h3>
-              {/* <Dialog.DialogClose className="">
-                  <CrossCircledIcon className="scale-150 -mt-1 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
-                </Dialog.DialogClose> */}
+              <p className="text-sm text-muted-foreground">
+                {format(new Date(), 'EEEE, MMMM d, yyyy, hh:mm a')}
+              </p>
             </div>
 
-
-            <div className="w-full flex mb-4 justify-between">
-              <h3 className="text-sm dark:text-white text-center ">
-                {isBreakOpen
-                  ? `End Break at ${new Date().toLocaleTimeString()}`
-                  : `Take a Break at ${new Date().toLocaleTimeString()}`}
-              </h3>
-            </div>
-
-            {/* Modern Enterprise Mode UI for Break Management with Working Search */}
+            {/* Enterprise mode selector for breaks */}
             {organization?.isEnterprise && (user?.role === 'admin' || user?.role === 'orgAdmin') && (
-              <div className="mt-3 mb-4">
-                <div className="flex items-center gap-2 mb-3">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
                   <div className="h-2 w-2 bg-amber-400 rounded-full animate-pulse"></div>
                   <h3 className="text-sm font-medium text-amber-700 dark:text-amber-400">Enterprise Mode</h3>
                 </div>
 
-                {/* Custom Select with Search */}
                 <div className="relative">
-                  <button
-                    type="button"
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    className="w-full justify-between"
                     onClick={() => setShowBreakUserDropdown(!showBreakUserDropdown)}
-                    className="w-full flex justify-between items-center px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded text-sm"
                   >
-                    <span className={selectedTargetUser ? "text-gray-900 dark:text-white" : "text-gray-500 dark:text-gray-400"}>
-                      {selectedTargetUser
-                        ? `${orgUsers.find(u => u._id === selectedTargetUser)?.firstName} ${orgUsers.find(u => u._id === selectedTargetUser)?.lastName}`
-                        : "Select worker to manage breaks..."}
-                    </span>
-                    <ChevronDown className="h-4 w-4 text-gray-500" />
-                  </button>
+                    {selectedTargetUser ?
+                      `${orgUsers.find(u => u._id === selectedTargetUser)?.firstName} ${orgUsers.find(u => u._id === selectedTargetUser)?.lastName}` :
+                      "Select worker to manage breaks..."
+                    }
+                    <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
 
-                  {/* Custom Dropdown with Search */}
                   {showBreakUserDropdown && (
-                    <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
-                      <div className="p-2 border-b border-gray-200 dark:border-gray-700">
-                        <input
-                          type="text"
+                    <div id="break-user-dropdown" className="absolute z-50 mt-1 w-full bg-popover rounded-md border shadow-md">
+                      <div className="p-2 border-b">
+                        <Input
+                          placeholder="Search workers..."
                           value={userSearchQuery}
                           onChange={(e) => setUserSearchQuery(e.target.value)}
-                          placeholder="Search workers..."
-                          className="w-full p-2 text-sm border rounded focus:outline-none focus:ring-1 focus:ring-[#815BF5] dark:bg-gray-800 dark:border-gray-700"
-                          autoFocus
+                          className="h-8"
                         />
                       </div>
 
                       <div className="max-h-60 overflow-y-auto py-1">
-                        {/* Myself option */}
-                        <div
-                          className={`px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center ${!selectedTargetUser ? 'bg-[#815BF5] bg-opacity-10 text-[#815BF5]' : ''}`}
+                        <Button
+                          variant={!selectedTargetUser ? "secondary" : "ghost"}
+                          className="w-full justify-start text-left"
                           onClick={() => {
-                            setSelectedTargetUser(null);
+                            handleWorkerSelect(null);
                             setShowBreakUserDropdown(false);
                           }}
                         >
-                          <UserIcon className="h-5 w-5 mr-2" />
+                          <UserIcon className="mr-2 h-4 w-4" />
                           <span>Myself (Admin)</span>
-                        </div>
+                        </Button>
 
-                        {/* Filtered workers */}
                         {filteredUsers.length === 0 ? (
-                          <div className="px-3 py-2 text-center text-sm text-gray-500">
+                          <div className="px-3 py-2 text-center text-sm text-muted-foreground">
                             No workers found
                           </div>
                         ) : (
                           filteredUsers.map(user => (
-                            <div
+                            <Button
                               key={user._id}
-                              className={`px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer flex items-center ${selectedTargetUser === user._id ? 'bg-[#815BF5] bg-opacity-10 text-[#815BF5]' : ''}`}
+                              variant={selectedTargetUser === user._id ? "secondary" : "ghost"}
+                              className="w-full justify-start text-left"
                               onClick={() => {
-                                setSelectedTargetUser(user._id);
+                                handleWorkerSelect(user._id);
                                 setShowBreakUserDropdown(false);
                               }}
                             >
-                              <div className="h-6 w-6 rounded-full text-white bg-[#815BF5] flex items-center justify-center text-xs mr-2">
-                                {user.firstName?.[0]}{user.lastName?.[0]}
+                              <div className="flex items-center">
+                                <div className="h-6 w-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs mr-2">
+                                  {user.firstName?.[0]}{user.lastName?.[0]}
+                                </div>
+                                <span>{user.firstName} {user.lastName}</span>
                               </div>
-                              <span>{user.firstName} {user.lastName}</span>
-                            </div>
+                            </Button>
                           ))
                         )}
                       </div>
@@ -2183,546 +2038,428 @@ export default function MyAttendance() {
                 </div>
 
                 {selectedTargetUser && (
-                  <div className="mt-2 px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full text-white bg-[#815BF5] flex items-center justify-center text-xs">
-                      {orgUsers.find(u => u._id === selectedTargetUser)?.firstName?.[0]}
-                      {orgUsers.find(u => u._id === selectedTargetUser)?.lastName?.[0]}
+                  <div className="p-2 bg-muted/50 rounded-md border flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs">
+                        {orgUsers.find(u => u._id === selectedTargetUser)?.firstName?.[0]}
+                        {orgUsers.find(u => u._id === selectedTargetUser)?.lastName?.[0]}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">
+                          {orgUsers.find(u => u._id === selectedTargetUser)?.firstName} {orgUsers.find(u => u._id === selectedTargetUser)?.lastName}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {isBreakOpen ? "End break" : "Start break"} for this worker
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium dark:text-white">
-                        {orgUsers.find(u => u._id === selectedTargetUser)?.firstName} {orgUsers.find(u => u._id === selectedTargetUser)?.lastName}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {isBreakOpen ? "End break" : "Start break"} for this worker
-                      </p>
-                    </div>
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => setSelectedTargetUser(null)}
-                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                      className="h-8 w-8"
                     >
                       <X className="h-4 w-4" />
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
             )}
 
-            {/* Webcam or Captured Image Display section follows */}
-
-            {/* Webcam or Captured Image Display */}
-            <div className="relative w-full h-auto mb-4">
+            {/* Webcam for Break */}
+            <div className="relative overflow-hidden rounded-lg border">
               {capturedBreakImage ? (
                 <img
                   src={capturedBreakImage}
                   alt="Captured"
-                  className="w-full h-auto rounded-lg"
+                  className="w-full h-auto aspect-video object-cover"
                 />
               ) : (
                 <Webcam
                   audio={false}
                   ref={webcamRef}
                   screenshotFormat="image/jpeg"
-                  className="w-full h-auto rounded-lg"
+                  className="w-full h-auto aspect-video object-cover"
                 />
               )}
 
-              {/* Face Logging Animation (if capturedImage exists) */}
+              {/* Face detection animation */}
               {capturedBreakImage && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  {/* Example face detection animtion */}
-                  <div className="face-animation">
-                    <DotLottieReact
-                      src="/lottie/facescan.lottie"
-                      loop
-                      className="h-56"
-                      autoplay
-                    />
-                  </div>
+                <div className="absolute inset-0 flex items-center justify-center bg-black/10">
+                  <DotLottieReact
+                    src="/lottie/facescan.lottie"
+                    loop
+                    className="h-36"
+                    autoplay
+                  />
                 </div>
               )}
             </div>
 
-            {/* Single Camera Button to Capture and Submit */}
-            <button
-              onClick={captureImageAndSubmitBreakStart}
-              className="bg-[#017A5B] text-white py-2 px-4 rounded-full flex items-center justify-center mx-auto mb-4"
-            >
-              <Camera className="w-6 h-6" />{" "}
-              {/* Replace with an actual camera icon */}
-            </button>
-
-            {/* Display Lat and Long */}
-
-            {/* <div className="text-center flex w-full justify-center text-xs text-white -400">
-                <p className="flex gap-2 text-sm">
-                  <MapPinIcon className="h-4" />
-                  {location
-                    ? `Lat: ${location.lat}, Long: ${location.lng}`
-                    : "Fetching location..."}
-                </p>
-              </div> */}
-            {orgData && orgData.allowGeofencing && location && (
-              <div className="mt-4 text-center">
-                {calculateDistance(
-                  location.lat,
-                  location.lng,
-                  orgData.location.lat,
-                  orgData.location.lng
-                ) <= orgData.geofenceRadius ? (
-                  <div className="flex justify-center">
-                    <div className="text-white flex gap-2 items-center bg-green-500 rounded-xl w-fit px-2 py-1 text-sm ">
-                      <FaHouseUser className="h-4 text-white" />
-                      You are outside office reach
-                    </div>
-                  </div>
+            {/* Capture button for break */}
+            <div className="flex justify-center">
+              <Button
+                onClick={captureImageAndSubmitBreakStart}
+                size="lg"
+                className={`rounded-full ${isBreakOpen ? "bg-blue-500 hover:bg-blue-600" : "bg-amber-500 hover:bg-amber-600"}`}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <Loader className="h-5 w-5" />
                 ) : (
-                  <div className="flex justify-center">
-                    <div className="text-white flex gap-2 items-center bg-red-500 rounded-xl w-fit px-2 py-1 text-sm ">
-                      <FaHouseUser className="h-4 text-white" />
-                      You are outside office reach
-                    </div>
-                  </div>
+                  <Camera className="h-5 w-5 mr-2" />
                 )}
-              </div>
-            )}
-
-            <div className="text-center flex w-full justify-center text-xs text-white -400 mt-4">
-              <div className="dark:bg-[#1E2A38] rounded-lg border py-2 px-4 flex items-center gap-2 dark:shadow-lg">
-                <MapPinIcon className="h-4 text-[#FC8929]" />
-                <p className="text-xs dark:text-white text-black dark:font-semibold">
-                  {location
-                    ? `Lat: ${location.lat}, Long: ${location.lng}`
-                    : "Fetching location..."}
-                </p>
-              </div>
+                {capturedBreakImage ? "Submit" : "Capture"}
+              </Button>
             </div>
 
-            {/* Show Loader if submitting */}
-            {isLoading && <Loader />}
+            {/* Location info */}
+            <div className="flex justify-center">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-md text-xs text-muted-foreground">
+                <MapPinIcon className="h-3.5 w-3.5 text-amber-500" />
+                <span>
+                  {location
+                    ? `Lat: ${location.lat.toFixed(6)}, Long: ${location.lng.toFixed(6)}`
+                    : "Fetching location..."}
+                </span>
+              </div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
 
       {/* Map Modal */}
       <Dialog open={mapModalOpen} onOpenChange={setMapModalOpen}>
-        <DialogContent className=" z-[100]">
-          <div className=" p-4 overflow-y-scroll scrollbar-hide h-[500px]   shadow-lg w-full   max-w-lg  rounded-lg">
-            <div className="w-full flex justify-between">
-              <h1 className="py-4 flex gap-2  ">
-                <Globe className="h-6 text-[#815BF5]" />
-                Geo Location
-              </h1>
-              <DialogClose className="dark:text-white py-4 px-1  ">
-                <CrossCircledIcon className="scale-150 mt-1 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
-              </DialogClose>
-            </div>
-            <div className="">
-              {mapCoords && (
-                <LoadScript googleMapsApiKey="AIzaSyASY9lRvSpjIR2skVaTLd6x7M1Kx2zY-4k">
-                  {" "}
-                  {/* Replace with your API key */}
-                  <GoogleMap
-                    mapContainerStyle={mapContainerStyle}
-                    center={mapCoords}
-                    zoom={13}
-                    options={{
-                      disableDefaultUI: true, // Disable default UI if you want
-                      zoomControl: true, // Show zoom control
-                    }}
-                  >
-                    <Marker position={mapCoords} />
-                  </GoogleMap>
-                </LoadScript>
-              )}
-            </div>
-            {/* {mapCoords && (
-                <MapContainer
-                  center={[mapCoords.lat, mapCoords.lng]}
-                  zoom={13}
-                  scrollWheelZoom={false}
-                  style={{ height: "400px", width: "100%" }}
+        <DialogContent className="sm:max-w-xl p-6">
+          <DialogTitle className="flex items-center gap-2">
+            <Globe className="h-5 w-5 text-primary" />
+            Location Details
+          </DialogTitle>
+          <Separator />
+          <div className="h-[400px] overflow-hidden rounded-md border">
+            {mapCoords && (
+              <LoadScript googleMapsApiKey="AIzaSyASY9lRvSpjIR2skVaTLd6x7M1Kx2zY-4k">
+                <GoogleMap
+                  mapContainerStyle={mapContainerStyle}
+                  center={mapCoords}
+                  zoom={15}
+                  options={{
+                    disableDefaultUI: false,
+                    zoomControl: true,
+                    streetViewControl: false,
+                    mapTypeControl: true,
+                  }}
                 >
-                  <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  />
-                  <Marker position={[mapCoords.lat, mapCoords.lng]}></Marker>
-                </MapContainer>
-              )} */}
+                  <Marker position={mapCoords} />
+                </GoogleMap>
+              </LoadScript>
+            )}
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Custom Date Range Modal */}
+      {/* Custom Date Range Dialog */}
       <Dialog open={isCustomModalOpen} onOpenChange={setIsCustomModalOpen}>
-        <DialogContent className="w-96 z-[100] ml-12 p-6 ">
-          <div className="flex justify-between">
-            <DialogTitle className="text-md  font-medium dark:text-white">
-              Select Custom Date Range
-            </DialogTitle>
-            <DialogClose className="" onClick={handleClose}>
-              {" "}
-              <CrossCircledIcon className="scale-150  hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
-              {/* <X className="cursor-pointer border -mt-4 rounded-full border-white h-6 hover:bg-white hover:text-black w-6" /> */}
-            </DialogClose>
-          </div>
+        <DialogContent className="sm:max-w-md p-6">
+          <DialogTitle>Select Custom Date Range</DialogTitle>
+          <DialogDescription>
+            Choose start and end dates to filter your attendance records
+          </DialogDescription>
 
           <form
             onSubmit={(e) => {
               e.preventDefault();
               if (customDateRange.start && customDateRange.end) {
-                handleCustomDateSubmit(
-                  customDateRange.start,
-                  customDateRange.end
-                );
+                handleCustomDateSubmit(customDateRange.start, customDateRange.end);
               }
             }}
             className="space-y-4"
           >
-            <div className="flex justify-between gap-2">
-              {/* Start Date Button */}
-              <div className="w-full">
-                {/* <h1 className="absolute bg-[#0B0D29] ml-2 text-xs font-medium text-white">
-                  Start Date
-                </h1> */}
-                <button
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Start Date</label>
+                <Button
                   type="button"
-                  className="text-start text-xs text-gray-400 mt-2 w-full border p-2 rounded"
-                  onClick={() => setIsStartPickerOpen(true)} // Open end date picker
+                  variant="outline"
+                  className="w-full justify-start text-left"
+                  onClick={() => setIsStartPickerOpen(true)}
                 >
+                  <Calendar className="mr-2 h-4 w-4" />
                   {customDateRange.start ? (
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4" />
-
-                      {new Date(customDateRange.start).toLocaleDateString(
-                        "en-GB"
-                      )}
-                    </div>
+                    format(customDateRange.start, "PP")
                   ) : (
-                    // Format date as dd/mm/yyyy
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4" />
-                      <h1 className="text-xs">Start Date</h1>
-                    </div>
+                    <span className="text-muted-foreground">Pick a date</span>
                   )}
-                </button>
+                </Button>
               </div>
 
-              {/* End Date Button */}
-              <div className="w-full">
-                {/* <h1 className="absolute bg-[#0B0D29] ml-2 text-xs font-medium text-white">
-                  End Date
-                </h1> */}
-                <button
+              <div className="space-y-2">
+                <label className="text-sm font-medium">End Date</label>
+                <Button
                   type="button"
-                  className="text-start text-xs text-gray-400 mt-2 w-full border p-2 rounded"
-                  onClick={() => setIsEndPickerOpen(true)} // Open end date picker
+                  variant="outline"
+                  className="w-full justify-start text-left"
+                  onClick={() => setIsEndPickerOpen(true)}
                 >
+                  <Calendar className="mr-2 h-4 w-4" />
                   {customDateRange.end ? (
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4" />
-
-                      {new Date(customDateRange.end).toLocaleDateString(
-                        "en-GB"
-                      )}
-                    </div>
+                    format(customDateRange.end, "PP")
                   ) : (
-                    <div className="flex gap-1">
-                      <Calendar className="h-4" />
-                      <h1 className="text-xs">End date</h1>
-                    </div>
+                    <span className="text-muted-foreground">Pick a date</span>
                   )}
-                </button>
+                </Button>
               </div>
             </div>
-            {/* Submit Button */}
-            <div>
-              <button
-                type="submit"
-                className="bg-[#815BF5] text-white py-2 px-4 rounded w-full text-xs"
-              >
-                Apply
-              </button>
-            </div>
+
+            <Button type="submit" className="w-full">Apply Date Range</Button>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* Start Date Picker Modal */}
+      {/* Date Picker Modals */}
       <Dialog open={isStartPickerOpen} onOpenChange={setIsStartPickerOpen}>
-        <DialogContent className=" z-[100] bg-black dark:bg-[#0a0d28] scale-90 flex justify-center ">
-          <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
-            <div className="w-full flex mb-4 justify-between">
-              <CustomDatePicker
-                selectedDate={customDateRange.start}
-                onDateChange={(newDate) => {
-                  setCustomDateRange((prev) => ({ ...prev, start: newDate }));
-                  setIsStartPickerOpen(false); // Close picker after selecting the date
-                }}
-                onCloseDialog={() => setIsStartPickerOpen(false)}
-              />
-            </div>
-          </div>
+        <DialogContent className="p-0 max-w-full scale-90 bg-transparent border-none">
+          <CustomDatePicker
+            selectedDate={customDateRange.start}
+            onDateChange={(newDate) => {
+              setCustomDateRange(prev => ({ ...prev, start: newDate }));
+              setIsStartPickerOpen(false);
+            }}
+            onCloseDialog={() => setIsStartPickerOpen(false)}
+          />
         </DialogContent>
       </Dialog>
 
-      {/* End Date Picker Modal */}
       <Dialog open={isEndPickerOpen} onOpenChange={setIsEndPickerOpen}>
-        <DialogContent className=" z-[100] bg-black dark:bg-[#0a0d28]  scale-90 flex justify-center ">
-          <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
-            <div className="w-full flex mb-4 justify-between">
-              <CustomDatePicker
-                selectedDate={customDateRange.end}
-                onDateChange={(newDate) => {
-                  setCustomDateRange((prev) => ({ ...prev, end: newDate }));
-                  setIsEndPickerOpen(false); // Close picker after selecting the date
-                }}
-                onCloseDialog={() => setIsEndPickerOpen(false)}
-              />
-            </div>
-          </div>
+        <DialogContent className="p-0 scale-90 max-w-full bg-transparent border-none">
+          <CustomDatePicker
+            selectedDate={customDateRange.end}
+            onDateChange={(newDate) => {
+              setCustomDateRange(prev => ({ ...prev, end: newDate }));
+              setIsEndPickerOpen(false);
+            }}
+            onCloseDialog={() => setIsEndPickerOpen(false)}
+          />
         </DialogContent>
       </Dialog>
 
-      {/**Regularization Modal */}
-      <Dialog
-        open={isRegularizationModalOpen}
-        onOpenChange={setIsRegularizationModalOpen}
-      >
+      {/* Regularization Modal */}
+      <Dialog open={isRegularizationModalOpen} onOpenChange={setIsRegularizationModalOpen}>
+        <DialogContent className="sm:max-w-md p-6">
+          <DialogTitle>Apply for Regularization</DialogTitle>
+          <DialogDescription>
+            Submit a request to regularize your attendance for a specific date
+          </DialogDescription>
 
-        <DialogContent className=" z-[100]  flex  w-full  ">
-          <div className=" overflow-y-scroll scrollbar-hide h-fit max-h-[600px]  shadow-lg w-full   max-w-lg  rounded-lg">
-            <div className="flex border-b py-2  w-full justify-between">
-              <DialogTitle className="text-md  dark:text-white px-6 py-2 font-medium">
-                Apply Regularization
-              </DialogTitle>
-              <DialogClose className="px-6 py-2">
-                <CrossCircledIcon className="scale-150 mt-1 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
-              </DialogClose>
+          <form onSubmit={handleSubmitRegularization} className="space-y-4">
+            {/* Date Selector */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Date</label>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full justify-start text-left"
+                onClick={() => setIsDatePickerOpen(true)}
+              >
+                <Calendar className="mr-2 h-4 w-4" />
+                {regularizationDate ? (
+                  format(parseISO(regularizationDate), "PP")
+                ) : (
+                  <span className="text-muted-foreground">Select date</span>
+                )}
+              </Button>
             </div>
 
-            <form
-              onSubmit={handleSubmitRegularization}
-              className="space-y-4 p-6"
-            >
-              {/* Date Input */}
-              <div className="relative">
-                <Dialog
-                  open={isDatePickerOpen}
-                  onOpenChange={setIsDatePickerOpen}
-                >
-                  <DialogTrigger asChild>
-                    <button
-                      type="button"
-                      onClick={() => setIsDatePickerOpen(true)}
-                      className="rounded border w-full  flex gap-1 py-2"
-                    >
-                      <Calendar className="h-4 mt-0.5 text-sm" />
-                      {regularizationDate ? (
-                        // Show the selected date if a date has been picked
-                        <h1 className="text-xs mt-1">
-                          {format(parseISO(String(regularizationDate)), "dd-MM-yyyy")}
-                        </h1>
-                      ) : (
-                        <h1 className="text-xs mt-1  dark:bg-[#0b0d29] text-[#787CA5]">
-                          Select Date
-                        </h1>
-                      )}
-                    </button>
-                  </DialogTrigger>
-                  <DialogContent className=" z-[100] bg-[#0a0d28] scale-[80%]  flex justify-center ">
-                    <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
-                      <div className="w-full flex mb-4 justify-between">
-                        <CustomDatePicker
-                          selectedDate={
-                            regularizationDate
-                              ? new Date(regularizationDate)
-                              : null
-                          }
-                          onDateChange={(newDate) => {
-                            // Manually extract the local date (year, month, day)
-                            const localDate = new Date(
-                              newDate.getTime() -
-                              newDate.getTimezoneOffset() * 60000
-                            )
-                              .toISOString()
-                              .split("T")[0];
-                            setRegularizationDate(localDate);
-                            setIsDatePickerOpen(false); // Close the picker after selecting the date
-                          }}
-                          onCloseDialog={() => setIsDatePickerOpen(false)}
-                        />
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-              {/* Login Time Input */}
-              <div className="relative">
-                <Dialog
-                  open={isTimePickerOpen}
-                  onOpenChange={setIsTimePickerOpen}
-                >
-                  <DialogTrigger asChild>
-                    <button
-                      type="button"
-                      className="rounded border w-full  flex gap-1 py-2"
-                      onClick={openTimePicker}
-                    >
-                      <Clock className="h-4 mt-1 text-sm" />
-                      {regularizationLoginTime ? (
-                        <h1 className="text-xs mt-1">
-                          {formatTimeForDisplay(regularizationLoginTime)}
-                        </h1>
-                      ) : (
-                        <h1 className="text-xs mt-1 dark:bg-[#0b0d29] text-[#787CA5]">
-                          Login Time
-                        </h1>
-                      )}
-                    </button>
-                  </DialogTrigger>
-                  <DialogContent className="scale-75 bg-[#0a0d28] p-6 ">
-
-                    <CustomTimePicker
-                      selectedTime={regularizationLoginTime}
-                      onTimeChange={handleTimeChange}
-                      onCancel={handleCancel}
-                      onAccept={handleAccept}
-                      onBackToDatePicker={() =>
-                        setIsTimePickerOpen(false)
-                      }
-                    />
-
-                  </DialogContent>
-                </Dialog>
-              </div>
-
-
-              {/* Logout Time Iput*/}
-
-              <div className="relative">
-                <Dialog
-                  open={isLogoutTimePickerOpen}
-                  onOpenChange={setIsLogoutTimePickerOpen}
-                >
-                  <DialogTrigger asChild>
-                    <button
-                      type="button"
-                      className="rounded border w-full  flex gap-1 py-2"
-                      onClick={openLogoutTimePicker}
-                    >
-                      <Clock className="h-4 mt-1 text-sm" />
-                      {regularizationLogoutTime ? (
-                        <h1 className="text-xs mt-1">
-                          {formatTimeForDisplay(regularizationLogoutTime)}
-                        </h1>
-                      ) : (
-                        <h1 className="text-xs mt-1 dark:bg-[#0b0d29] text-[#787CA5]">
-                          Logout Time
-                        </h1>
-                      )}
-                    </button>
-                  </DialogTrigger>
-
-                  <DialogContent className="scale-75 bg-[#0a0d28] p-6">
-
-                    <CustomTimePicker
-                      selectedTime={regularizationLogoutTime}
-                      onTimeChange={handleLogoutTimeChange}
-                      onCancel={handleLogoutCancel}
-                      onAccept={handleLogoutAccept}
-                      onBackToDatePicker={() =>
-                        setIsLogoutTimePickerOpen(false)
-                      }
-                    />
-
-                  </DialogContent>
-                </Dialog>
-              </div>
-
-              {/* Remarks Textarea */}
-              <div className="relative">
-                <label
-                  htmlFor="remarks"
-                  className="absolute bg-white dark:bg-[#0b0d29] text-[#787CA5] ml-2 text-xs -mt-2 px-1"
-                >
-                  Remarks
-                </label>
-                <textarea
-                  id="remarks"
-                  value={regularizationRemarks}
-                  onChange={(e) => setRegularizationRemarks(e.target.value)}
-                  required
-                  className="w-full focus-within:border-[#815BF5] text-sm p-2 border bg-transparent outline-none rounded"
-                  rows={3}
-                ></textarea>
-              </div>
-
-              {/* Submit Button */}
-              <div>
-
-                <button
-                  type="submit"
-                  className="bg-[#815BF5] w-full text-sm cursor-pointer  text-white px-4 mt-6  py-2 rounded"
-                >
-                  {isSubmittingRegularization ? <Loader /> : "Submit"}
-                </button>
-
-              </div>
-            </form>
-          </div>
-        </DialogContent >
-      </Dialog >
-
-      {/* Register Faces Modal */}
-      {/* Register Face Modal */}
-      <Dialog
-        open={isRegisterFaceModalOpen}
-        onOpenChange={setIsRegisterFaceModalOpen}
-      >
-        <DialogContent className="z-[100] flex w-full justify-center">
-          <div className="w-full">
-            <div className="flex border-b py-2  w-full justify-between ">
-              <DialogTitle className="text-md  dark:text-white  px-6 py-2 font-medium">
-                Register Faces (Upload 3 Images)
-              </DialogTitle>
-              <DialogClose className=" px-6 py-2">
-                <CrossCircledIcon className="scale-150 mt-1 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
-              </DialogClose>
+            {/* Login Time */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Login Time</label>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full justify-start text-left"
+                onClick={() => setIsTimePickerOpen(true)}
+              >
+                <Clock className="mr-2 h-4 w-4" />
+                {regularizationLoginTime ? (
+                  formatTimeForDisplay(regularizationLoginTime)
+                ) : (
+                  <span className="text-muted-foreground">Select login time</span>
+                )}
+              </Button>
             </div>
 
-            <div className="space-y-4 p-6">
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleImageUpload}
-                className="w-full text-sm   outline-none   bg-[#] flex gap-1 mt-auto text-gray-300"
+            {/* Logout Time */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Logout Time</label>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full justify-start text-left"
+                onClick={() => setIsLogoutTimePickerOpen(true)}
+              >
+                <Clock className="mr-2 h-4 w-4" />
+                {regularizationLogoutTime ? (
+                  formatTimeForDisplay(regularizationLogoutTime)
+                ) : (
+                  <span className="text-muted-foreground">Select logout time</span>
+                )}
+              </Button>
+            </div>
+
+            {/* Remarks */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Remarks</label>
+              <Textarea
+                value={regularizationRemarks}
+                onChange={(e) => setRegularizationRemarks(e.target.value)}
+                placeholder="Provide reason for regularization"
+                className="min-h-[100px]"
+                required
               />
+            </div>
 
-              <div className="grid grid-cols-3 mt-4 gap-4 mb-4">
-                {selectedImages?.length > 0 &&
-                  selectedImages.map((file, index) => (
-                    <div key={index}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isSubmittingRegularization}
+            >
+              {isSubmittingRegularization ? <Loader className="mr-2 h-4 w-4" /> : null}
+              Submit Regularization
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Time Picker Dialogs */}
+      <Dialog open={isTimePickerOpen} onOpenChange={setIsTimePickerOpen}>
+      <DialogContent className=" scale-75 w-[550px] bg-transparent border-none">
+          <CustomTimePicker
+            selectedTime={regularizationLoginTime}
+            onTimeChange={handleTimeChange}
+            onCancel={handleCancel}
+            onAccept={handleAccept}
+            onBackToDatePicker={() => setIsTimePickerOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isLogoutTimePickerOpen} onOpenChange={setIsLogoutTimePickerOpen}>
+      <DialogContent className=" scale-75 w-[550px] bg-transparent border-none">
+          <CustomTimePicker
+            selectedTime={regularizationLogoutTime}
+            onTimeChange={handleLogoutTimeChange}
+            onCancel={handleLogoutCancel}
+            onAccept={handleLogoutAccept}
+            onBackToDatePicker={() => setIsLogoutTimePickerOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Date Picker for Regularization */}
+      <Dialog open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
+        <DialogContent className="p-6 scale-90 max-w-full bg-transparent border-none">
+          <CustomDatePicker
+            selectedDate={regularizationDate ? new Date(regularizationDate) : null}
+            onDateChange={(newDate) => {
+              // Manually extract the local date (year, month, day)
+              const localDate = new Date(
+                newDate.getTime() - newDate.getTimezoneOffset() * 60000
+              ).toISOString().split("T")[0];
+              setRegularizationDate(localDate);
+              setIsDatePickerOpen(false);
+            }}
+            onCloseDialog={() => setIsDatePickerOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Face Registration Modal */}
+      <Dialog open={isRegisterFaceModalOpen} onOpenChange={setIsRegisterFaceModalOpen}>
+        <DialogContent className="sm:max-w-lg p-6">
+          <DialogTitle>Register Your Face</DialogTitle>
+          <DialogDescription>
+            Upload 3 clear photos of your face for attendance verification
+          </DialogDescription>
+
+          <div className="space-y-4">
+            <div className="bg-muted/50 p-6 rounded-lg border border-dashed border-muted-foreground/50 text-center">
+              <div className="flex justify-center mb-4">
+                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Camera className="h-6 w-6 text-primary" />
+                </div>
+              </div>
+
+              <h3 className="text-lg font-medium mb-2">Upload Face Images</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Please upload exactly 3 clear photos showing your face from different angles
+              </p>
+
+              <label className="cursor-pointer">
+                <div className="flex items-center justify-center p-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  <span className="text-sm">Select Images</span>
+                </div>
+              </label>
+            </div>
+
+            {selectedImages.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium">Selected Images ({selectedImages.length}/3)</h4>
+                <div className="grid grid-cols-3 gap-4">
+                  {selectedImages.map((file, index) => (
+                    <div key={index} className="relative aspect-square rounded-md overflow-hidden border">
                       <img
                         src={URL.createObjectURL(file)}
-                        alt={`preview-${index}`}
-                        className="w-full h-auto"
+                        alt={`Face image ${index + 1}`}
+                        className="w-full h-full object-cover"
                       />
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-1 right-1 h-6 w-6 rounded-full"
+                        onClick={() => {
+                          const newImages = [...selectedImages];
+                          newImages.splice(index, 1);
+                          setSelectedImages(newImages);
+                        }}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
                     </div>
                   ))}
-              </div>
 
-              <button
-                onClick={handleFaceRegistrationSubmit}
-                className="bg-[#815BF5] w-full text-sm cursor-pointer text-white px-4 mt-2 py-2 rounded"
-              >
-                {isLoading ? <Loader /> : "Submit Face Registration"}
-              </button>
-            </div>
+                  {/* Placeholder slots for remaining images */}
+                  {Array.from({ length: Math.max(0, 3 - selectedImages.length) }).map((_, i) => (
+                    <div
+                      key={`placeholder-${i}`}
+                      className="border border-dashed rounded-md flex items-center justify-center bg-muted/30 aspect-square"
+                    >
+                      <Camera className="h-6 w-6 text-muted-foreground/40" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <Button
+              onClick={handleFaceRegistrationSubmit}
+              className="w-full"
+              disabled={selectedImages.length !== 3 || isLoading}
+            >
+              {isLoading ? (
+                <Loader className="mr-2 h-4 w-4" />
+              ) : null}
+              Submit Face Registration
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
-    </div >
+    </div>
   );
 }

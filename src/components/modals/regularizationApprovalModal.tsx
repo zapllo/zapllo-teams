@@ -76,7 +76,7 @@ const RegularizationApprovalModal: React.FC<
       <>
         {/* <Toaster /> */}
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-[#0b0d29] overflow-y-scroll scrollbar-hide h-fit max-h-[600px]  shadow-lg w-full pb-6   max-w-md  rounded-lg">
+          <div className="bg-background overflow-y-scroll scrollbar-hide h-fit max-h-[600px]  shadow-lg w-full pb-6   max-w-md  rounded-lg">
             <div className="flex border-b py-2  w-full justify-between">
               <h2 className="text-md   px-6 py-2 font-medium">
                 Approve Regularization Request
@@ -101,7 +101,7 @@ const RegularizationApprovalModal: React.FC<
               <textarea
                 value={approvalRemarks}
                 onChange={(e) => setApprovalRemarks(e.target.value)}
-                className="w-full mt-4 p-2 text-xs  bg-[#0b0d29] outline-none  h-24 border rounded-md"
+                className="w-full mt-4 p-2 text-xs  bg-background outline-none  h-24 border rounded-md"
                 placeholder="Add a note before approval (optional)"
               />
             </div>

@@ -40,7 +40,7 @@ const HolidayForm: React.FC<HolidayFormProps> = ({ onHolidayCreated }) => {
       setHolidayName("");
       setHolidayDate(null); // Reset holiday date
       setIsSubmitting(false);
-     
+
       // Callback after creation
       onHolidayCreated();
     } catch (error) {
@@ -109,9 +109,8 @@ const HolidayForm: React.FC<HolidayFormProps> = ({ onHolidayCreated }) => {
               </button>
             </DialogTrigger>
 
-            <DialogContent className=" z-[100] bg-black dark:bg-[#0a0d28] scale-90 flex justify-center ">
-              <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
-                <div className="w-full flex mb-4 justify-between">
+            <DialogContent className=" scale-90 flex justify-center">
+
                   <CustomDatePicker
                     selectedDate={holidayDate ? new Date(holidayDate) : null}
                     onDateChange={(newDate) => {
@@ -125,8 +124,7 @@ const HolidayForm: React.FC<HolidayFormProps> = ({ onHolidayCreated }) => {
                     }}
                     onCloseDialog={() => setIsDatePickerOpen(false)}
                   />
-                </div>
-              </div>
+
             </DialogContent>
           </Dialog>
         </div>

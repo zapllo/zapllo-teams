@@ -38,7 +38,7 @@ export default function WalletLogs({ }: Props) {
   const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   const [rechargeGstNumber, setRechargeGstNumber] = useState('');
   const [rechargeModalStep, setRechargeModalStep] = useState(1);
-  const [orgCredits, setOrgCredits] = useState<number>(0); // State for subscribed user  
+  const [orgCredits, setOrgCredits] = useState<number>(0); // State for subscribed user
 
   const router = useRouter();
 
@@ -205,8 +205,10 @@ export default function WalletLogs({ }: Props) {
   if (!orderLogs.length) {
     return (
       <>
-        <div className="flex   mt-12">
-          <BillingSidebar />
+        <div className="flex   mt-10">
+          <div className='border-r w-64'>
+            <BillingSidebar />
+          </div>
           <div className='flex  justify-center w-full'>
             <div className=' w-full mt-12  justify-center '>
               <div className='flex justify-center'>

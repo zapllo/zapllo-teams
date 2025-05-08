@@ -645,9 +645,11 @@ export default function Billing() {
 
 
                 {/* <Toaster /> */}
+                <div className='border-r w-56'>
                 <BillingSidebar />
+                </div>
                 {currentUser?.role === "orgAdmin" ? (
-                    <div className="flex-1 overflow-y-scroll h-screen  p-4">
+                    <div className="flex-1 overflow-y-scroll scrollbar-hide h-screen  p-4">
                         <div className="w-full flex justify-center   max-w-5xl mx-auto">
                             <div className="gap-2 flex  mb-6 w-full">
                                 <div className="-mt-2">

@@ -229,7 +229,9 @@ export default function WalletRechargePage() {
 
   return (
     <div className="flex h-screen mt-12 overflow-hidden">
+      <div className='border-r w-64'>
       <BillingSidebar />
+      </div>
       <div className="flex-1 overflow-y-auto">
         <div className="container mx-auto py-8 px-4 md:px-6">
           <h1 className="text-3xl font-bold mb-6 flex items-center">

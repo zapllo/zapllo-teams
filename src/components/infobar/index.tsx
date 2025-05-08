@@ -171,7 +171,7 @@ const InfoBar = (props: Props) => {
       return "Billing & Wallet";
     } else if (pathName === "/dashboard/billing/wallet-logs") {
       return "Billing Logs";
-    } else if (pathName === "/dashboard/checklist") {
+    } else if (pathName === "/help/checklist") {
       return "My Checklist";
     } else if (pathName === "/help/tickets") {
       return "My Tickets";

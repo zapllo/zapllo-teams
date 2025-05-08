@@ -2,10 +2,14 @@ import React from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import {
-  GitBranchPlusIcon,
-  PieChart,
-  Settings,
-  WalletCards
+  Calendar,
+  CheckCircle,
+  HelpCircle,
+  LifeBuoy,
+  Smartphone,
+  Ticket,
+  Video,
+  Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -18,11 +22,11 @@ interface NavItem {
   description: string;
 }
 
-interface SettingsSidebarProps {
+interface HelpSidebarProps {
   sidebarWidth?: number;
 }
 
-const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ sidebarWidth = 20 }) => {
+const HelpSidebar: React.FC<HelpSidebarProps> = ({ sidebarWidth = 20 }) => {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -31,44 +35,50 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ sidebarWidth = 20 }) 
 
   const navItems: NavItem[] = [
     {
-      title: "General",
-      path: "/dashboard/settings",
-      icon: <Settings className="h-5 w-5" />,
-      description: "Account and general settings"
+      title: "Getting Started",
+      path: "/help/checklist",
+      icon: <CheckCircle className="h-5 w-5" />,
+      description: "Complete onboarding tasks"
     },
     {
-      title: "Categories",
-      path: "/dashboard/settings/categories",
-      icon: <PieChart className="h-5 w-5" />,
-      description: "Manage your categories"
+      title: "Tutorials",
+      path: "/help/tutorials",
+      icon: <Video className="h-5 w-5" />,
+      description: "Learn how to use Zapllo"
     },
     {
-      title: "Billing",
-      path: "/dashboard/billing",
-      icon: <WalletCards className="h-5 w-5" />,
-      description: "Manage subscription and billing"
+      title: "Mobile App",
+      path: "/help/mobile-app",
+      icon: <Smartphone className="h-5 w-5" />,
+      description: "Download our mobile applications"
     },
     {
-      title: "Integrations",
-      path: "/dashboard/settings/integrations",
-      icon: <GitBranchPlusIcon className="h-5 w-5" />,
-      description: "Connect with other services"
-    }
+      title: "Events",
+      path: "/help/events",
+      icon: <Calendar className="h-5 w-5" />,
+      description: "Join upcoming events and webinars"
+    },
+    {
+      title: "Support Tickets",
+      path: "/help/tickets",
+      icon: <Ticket className="h-5 w-5" />,
+      description: "Get help from our support team"
+    },
   ];
 
   const isActive = (path: string) => pathname === path;
 
   return (
-    <div className="h-full flex flex-col overflow-hidden">
+    <div className="h-full flex mt-12 flex-col overflow-hidden">
       <div className="flex-1 overflow-y-scroll h-screen scrollbar-hide">
         <div className="py-6 px-4 space-y-6">
           <div className="px-2">
             <div className="flex items-center gap-2 mb-1">
-              <Settings className="h-6 w-6 text-primary" />
-              <h2 className="text-xl font-semibold">Settings</h2>
+              <LifeBuoy className="h-6 w-6 text-primary" />
+              <h2 className="text-xl font-semibold">Help Center</h2>
             </div>
             <p className="text-xs text-muted-foreground pl-8">
-              Configure your preferences
+              Resources and support
             </p>
           </div>
 
@@ -118,10 +128,30 @@ const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ sidebarWidth = 20 }) 
               </TooltipProvider>
             ))}
           </div>
+
+          <div className="mt-6 px-2">
+            <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                <h3 className="font-medium">Pro Tips</h3>
+              </div>
+              <p className={cn("text-xs text-muted-foreground", isNarrow && "line-clamp-2")}>
+                Get the most out of Zapllo with expert tips and best practices.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={() => router.push('/help/tutorials')}
+              >
+                Explore Tips
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default SettingsSidebar;
+export default HelpSidebar;

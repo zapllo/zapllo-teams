@@ -36,14 +36,14 @@ const Layout = (props: Props) => {
     }, []);
 
 
-    
+
     return (
         <div className='flex overflow-hidden mt-12 scrollbar-hide h-full '>
-            <div className='mt-12'>
+            {/* <div className='mt-12'>
             <ChecklistSidebar />
 
-            </div>
-            <div className='w-full ml-32 '>
+            </div> */}
+            <div className='w-full  '>
                 {/* <InfoBar /> */}
                 {props.children}
             </div>

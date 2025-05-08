@@ -441,7 +441,16 @@ export default function RegisterFace() {
       </Card>
 
       {/* Registration Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={(open) => {
+        setIsDialogOpen(open);
+        if (!open) {
+          // Reset form state when dialog is closed
+          setSelectedUser(null);
+          setImageFiles([]);
+          setError(null);
+        }
+      }}
+      >
         <DialogContent className="sm:max-w-[500px] p-6">
           <DialogHeader>
             <div className="flex items-center justify-between mb-4">

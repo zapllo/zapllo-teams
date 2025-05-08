@@ -5,13 +5,16 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { StaticTimePicker } from "@mui/x-date-pickers/StaticTimePicker";
 import dayjs, { Dayjs } from "dayjs";
+import { Clock, Check, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import Box from "@mui/material/Box";
 
 interface CustomTimePickerProps {
   selectedTime: string | null;
   onTimeChange: (time: string) => void;
-  onCancel: () => void; // Modify to make onCancel required
-  onAccept: () => void; // Modify to make onAccept required
+  onCancel: () => void;
+  onAccept: () => void;
   onBackToDatePicker: () => void;
 }
 
@@ -22,11 +25,10 @@ const CustomTimePicker: React.FC<CustomTimePickerProps> = ({
   onAccept,
   onBackToDatePicker,
 }) => {
-  console.log(selectedTime, 'timeeeeeeeeee')
-  const [selectedTimeValue, setSelectedTimeValue] =
-    React.useState<Dayjs | null>(
-      selectedTime ? dayjs(`1970-01-01T${selectedTime}:00`) : dayjs() // Default to the current tt
-    );
+  const [selectedTimeValue, setSelectedTimeValue] = React.useState<Dayjs | null>(
+    selectedTime ? dayjs(`1970-01-01T${selectedTime}:00`) : dayjs()
+  );
+
   // Update selectedTimeValue when selectedTime changes
   React.useEffect(() => {
     if (selectedTime && selectedTime !== "") {
@@ -35,12 +37,12 @@ const CustomTimePicker: React.FC<CustomTimePickerProps> = ({
       setSelectedTimeValue(dayjs()); // Default to current time
     }
   }, [selectedTime]);
+
   const handleTimeChange = (newValue: Dayjs | null) => {
     if (newValue) {
       setSelectedTimeValue(newValue);
     }
   };
-
 
   const handleOkClick = () => {
     if (selectedTimeValue) {
@@ -52,136 +54,150 @@ const CustomTimePicker: React.FC<CustomTimePickerProps> = ({
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        border: "none",
-        borderColor: "red",
-        spaceY: 2,
-      }}
-    >
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <StaticTimePicker
-          orientation="landscape"
-          value={selectedTimeValue}
-          onChange={handleTimeChange}
-          displayStaticWrapperAs="mobile"
-          ampm={true} // Enable 12-hour format with AM/PM
-          sx={{
-            backgroundColor: "transparent",
-            border: "none",
-            "& .MuiPickersLayout-root": {
-              backgroundColor: "transparent",
-              borderTop: "none", // Remove top border in action buttons
-              borderBottom: "none",
-            },
-            "& .MuiPickersToolbar-root": {
-              backgroundColor: "#0B0D29",
-              color: "white",
-              border: "none",
-            },
-            "& .MuiTypography-root.Mui-selected": {
-              color: "white", // Active AM/PM button typography is white
-              border: "none",
-            },
-            "& .MuiTypography-root": {
-              color: "gray", // Inactive AM/PM button typography is gray
-              border: "none",
-            },
-            "& .MuiPickersToolbar-content": {
-              color: "white",
-              border: "none",
-            },
-            "& .MuiPickersLayout-contentWrapper": {
-              border: "none",
-            },
-            "& .MuiTimeClock-root": {
-              backgroundColor: "#0B0D29",
-              border: "none",
-              borderColor: "red",
-            },
-            "& .MuiClock-wrapper": {
-              backgroundColor: "white",
-              border: "none",
-            },
-            "& .MuiClockNumber-root": {
-              color: "white",
-              border: "none",
-            },
-            "& .MuiDialogActions-root": {
-              backgroundColor: "#0B0D29",
-              borderTop: "none", // Remove top border in action buttons
-              borderBottom: "none",
-            },
-            "& .MuiTypography-h3": {
-              border: "none", // Remove border around time typography
-            },
-            "& .MuiButtonBase-root": {
-              color: "white",
-              border: "none",
-            },
-            "& .MuiSvgIcon-root": {
-              color: "white",
-              border: "none",
-            },
-            "& .MuiClockPicker-root": {
+    <div className="flex flex-col p-4 bg-background rounded-lg w-full max-w-">
+      <div className="flex items-center justify-between mb-2">
+        <div>
+          <h3 className="text-lg font-medium">Select Time</h3>
+          <p className="text-sm text-muted-foreground">
+            Choose a time
+          </p>
+        </div>
+        <Clock className="h-5 w-5 text-muted-foreground" />
+      </div>
+
+      <div className="border rounded-md p-2 mb-4">
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <StaticTimePicker
+            orientation="landscape"
+            value={selectedTimeValue}
+            onChange={handleTimeChange}
+            displayStaticWrapperAs="mobile"
+            ampm={true}
+            sx={{
               backgroundColor: "transparent",
               border: "none",
-            },
-            "& .MuiPaper-root": {
-              backgroundColor: "transparent",
-              border: "none",
-            },
-            "& .MuiBox-root": {
-              border: "none",
-            },
-            "& .MuiClock-pin": {
-              backgroundColor: "#017a5b", // Set the dot (thumb) color to #017a5b
-              border: "none",
-            },
-            "& .MuiDialogActions-root button:nth-of-type(1)": {
-              display: "none", // Hide the Cancel button in the dialog
-              border: "none",
-            },
-            "& .MuiClockPointer-root": {
-              backgroundColor: "#017a5b", // Set the clock hand color to #017a5b
-              border: "none",
-            },
-            "& .MuiClockPointer-thumb": {
-              borderColor: "#017a5b", // Set the thumb (center point of the clock) to the same color
-              backgroundColor: "#017a5b", // Set the dot (thumb) color to #017a5b
-            },
-            "& .MuiClock-squareMask": {
-              border: "none", // Remove the square mask border
-            },
-          }}
-        />
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            width: "100%",
-            border: "none",
-            mt: 2,
-          }}
+              "& .MuiPickersLayout-root": {
+                backgroundColor: "transparent",
+                borderTop: "none",
+                borderBottom: "none",
+              },
+              "& .MuiPickersToolbar-root": {
+                backgroundColor: "transparent",
+                color: "inherit",
+                border: "none",
+              },
+              "& .MuiTypography-root.Mui-selected": {
+                color: "var(--primary)",
+                border: "none",
+              },
+              "& .MuiTypography-root": {
+                color: "inherit",
+                border: "none",
+              },
+              "& .MuiPickersToolbar-content": {
+                color: "inherit",
+                border: "none",
+              },
+              "& .MuiPickersLayout-contentWrapper": {
+                border: "none",
+              },
+              "& .MuiTimeClock-root": {
+                backgroundColor: "transparent",
+                border: "none",
+              },
+              "& .MuiClock-wrapper": {
+                backgroundColor: "transparent",
+                border: "none",
+              },
+              "& .MuiClockNumber-root": {
+                color: "inherit",
+                border: "none",
+              },
+              "& .MuiDialogActions-root": {
+                backgroundColor: "transparent",
+                borderTop: "none",
+                borderBottom: "none",
+                display: "none",
+              },
+              "& .MuiTypography-h3": {
+                border: "none",
+              },
+              "& .MuiButtonBase-root": {
+                color: "inherit",
+                border: "none",
+              },
+              "& .MuiSvgIcon-root": {
+                color: "inherit",
+                border: "none",
+              },
+              "& .MuiClockPicker-root": {
+                backgroundColor: "transparent",
+                border: "none",
+              },
+              "& .MuiPaper-root": {
+                backgroundColor: "transparent",
+                border: "none",
+                boxShadow: "none",
+              },
+              "& .MuiBox-root": {
+                border: "none",
+              },
+              // Clock hand styling adjustments
+              "& .MuiClock-pin": {
+                backgroundColor: "#017a5b",
+                border: "none",
+              },
+              "& .MuiClockPointer-root": {
+                backgroundColor: "#017a5b",
+                "&::before": {
+                  backgroundColor: "#017a5b",
+                  border: "1px solid #017a5b",
+                },
+              },
+              "& .MuiClockPointer-thumb": {
+                border: "4px solid #017a5b",
+                backgroundColor: "#017a5b",
+                width: "14px",
+                height: "14px",
+              },
+              "& .MuiClock-clock": {
+                backgroundColor: "#f3f4f6", // Light background for the clock face
+                border: "1px solid #e5e7eb",
+              },
+              "& .MuiClockNumber-root.Mui-selected": {
+                backgroundColor: "#017a5b",
+                color: "white",
+              },
+              "& .MuiClock-squareMask": {
+                border: "none",
+                backgroundColor: "rgba(1, 122, 91, 0.1)",
+              },
+            }}
+          />
+        </LocalizationProvider>
+      </div>
+
+      <div className="p-3 bg-muted/40 rounded-md mb-4">
+        <h4 className="text-sm font-medium mb-1">Selected Time</h4>
+        <p className="text-xl font-semibold">
+          {selectedTimeValue?.format("hh:mm A") || "No time selected"}
+        </p>
+      </div>
+
+      <div className="flex justify-end gap-2">
+        <Button
+          variant="outline"
+          onClick={onCancel}
         >
-          <button
-            onClick={onCancel} // Close the modal without saving the time
-            className="border absolute -mt-[58px] text-sm ml-6  text-white rounded px-4 py-2"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleOkClick} // Set the time and close the modal
-            className="bg-[#017a5b] absolute -mt-[58px]  left-96 hover:bg-[#017a5b] text-white rounded px-4 py-2 w-24 text-sm"
-          >
-            OK
-          </button>
-        </Box>
-      </LocalizationProvider>
-    </Box>
+          <X className="h-4 w-4 mr-2" />
+          Cancel
+        </Button>
+        <Button onClick={handleOkClick} className="bg-primary hover:bg-primary/90">
+          <Check className="h-4 w-4 mr-2" />
+          Confirm
+        </Button>
+      </div>
+    </div>
   );
 };
 

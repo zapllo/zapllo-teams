@@ -112,9 +112,9 @@ export default function ChecklistPage() {
 
     return (
         <div className="flex h-full mt-24">
-            <ChecklistSidebar />
+            {/* <ChecklistSidebar /> */}
             <div className="flex-1 px-4 -mt-12 py-6">
-                <div className="ml-48 max-w-6xl mx-auto">
+                <div className=" mx-auto">
                     {showConfetti && (
                         <div className='fixed inset-0 pointer-events-none z-50'>
                             <DotLottieReact src="/lottie/confetti.lottie" autoplay />

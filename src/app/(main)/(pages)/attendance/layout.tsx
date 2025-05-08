@@ -126,7 +126,7 @@ const Layout = (props: Props) => {
   return (
     <div className="flex h-screen overflow-hidden dark:bg-[#04061e]">
       {/* Sidebar */}
-      <div className="w-48 shrink-0">
+      <div className="w-56 border-r shrink-0">
         <LeavesSidebar />
       </div>
 

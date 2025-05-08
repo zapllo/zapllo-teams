@@ -14,15 +14,10 @@ import RegularizationApprovalModal from "@/components/modals/regularizationAppro
 import RegularizationRejectModal from "@/components/modals/rejectRegularizationModal";
 import RegularizationDetails from "@/components/sheets/regularizationDetails";
 import {
-  Accordion2,
-  AccordionContent2,
-  AccordionItem2,
-  AccordionTrigger2,
-} from "@/components/ui/simple-accordion";
-import {
   Calendar,
   CalendarDays,
   CheckCheck,
+  Filter,
   Trash2,
   Users2,
   X,
@@ -38,6 +33,32 @@ import Loader from "@/components/ui/loader";
 import CustomDatePicker from "@/components/globals/date-picker";
 import { CrossCircledIcon } from "@radix-ui/react-icons";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs3 as Tabs, TabsContent3 as TabsContent, TabsList3 as TabsList, TabsTrigger3 as TabsTrigger } from "@/components/ui/tabs3";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion3";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { toast } from "sonner";
 
 type User = {
   _id: string;
@@ -89,8 +110,6 @@ function isAttendance(entry: Attendance | Regularization): entry is Attendance {
   return entry.action === "login" || entry.action === "logout";
 }
 
-
-
 export default function AllAttendance() {
   const [groupedEntries, setGroupedEntries] = useState<{
     [key: string]: { user: User; dates: { [date: string]: Attendance[] } };
@@ -118,7 +137,7 @@ export default function AllAttendance() {
     start: null,
     end: null,
   });
-  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false); // For custom date modal
+  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<
     Attendance | Regularization | null
   >(null);
@@ -132,8 +151,8 @@ export default function AllAttendance() {
     string | null
   >(null);
   const [loading, setLoading] = useState(false);
-  const [isStartPickerOpen, setIsStartPickerOpen] = useState(false); // For triggering the start date picker
-  const [isEndPickerOpen, setIsEndPickerOpen] = useState(false); // For triggering the end date picker
+  const [isStartPickerOpen, setIsStartPickerOpen] = useState(false);
+  const [isEndPickerOpen, setIsEndPickerOpen] = useState(false);
 
   useEffect(() => {
     const fetchEntries = async () => {
@@ -146,13 +165,11 @@ export default function AllAttendance() {
               response.data.entries
             );
             setGroupedEntries(groupedByUser);
-            setLoading(false);
           }
         } else if (filter === "Regularization") {
           const response = await axios.get("/api/all-regularization-approvals");
           if (response.data.success) {
             setRegularizations(response.data.regularizations);
-            setLoading(false);
           }
         }
       } catch (error: any) {
@@ -160,10 +177,11 @@ export default function AllAttendance() {
           `Error fetching ${filter} entries:`,
           error.response?.data || error.message
         );
-        alert(
-          `Failed to fetch ${filter} entries: ${error.response?.data?.message || error.message
-          }`
+        toast.error(
+          `Failed to fetch ${filter} entries: ${error.response?.data?.message || error.message}`
         );
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -248,8 +266,8 @@ export default function AllAttendance() {
   };
 
   const handleRegularizationClick = (regularization: Regularization) => {
-    setSelectedEntry(regularization); // Set selected entry
-    setIsRegularizationDetailsOpen(true); // Open details sheet
+    setSelectedEntry(regularization);
+    setIsRegularizationDetailsOpen(true);
   };
 
   const handleModalSubmit = async () => {
@@ -269,11 +287,11 @@ export default function AllAttendance() {
 
   const handleCustomDateSubmit = (start: Date, end: Date) => {
     setCustomDateRange({ start, end });
+    setDateFilter("Custom");
     setIsCustomModalOpen(false);
   };
 
   const handleClose = () => {
-    // Reset date range when closing
     setCustomDateRange({ start: null, end: null });
     setIsCustomModalOpen(false);
   };
@@ -304,7 +322,7 @@ export default function AllAttendance() {
 
   const handleRejectSubmit = async () => {
     if (!remarks) {
-      alert("Please enter remarks for rejection.");
+      toast.error("Please enter remarks for rejection.");
       return;
     }
     try {
@@ -319,13 +337,14 @@ export default function AllAttendance() {
       );
 
       if (response.data.success) {
+        toast.success("Regularization request rejected successfully");
         const updatedEntries = await axios.get(
           "/api/all-regularization-approvals"
         );
         setRegularizations(updatedEntries.data.regularizations);
         setIsRejectModalOpen(false);
         setSelectedEntry(null);
-        setRemarks(""); // Clear remarks
+        setRemarks("");
       } else {
         throw new Error(
           response.data.message || "Failed to reject regularization request."
@@ -336,7 +355,7 @@ export default function AllAttendance() {
         `Error rejecting regularization:`,
         error.response?.data || error.message
       );
-      alert(`Failed to reject regularization`);
+      toast.error("Failed to reject regularization request");
     }
   };
 
@@ -348,13 +367,14 @@ export default function AllAttendance() {
         `/api/regularization-approvals/${regularizationIdToDelete}`
       );
       if (response.data.success) {
+        toast.success("Regularization request deleted successfully");
         // Refetch regularization entries after deletion
         const updatedEntries = await axios.get(
           "/api/all-regularization-approvals"
         );
         setRegularizations(updatedEntries.data.regularizations);
-        setIsDeleteDialogOpen(false); // Close dialog
-        setRegularizationIdToDelete(null); // Reset regularization ID
+        setIsDeleteDialogOpen(false);
+        setRegularizationIdToDelete(null);
       } else {
         throw new Error(
           response.data.message || "Failed to delete regularization."
@@ -365,14 +385,14 @@ export default function AllAttendance() {
         `Error deleting regularization:`,
         error.response?.data || error.message
       );
-      alert(`Failed to delete regularization`);
+      toast.error("Failed to delete regularization request");
     }
   };
 
   const openDeleteDialog = (entryId: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent accordion toggle
-    setRegularizationIdToDelete(entryId); // Store regularization ID
-    setIsDeleteDialogOpen(true); // Open confirmation dialog
+    e.stopPropagation();
+    setRegularizationIdToDelete(entryId);
+    setIsDeleteDialogOpen(true);
   };
 
   const handleModalClose = () => {
@@ -382,282 +402,298 @@ export default function AllAttendance() {
     setRemarks("");
   };
 
+  // Get status color for badge
+  const getStatusColor = (status: string) => {
+    switch(status) {
+      case 'Pending': return 'bg-yellow-500';
+      case 'Approved': return 'bg-green-500';
+      case 'Rejected': return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
   if (loading) {
     return (
-      <div className="mt-32 flex justify-center items-center">
+      <div className="flex h-[80vh] w-full items-center justify-center">
         <Loader />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-6">
-      {/* Date Filter Buttons */}
-      <div className="flex justify-center gap-4 mb-6">
-        <button
-          onClick={() => setDateFilter("Today")}
-          className={`px-4 text-xs h-8 rounded ${dateFilter === "Today"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          Today
-        </button>
-        <button
-          onClick={() => setDateFilter("Yesterday")}
-          className={`px-4 text-xs h-8 rounded ${dateFilter === "Yesterday"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          Yesterday
-        </button>
-        <button
-          onClick={() => setDateFilter("ThisWeek")}
-          className={`px-4 text-xs h-8 rounded ${dateFilter === "ThisWeek"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          This Week
-        </button>
-        <button
-          onClick={() => setDateFilter("ThisMonth")}
-          className={`px-4 text-xs h-8 rounded ${dateFilter === "ThisMonth"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          This Month
-        </button>
-        <button
-          onClick={() => setDateFilter("LastMonth")}
-          className={`px-4 text-xs h-8 rounded ${dateFilter === "LastMonth"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          Last Month
-        </button>
-        <button
-          onClick={() => setDateFilter("AllTime")}
-          className={`px-4 text-xs h-8 rounded ${dateFilter === "AllTime"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          All Time
-        </button>
-        <button
-          onClick={() => setIsCustomModalOpen(true)}
-          className={`px-4 text-xs h-8 rounded ${dateFilter === "Custom"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          Custom
-        </button>
-      </div>
+    <div className="container mx-auto p-4 max-w-7xl">
+      <Card className="mb-8">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-2xl font-bold">Attendance Management</CardTitle>
+          </div>
+        </CardHeader>
 
-      {/* Tabs for Attendance and Regularization */}
-      <div className="flex justify-center gap-4 mb-6">
-        <button
-          onClick={() => setFilter("Attendance")}
-          className={`px-4 text-xs flex items-center py-2 rounded ${filter === "Attendance"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          <CalendarDays className="h-4" />
-          <h1>All Attendance</h1>
-        </button>
-        <button
-          onClick={() => setFilter("Regularization")}
-          className={`px-4 text-xs flex items-center py-2 rounded ${filter === "Regularization"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          <Users2 className="h-4" />
-          All Regularizations
-        </button>
-      </div>
+        <CardContent>
+          <Tabs value={filter} onValueChange={(value) => setFilter(value as "Attendance" | "Regularization")}>
+            <TabsList className="mb-6 justify-center">
+              <TabsTrigger value="Attendance" className="flex items-center gap-1">
+                <CalendarDays className="h-4 w-4" />
+                All Attendance
+              </TabsTrigger>
+              <TabsTrigger value="Regularization" className="flex items-center gap-1">
+                <Users2 className="h-4 w-4" />
+                All Regularizations
+              </TabsTrigger>
+            </TabsList>
 
-      {/* Attendance Section */}
-      {filter === "Attendance" && (
-        <Accordion2 type="multiple" className="space-y-4">
-          {Object.keys(groupedEntries).length === 0 ? (
-            <div className="flex w-full justify-center ">
-              <div className="mt-8 ml-4">
-                <DotLottieReact
-                  src="/lottie/empty.lottie"
-                  loop
-                  className="h-56"
-                  autoplay
-                />
-                <h1 className="text-center font-bold text-md mt-2 ">
-                  No Attendance Records Found
-                </h1>
-                <p className="text-center text-sm ">
-                  The list is currently empty for the selected filters
-                </p>
-              </div>
-            </div>
-          ) : (
-            Object.keys(groupedEntries).map((userId) => (
-              <AccordionItem2  key={userId} value={userId}>
-                <div className="border h-10  px-4">
-                  <AccordionTrigger2 className="-mt-2">
-                    <div className="flex items-center gap-4">
-                      <div className="h-6 w-6 rounded-full bg-[#815BF5] flex items-center justify-center text-white text-sm">
-                        {groupedEntries[userId].user.firstName[0]}
-                      </div>
-                      {groupedEntries[userId].user.firstName}
-                    </div>
-                  </AccordionTrigger2>
-                </div>
-                <AccordionContent2>
-                  <div className="px-4 border">
-                    {Object.keys(groupedEntries[userId].dates).map((date) => (
-                      <Accordion2 key={date} type="single" collapsible>
-                        <AccordionItem2 value={date}>
-                          <AccordionTrigger2>
-                            {format(new Date(date), "MMM d, yyyy")}
-                          </AccordionTrigger2>
-                          <AccordionContent2>
-                            {groupedEntries[userId].dates[date].map((entry) => (
-                              <div
-                                key={entry._id}
-                                className="flex justify-between items-center border-b py-2"
-                              >
-                                <span className="dark:text-white">
-                                  {entry.action === "login"
-                                    ? "Login"
-                                    : "Logout"}{" "}
-                                  at{" "}
-                                  {format(new Date(entry.timestamp), "hh:mm a")}
-                                </span>
-                              </div>
-                            ))}
-                          </AccordionContent2>
-                        </AccordionItem2>
-                      </Accordion2>
-                    ))}
-                  </div>
-                </AccordionContent2>
-              </AccordionItem2>
-            ))
-          )}
-        </Accordion2>
-      )}
+            <div className="flex flex-col md:flex-row justify-between gap-3 mb-6">
+              <div className="flex flex-wrap items-center gap-2">
+                <Select value={dateFilter} onValueChange={(value) => setDateFilter(value as any)}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Date Range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Today">Today</SelectItem>
+                    <SelectItem value="Yesterday">Yesterday</SelectItem>
+                    <SelectItem value="ThisWeek">This Week</SelectItem>
+                    <SelectItem value="ThisMonth">This Month</SelectItem>
+                    <SelectItem value="LastMonth">Last Month</SelectItem>
+                    <SelectItem value="AllTime">All Time</SelectItem>
+                    <SelectItem value="Custom">Custom Range</SelectItem>
+                  </SelectContent>
+                </Select>
 
-      {/* Regularization Section */}
-      {filter === "Regularization" && (
-        <div className="space-y-4">
-          {filteredRegularizations.length === 0 ? (
-            <div className="flex w-full justify-center ">
-              <div className="mt-8 ml-4">
-                <DotLottieReact
-                  src="/lottie/empty.lottie"
-                  loop
-                  className="h-56"
-                  autoplay
-                />
-                <h1 className="text-center font-bold text-md  ">
-                  No Entries Found
-                </h1>
-                <p className="text-center text-sm p-2">
-                  The list is currently empty for the selected filters
-                </p>
-              </div>
-            </div>
-          ) : (
-            filteredRegularizations.map((entry) => (
-              <div
-                className="border hover:border-[#815BF5] cursor-pointer"
-                key={entry._id}
-              >
-                <div
-                  onClick={() => handleRegularizationClick(entry)}
-                  className="flex items-center justify-between px-4 rounded shadow-sm py-2"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="h-6 w-6 rounded-full bg-[#815BF5] flex items-center justify-center text-white text-sm">
-                      {entry.userId.firstName[0]}
-                    </div>
-                    <h3 className="text-md dark:text-white">
-                      {entry.userId.firstName}
-                    </h3>
-                    <p className="text-sm text-gray-400">
-                      Date:{" "}
-                      <span className="dark:text-white">
-                        {format(new Date(entry.timestamp), "MMM d, yyyy")}
-                      </span>
-                    </p>
-                  </div>
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs ${entry.approvalStatus === "Pending"
-                      ? "bg-yellow-800 text-white"
-                      : entry.approvalStatus === "Approved"
-                        ? "bg-green-800 text-white"
-                        : "bg-red-500 text-white"
-                      }`}
-                  >
-                    {entry.approvalStatus}
-                  </span>
-                </div>
-                {entry.approvalStatus === "Pending" && (
-                  <div className="flex gap-2 ml-4 w-full mb-4 justify-start">
-                    <button
-                      className="bg-transparent py-2 flex gap-2 border  text-xs dark:text-white px-4 rounded hover:border-green-500"
-                      onClick={(e) => handleApproval(entry, e)}
+                {dateFilter === "Custom" && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setIsCustomModalOpen(true)}
+                      className="flex items-center gap-1"
                     >
-                      <CheckCheck className="w-4 h-4 text-[#017a5b]" />
-                      Approve
-                    </button>
-
-                    <button
-                      className="bg-transparent border  flex gap-2 dark:text-white px-4 py-2 text-xs rounded hover:border-red-500"
-                      onClick={(e) => handleReject(entry, e)}
-                    >
-                      <X className="w-4 h-4 text-red-500" />
-                      Reject
-                    </button>
-
-                    <button
-                      className="bg-transparent flex gap-2 dark:text-white px-4 py-2 text-xs rounded"
-                      onClick={(e) => openDeleteDialog(entry._id, e)} // Trigger confirmation dialog
-                    >
-                      <Trash2 className="w-4 h-4 text-red-500" />
-                    </button>
-                    {/* Delete Confirmation Dialog */}
-                    <DeleteConfirmationDialog
-                      isOpen={isDeleteDialogOpen}
-                      onClose={() => setIsDeleteDialogOpen(false)}
-                      onConfirm={confirmDelete} // Confirm delete action
-                      title="Confirm Delete"
-                      description="Are you sure you want to delete this regularization request? This action cannot be undone."
-                    />
+                      <Calendar className="h-4 w-4" />
+                      {customDateRange.start && customDateRange.end
+                        ? `${format(customDateRange.start, 'dd/MM/yy')} - ${format(customDateRange.end, 'dd/MM/yy')}`
+                        : "Select Dates"}
+                    </Button>
                   </div>
                 )}
               </div>
-            ))
-          )}
-        </div>
-      )}
 
+              {filter === "Regularization" && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="All">All Status</SelectItem>
+                      <SelectItem value="Pending">Pending</SelectItem>
+                      <SelectItem value="Approved">Approved</SelectItem>
+                      <SelectItem value="Rejected">Rejected</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+
+            <Separator className="mb-6" />
+
+            <TabsContent value="Attendance" className="mt-0">
+              {Object.keys(groupedEntries).length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <DotLottieReact
+                    src="/lottie/empty.lottie"
+                    loop
+                    className="h-40"
+                    autoplay
+                  />
+                  <h2 className="text-lg font-semibold mt-4">No Attendance Records Found</h2>
+                  <p className="text-sm text-muted-foreground">
+                    The list is currently empty for the selected filters
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {Object.keys(groupedEntries).map((userId) => (
+                    <Accordion type="single" collapsible key={userId}>
+                      <AccordionItem value={userId} className="border-b-0">
+                        <Card>
+                          <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-9 w-9">
+                                <AvatarFallback className="bg-primary text-primary-foreground">
+                                  {groupedEntries[userId].user.firstName[0]}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="font-medium">
+                                {groupedEntries[userId].user.firstName}
+                              </span>
+                            </div>
+                          </AccordionTrigger>
+
+                          <AccordionContent className="pt-0 pb-0">
+                            <div className="border-t p-0">
+                              {Object.keys(groupedEntries[userId].dates).map((date) => (
+                                <Accordion type="single" collapsible key={date}>
+                                  <AccordionItem value={date} className="border-b-0">
+                                    <AccordionTrigger className="px-4 py-2 font-medium text-sm hover:no-underline">
+                                      {format(new Date(date), "MMM d, yyyy")}
+                                    </AccordionTrigger>
+                                    <AccordionContent className="border-t border-muted pb-0">
+                                      <div className="divide-y">
+                                        {groupedEntries[userId].dates[date].map((entry) => (
+                                          <div
+                                            key={entry._id}
+                                            className="flex justify-between items-center py-3 px-6"
+                                          >
+                                            <div className="flex items-center gap-3">
+                                              <Badge variant={"outline"}>
+                                                {entry.action === "login" ? "Login" : "Logout"}
+                                              </Badge>
+                                              <span className="text-sm text-muted-foreground">
+                                                {format(new Date(entry.timestamp), "hh:mm a")}
+                                              </span>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </AccordionContent>
+                                  </AccordionItem>
+                                </Accordion>
+                              ))}
+                            </div>
+                          </AccordionContent>
+                        </Card>
+                      </AccordionItem>
+                    </Accordion>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="Regularization" className="mt-0">
+              {filteredRegularizations.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <DotLottieReact
+                    src="/lottie/empty.lottie"
+                    loop
+                    className="h-40"
+                    autoplay
+                  />
+                  <h2 className="text-lg font-semibold mt-4">No Regularization Requests Found</h2>
+                  <p className="text-sm text-muted-foreground">
+                    The list is currently empty for the selected filters
+                  </p>
+                </div>
+              ) : (
+                <div className="grid gap-4">
+                  {filteredRegularizations.map((entry) => (
+                    <Card
+                      key={entry._id}
+                      className="overflow-hidden transition-all hover:shadow-md cursor-pointer"
+                      onClick={() => handleRegularizationClick(entry)}
+                    >
+                      <CardContent className="p-0">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-9 w-9">
+                              <AvatarFallback className="bg-primary text-primary-foreground">
+                                {entry.userId.firstName[0]}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">{`${entry.userId.firstName} ${entry.userId.lastName || ""}`}</p>
+                              <div className="flex flex-wrap gap-2 mt-1 text-sm text-muted-foreground">
+                                <span>{format(new Date(entry.timestamp), "MMM d, yyyy")}</span>
+                                <span>•</span>
+                                <span>{`Login: ${entry.loginTime?.substring(0, 5) || "N/A"}`}</span>
+                                <span>•</span>
+                                <span>{`Logout: ${entry.logoutTime?.substring(0, 5) || "N/A"}`}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 mt-3 sm:mt-0">
+                            <Badge
+                              variant="outline"
+                              className={`${getStatusColor(entry.approvalStatus)} text-white border-none px-2 py-1`}
+                            >
+                              {entry.approvalStatus}
+                            </Badge>
+                          </div>
+                        </div>
+
+                        {entry.approvalStatus === "Pending" && (
+                          <div className="bg-muted/50 p-2 flex justify-end gap-2 border-t">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50"
+                                    onClick={(e) => handleApproval(entry, e)}
+                                  >
+                                    <CheckCheck className="h-4 w-4" />
+                                    Approve
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Approve this regularization request</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    onClick={(e) => handleReject(entry, e)}
+                                  >
+                                    <X className="h-4 w-4" />
+                                    Reject
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Reject this regularization request</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-red-600"
+                                    onClick={(e) => openDeleteDialog(entry._id, e)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Delete this regularization request</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+
+      {/* Custom Date Range Modal */}
       <Dialog open={isCustomModalOpen} onOpenChange={setIsCustomModalOpen}>
-        <DialogContent className="w-96 p-6 ml-12  z-[100]">
-          <div className="flex justify-between">
-            <DialogTitle className="text-md font-medium dark:text-white">
-              Select Custom Date Range
-            </DialogTitle>
-            <DialogClose className="" onClick={handleClose}>
-              {" "}
-              <CrossCircledIcon className="scale-150  hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
-              {/* <X className="cursor-pointer border -mt-4 rounded-full border-white h-6 hover:bg-white hover:text-black w-6" /> */}
-            </DialogClose>
-          </div>
+        <DialogContent className="sm:max-w-md">
+          <DialogTitle className="text-lg font-semibold">
+            Select Custom Date Range
+          </DialogTitle>
 
           <form
             onSubmit={(e) => {
@@ -669,110 +705,86 @@ export default function AllAttendance() {
                 );
               }
             }}
-            className="space-y-4"
+            className="space-y-4 pt-2"
           >
-            <div className="flex justify-between gap-2">
-              {/* Start Date Button */}
-              <div className="w-full">
-                {/* <h1 className="absolute bg-[#0B0D29] ml-2 text-xs font-medium text-white">
-                  Start Date
-                </h1> */}
-                <button
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Start Date</label>
+                <Button
                   type="button"
-                  className="text-start text-xs text-gray-400 mt-2 w-full border p-2 rounded"
-                  onClick={() => setIsStartPickerOpen(true)} // Open end date picker
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                  onClick={() => setIsStartPickerOpen(true)}
                 >
-                  {customDateRange.start ? (
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4" />
-
-                      {new Date(customDateRange.start).toLocaleDateString(
-                        "en-GB"
-                      )}
-                    </div> // Format date as dd/mm/yyyy
-                  ) : (
-                    <div className="flex gap-1">
-                      <Calendar className="h-4" />
-                      <h1 className="text-xs">Start Date</h1>
-                    </div>
-                  )}
-                </button>
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {customDateRange.start
+                    ? format(customDateRange.start, "PPP")
+                    : "Select date"}
+                </Button>
               </div>
 
-              {/* End Date Button */}
-              <div className="w-full">
-                {/* <h1 className="absolute bg-[#0B0D29] ml-2 text-xs font-medium text-white">
-                  End Date
-                </h1> */}
-                <button
+              <div className="space-y-2">
+                <label className="text-sm font-medium">End Date</label>
+                <Button
                   type="button"
-                  className="text-start text-xs text-gray-400 mt-2 w-full border p-2 rounded"
-                  onClick={() => setIsEndPickerOpen(true)} // Open end date picker
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                  onClick={() => setIsEndPickerOpen(true)}
                 >
-                  {customDateRange.end ? (
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4" />
-
-                      {new Date(customDateRange.end).toLocaleDateString(
-                        "en-GB"
-                      )}
-                    </div> // Format date as dd/mm/yyyy
-                  ) : (
-                    <div className="flex gap-1">
-                      <Calendar className="h-4" />
-                      <h1 className="text-xs">End date</h1>
-                    </div>
-                  )}
-                </button>
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {customDateRange.end
+                    ? format(customDateRange.end, "PPP")
+                    : "Select date"}
+                </Button>
               </div>
             </div>
-            {/* Submit Button */}
-            <div>
-              <button
-                type="submit"
-                className="bg-[#815BF5] text-white py-2 px-4 rounded w-full text-xs"
+
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
               >
-                Apply
-              </button>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={!customDateRange.start || !customDateRange.end}
+              >
+                Apply Range
+              </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* Start Picker Modal */}
+      {/* Date Picker Modals */}
       <Dialog open={isStartPickerOpen} onOpenChange={setIsStartPickerOpen}>
-
-        <DialogContent className=" z-[100]  bg-black dark:bg-[#0a0d28] scale-90 flex justify-center ">
-          <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
-            <div className="w-full flex mb-4 justify-between">
-              <CustomDatePicker
-                selectedDate={customDateRange.start}
-                onDateChange={(newDate) => {
-                  setCustomDateRange((prev) => ({ ...prev, end: newDate }));
-                  setIsStartPickerOpen(false); // Close picker after selecting the date
-                }}
-                onCloseDialog={() => setIsStartPickerOpen(false)}
-              />
-            </div>
+        <DialogContent className="p-0 bg-transparent border-none shadow-none">
+          <div className="rounded-lg bg-background shadow-lg p-4">
+            <CustomDatePicker
+              selectedDate={customDateRange.start}
+              onDateChange={(newDate) => {
+                setCustomDateRange((prev) => ({ ...prev, start: newDate }));
+                setIsStartPickerOpen(false);
+              }}
+              onCloseDialog={() => setIsStartPickerOpen(false)}
+            />
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* End Date Picker Modal */}
       <Dialog open={isEndPickerOpen} onOpenChange={setIsEndPickerOpen}>
-
-        <DialogContent className=" z-[100] bg-black dark:bg-[#0a0d28]  scale-90 flex justify-center ">
-          <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
-            <div className="w-full flex mb-4 justify-between">
-              <CustomDatePicker
-                selectedDate={customDateRange.end}
-                onDateChange={(newDate) => {
-                  setCustomDateRange((prev) => ({ ...prev, end: newDate }));
-                  setIsEndPickerOpen(false); // Close picker after selecting the date
-                }}
-                onCloseDialog={() => setIsEndPickerOpen(false)}
-              />
-            </div>
+        <DialogContent className="p-0 bg-transparent border-none shadow-none">
+          <div className="rounded-lg bg-background shadow-lg p-4">
+            <CustomDatePicker
+              selectedDate={customDateRange.end}
+              onDateChange={(newDate) => {
+                setCustomDateRange((prev) => ({ ...prev, end: newDate }));
+                setIsEndPickerOpen(false);
+              }}
+              onCloseDialog={() => setIsEndPickerOpen(false)}
+            />
           </div>
         </DialogContent>
       </Dialog>
@@ -782,8 +794,8 @@ export default function AllAttendance() {
         isRegularizationDetailsOpen &&
         isRegularization(selectedEntry) && (
           <RegularizationDetails
-            selectedRegularization={selectedEntry} // This will only work if selectedEntry is Regularization
-            onClose={() => setIsRegularizationDetailsOpen(false)} // Close sheet
+            selectedRegularization={selectedEntry}
+            onClose={() => setIsRegularizationDetailsOpen(false)}
           />
         )}
 
@@ -811,6 +823,15 @@ export default function AllAttendance() {
             onClose={handleModalClose}
           />
         )}
+
+   {/* Delete Confirmation Dialog */}
+   <DeleteConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={confirmDelete}
+        title="Confirm Delete"
+        description="Are you sure you want to delete this regularization request? This action cannot be undone."
+      />
     </div>
   );
 }

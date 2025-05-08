@@ -11,10 +11,7 @@ import Link from 'next/link';
 export default function MobileApp() {
     return (
         <div className="flex mt-24">
-            <div className="w-52 shrink-0">
-                {/* This div serves as a placeholder for the sidebar's fixed position */}
-                <ChecklistSidebar />
-            </div>
+          
 
             <div className="flex-1 m pt-4 h-screen overflow-y-auto mb-12 scrollbar-hide">
                 <div className="w-full m mx-auto px-4 md:px-6">

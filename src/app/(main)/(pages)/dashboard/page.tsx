@@ -1,18 +1,17 @@
 "use client";
 
-import { ShiningButton } from "@/components/globals/shiningbutton";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import Loader from "@/components/ui/loader";
 import { Progress } from "@/components/ui/progress";
 import { useTrialStatus } from "@/providers/trial-status-provider";
 import axios from "axios";
 import { formatDistanceToNow } from "date-fns";
-import { CalendarMinus, Globe, Home, Lock, Megaphone } from "lucide-react";
+import { Calendar, CheckCircleIcon, Clock, Globe, Lock, Megaphone, PlayCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-
+import { FaAndroid, FaApple } from "react-icons/fa";
 
 // Define types for ChecklistItem and Progress
 interface ChecklistItem {
@@ -20,7 +19,6 @@ interface ChecklistItem {
   text: string;
   tutorialLink?: string;
 }
-
 
 const DashboardPage = () => {
   const [progress, setProgress] = useState<String[]>([]);
@@ -38,9 +36,8 @@ const DashboardPage = () => {
   const [leavesRemainingTime, setLeavesRemainingTime] = useState("");
   const [attendanceRemainingTime, setAttendanceRemainingTime] = useState("");
   const [isLoading, setIsLoading] = useState(true); // Global loading state
-  const [isFreeTrialLoading, setFreeTrialLoading] = useState(true);
+  const [isFreeTrialLoading, setFreeTrialLoading] = useState(false);
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]); // Array of ChecklistItem
-
 
   useEffect(() => {
     if (leavesTrialExpires) {
@@ -111,7 +108,6 @@ const DashboardPage = () => {
     };
 
     fetchChecklistItems();
-
   }, []);
 
   const calculateProgress = () => {
@@ -121,37 +117,40 @@ const DashboardPage = () => {
     return Math.round(progressPercentage);
   };
 
-
   const fetchTrialStatus = async () => {
-    const response = await axios.get("/api/organization/getById");
-    const {
-      leavesTrialExpires,
-      attendanceTrialExpires,
-      isPro,
-      subscribedPlan,
-    } = response.data.data;
+    try {
+      const response = await axios.get("/api/organization/getById");
+      const {
+        leavesTrialExpires,
+        attendanceTrialExpires,
+        isPro,
+        subscribedPlan,
+      } = response.data.data;
 
-    const eligiblePlans = ["Money Saver Bundle", "Zapllo Payroll"];
-    const taskEligiblePlans = ["Zapllo Tasks", "Money Saver Bundle"]; // Define task-eligible plans
-    const isPlanEligible = eligiblePlans.includes(subscribedPlan);
-    const isTaskPlanEligible = taskEligiblePlans.includes(subscribedPlan);
+      const eligiblePlans = ["Money Saver Bundle", "Zapllo Payroll"];
+      const taskEligiblePlans = ["Zapllo Tasks", "Money Saver Bundle"]; // Define task-eligible plans
+      const isPlanEligible = eligiblePlans.includes(subscribedPlan);
+      const isTaskPlanEligible = taskEligiblePlans.includes(subscribedPlan);
 
-    setLeavesTrialExpires(
-      isPlanEligible || (leavesTrialExpires && new Date(leavesTrialExpires) > new Date())
-        ? leavesTrialExpires
-        : null
-    );
-    setAttendanceTrialExpires(
-      isPlanEligible || (attendanceTrialExpires && new Date(attendanceTrialExpires) > new Date())
-        ? attendanceTrialExpires
-        : null
-    );
-    setIsSubscribed(isPro);
-    setIsPlanEligible(isPlanEligible);
-    setIsTaskPlanEligible(isTaskPlanEligible); // Track task plan eligibility
-    setIsLoading(false); // Data fetched, stop showing the global loader
+      setLeavesTrialExpires(
+        isPlanEligible || (leavesTrialExpires && new Date(leavesTrialExpires) > new Date())
+          ? leavesTrialExpires
+          : null
+      );
+      setAttendanceTrialExpires(
+        isPlanEligible || (attendanceTrialExpires && new Date(attendanceTrialExpires) > new Date())
+          ? attendanceTrialExpires
+          : null
+      );
+      setIsSubscribed(isPro);
+      setIsPlanEligible(isPlanEligible);
+      setIsTaskPlanEligible(isTaskPlanEligible); // Track task plan eligibility
+    } catch (error) {
+      console.error("Error fetching trial status:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
-  console.log(progress, 'progress')
 
   useEffect(() => {
     fetchTrialStatus();
@@ -175,319 +174,359 @@ const DashboardPage = () => {
     }
   };
 
-  console.log('progresss calculated', calculateProgress())
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-screen"><Loader size="lg" /></div>;
+  }
 
   return (
+    <div className="dark:bg-[#04061e] bg-[#ffffff] mb-16 overflow-y-scroll pt-2 scale-95 h-screen relative overflow-x-hidden scrollbar-hide">
+      {/* Business Apps Section - First and directly visible */}
+      <div className=" mx-auto px-4 mt-12">
+        {/* <h2 className="text-xl font-bold mb-6">My Business Apps</h2> */}
 
-    <div className=' dark:bg-[#04061e] bg-[#ffffff] mb-16 overflow-y-scroll
-     pt-2 scale-95 h-screen gap- relative overflow-x-hidden scrollbar-hide'>
-
-      {/* <h1 className='text-xl gap-2 sticky top-0 z-[10] -mt-12   dark:bg-[#04071F] backdrop-blur-lg flex items-center border-b'>   <Home className='h-5' />  Dashboard
-      </h1> */}
-      <div className="w-full mb-2 mt-12 flex">
-        {calculateProgress() < 100 && (
-          <div className=' w-[50.33%] flex justify-start gap-4'>
-            <div className='p-4  w-full mx-4 rounded-xl  border dark:border-[#E0E0E066]'>
-              <div className='w-full'>
-                <h1>Checklist </h1>
-                <Progress value={calculateProgress()} className="" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-10">
+          {/* Zapllo Tasks */}
+          <Card className="border dark:border-[#E0E0E066] shadow-sm h-full">
+            <CardHeader>
+              <div className="rounded-full flex items-center justify-center h-12 w-12 border dark:border-[#E0E0E066] mb-2">
+                <img src="/icons/atask.png" className="h-6 " alt="Tasks" />
               </div>
-              <div className='flex justify-start mt-3'>
-                <Link href='/dashboard/checklist' >
-                  <Button className='bg-[#815BF5] mt-12 hover:bg-[#5f31e9]'>
-                    Checklist
+              <CardTitle className="text-lg font-medium">Zapllo Tasks</CardTitle>
+              <CardDescription>
+                Delegate one time and recurring task to your team
+              </CardDescription>
+            </CardHeader>
+            <CardFooter>
+              {(isTaskAccess || isTaskPlanEligible) ? (
+                <Link href="/dashboard/tasks">
+                  <Button className="bg-[#815BF5] py-1 hover:bg-[#5f31e9] text-xs">
+                    Go To Task Management
                   </Button>
                 </Link>
-              </div>
-            </div>
-          </div>
-        )}
-        <div className=' w-full h-48 flex justify-start gap-4'>
-          <div className='p-4  w-full mx-4 rounded-xl  border dark:border-[#E0E0E066]'>
-            <div className='w-full p'>
-              <h1 className='px-4 text-lg font-medium'>Tutorials </h1>
-              <h1 className='px-4 py-4 text-sm text-muted-foreground'>Learn how to to get best out of our business workspace </h1>
-              <Link href='/help/tutorials'>
-                <Button className='bg-white border hover:bg-gray-300 text-black ml-4   mt-6' >Go To Tutorials</Button></Link>
-              <img src='/animations/tutorials.png' className='absolute h-48 ml-[45%] -mt-[150px]' />
-            </div>
-          </div>
-        </div>
-        {calculateProgress() == 100 && (
-          <div className=' w-[50.33%] flex justify-start h-48 gap-4'>
-            <div className='p-4  w-full mx-4 rounded-xl  border dark:border-[#E0E0E066]'>
-              <div className='w-full m'>
-                <h1 className='text-lg font-medium flex gap-2'><Megaphone /> Events </h1>
-                <p className='text-sm py-2 text-muted-foreground'>We are bringing Live Classes to help you grow your business. Check out all our events to get the best out of our business workspace. </p>
-                <div className="flex justify-start ">
-                  <Link href="/help/events">
-                    <Button className="bg-white text-black mt-4 text-sm hover:bg-gray-300 ">
-                      Go To Events
-                    </Button>
-                  </Link>
-                </div>
-              </div>
+              ) : (
+                <Button className="bg-[#815BF5] flex dark:text-white gap-1 py-1 text-xs opacity-80">
+                  <Lock className="h-4" />
+                  <span>Locked</span>
+                </Button>
+              )}
+            </CardFooter>
+          </Card>
 
-            </div>
-          </div>
-        )}
-      </div>
-      <div className='grid grid-cols-3  '>
-        <div className='flex items-center  gap-4 '>
-          <div className='p-4 w-full border dark:border-[#E0E0E066] bg-[#]   m-4  dark:text-white items-center flex justify-start rounded-xl '>
-            <div className=' font-bold text-xl space-y-1'>
-              <div className='rounded-full flex items-center justify-items-center h-12 dark:border-[#E0E0E066] border w-12'>
-                <img src='/icons/atask.png' className=' h-6  ml-[10px]   object-cover' />
+          {/* Zapllo Intranet */}
+          <Card className="border dark:border-[#E0E0E066] shadow-sm h-full">
+            <CardHeader>
+              <div className="rounded-full flex items-center justify-center h-12 w-12 border dark:border-[#E0E0E066] mb-2">
+                <img src="/icons/Zapllo Intranet.png" className="h-6 " alt="Intranet" />
               </div>
-              <h1 className='text-lg font-medium'>Zapllo Tasks</h1>
-              <p className='text-xs font-medium '>Delegate one time and recurring task to your team</p>
-              <div className="pt-2">
-                {(isTaskAccess || isTaskPlanEligible) ? (
-                  <Link href="/dashboard/tasks">
-                    <Button className="bg-[#815BF5] py-1 hover:bg-[#5f31e9] text-xs">
-                      Go To Task Management
-                    </Button>
-                  </Link>
-                ) : (
-                  <Button className="bg-[#815BF5] flex dark:text-white gap-1 py-1 text-xs opacity-80">
-                    <Lock className="h-4" />
-                    <h1>Locked</h1>
-                  </Button>
-                )}
+              <CardTitle className="text-lg font-medium">Zapllo Intranet</CardTitle>
+              <CardDescription>
+                Manage all your Important Company Links
+              </CardDescription>
+            </CardHeader>
+            <CardFooter>
+              <Link href="/intranet">
+                <Button className="bg-[#815BF5] py-1 hover:bg-[#5f31e9] text-xs">
+                  Go To Intranet
+                </Button>
+              </Link>
+            </CardFooter>
+          </Card>
+
+          {/* Zapllo Leaves */}
+          <Card className="border dark:border-[#E0E0E066] shadow-sm h-full">
+            <CardHeader>
+              <div className="rounded-full flex items-center justify-center h-12 w-12 border dark:border-[#E0E0E066] mb-2">
+                <img src="/icons/Zapllo Leaves.png" className="h-6 " alt="Leaves" />
               </div>
-            </div>
-          </div>
-        </div>
-        <div className='flex items-center w-full  gap-4 '>
-          <div className='p-4 w-full border dark:border-[#E0E0E066] bg-[#]  m-4  dark:text-white items-center flex justify-start rounded-xl '>
-            <div className=' font-bold text-xl space-y-1'>
-              <div className='rounded-full h-12 flex items-center dark:border-[#E0E0E066] border w-12'>
-                <img src='/icons/Zapllo Intranet.png' className=' h-6  ml-[10px]   object-cover' />
-              </div>
-              <h1 className='text-lg font-medium'>Zapllo Intranet</h1>
-              <p className='text-xs font-medium'>Manage all your Important Company Links</p>
-              <div className='pt-2'>
-                <Link href='/intranet'>
-                  <Button className='bg-[#815BF5] py-1 hover:bg-[#5f31e9]  text-xs' >Go To Intranet</Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="flex  gap-4 ">
-          <div className="p-4 w-full border dark:border-[#E0E0E066] bg-[#] m-4  dark:text-white items-center relative flex justify-start rounded-xl ">
-            <div className=" font-bold text-xl space-y-1">
-              <div className="rounded-full flex items-center h-12 dark:border-[#E0E0E066] border w-12">
-                <img src='/icons/Zapllo Leaves.png' className=' h-6  ml-[10px]   object-cover' />
-              </div>
-              <h1 className="text-lg font-medium">Zapllo Leaves</h1>
-              <p className="text-xs font-medium">
+              <CardTitle className="text-lg font-medium">Zapllo Leaves</CardTitle>
+              <CardDescription>
                 Manage your Employee Leaves & Holidays
-              </p>
-              <div className="">
-                {isLeaveAcess ? (
-                  isPlanEligible ? (
-                    <Link href="/attendance/my-leaves">
-                      <Button className="bg-[#815BF5] py-1 hover:bg-[#5f31e9] text-xs">
-                        Go To Leaves
-                      </Button>
-                    </Link>
-                  ) : leavesTrialExpires ? (
-                    <>
-                      <p className="text-xs text-red-600 py-2">
-                        Free Trial Expires {leavesRemainingTime}
-                      </p>
-                      <Link href="/attendance/my-leaves">
-                        <Button className="bg-[#815BF5] py-1 hover:bg-[#5f31e9] text-xs">
-                          Go To Leaves
-                        </Button>
-                      </Link>
-                    </>
-                  ) : (
-                    <Button
-                      onClick={() => startTrial("leaves")}
-                      className="bg-[#815BF5] py-1 hover:bg-[#5f31e9] text-xs"
-                    >
-                      {isFreeTrialLoading ? (
-                        <span>Start trial</span>
-                      ) : (
-                        <>
-                          <Loader /> <span>Starting trial </span>
-                        </>
-                      )}
-                    </Button>
-                  )
-                ) : role !== "orgAdmin" && !leavesTrialExpires || !isLeaveAcess ? (
-                  <Button className="bg-[#815BF5] flex dark:text-white gap-1 py-1 text-xs opacity-80" >
-                    <Lock className='h-4' />
-                    <h1>
-                      Locked
-                    </h1>
-                  </Button>
-                ) : (
-                  <Link href="/attendance/my-leaves">
-                    <Button className="bg-[#815BF5] py-1 hover:bg-[#5f31e9] text-xs">
-                      Go To Attendance
-                    </Button>
-                  </Link>
-                )}
-              </div>
-            </div>
-            {/* <div className="absolute top-2 right-2">
-              <img src="/branding/payroll.png" className="h-6 mt-2" />
-            </div> */}
-          </div>
-        </div>
-      </div>
-
-      <div className='grid grid-cols-3 mb-12 '>
-        <div className='flex  gap-4 '>
-          <div className='p-4 w-full border dark:border-[#E0E0E066] bg-[#]  m-4  dark:text-white items-center flex justify-start rounded-xl '>
-            <div className=' font-bold text-xl space-y-1'>
-              <div className='rounded-full flex items-center h-12 dark:border-[#E0E0E066] border w-12'>
-                <img src='/icons/Zapllo attendance.png' className=' h-6  ml-[10px]   object-cover' />
-
-              </div>
-              <h1 className="text-lg font-medium">Zapllo Attendance</h1>
-              <p className="text-xs font-medium">
-                Track your Team Attendance & Breaks
-              </p>
-              <div className="">
-                {isLeaveAcess ? (
-                  isPlanEligible ? (
-                    <Link href="/attendance/my-attendance">
-                      <Button className="bg-[#815BF5] py-1 hover:bg-[#5f31e9] text-xs">
-                        Go To Attendance
-                      </Button>
-                    </Link>
-                  ) : leavesTrialExpires ? (
-                    <>
-                      <p className="text-xs text-red-600 py-2">
-                        Free Trial Expires {leavesRemainingTime}
-                      </p>
-                      <Link href="/attendance/my-attendance">
-                        <Button className="bg-[#815BF5] py-1 hover:bg-[#5f31e9] text-xs">
-                          Go To Attendance
-                        </Button>
-                      </Link>
-                    </>
-                  ) : (
-                    <Button
-                      onClick={() => startTrial("attendance")}
-                      className="bg-[#815BF5] py-1 hover:bg-[#815BF5] text-xs"
-                    >
-                      {isFreeTrialLoading ? (
-                        <span>Start trial</span>
-                      ) : (
-                        <>
-                          <Loader /> <span>Starting trial </span>
-                        </>
-                      )}
-                    </Button>
-                  )
-                ) : role !== "orgAdmin" && !leavesTrialExpires || !isLeaveAcess ? (
-                  <Button className="bg-[#815BF5] flex dark:text-white gap-1 py-1 text-xs opacity-80" >
-                    <Lock className='h-4' />
-                    <h1>
-                      Locked
-                    </h1>
-                  </Button>
-                ) : (
+              </CardDescription>
+            </CardHeader>
+            <CardFooter>
+              {isLeaveAcess ? (
+                isPlanEligible ? (
                   <Link href="/attendance/my-leaves">
                     <Button className="bg-[#815BF5] py-1 hover:bg-[#5f31e9] text-xs">
                       Go To Leaves
                     </Button>
                   </Link>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className='flex  gap-4 '>
-          <div className='p-4 w-full border dark:border-[#E0E0E066] bg-[]  m-4  dark:text-white items-center flex justify-start rounded-xl '>
-            <div className=' font-bold text-xl space-y-1'>
-              <div className='rounded-full flex items-center h-12 dark:border-[#E0E0E066] border w-12'>
-                <img src='/icons/Group.png' className=' h-6  ml-[10px]   object-cover' />
-
-              </div>
-              <h1 className='text-lg font-medium'>Zapllo WABA</h1>
-              <p className='text-xs font-medium'>Get the Official Whatsapp API</p>
-              <div className='pt-2'>
-                <Link href='https://waba.zapllo.com/signup' target="_blank" rel="noopener noreferrer">
-                  <Button className='bg-[#815BF5] py-1 hover:bg-[#5f31e9]  text-xs' >Go To WhatsApp API</Button>
+                ) : leavesTrialExpires ? (
+                  <div className="w-full space-y-2">
+                    <p className="text-xs mb-2 text-red-600">
+                      Free Trial Expires {leavesRemainingTime}
+                    </p>
+                    <Link href="/attendance/my-leaves">
+                      <Button className="bg-[#815BF5] py-1 hover:bg-[#5f31e9] text-xs">
+                        Go To Leaves
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <Button
+                    onClick={() => startTrial("leaves")}
+                    className="bg-[#815BF5] py-1 hover:bg-[#5f31e9] text-xs"
+                  >
+                    {isFreeTrialLoading ? (
+                      <div className="flex items-center gap-2">
+                        <Loader /> Starting trial
+                      </div>
+                    ) : (
+                      "Start Trial"
+                    )}
+                  </Button>
+                )
+              ) : role !== "orgAdmin" && !leavesTrialExpires || !isLeaveAcess ? (
+                <Button className="bg-[#815BF5] flex dark:text-white gap-1 py-1 text-xs opacity-80">
+                  <Lock className="h-4" />
+                  <span>Locked</span>
+                </Button>
+              ) : (
+                <Link href="/attendance/my-leaves">
+                  <Button className="bg-[#815BF5] py-1 hover:bg-[#5f31e9] text-xs">
+                    Go To Attendance
+                  </Button>
                 </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className='flex  gap-4 '>
-          <div className='p-4 w-full border dark:border-[#E0E0E066] bg-[]  m-4  dark:text-white items-center flex justify-start rounded-xl '>
-            <div className=' font-bold text-xl space-y-1'>
-              <div className='rounded-full flex items-center h-12 dark:border-[#E0E0E066] border w-12'>
-                <img src='/icons/crm.png' className=' h-6  ml-[10px]   object-cover' />
+              )}
+            </CardFooter>
+          </Card>
 
+          {/* Zapllo Attendance */}
+          <Card className="border dark:border-[#E0E0E066] shadow-sm h-full">
+            <CardHeader>
+              <div className="rounded-full flex items-center justify-center h-12 w-12 border dark:border-[#E0E0E066] mb-2">
+                <img src="/icons/Zapllo attendance.png" className="h-6 " alt="Attendance" />
               </div>
-              <h1 className='text-lg font-medium'>Zapllo CRM</h1>
-              <p className='text-xs font-medium'>Track, Convert & Assign Leads to your Sales Team</p>
-              <div className='pt-2'>
-                <Link href='https://crm.zapllo.com/login' target="_blank" rel="noopener noreferrer">
-                  <Button className='bg-[#815BF5] py-1 hover:bg-[#5f31e9]  text-xs' >Go To  CRM</Button>
+              <CardTitle className="text-lg font-medium">Zapllo Attendance</CardTitle>
+              <CardDescription>
+                Track your Team Attendance & Breaks
+              </CardDescription>
+            </CardHeader>
+            <CardFooter>
+              {isLeaveAcess ? (
+                isPlanEligible ? (
+                  <Link href="/attendance/my-attendance">
+                    <Button className="bg-[#815BF5] py-1 hover:bg-[#5f31e9] text-xs">
+                      Go To Attendance
+                    </Button>
+                  </Link>
+                ) : leavesTrialExpires ? (
+                  <div className="w-full space-y-2">
+                    <p className="text-xs mb-2 text-red-600">
+                      Free Trial Expires {leavesRemainingTime}
+                    </p>
+                    <Link href="/attendance/my-attendance">
+                      <Button className="bg-[#815BF5] py-1 hover:bg-[#5f31e9] text-xs">
+                        Go To Attendance
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  <Button
+                    onClick={() => startTrial("attendance")}
+                    className="bg-[#815BF5] py-1 hover:bg-[#815BF5] text-xs"
+                  >
+                    {isFreeTrialLoading ? (
+                      <div className="flex items-center gap-2">
+                        <Loader /> Starting trial
+                      </div>
+                    ) : (
+                      "Start Trial"
+                    )}
+                  </Button>
+                )
+              ) : role !== "orgAdmin" && !leavesTrialExpires || !isLeaveAcess ? (
+                <Button className="bg-[#815BF5] flex dark:text-white gap-1 py-1 text-xs opacity-80">
+                  <Lock className="h-4" />
+                  <span>Locked</span>
+                </Button>
+              ) : (
+                <Link href="/attendance/my-leaves">
+                  <Button className="bg-[#815BF5] py-1 hover:bg-[#5f31e9] text-xs">
+                    Go To Leaves
+                  </Button>
                 </Link>
+              )}
+            </CardFooter>
+          </Card>
+
+          {/* Zapllo WABA */}
+          <Card className="border dark:border-[#E0E0E066] shadow-sm h-full">
+            <CardHeader>
+              <div className="rounded-full flex items-center justify-center h-12 w-12 border dark:border-[#E0E0E066] mb-2">
+                <img src="/icons/Group.png" className="h-6 " alt="WABA" />
               </div>
-            </div>
-          </div>
+              <CardTitle className="text-lg font-medium">Zapllo WABA</CardTitle>
+              <CardDescription>
+                Get the Official Whatsapp API
+              </CardDescription>
+            </CardHeader>
+            <CardFooter>
+              <Link href="https://app.zapllo.com/signup" target="_blank" rel="noopener noreferrer">
+                <Button className="bg-[#815BF5] py-1 hover:bg-[#5f31e9] text-xs">
+                  Go To WhatsApp API
+                </Button>
+              </Link>
+            </CardFooter>
+          </Card>
+
+          {/* Zapllo CRM */}
+          <Card className="border dark:border-[#E0E0E066] shadow-sm h-full">
+            <CardHeader>
+              <div className="rounded-full flex items-center justify-center h-12 w-12 border dark:border-[#E0E0E066] mb-2">
+                <img src="/icons/crm.png" className="h-6 " alt="CRM" />
+              </div>
+              <CardTitle className="text-lg font-medium">Zapllo CRM</CardTitle>
+              <CardDescription>
+                Track, Convert & Assign Leads to your Sales Team
+              </CardDescription>
+            </CardHeader>
+            <CardFooter>
+              <Link href="https://crm.zapllo.com/login" target="_blank" rel="noopener noreferrer">
+                <Button className="bg-[#815BF5] py-1 hover:bg-[#5f31e9] text-xs">
+                  Go To CRM
+                </Button>
+              </Link>
+            </CardFooter>
+          </Card>
+
+          {/* Zapllo Events */}
+          <Card className="border dark:border-[#E0E0E066] shadow-sm h-full">
+            <CardHeader>
+              <div className="rounded-full flex items-center justify-center h-12 w-12 border dark:border-[#E0E0E066] mb-2">
+                <img src="/icons/events.png" className="h-6 " alt="Events" />
+              </div>
+              <CardTitle className="text-lg font-medium">Zapllo Events</CardTitle>
+              <CardDescription>
+                Live Q&A Classes and Weekly Business Growth Sessions
+              </CardDescription>
+            </CardHeader>
+            <CardFooter>
+              <Link href="/help/events">
+                <Button className="bg-[#815BF5] py-1 hover:bg-[#5f31e9] text-xs">
+                  Go To Events
+                </Button>
+                </Link>
+            </CardFooter>
+          </Card>
+
+          {/* Zapllo Workflows */}
+          <Card className="border dark:border-[#E0E0E066] shadow-sm h-full">
+            <CardHeader>
+              <div className="rounded-full flex items-center justify-center h-12 w-12 border dark:border-[#E0E0E066] mb-2">
+                <img src="/branding/teamsicon.png" className="h-6 " alt="Workflows" />
+              </div>
+              <CardTitle className="text-lg font-medium">Zapllo Workflows</CardTitle>
+              <CardDescription>
+                Automate, Integrate & Connect anything effortlessly
+              </CardDescription>
+            </CardHeader>
+            <CardFooter>
+              <Button className="bg-[#815BF5] py-1 hover:bg-[#815BF5] opacity-50 text-xs">
+                Coming Soon
+              </Button>
+            </CardFooter>
+          </Card>
+
+          {/* Zapllo AI Assistant */}
+          <Card className="border dark:border-[#E0E0E066] shadow-sm h-full">
+            <CardHeader>
+              <div className="rounded-full flex items-center justify-center h-12 w-12 border dark:border-[#E0E0E066] mb-2">
+                <img src="/branding/AII.png" className="h-6 " alt="AI" />
+              </div>
+              <CardTitle className="text-lg font-medium">Zapllo AI Agents & Assistants</CardTitle>
+              <CardDescription>
+                Upgrade your experience by 10X with our proprietory AI Technology
+              </CardDescription>
+            </CardHeader>
+            <CardFooter>
+              <Button className="bg-[#815BF5] py-1 hover:bg-[#5f31e9] opacity-50 text-xs">
+                Coming Soon
+              </Button>
+            </CardFooter>
+          </Card>
         </div>
-        <div className='flex  gap-4 '>
-          <div className='p-4 w-full border dark:border-[#E0E0E066] bg-[]  m-4  dark:text-white items-center flex justify-start rounded-xl '>
-            <div className=' font-bold text-xl space-y-1'>
-              <div className='rounded-full flex items-center h-12 dark:border-[#E0E0E066] border w-12'>
-                <img src='/icons/events.png' className=' h-6  ml-[12px]   object-cover' />
 
-              </div>
-              <h1 className='text-lg font-medium'>Zapllo Events</h1>
-              <p className='text-xs font-medium'>Live Q&A Classes and Weekly Business Growth Sessions</p>
-              <div className='pt-2'>
+        {/* Help & Resources Section - Second */}
+        <h2 className="text-xl font-bold mb-6 mt-10">Resources</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          {/* Checklist Card */}
+          {calculateProgress() < 100 && (
+            <Card className="border dark:border-[#E0E0E066] shadow-sm h-fit">
+              <CardHeader>
+                <div className="rounded-full flex items-center justify-center h-12 w-12 border dark:border-[#E0E0E066] mb-2">
+                  <CheckCircleIcon className="h-6 w-6 text-[#815BF5]" />
+                </div>
+                <CardTitle className="text-lg font-medium">Checklist</CardTitle>
+                <CardDescription>
+                  Complete your onboarding steps
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="w-full">
+                  <Progress value={calculateProgress()} className="h-2" />
+                  <p className="text-xs text-muted-foreground -mt-2">
+                    Progress: {calculateProgress()}%
+                  </p>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Link href="/help/checklist">
+                  <Button className="bg-[#815BF5] py-1 hover:bg-[#5f31e9] text-xs">
+                    Go To Checklist
+                  </Button>
+                </Link>
+              </CardFooter>
+            </Card>
+          )}
 
-                <Button className='bg-[#815BF5] py-1 hover:bg-[#5f31e9] opacity-50 text-xs' >Coming Soon</Button>
+          {/* Tutorials Card */}
+          <Card className="border dark:border-[#E0E0E066] shadow-sm h-[280px]">
+            <CardHeader>
+              <div className="rounded-full flex items-center justify-center h-12 w-12 border dark:border-[#E0E0E066] mb-2">
+                <PlayCircle className="h-6 w-6 text-[#815BF5]" />
               </div>
-            </div>
-          </div>
+              <CardTitle className="text-lg font-medium">Tutorials</CardTitle>
+              <CardDescription>
+                Learn how to get the best out of our business workspace
+              </CardDescription>
+            </CardHeader>
+
+            <CardFooter>
+              <Link href="/help/tutorials">
+                <Button className="bg-white border hover:bg-gray-300 text-black text-xs">
+                  Go To Tutorials
+                </Button>
+              </Link>
+            </CardFooter>
+          </Card>
+
+          {/* Events Card - Always visible now */}
+          {/* <Card className="border dark:border-[#E0E0E066] shadow-sm h-[280px]">
+            <CardHeader>
+              <div className="rounded-full flex items-center justify-center h-12 w-12 border dark:border-[#E0E0E066] mb-2">
+                <Megaphone className="h-6 w-6 text-[#815BF5]" />
+              </div>
+              <CardTitle className="text-lg font-medium">Events</CardTitle>
+              <CardDescription>
+                Live Q&A Classes and Weekly Business Growth Sessions
+
+
+              </CardDescription>
+            </CardHeader>
+
+
+            <CardFooter>
+              <Link href="/help/events">
+                <Button className="bg-white  text-black hover:bg-gray-300 text-xs">
+                  Go To Events
+                </Button>
+              </Link>
+            </CardFooter>
+          </Card> */}
         </div>
-        <div className='flex  gap-4 '>
-          <div className='p-4 w-full border dark:border-[#E0E0E066] bg-[]  m-4  dark:text-white items-center flex justify-start rounded-xl '>
-            <div className=' font-bold text-xl space-y-1'>
-              <div className='rounded-full flex items-center h-12 dark:border-[#E0E0E066] border w-12'>
-                <img src='/branding/teamsicon.png' className=' h-6  ml-[10px]   object-cover' />
-
-              </div>
-              <h1 className='text-lg font-medium'>Zapllo Workflows</h1>
-              <p className='text-xs font-medium'>Automate, Integrate & Connect anything effortlessly</p>
-              <div className='pt-2'>
-
-                <Button className='bg-[#815BF5] py-1 hover:bg-[#815BF5] opacity-50 text-xs' >Coming Soon</Button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className='flex  gap-4 '>
-          <div className='p-4 w-full border dark:border-[#E0E0E066] bg-[]  m-4  dark:text-white items-center flex justify-start rounded-xl '>
-            <div className=' font-bold text-xl space-y-1'>
-              <div className='rounded-full flex items-center h-12 dark:border-[#E0E0E066] border w-12'>
-                <img src='/branding/AII.png' className=' h-6  ml-[10px]   object-cover' />
-
-              </div>
-              <h1 className='text-lg font-medium'>Zapllo AI Assistant</h1>
-              <p className='text-xs font-medium'>Upgrade your experience by 10X with our proprietory AI Technology</p>
-              <div className='pt-2'>
-
-                <Button className='bg-[#815BF5] py-1 hover:bg-[#5f31e9] opacity-50 text-xs' >Coming Soon</Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div >
-
-    </div >
+      </div>
+    </div>
   );
 };
 

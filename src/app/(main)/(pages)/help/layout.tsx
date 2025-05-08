@@ -2,52 +2,37 @@
 
 import React, { useEffect, useState } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
-import SettingsSidebar from '@/components/sidebar/settingsSidebar';
+import HelpSidebar from '@/components/sidebar/helpSidebar';
 import { Button } from '@/components/ui/button';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { Menu } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
-import axios from 'axios';
 
-interface SettingsLayoutProps {
+interface HelpLayoutProps {
   children: React.ReactNode;
 }
 
-export default function SettingsLayout({ children }: SettingsLayoutProps) {
+export default function HelpLayout({ children }: HelpLayoutProps) {
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const [isMounted, setIsMounted] = useState(false);
+  // Default to 260px (converted to percentage of viewport later)
   const [sidebarSize, setSidebarSize] = useState(30);
-  const [isTrialExpired, setIsTrialExpired] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
 
     // Load saved sidebar size from localStorage if available
-    const savedSize = localStorage.getItem('settingsSidebarSize');
+    const savedSize = localStorage.getItem('helpSidebarSize');
     if (savedSize) {
       setSidebarSize(Number(savedSize));
     }
-
-    // Fetch user/organization details
-    const getUserDetails = async () => {
-      try {
-        const response = await axios.get('/api/organization/getById');
-        const organization = response.data.data;
-        const isExpired = organization.trialExpires && new Date(organization.trialExpires) <= new Date();
-        setIsTrialExpired(isExpired);
-      } catch (error) {
-        console.error('Error fetching organization details:', error);
-      }
-    };
-
-    getUserDetails();
   }, []);
 
   // Save sidebar size to localStorage when it changes
   const handleSidebarResize = (size: number) => {
     setSidebarSize(size);
-    localStorage.setItem('settingsSidebarSize', size.toString());
+    localStorage.setItem('helpSidebarSize', size.toString());
   };
 
   if (!isMounted) {
@@ -65,10 +50,10 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0 w-72">
-              <SettingsSidebar />
+              <HelpSidebar />
             </SheetContent>
           </Sheet>
-          <h1 className="font-semibold">Settings</h1>
+          <h1 className="font-semibold">Help Center</h1>
         </div>
         <div className="flex-1 overflow-auto">
           {children}
@@ -78,23 +63,24 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
   }
 
   return (
-    <div className="h-screen overflow-hidden mt-12">
+    <div className="h-screen overflow-hidden">
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel
           defaultSize={25}
+          // Minimum width that ensures descriptions remain readable
           minSize={20}
+          // Maximum width to prevent sidebar from dominating the screen
           maxSize={30}
           onResize={handleSidebarResize}
           className="border-r border-border/40 bg-background/50 backdrop-blur-sm"
         >
-          <SettingsSidebar sidebarWidth={sidebarSize} />
+          <HelpSidebar sidebarWidth={sidebarSize} />
         </ResizablePanel>
 
         <ResizableHandle withHandle />
 
         <ResizablePanel>
           <ScrollArea className="h-full">
-            {/* You can add your InfoBar here if needed */}
             {children}
           </ScrollArea>
         </ResizablePanel>

@@ -173,8 +173,8 @@ export default function EventDetails({ params }: { params: { id: string } }) {
 
   return (
     <div className="flex h-full max-h-screen overflow-y-scroll  pt-24">
-    <ChecklistSidebar />
-    <div className="flex-1 px-4 pl-64 mt-">
+
+    <div className="flex-1 px-4  mt-">
       <div className="mb-6">
         <Link href="/help/events">
           <Button variant="outline" className="flex items-center gap-2">

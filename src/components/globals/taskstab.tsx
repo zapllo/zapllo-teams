@@ -1498,23 +1498,19 @@ export default function TasksTab({
                             {/* Date Picker Dialog */}
                             {datePickerType && (
                               <Dialog open={Boolean(datePickerType)} onOpenChange={() => setDatePickerType(null)}>
-                                <DialogContent className=" z-[100]  bg-[#0a0d28] scale-90  flex justify-center ">
-                                  <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
-                                    <div className="w-full flex mb-4 justify-between">
-                                      <CustomDatePicker
-                                        selectedDate={datePickerType === "start" ? customStartDate : customEndDate}
-                                        onDateChange={(date) => {
-                                          if (datePickerType === "start") {
-                                            setCustomStartDate(date);
-                                          } else if (datePickerType === "end") {
-                                            setCustomEndDate(date);
-                                          }
-                                          setDatePickerType(null); // Close the dialog after selection
-                                        }}
-                                        onCloseDialog={() => setDatePickerType(null)}
-                                      />
-                                    </div>
-                                  </div>
+                                <DialogContent className=" z-[100]  max-w-full scale-90  flex justify-center ">
+                                  <CustomDatePicker
+                                    selectedDate={datePickerType === "start" ? customStartDate : customEndDate}
+                                    onDateChange={(date) => {
+                                      if (datePickerType === "start") {
+                                        setCustomStartDate(date);
+                                      } else if (datePickerType === "end") {
+                                        setCustomEndDate(date);
+                                      }
+                                      setDatePickerType(null); // Close the dialog after selection
+                                    }}
+                                    onCloseDialog={() => setDatePickerType(null)}
+                                  />
                                 </DialogContent>
                               </Dialog>
                             )}
@@ -4433,9 +4429,9 @@ export function DirectoryTemplateCard({ template, categoryName }: DirectoryTempl
 
       <div className="mt-4 flex items-center justify-between">
         <span
-          className={`text-xs px-2 py-1 rounded border 
-    ${template.priority === "High" ? "border-red-500 text-red-500" : ""} 
-    ${template.priority === "Medium" ? "border-orange-500 text-orange-500" : ""} 
+          className={`text-xs px-2 py-1 rounded border
+    ${template.priority === "High" ? "border-red-500 text-red-500" : ""}
+    ${template.priority === "Medium" ? "border-orange-500 text-orange-500" : ""}
     ${template.priority === "Low" ? "border-green-500 text-green-500" : ""}`}
         >
           {template.priority}

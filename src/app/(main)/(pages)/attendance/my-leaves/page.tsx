@@ -9,25 +9,38 @@ import {
   DialogTitle,
   DialogDescription,
   DialogClose,
-  DialogOverlay,
 } from "@/components/ui/dialog";
-import MyLeaveForm from "@/components/forms/MyLeavesForm"; // Your form component
-import LeaveDetails from "@/components/sheets/leaveDetails";
-import { Calendar, CheckCircle, ChevronLeft, ChevronRight, Circle, Info, X } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
-  Cross1Icon,
-  CrossCircledIcon,
-  HamburgerMenuIcon,
-} from "@radix-ui/react-icons";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import MyLeaveForm from "@/components/forms/MyLeavesForm";
+import LeaveDetails from "@/components/sheets/leaveDetails";
+import { Calendar, CheckCircle, ChevronLeft, ChevronRight, Info, Plus, CalendarDays } from "lucide-react";
+import { CrossCircledIcon } from "@radix-ui/react-icons";
 import Loader from "@/components/ui/loader";
 import CustomDatePicker from "@/components/globals/date-picker";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
-
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
-import 'react-circular-progressbar/dist/styles.css'; // Import necessary styles for the progress bar
+import 'react-circular-progressbar/dist/styles.css';
 import { useTheme } from "next-themes";
-
-
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Tabs3, TabsList3, TabsTrigger3 } from "@/components/ui/tabs3";
 
 interface LeaveType {
   allotedLeaves: number;
@@ -61,7 +74,7 @@ interface Leave {
     firstName: string;
     lastName: string;
     _id: string;
-  }; // Add user field to match your MongoDB model
+  };
   remarks: string;
   approvedBy: {
     firstName: string;
@@ -74,7 +87,7 @@ interface Leave {
     _id: string;
   };
   leaveReason: string;
-  createdAt: string; // Add createdAt field
+  createdAt: string;
   updatedAt: string;
 }
 
@@ -132,6 +145,13 @@ const months = [
   { value: 11, label: "December" },
 ];
 
+const statusColors = {
+  "Approved": "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100 hover:bg-green-200",
+  "Partially Approved": "bg-amber-100 text-amber-800 dark:bg-amber-800 dark:text-amber-100 hover:bg-amber-200",
+  "Rejected": "bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100 hover:bg-red-200",
+  "Pending": "bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100 hover:bg-blue-200",
+};
+
 const MyLeaves: React.FC = () => {
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
@@ -154,7 +174,7 @@ const MyLeaves: React.FC = () => {
     description: string;
     details: string;
   } | null>(null);
-  const [activeTab, setActiveTab] = useState("thisMonth"); // Set default to 'thisMonth'
+  const [activeTab, setActiveTab] = useState("thisMonth");
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [customDateRange, setCustomDateRange] = useState<{
@@ -164,9 +184,9 @@ const MyLeaves: React.FC = () => {
     start: null,
     end: null,
   });
-  const [isStartPickerOpen, setIsStartPickerOpen] = useState(false); // For triggering the start date picker
-  const [isEndPickerOpen, setIsEndPickerOpen] = useState(false); // For triggering the end date picker
-  const scrollContainerRef = useRef<HTMLDivElement>(null); // Type the ref as HTMLDivElement
+  const [isStartPickerOpen, setIsStartPickerOpen] = useState(false);
+  const [isEndPickerOpen, setIsEndPickerOpen] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
   const textColor = theme === "dark" ? "#ffffff" : "#000000";
 
@@ -187,6 +207,7 @@ const MyLeaves: React.FC = () => {
       });
     }
   };
+
   const normalizeDate = (date: Date) =>
     new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
@@ -317,7 +338,6 @@ const MyLeaves: React.FC = () => {
 
       for (const leaveType of leaveTypes) {
         const response = await axios.get(`/api/leaves/${leaveType._id}`);
-        console.log(response.data, "response.data");
         if (response.data.success) {
           leaveDetailsMap[leaveType._id] = {
             totalAllotedLeaves: response.data.data.allotedLeaves,
@@ -340,7 +360,7 @@ const MyLeaves: React.FC = () => {
 
   const fetchUserLeaves = async () => {
     try {
-      // setLoading(true)
+      setLoading(true);
       const response = await axios.get("/api/leaves");
       if (response.data.success) {
         setLeaves(response.data.leaves);
@@ -363,6 +383,7 @@ const MyLeaves: React.FC = () => {
       fetchLeaveDetails(leaveTypes);
     }
   }, [leaveTypes]);
+
   const handleInfoClick = (leaveType: string) => {
     if (leaveTypeInfo[leaveType]) {
       setInfoModalContent(leaveTypeInfo[leaveType]);
@@ -394,7 +415,7 @@ const MyLeaves: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="mt-32 flex justify-center items-center">
+      <div className="h-screen flex justify-center items-center">
         <Loader />
       </div>
     );
@@ -406,296 +427,262 @@ const MyLeaves: React.FC = () => {
     const percentage = consumedLeaves ? (consumedLeaves / leaveType.allotedLeaves) * 100 : 0;
 
     return (
-      <div key={leaveType._id} className="w-60 relative flex-shrink-0 border px-4 py-3">
-        {/* Circular Progress Bar */}
-        <Info
-          className="h-4 absolute ml-48 text-muted-foreground dark:text-blue-200 cursor-pointer"
-          onClick={() => handleInfoClick(leaveType.leaveType)}
-        />
-        <div className="flex justify-center ">
-          <div className="scale-75 dark:bg-black dark:bg-transparent rounded-full" style={{ width: 100, height: 100 }}>
+      <Card key={leaveType._id} className="w-60 relative flex-shrink-0">
+        <CardHeader className="pb-2">
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-sm">{leaveType.leaveType}</CardTitle>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => handleInfoClick(leaveType.leaveType)}
+                  >
+                    <Info className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>View {leaveType.leaveType} details</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center space-y-3 pt-0">
+          <div className="w-20 h-20">
             <CircularProgressbar
               value={percentage}
-              text={`Consumed ${consumedLeaves}`}
+              text={`${consumedLeaves}`}
               styles={buildStyles({
-                pathColor: '#815BF5', // color of the progress bar (you can choose a color that matches the design)
-                textColor: textColor, // color of the text inside the circle
-                trailColor: '#9ca3af', // color of the remaining path
-                textSize: '12'
+                pathColor: '#815BF5',
+                textColor: textColor,
+                trailColor: theme === 'dark' ? '#2a2a2a' : '#e9e9e9',
+                textSize: '26px',
               })}
             />
           </div>
-        </div>
-
-        <div className="flex  justify-center">
-
-          <h1 className="text-sm  font-semibold">{leaveType.leaveType}</h1>
-
-        </div>
-        <div className="  text-center ">
-          {/* <p className="text-xs">Allotted: {leaveType.allotedLeaves}</p> */}
-          {leaveDetails[leaveType._id] ? (
-            <p className="text-muted-foreground text-xs">
-              Balance: {leaveDetails[leaveType._id]?.userLeaveBalance ?? "N/A"}
-            </p>
-          ) : (
-            <p className="text-xs">Loading...</p>
-          )}
-        </div>
-
-
-      </div>
+          <div className="text-center space-y-1">
+            <p className="text-xs text-muted-foreground">Consumed leaves</p>
+            {leaveDetails[leaveType._id] ? (
+              <p className="text-sm font-medium">
+                Balance: {leaveDetails[leaveType._id]?.userLeaveBalance ?? "N/A"} days
+              </p>
+            ) : (
+              <p className="text-xs">Loading...</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     );
   };
+
   return (
-    <div className="container h-screen  overflow-y-scroll scrollbar-hide t mx-auto p-6">
-      <div className="flex items-center justify-center gap-4 mb-4">
-        <select
-          value={selectedYear}
-          onChange={(e) => setSelectedYear(Number(e.target.value))}
-          className=" border dark:bg-[#04061E] rounded px-3 border-[#] outline-none text-xs py-2"
-        >
-          {[2022, 2023, 2024, 2025].map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
-        </select>
-
-        <select
-          value={selectedMonth}
-          onChange={(e) => setSelectedMonth(Number(e.target.value))}
-          className="border dark:bg-[#04061E] rounded px-3 outline-none text-xs py-2"
-        >
-          {months.map((month) => (
-            <option key={month.value} value={month.value}>
-              {month.label}
-            </option>
-          ))}
-        </select>
-
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogTrigger asChild>
-            <button
-              className="bg-[#017a5b] text-white text-xs px-4 py-2 rounded"
-              onClick={() => setIsModalOpen(true)}
-            >
-              Apply Leave
-            </button>
-          </DialogTrigger>
-
-          <DialogContent className=" z-[100] hidden">
-            <DialogDescription>
-
-            </DialogDescription>
-            <MyLeaveForm leaveTypes={leaveTypes} onClose={handleModalClose} />
-          </DialogContent>
-        </Dialog>
-      </div>
-      {/* Date Tabs */}
-      <div className="tabs mb-6 flex flex-wrap justify-center space-x-2">
-        <button
-          onClick={() => setActiveTab("today")}
-          className={`px-4 h-fit py-2 text-xs rounded ${activeTab === "today" ? "bg-[#815BF5] text-white" : "bg-[#] border"
-            }`}
-        >
-          Today
-        </button>
-        <button
-          onClick={() => setActiveTab("thisWeek")}
-          className={`px-4 py-2 h-fit text-xs rounded ${activeTab === "thisWeek" ? "bg-[#815BF5] text-white" : "bg-[#] border"
-            }`}
-        >
-          This Week
-        </button>
-        <button
-          onClick={() => setActiveTab("thisMonth")}
-          className={`px-4 py-2 text-xs h-fit rounded ${activeTab === "thisMonth" ? "bg-[#815BF5] text-white" : "bg-[#] border"
-            }`}
-        >
-          This Month
-        </button>
-        <button
-          onClick={() => setActiveTab("lastMonth")}
-          className={`px-4 py-2 text-xs h-fit rounded ${activeTab === "lastMonth" ? "bg-[#815BF5] text-white" : "bg-[#] border"
-            }`}
-        >
-          Last Month
-        </button>
-        <button
-          onClick={openCustomModal}
-          className={`px-4 py-2 text-xs h-fit rounded ${activeTab === "custom" ? "bg-[#815BF5] text-white" : "bg-[#] border"
-            }`}
-        >
-          Custom
-        </button>
-      </div>
-
-      {/* Leave Balance and Type Filter */}
-      {leaveTypes.length > 0 && (
-        <div className="relative flex justify-center  items-center space-x-4 mb-4">
-
-
-
-          {/* Scrollable Container */}
-          <div
-            ref={scrollContainerRef}
-            className="flex overflow-x-scroll max-w-6xl w-full scrollbar-hide gap-4 px-2"
-          >
-            {leaveTypes.map((leaveType) => (
-              <LeaveCard key={leaveType._id} leaveType={leaveType} />
-            ))}
-
+    <div className="container max-w-7xl mx-auto py-6 space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="flex flex-1 items-center space-x-4">
+          <CalendarDays className="h-6 w-6 text-primary" />
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">My Leave History</h1>
+            <p className="text-sm text-muted-foreground">Manage and track your leave applications</p>
           </div>
+        </div>
 
+        <div className="flex flex-wrap gap-2 items-center">
+    
+          <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <Plus className="h-4 w-4" />
+                Apply Leave
+              </Button>
+            </DialogTrigger>
 
+            <DialogContent className="z-[100] h-fit max-h-screen overflow-y-scroll max-w-lg">
 
+              <MyLeaveForm leaveTypes={leaveTypes} onClose={handleModalClose} />
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
 
+      {/* Date Range Tabs */}
+      <Tabs3 defaultValue={activeTab} value={activeTab} className="w-full" onValueChange={setActiveTab}>
+        <TabsList3 className="w-full  mx-auto gap-3 grid grid-cols-5">
+          <TabsTrigger3 value="today">Today</TabsTrigger3>
+          <TabsTrigger3 value="thisWeek">This Week</TabsTrigger3>
+          <TabsTrigger3 value="thisMonth">This Month</TabsTrigger3>
+          <TabsTrigger3 value="lastMonth">Last Month</TabsTrigger3>
+          <TabsTrigger3 value="custom" onClick={openCustomModal}>Custom</TabsTrigger3>
+        </TabsList3>
+      </Tabs3>
+
+      {/* Status Filter */}
+      <div className="flex flex-wrap gap-2 justify-center">
+        <Badge
+          variant="outline"
+          className={`cursor-pointer py-1 px-3 ${selectedStatus === 'All' ? 'bg-primary text-primary-foreground' : ''}`}
+          onClick={() => setSelectedStatus('All')}
+        >
+          All ({allLeavesCount})
+        </Badge>
+        <Badge
+          variant="outline"
+          className={`cursor-pointer py-1 px-3 ${selectedStatus === 'Pending' ? 'bg-blue-500 text-white' : ''}`}
+          onClick={() => setSelectedStatus('Pending')}
+        >
+          Pending ({pendingCount})
+        </Badge>
+        <Badge
+          variant="outline"
+          className={`cursor-pointer py-1 px-3 ${selectedStatus === 'Approved' ? 'bg-green-600 text-white' : ''}`}
+          onClick={() => setSelectedStatus('Approved')}
+        >
+          Approved ({approvedCount})
+        </Badge>
+        <Badge
+          variant="outline"
+          className={`cursor-pointer py-1 px-3 ${selectedStatus === 'Rejected' ? 'bg-red-500 text-white' : ''}`}
+          onClick={() => setSelectedStatus('Rejected')}
+        >
+          Rejected ({rejectedCount})
+        </Badge>
+      </div>
+
+      {/* Leave Balance Cards */}
+      {leaveTypes.length > 0 && (
+        <div className="relative ">
+          <ScrollArea className=" whitespace-nowrap">
+            <div className="grid grid-cols-4">
+              {leaveTypes.map((leaveType) => (
+                <LeaveCard key={leaveType._id} leaveType={leaveType} />
+              ))}
+            </div>
+          </ScrollArea>
         </div>
       )}
 
-      {infoModalContent && (
-        <Dialog open={isInfoModalOpen} onOpenChange={setIsInfoModalOpen}>
-          <DialogContent className="w-96 p-6 z-[100] ">
-            <div className="flex w-full justify-between">
-              <div className="flex gap-2">
-                <Info className="h-5 mt-1 " />
-                <DialogTitle className="text-center text-lg flex gap-2 font-semibold">
-                  {infoModalContent.title}
-                </DialogTitle>
-              </div>
-              <DialogClose>
-                <CrossCircledIcon className="scale-150 mt-1 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
-              </DialogClose>
-            </div>
-            <DialogDescription className="mt-2 text-sm">
-              {infoModalContent.description}
-            </DialogDescription>
-            <div className="mt-4 text-xs">
-              {infoModalContent.details.split("\n").map((line, index) => (
-                <p key={index} className="leading-5 text-muted-foreground">
-                  {line}
-                </p>
-              ))}
-            </div>
-            {/* <button
-                            className="mt-6 bg-[#017a5b] text-white px-4 py-2 rounded w-full"
-                            onClick={handleModalClose}
-                        >
-                            Close
-                        </button> */}
-          </DialogContent>
-        </Dialog>
-      )}
+      {/* Leave List */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold tracking-tight">Leave Applications</h2>
+        {finalFilteredLeaves.length > 0 ? (
+          <div className="space-y-3">
+            {finalFilteredLeaves.map((leave) => (
+              <Card
+                key={leave._id}
+                className="hover:border-primary transition-all duration-200 cursor-pointer"
+                onClick={() => handleLeaveClick(leave)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex flex-col sm:flex-row justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-9 w-9 bg-primary">
+                        <AvatarFallback>{leave.user.firstName?.[0]}</AvatarFallback>
+                      </Avatar>
+                      <div className="space-y-1">
+                        <p className="font-medium leading-none">{leave.user.firstName} {leave.user.lastName}</p>
+                        <p className="text-sm text-muted-foreground">{leave.leaveType.leaveType}</p>
+                      </div>
+                    </div>
 
-      {/* Display Filtered Leaves */}
-      <div className="grid grid-cols-1 w-full mb-12 ">
-        {filteredLeaves?.length > 0 ? (
-          finalFilteredLeaves?.map((leave) => (
-            <div
-              key={leave._id}
-              className="flex hover:border-[#815BF5] items-center  cursor-pointer justify-between border p-4 rounded shadow-sm mb-4"
-              onClick={() => handleLeaveClick(leave)}
-            >
-              {/* User Profile Icon */}
-              <div className="flex items-center gap-4">
-                <div className="flex-shrink-0">
-                  <div className="h-6 w-6 rounded-full bg-[#7c3987] flex items-center justify-center text-white text-sm">
-                    {leave.user.firstName?.[0]}
+                    <div className="flex items-center gap-2">
+                      <Badge className={statusColors[leave.status as keyof typeof statusColors] || ""}>
+                        {leave.status}
+                      </Badge>
+                    </div>
                   </div>
-                </div>
-                <h1 className="text-s">{leave.user.firstName}</h1>
 
-                {/* Leave Details */}
-                <div className=" flex items-center gap-4">
-                  <h3 className=" text-sm ">
-                    {leave?.leaveType?.leaveType}
-                  </h3>
-                  <p className="text-sm flex items-center gap-1  text-gray-400">
-                    From:{" "}
-                    <span className="dark:text-white">
-                      {new Date(leave?.fromDate).toLocaleDateString()}
-                    </span>
-                    <h1 className="gap-1 ml-4 flex">
-                      To:
-                      <span className="dark:text-white">
-                        {new Date(leave?.toDate).toLocaleDateString()}
+                  <Separator className="my-3" />
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">From:</span>
+                      <span>{new Date(leave.fromDate).toLocaleDateString()}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">To:</span>
+                      <span>{new Date(leave.toDate).toLocaleDateString()}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">Applied:</span>
+                      <span className="text-nowrap">{leave.appliedDays} day(s)</span>
+                      <span className="text-muted-foreground">|</span>
+                      <span className="text-muted-foreground">Approved:</span>
+                      <span className="text-nowrap">
+                        {leave.leaveDays.filter((day) => day.status === "Approved").length} day(s)
                       </span>
-                    </h1>
-                  </p>
-                  <p className="text-sm flex gap-1  text-gray-400">
-                    Applied For:
-                    <span className="dark:text-white">
-                      {leave.appliedDays} Day(s)
-                    </span>
-                    |<span className="ml-1">Approved For:</span>
-                    <span className="dark:text-white">
-                      {
-                        leave.leaveDays.filter(
-                          (day) => day.status === "Approved"
-                        ).length
-                      }{" "}
-                      Day(s)
-                    </span>
-                  </p>
-                </div>
-              </div>
-              {/* Status and Approval */}
-              <div className="flex items-center">
-                <span
-                  className={`px-3  py-1 rounded-full text-[10px] ${leave.status === "Approved"
-                    ? "bg-green-700  text-white"
-                    : leave.status === "Partially Approved"
-                      ? "bg-orange-900 text-white -800"
-                      : leave.status === "Rejected"
-                        ? "bg-orange-200 text-red-800"
-                        : "bg-orange-700 text-white -800"
-                    }`}
-                >
-                  {leave.status}
-                </span>
-              </div>
-            </div>
-          ))
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         ) : (
-          <div className="flex w-full justify-center ">
-            <div className="mt-8 ml-4">
+          <Card className="py-8">
+            <CardContent className="flex flex-col items-center justify-center">
               <DotLottieReact
                 src="/lottie/empty.lottie"
                 loop
                 className="h-56"
                 autoplay
               />
-              <h1 className="text-center font-bold text-md mt-2 ">
-                No Leaves Found
-              </h1>
-              <p className="text-center text-sm ">
-                The list is currently empty for the selected filters
+              <h3 className="mt-4 text-lg font-semibold">No Leaves Found</h3>
+              <p className="text-muted-foreground text-sm text-center max-w-md mt-1">
+                The list is currently empty for the selected filters. Try changing your filter criteria or apply for a new leave.
               </p>
-            </div>
-          </div>
+              <Button
+                className="mt-4"
+                variant="outline"
+                onClick={() => setIsModalOpen(true)}
+              >
+                Apply for Leave
+              </Button>
+            </CardContent>
+          </Card>
         )}
       </div>
-      {selectedLeave && (
-        <LeaveDetails
-          selectedLeave={selectedLeave}
-          onClose={handleSheetClose}
-        />
+
+      {/* Leave Type Information Modal */}
+      {infoModalContent && (
+        <Dialog open={isInfoModalOpen} onOpenChange={setIsInfoModalOpen}>
+          <DialogContent className="sm:max-w-md p-6">
+            <DialogTitle className="flex items-center gap-2">
+              <Info className="h-5 w-5" />
+              {infoModalContent.title}
+            </DialogTitle>
+            <DialogDescription>
+              {infoModalContent.description}
+            </DialogDescription>
+            <div className="mt-4 space-y-2">
+              {infoModalContent.details.split("\n").map((line, index) => (
+                <p key={index} className="text-sm text-muted-foreground">
+                  {line}
+                </p>
+              ))}
+            </div>
+            <DialogClose asChild>
+              <Button className="w-full">Close</Button>
+            </DialogClose>
+          </DialogContent>
+        </Dialog>
       )}
 
       {/* Custom Date Range Modal */}
       <Dialog open={isCustomModalOpen} onOpenChange={setIsCustomModalOpen}>
-        <DialogContent className="w-96 p-6 ml-12 z-[100] ">
-          <div className="flex justify-between">
-            <DialogTitle className="text-md  font-medium dark:text-white">
-              Select Custom Date Range
-            </DialogTitle>
-            <DialogClose className="" onClick={handleClose}>
-              {" "}
-              <CrossCircledIcon className="scale-150  hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
-              {/* <X className="cursor-pointer border -mt-4 rounded-full border-white h-6 hover:bg-white hover:text-black w-6" /> */}
-            </DialogClose>
-          </div>
+        <DialogContent className="sm:max-w-md p-6">
+          <DialogTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            Custom Date Range
+          </DialogTitle>
+          <DialogDescription>
+            Select a start and end date to filter your leave applications
+          </DialogDescription>
 
           <form
             onSubmit={(e) => {
@@ -709,110 +696,90 @@ const MyLeaves: React.FC = () => {
             }}
             className="space-y-4"
           >
-            <div className="flex justify-between gap-2">
-              {/* Start Date Button */}
-              <div className="w-full">
-                {/* <h1 className="absolute bg-[#0B0D29] ml-2 text-xs font-medium text-white">
-                  Start Date
-                </h1> */}
-                <button
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Start Date</label>
+                <Button
                   type="button"
-                  className="text-start text-xs text-gray-400 mt-2 w-full border p-2 rounded"
-                  onClick={() => setIsStartPickerOpen(true)} // Open end date picker
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                  onClick={() => setIsStartPickerOpen(true)}
                 >
-                  {customDateRange.start ? (
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4" />
-
-                      {new Date(customDateRange.start).toLocaleDateString(
-                        "en-GB"
-                      )}
-                    </div> // Format date as dd/mm/yyyy
-                  ) : (
-                    <div className="flex gap-1">
-                      <Calendar className="h-4" />
-                      <h1 className="text-xs">Start Date</h1>
-                    </div>
-                  )}
-                </button>
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {customDateRange.start
+                    ? new Date(customDateRange.start).toLocaleDateString()
+                    : "Select date"}
+                </Button>
               </div>
 
-              {/* End Date Button */}
-              <div className="w-full">
-                {/* <h1 className="absolute bg-[#0B0D29] ml-2 text-xs font-medium text-white">
-                  End Date
-                </h1> */}
-                <button
+              <div className="space-y-2">
+                <label className="text-sm font-medium">End Date</label>
+                <Button
                   type="button"
-                  className="text-start text-xs text-gray-400 mt-2 w-full border p-2 rounded"
-                  onClick={() => setIsEndPickerOpen(true)} // Open end date picker
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                  onClick={() => setIsEndPickerOpen(true)}
                 >
-                  {customDateRange.end ? (
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4" />
-
-                      {new Date(customDateRange.end).toLocaleDateString(
-                        "en-GB"
-                      )}
-                    </div>
-                  ) : (
-                    <div className="flex gap-1">
-                      <Calendar className="h-4" />
-                      <h1 className="text-xs">End date</h1>
-                    </div>
-                  )}
-                </button>
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {customDateRange.end
+                    ? new Date(customDateRange.end).toLocaleDateString()
+                    : "Select date"}
+                </Button>
               </div>
             </div>
-            {/* Submit Button */}
-            <div>
-              <button
+
+            <div className="flex justify-end gap-3">
+              <Button type="button" variant="outline" onClick={handleClose}>
+                Cancel
+              </Button>
+              <Button
                 type="submit"
-                className="bg-[#815BF5] text-white py-2 px-4 rounded w-full text-xs"
+                disabled={!customDateRange.start || !customDateRange.end}
               >
-                Apply
-              </button>
+                Apply Filter
+              </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
+
       {/* Start Date Picker Modal */}
       <Dialog open={isStartPickerOpen} onOpenChange={setIsStartPickerOpen}>
+        <DialogContent className="p-0 scale-90 bg-transparent border-none shadow-none max-w-full">
 
-        <DialogContent className=" z-[100]  bg-black dark:bg-[#0a0d28] scale-90 flex justify-center ">
-          <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
-            <div className="w-full flex mb-4 justify-between">
-              <CustomDatePicker
-                selectedDate={customDateRange.start}
-                onDateChange={(newDate) => {
-                  setCustomDateRange((prev) => ({ ...prev, start: newDate }));
-                  setIsStartPickerOpen(false); // Close picker after selecting the date
-                }}
-                onCloseDialog={() => setIsStartPickerOpen(false)}
-              />
-            </div>
-          </div>
+          <CustomDatePicker
+            selectedDate={customDateRange.start}
+            onDateChange={(newDate) => {
+              setCustomDateRange((prev) => ({ ...prev, start: newDate }));
+              setIsStartPickerOpen(false);
+            }}
+            onCloseDialog={() => setIsStartPickerOpen(false)}
+          />
         </DialogContent>
       </Dialog>
 
       {/* End Date Picker Modal */}
       <Dialog open={isEndPickerOpen} onOpenChange={setIsEndPickerOpen}>
+        <DialogContent className="p-0 scale-90 bg-transparent border-none shadow-none max-w-full">
+          <CustomDatePicker
+            selectedDate={customDateRange.end}
+            onDateChange={(newDate) => {
+              setCustomDateRange((prev) => ({ ...prev, end: newDate }));
+              setIsEndPickerOpen(false);
+            }}
+            onCloseDialog={() => setIsEndPickerOpen(false)}
+          />
 
-        <DialogContent className=" z-[100]  bg-black dark:bg-[#0a0d28] scale-90 flex justify-center ">
-          <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
-            <div className="w-full flex mb-4 justify-between">
-              <CustomDatePicker
-                selectedDate={customDateRange.end}
-                onDateChange={(newDate) => {
-                  setCustomDateRange((prev) => ({ ...prev, end: newDate }));
-                  setIsEndPickerOpen(false); // Close picker after selecting the date
-                }}
-                onCloseDialog={() => setIsEndPickerOpen(false)}
-              />
-            </div>
-          </div>
         </DialogContent>
       </Dialog>
+
+      {/* Leave Details Sheet */}
+      {selectedLeave && (
+        <LeaveDetails
+          selectedLeave={selectedLeave}
+          onClose={handleSheetClose}
+        />
+      )}
     </div>
   );
 };

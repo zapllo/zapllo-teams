@@ -18,7 +18,9 @@ import {
   CheckCheck,
   CheckCircle,
   Circle,
+  Filter,
   PencilIcon,
+  Search,
   Trash2,
   WalletCards,
   X,
@@ -40,11 +42,46 @@ import Loader from "@/components/ui/loader";
 import CustomDatePicker from "@/components/globals/date-picker";
 import { toast } from "sonner";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs3 as Tabs, TabsContent3 as TabsContent, TabsList3 as TabsList, TabsTrigger3 as TabsTrigger } from "@/components/ui/tabs3";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 type LeaveType = {
   _id: string;
   leaveType: string;
-  allotedLeaves: number; // Allotted leave balance for each leave type
+  allotedLeaves: number;
 };
 
 type LeaveBalance = {
@@ -106,7 +143,7 @@ interface Leave {
     lastName: string;
     _id: string;
   };
-  createdAt: string; // Add createdAt field
+  createdAt: string;
   updatedAt: string;
 }
 
@@ -122,7 +159,7 @@ export default function AllLeaves() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [remarks, setRemarks] = useState<string>("");
-  const [tab, setTab] = useState<"applications" | "balances">("balances");
+  const [activeTab, setActiveTab] = useState<"applications" | "balances">("balances");
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -174,7 +211,7 @@ export default function AllLeaves() {
     setSelectedUser(user);
     setIsEditModalOpen(true);
   };
-  console.log(selectedUser, "selectedUser");
+
   const handleLeaveModalSubmit = async (
     updatedLeaveBalances: LeaveBalance[]
   ) => {
@@ -186,11 +223,6 @@ export default function AllLeaves() {
     }));
 
     try {
-      console.log(
-        selectedUser.userId,
-        formattedBalances,
-        "Sending data to the backend"
-      );
       await axios.post("/api/leaveBalances/update", {
         userIdToUpdate: selectedUser.userId,
         leaveBalances: formattedBalances,
@@ -205,36 +237,37 @@ export default function AllLeaves() {
       setIsEditModalOpen(false);
     } catch (error) {
       console.error("Error updating leave balances:", error);
+      toast.error("Failed to update leave balances");
     }
   };
-
 
   const fetchAllLeaves = async () => {
     try {
-      // setLoading(true);
+      setLoading(true);
       const response = await axios.get("/api/leaves/all");
       if (response.data.success) {
         setLeaves(response.data.leaves);
-        // setLoading(false);
       }
     } catch (error) {
       console.error("Error fetching leaves:", error);
+      toast.error("Failed to fetch leaves");
+    } finally {
+      setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchAllLeaves();
   }, []);
 
-  const handleApproval = (leave: Leave, e: React.MouseEvent
-  ) => {
-    e.stopPropagation(); // Stop event from triggering parent handlers
+  const handleApproval = (leave: Leave, e: React.MouseEvent) => {
+    e.stopPropagation();
     setSelectedLeave(leave);
     setIsModalOpen(true);
   };
 
-  const handleReject = (leave: Leave, e: React.MouseEvent
-  ) => {
-    e.stopPropagation(); // Stop event from triggering parent handlers
+  const handleReject = (leave: Leave, e: React.MouseEvent) => {
+    e.stopPropagation();
     setSelectedLeave(leave);
     setIsRejectModalOpen(true);
     setIsEditModalOpen(false);
@@ -250,9 +283,11 @@ export default function AllLeaves() {
         setLeaves(updatedLeaves.data.leaves);
       } else {
         console.error(response.data.error);
+        toast.error(response.data.error || "Failed to delete leave request");
       }
     } catch (error) {
       console.error("Error deleting leave:", error);
+      toast.error("Failed to delete leave request");
     }
   };
 
@@ -263,13 +298,19 @@ export default function AllLeaves() {
     }
   };
 
-  const openDeleteDialog = (leaveId: string) => {
+  const openDeleteDialog = (leaveId: string, e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
     setLeaveIdToDelete(leaveId);
     setIsDeleteDialogOpen(true);
   };
 
   const handleRejectSubmit = async () => {
-    if (!remarks) return;
+    if (!remarks) {
+      toast.error("Please provide rejection remarks");
+      return;
+    }
     try {
       setLoading(true);
       if (!selectedLeave) return;
@@ -291,10 +332,12 @@ export default function AllLeaves() {
         setIsRejectModalOpen(false);
         setSelectedLeave(null);
         setRemarks("");
-        setLoading(false);
       }
     } catch (error) {
       console.error("Error rejecting leave:", error);
+      toast.error("Failed to reject leave request");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -368,7 +411,6 @@ export default function AllLeaves() {
   };
 
   const handleClose = () => {
-    // Reset date range when closing
     setCustomDateRange({ start: null, end: null });
     setIsCustomModalOpen(false);
   };
@@ -382,15 +424,17 @@ export default function AllLeaves() {
   useEffect(() => {
     const fetchLeaveBalances = async () => {
       try {
-        // setLoading(true);
+        setLoading(true);
         const response = await axios.get("/api/leaves/getAllUsersBalances");
         if (response.data.success) {
           setUsers(response.data.data.users);
           setLeaveTypes(response.data.data.leaveTypes);
-          // setLoading(false);
         }
       } catch (error) {
         console.error("Error fetching leave balances:", error);
+        toast.error("Failed to fetch leave balances");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -407,569 +451,480 @@ export default function AllLeaves() {
     setFilteredUsers(filtered);
   }, [searchQuery, users]);
 
+  // Get status color for badge
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Pending': return 'bg-yellow-500';
+      case 'Approved': return 'bg-green-500';
+      case 'Rejected': return 'bg-red-500';
+      case 'Partially Approved': return 'bg-orange-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
   if (loading) {
     return (
-      <div className="mt-32 flex justify-center items-center">
+      <div className="flex h-[80vh] w-full items-center justify-center">
         <Loader />
       </div>
     );
   }
 
   return (
-    <div className="container h-screen overflow-y-scroll scrollbar-hide  mx-auto p-6">
-      {/* Date Filter Buttons */}
-      <div className="flex justify-center gap-4 mb-6">
-        <button
-          onClick={() => setDateFilter("Today")}
-          className={`px-4 text-xs h-8 rounded ${dateFilter === "Today"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          Today
-        </button>
-        <button
-          onClick={() => setDateFilter("Yesterday")}
-          className={`px-4 text-xs h-8 rounded ${dateFilter === "Yesterday"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          Yesterday
-        </button>
-        <button
-          onClick={() => setDateFilter("ThisWeek")}
-          className={`px-4 text-xs h-8 rounded ${dateFilter === "ThisWeek"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          This Week
-        </button>
-        <button
-          onClick={() => setDateFilter("ThisMonth")}
-          className={`px-4 text-xs h-8 rounded ${dateFilter === "ThisMonth"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          This Month
-        </button>
-        <button
-          onClick={() => setDateFilter("LastMonth")}
-          className={`px-4 text-xs h-8 rounded ${dateFilter === "LastMonth"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          Last Month
-        </button>
-        <button
-          onClick={() => setDateFilter("AllTime")}
-          className={`px-4 text-xs h-8 rounded ${dateFilter === "AllTime"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          All Time
-        </button>
-        <button
-          onClick={() => setIsCustomModalOpen(true)}
-          className={`px-4 text-xs h-8 rounded ${dateFilter === "Custom"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          Custom
-        </button>
-      </div>
-      {/* Tab Navigation with Counts */}
-      <div className="flex justify-center gap-4 mb-6">
-
-        <button
-          onClick={() => setTab("balances")}
-          className={`px-4 text-xs py-2 flex  items-center rounded ${tab === "balances"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          <WalletCards className="h-4" />
-          Leave Balances
-        </button>
-        <button
-          onClick={() => setTab("applications")}
-          className={`px-4 text-xs py-2 flex items-center  rounded ${tab === "applications"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          <Calendar className="h-4" />
-          <h1 className="mt-[1px]">Leave Applications </h1>
-        </button>
-      </div>
-      {tab === "balances" && (
-        <div className="flex justify-center mb-4">
-          <input
-            type="text"
-            placeholder="Search users..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="text-xs outline-none border rounded px-4 py-2"
-          />
-        </div>
-      )}
-      {/* Tab Content */}
-      {tab === "applications" ? (
-        <>
-          {/* Filter Buttons */}
-          {/* <div className="flex justify-center gap-4 mb-6">
-            {["All", "Pending", "Approved", "Rejected"].map((status) => (
-              <button
-                key={status}
-                onClick={() =>
-                  setFilter(
-                    status as "Pending" | "Approved" | "Rejected" | "All"
-                  )
-                }
-                className={`px-4 text-xs h-8 flex items-center gap-2 rounded ${filter === status
-                    ? "bg-[#7c3987] text-white"
-                    : "bg-[#28152e] text-white"
-                  }`}
-              >
-                {status === "All" && <HamburgerMenuIcon className="h-4" />}
-                {status === "Pending" && (
-                  <Circle className="h-4 text-red-500" />
-                )}
-                {status === "Approved" && (
-                  <CheckCircle className="h-4 text-green-500" />
-                )}
-                {status === "Rejected" && (
-                  <Cross1Icon className="h-4 text-red-500" />
-                )}
-                {status} (
-                {
-                  leaves.filter(
-                    (leave) => status === "All" || leave.status === status
-                  ).length
-                }
-                )
-              </button>
-            ))}
-          </div> */}
-          <div className="flex justify-center gap-4 mb-6">
-            {["All", "Pending", "Approved", "Rejected"].map((status) => (
-              <button
-                key={status}
-                onClick={() =>
-                  setFilter(
-                    status as "Pending" | "Approved" | "Rejected" | "All"
-                  )
-                }
-                className={`px-4 text-xs h-8 flex items-center  gap-2 rounded border ${filter === status
-                  ? "bg-[#815BF5] text-white"
-                  : "bg-[#] border dark:text-white"
-                  } ${status === "Approved" && filter !== status
-                    ? "hover:border-green-500 border"
-                    : ""
-                  } ${status === "Rejected" && filter !== status
-                    ? "hover:border-red-500 border"
-                    : status === "Pending" && filter !== status
-                      ? "hover:border-orange-500"
-                      : ""
-                  }`}
-              >
-                {status === "All" && <HamburgerMenuIcon className="h-4" />}
-                {status === "Pending" && (
-                  <Circle
-                    className={`h-4 text-red-500 ${status === "Pending" ? "text-" : "text-red-500"
-                      } `}
-                  />
-                )}
-                {status === "Approved" && (
-                  <CheckCircle
-                    className={`h-4 text-green-500 ${status === "Approved" ? "text-green-500" : ""
-                      } `}
-                  />
-                )}
-                {status === "Rejected" && (
-                  <Cross1Icon className="h-4 text-red-500" />
-                )}
-                {status} (
-                {
-                  filteredLeaves.filter(
-                    (leave) => status === "All" || leave.status === status
-                  ).length
-                }
-                )
-              </button>
-            ))}
+    <div className="container mx-auto p-4 max-w-7xl">
+      <Card className="mb-8">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-2xl font-bold">Leave Management</CardTitle>
           </div>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "applications" | "balances")}>
+            <TabsList className="mb-6 justify-center gap-2">
+              <TabsTrigger value="balances" className="flex items-center gap-1">
+                <WalletCards className="h-4 w-4" />
+                Leave Balances
+              </TabsTrigger>
+              <TabsTrigger value="applications" className="flex items-center gap-1">
+                <Calendar className="h-4 w-4" />
+                Leave Applications
+              </TabsTrigger>
+            </TabsList>
 
-          {/* Leave Cards */}
-          {filteredLeaves.length === 0 ? (
-            <div className="flex w-full justify-center ">
-              <div className="mt-8 ml-4">
-                <DotLottieReact
-                  src="/lottie/empty.lottie"
-                  loop
-                  className="h-56"
-                  autoplay
-                />
-                <h1 className="text-center font-bold text-md  ">
-                  No Leaves Found
-                </h1>
-                <p className="text-center text-sm p-2 ">
-                  The list is currently empty for the selected filters
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4 mb-12">
-              {filteredLeaves.map((leave) => (
-                <div
-                  key={leave._id}
-                  className="border items-center hover:border-[#815BF5] cursor-pointer"
-                  onClick={() => setSelectedLeaveForDetails(leave)}
-                >
-                  <div className="flex items-center justify-between    px-4 rounded shadow-sm py-2 ">
-                    <div className="flex items-center gap-4">
-                      {/* User Profile Icon */}
-                      <div className="h-6 w-6 rounded-full bg-[#7c3987] flex items-center justify-center text-white text-sm">
-                        {leave.user.firstName[0]}
-                      </div>
-                      <h3 className="text-md dark:text-white">
-                        {leave.user.firstName}
-                      </h3>
-                      <div className="flex gap-4">
-                        <p className="text-sm text-gray-400">
-                          From:{" "}
-                          <span className="dark:text-white">
-                            {format(new Date(leave.fromDate), "MMM d, yyyy")}
-                          </span>
-                        </p>
-                        <p className="text-sm text-gray-400 ml-4">
-                          To:{" "}
-                          <span className="dark:text-white">
-                            {format(new Date(leave.toDate), "MMM d, yyyy")}
-                          </span>
-                        </p>
-                        <p className="text-sm text-gray-400 ml-4">
-                          Applied:{" "}
-                          <span className="dark:text-white">
-                            {leave.appliedDays} Day(s)
-                          </span>
-                        </p>
-                        <p className="text-sm text-gray-400 ml-4">
-                          Approved:{" "}
-                          <span className="dark:text-white">
-                            {
-                              leave.leaveDays.filter(
-                                (day) => day.status === "Approved"
-                              ).length
-                            }{" "}
-                            Day(s)
-                          </span>
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex gap-2 justify-end">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs ${leave.status === "Pending"
-                          ? "bg-yellow-800 text-white"
-                          : leave.status === "Approved"
-                            ? "bg-green-800 text-white"
-                            : leave.status === "Rejected"
-                              ? "bg-red-800 text-white"
-                              : leave.status === "Partially Approved"
-                                ? "bg-red-900 text-white"
-                                : "bg-gray-500 text-white"
-                          }`}
-                      >
-                        {leave.status}
-                      </span>
-                      {leave.leaveReason === "Penalty" && (
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs ${leave.leaveReason === "Penalty"
-                            ? "bg-red-800 text-white"
-                            : ""
-                            }`}
+            <TabsContent value="applications">
+              <div className="space-y-4">
+                {/* Date Filter */}
+                <div className="flex flex-col md:flex-row justify-between gap-3 mb-6">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Select value={dateFilter} onValueChange={(value) => setDateFilter(value as any)}>
+                      <SelectTrigger className="w-40">
+                        <SelectValue placeholder="Date Range" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Today">Today</SelectItem>
+                        <SelectItem value="Yesterday">Yesterday</SelectItem>
+                        <SelectItem value="ThisWeek">This Week</SelectItem>
+                        <SelectItem value="ThisMonth">This Month</SelectItem>
+                        <SelectItem value="LastMonth">Last Month</SelectItem>
+                        <SelectItem value="AllTime">All Time</SelectItem>
+                        <SelectItem value="Custom">Custom Range</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {dateFilter === "Custom" && (
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setIsCustomModalOpen(true)}
+                          className="flex items-center gap-1"
                         >
-                          {leave.leaveReason === "Penalty" ? "Penalty" : ""}
-                        </span>
-                      )}
-                    </div>
+                          <Calendar className="h-4 w-4" />
+                          {customDateRange.start && customDateRange.end
+                            ? `${format(customDateRange.start, 'dd/MM/yy')} - ${format(customDateRange.end, 'dd/MM/yy')}`
+                            : "Select Dates"}
+                        </Button>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Approve/Reject/Delete Buttons */}
-                  <div className="flex justify-start ml-4 w-full mb-4">
-                    {currentUserRole === "orgAdmin" &&
-                      leave.status === "Pending" && (
-                        <div className="flex gap-2">
-                          <button
-                            className="bg-transparent py-2 flex gap-2 border  text-xs dark:text-white px-4 rounded hover:border-green-500"
-                            onClick={(e) => {
-                              e.stopPropagation(); // Prevent triggering sheet
-                              handleApproval(leave, e)
-                            }}
-                          >
-                            <CheckCheck className="w-4 h-4 text-[#017a5b]" />
-                            Approve
-                          </button>
-
-                          <button
-                            className="bg-transparent border  flex gap-2 dark:text-white px-4 py-2 text-xs rounded hover:border-red-500"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleReject(leave, e)
-                            }}
-                          >
-                            <X className="w-4 h-4 text-red-500" />
-                            Reject
-                          </button>
-
-                          <button
-                            className="text-red-500  px-4 py-1 ml-auto text-xs rounded"
-                            onClick={() => openDeleteDialog(leave._id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      )}
+                  {/* Status Filter */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Select value={filter} onValueChange={(value) => setFilter(value as any)}>
+                      <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="All">All Status</SelectItem>
+                        <SelectItem value="Pending">Pending</SelectItem>
+                        <SelectItem value="Approved">Approved</SelectItem>
+                        <SelectItem value="Rejected">Rejected</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
-              ))}
+
+                <Separator className="mb-6" />
+
+                {/* Leave Applications */}
+                {filteredLeaves.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <DotLottieReact
+                      src="/lottie/empty.lottie"
+                      loop
+                      className="h-40"
+                      autoplay
+                    />
+                    <h2 className="text-lg font-semibold mt-4">No Leaves Found</h2>
+                    <p className="text-sm text-muted-foreground">
+                      The list is currently empty for the selected filters
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {filteredLeaves.map((leave) => (
+                      <Card
+                        key={leave._id}
+                        className="overflow-hidden transition-all hover:shadow-md cursor-pointer"
+                        onClick={() => setSelectedLeaveForDetails(leave)}
+                      >
+                        <CardContent className="p-0">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4">
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-10 w-10 bg-primary">
+                                <AvatarFallback>{leave.user.firstName[0]}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium">{`${leave.user.firstName} ${leave.user.lastName}`}</p>
+                                <div className="flex flex-wrap gap-2 mt-1 text-sm text-muted-foreground">
+                                  <span>{leave.leaveType?.leaveType}</span>
+                                  <span>•</span>
+                                  <span>{`${format(new Date(leave.fromDate), "MMM d")} - ${format(new Date(leave.toDate), "MMM d, yyyy")}`}</span>
+                                  <span>•</span>
+                                  <span>{`${leave.appliedDays} day${leave.appliedDays > 1 ? 's' : ''}`}</span>
+                                  <span>•</span>
+                                  <span>{`${leave.leaveDays.filter(day => day.status === "Approved").length} day(s) approved`}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3 mt-3 sm:mt-0">
+                              {leave.leaveReason === "Penalty" && (
+                                <Badge variant="destructive">Penalty</Badge>
+                              )}
+                              <Badge
+                                variant="outline"
+                                className={`${getStatusColor(leave.status)} text-white border-none px-2 py-1`}
+                              >
+                                {leave.status}
+                              </Badge>
+                            </div>
+                          </div>
+
+                          {currentUserRole === "orgAdmin" && leave.status === "Pending" && (
+                            <div className="bg-muted/50 p-2 flex justify-end gap-2 border-t">
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50"
+                                      onClick={(e) => handleApproval(leave, e)}
+                                    >
+                                      <CheckCheck className="h-4 w-4" />
+                                      Approve
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Approve this leave request</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                      onClick={(e) => handleReject(leave, e)}
+                                    >
+                                      <X className="h-4 w-4" />
+                                      Reject
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Reject this leave request</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 text-red-600"
+                                      onClick={(e) => openDeleteDialog(leave._id, e)}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Delete this leave request</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="balances">
+              <div className="space-y-4">
+                <div className="flex relative w-full max-w-sm items-center mb-4 space-x-2">
+                  <Search className="h-4 w-4 text-muted-foreground absolute ml-3 pointer-events-none" />
+                  <Input
+                    placeholder="Search users..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="h-9 pl-9"
+                  />
+                </div>
+
+                <Card>
+                  <CardContent className="p-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="hover:bg-transparent">
+                          <TableHead className="w-[250px]">User</TableHead>
+                          {leaveTypes.map((leaveType) => (
+                            <TableHead key={leaveType._id} className="text-left">
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger className="cursor-help">
+                                    {leaveType.leaveType.substring(0, 2).toUpperCase()}
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top">
+                                    <p>{leaveType.leaveType}</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </TableHead>
+                          ))}
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredUsers.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={leaveTypes.length + 2} className="text-center py-6">
+                              <div className="flex flex-col items-center justify-center py-6">
+                                <p className="text-sm text-muted-foreground">No users found</p>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          filteredUsers.map((user) => (
+                            <TableRow key={user.userId} className="hover:bg-muted/50">
+                              <TableCell className="font-medium">
+                                <div className="flex items-center gap-3">
+                                  <Avatar className="h-8 w-8">
+                                    <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                                      {user.firstName[0]}{user.lastName[0]}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <span>{user.firstName} {user.lastName}</span>
+                                </div>
+                              </TableCell>
+                              {leaveTypes.map((leaveType) => {
+                                const balance =
+                                  user.leaveBalances.find(
+                                    (lb) => lb.leaveTypeId === leaveType._id
+                                  )?.userLeaveBalance || 0;
+
+                                return (
+                                  <TableCell key={leaveType._id} className="text-left">
+                                    <Badge className="font-medium text-white bg-primary">
+                                      {balance}
+                                    </Badge>
+                                  </TableCell>
+                                );
+                              })}
+                              <TableCell className="text-right">
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => handleEditClick(user)}
+                                        className="text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                                      >
+                                        <PencilIcon className="h-4 w-4" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Edit leave balances</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+
+      {/* Custom Date Range Modal */}
+      <Dialog open={isCustomModalOpen} onOpenChange={setIsCustomModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogTitle className="text-lg font-semibold">
+            Select Custom Date Range
+          </DialogTitle>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (customDateRange.start && customDateRange.end) {
+                handleCustomDateSubmit(
+                  customDateRange.start,
+                  customDateRange.end
+                );
+              }
+            }}
+            className="space-y-4 pt-2"
+          >
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Start Date</label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                  onClick={() => setIsStartPickerOpen(true)}
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {customDateRange.start
+                    ? format(customDateRange.start, "PPP")
+                    : "Select date"}
+                </Button>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">End Date</label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full justify-start text-left font-normal"
+                  onClick={() => setIsEndPickerOpen(true)}
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {customDateRange.end
+                    ? format(customDateRange.end, "PPP")
+                    : "Select date"}
+                </Button>
+              </div>
             </div>
-          )}
-          <DeleteConfirmationDialog
-            isOpen={isDeleteDialogOpen}
-            onClose={() => setIsDeleteDialogOpen(false)}
-            onConfirm={confirmDelete}
-            title="Confirm Delete"
-            description="Are you sure you want to delete this leave request? This action cannot be undone."
-          />
 
-          {selectedLeaveForDetails && (
-            <LeaveDetails
-              selectedLeave={selectedLeaveForDetails}
-              onClose={() => setSelectedLeaveForDetails(null)}
-            />
-          )}
-
-          {/* Render the approval modal */}
-          {selectedLeave && isModalOpen && (
-            <LeaveApprovalModal
-              leaveId={selectedLeave._id}
-              leaveDays={selectedLeave.leaveDays}
-              appliedDays={selectedLeave.appliedDays}
-              leaveReason={selectedLeave.leaveReason}
-              leaveType={selectedLeave.leaveType.leaveType}
-              fromDate={selectedLeave.fromDate}
-              toDate={selectedLeave.toDate}
-              user={selectedLeave.user}
-              manager={selectedLeave.user.reportingManager}
-              onClose={handleModalClose}
-              onUpdate={fetchAllLeaves}
-            />
-          )}
-
-          {/* Render the reject modal */}
-          {selectedLeave && isRejectModalOpen && (
-            <RejectModal
-              entryId={selectedLeave._id}
-              remarks={remarks}
-              setRemarks={setRemarks}
-              onClose={handleModalClose}
-              onSubmit={handleRejectSubmit}
-            />
-          )}
-
-          <Dialog open={isCustomModalOpen} onOpenChange={setIsCustomModalOpen}>
-            <DialogContent className="w-96 p-6 ml-12  z-[100]">
-              <div className="flex justify-between">
-                <DialogTitle className="text-md  font-medium dark:text-white">
-                  Select Custom Date Range
-                </DialogTitle>
-                <DialogClose className="" onClick={handleClose}>
-                  {" "}
-                  <CrossCircledIcon className="scale-150  hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
-                  {/* <X className="cursor-pointer border -mt-4 rounded-full border-white h-6 hover:bg-white hover:text-black w-6" /> */}
-                </DialogClose>
-              </div>
-
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (customDateRange.start && customDateRange.end) {
-                    handleCustomDateSubmit(
-                      customDateRange.start,
-                      customDateRange.end
-                    );
-                  }
-                }}
-                className="space-y-4"
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
               >
-                <div className="flex justify-between gap-2">
-                  {/* Start Date Button */}
-                  <div className="w-full">
-                    {/* <h1 className="absolute bg-[#0B0D29] ml-2 text-xs font-medium text-white">
-                  Start Date
-                </h1> */}
-                    <button
-                      type="button"
-                      className="text-start text-xs text-gray-400 mt-2 w-full border p-2 rounded"
-                      onClick={() => setIsStartPickerOpen(true)} // Open end date picker
-                    >
-                      {customDateRange.start ? (
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4" />
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={!customDateRange.start || !customDateRange.end}
+              >
+                Apply Range
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-                          {new Date(customDateRange.start).toLocaleDateString(
-                            "en-GB"
-                          )}
-                        </div>
-                      ) : (
-                        <div className="flex gap-1">
-                          <Calendar className="h-4" />
-                          <h1 className="text-xs">Start Date</h1>
-                        </div>
-                      )}
-                    </button>
-                  </div>
-
-                  {/* End Date Button */}
-                  <div className="w-full">
-                    {/* <h1 className="absolute bg-[#0B0D29] ml-2 text-xs font-medium text-white">
-                  End Date
-                </h1> */}
-                    <button
-                      type="button"
-                      className="text-start text-xs text-gray-400 mt-2 w-full border p-2 rounded"
-                      onClick={() => setIsEndPickerOpen(true)} // Open end date picker
-                    >
-                      {customDateRange.end ? (
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-4" />
-
-                          {new Date(customDateRange.end).toLocaleDateString(
-                            "en-GB"
-                          )}
-                        </div>
-                      ) : (
-                        <div className="flex gap-1">
-                          <Calendar className="h-4" />
-                          <h1 className="text-xs">End date</h1>
-                        </div>
-                      )}
-                    </button>
-                  </div>
-                </div>
-                {/* Submit Button */}
-                <div>
-                  <button
-                    type="submit"
-                    className="bg-[#815BF5] text-white py-2 px-4 rounded w-full text-xs"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-
-          {/* Start Date Picker Modal */}
-          <Dialog open={isStartPickerOpen} onOpenChange={setIsStartPickerOpen}>
-
-            <DialogContent className=" z-[100] bg-black dark:bg-[#0a0d28] scale-90 flex justify-center ">
-              <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
-                <div className="w-full flex mb-4 justify-between">
-                  <CustomDatePicker
-                    selectedDate={customDateRange.start}
-                    onDateChange={(newDate) => {
-                      setCustomDateRange((prev) => ({ ...prev, start: newDate }));
-                      setIsStartPickerOpen(false);
-                    }}
-                    onCloseDialog={() => setIsStartPickerOpen(false)}
-                  />
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-
-          {/* End Date Picker Modal */}
-          <Dialog open={isEndPickerOpen} onOpenChange={setIsEndPickerOpen}>
-
-            <DialogContent className=" z-[100] bg-black dark:bg-[#0a0d28] scale-90 flex justify-center ">
-              <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
-                <div className="w-full flex mb-4 justify-between">
-                  <CustomDatePicker
-                    selectedDate={customDateRange.end}
-                    onDateChange={(newDate) => {
-                      setCustomDateRange((prev) => ({ ...prev, end: newDate }));
-                      setIsEndPickerOpen(false);
-                    }}
-                    onCloseDialog={() => setIsEndPickerOpen(false)}
-                  />
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full border  border-collapse table-auto">
-            <thead className="dark:bg-[#0A0D28] text-left text-xs">
-              <tr>
-                <th className="px-4  py-2">User</th>
-                {leaveTypes.map((leaveType) => (
-                  <th key={leaveType._id} className="px-4 py-2">
-                    {leaveType.leaveType.substring(0, 2).toUpperCase()}
-                  </th>
-                ))}
-                <th className="px-4 py-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.map((user) => (
-                <tr className="text-xs" key={user.userId}>
-                  <td className="border-t px-4 py-2">
-                    {user.firstName} {user.lastName}
-                  </td>
-                  {leaveTypes.map((leaveType) => {
-                    const balance =
-                      user.leaveBalances.find(
-                        (lb) => lb.leaveTypeId === leaveType._id
-                      )?.userLeaveBalance || 0;
-
-                    return (
-                      <td key={leaveType._id} className="border-t px-4 py-2">
-                        {balance}
-                      </td>
-                    );
-                  })}
-                  <td className="border-t px-4 py-2">
-                    <button
-                      className="text-blue-400 px-4 py-2 rounded"
-                      onClick={() => handleEditClick(user)}
-                    >
-                      <PencilIcon className="w-4 h-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {/* Render Edit Leave Balance Modal */}
-          {isEditModalOpen && selectedUser && (
-            <EditLeaveBalanceModal
-              user={selectedUser}
-              leaveTypes={leaveTypes}
-              onClose={() => setIsEditModalOpen(false)}
-              onSubmit={handleLeaveModalSubmit}
+      {/* Date Picker Modals */}
+      <Dialog open={isStartPickerOpen} onOpenChange={setIsStartPickerOpen}>
+        <DialogContent className="p-0 bg-transparent border-none shadow-none">
+          <div className="rounded-lg bg-background shadow-lg p-4">
+            <CustomDatePicker
+              selectedDate={customDateRange.start}
+              onDateChange={(newDate) => {
+                setCustomDateRange((prev) => ({ ...prev, start: newDate }));
+                setIsStartPickerOpen(false);
+              }}
+              onCloseDialog={() => setIsStartPickerOpen(false)}
             />
-          )}
-        </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isEndPickerOpen} onOpenChange={setIsEndPickerOpen}>
+        <DialogContent className="p-0 bg-transparent border-none shadow-none">
+          <div className="rounded-lg bg-background shadow-lg p-4">
+            <CustomDatePicker
+              selectedDate={customDateRange.end}
+              onDateChange={(newDate) => {
+                setCustomDateRange((prev) => ({ ...prev, end: newDate }));
+                setIsEndPickerOpen(false);
+              }}
+              onCloseDialog={() => setIsEndPickerOpen(false)}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Leave Details Sheet */}
+      {selectedLeaveForDetails && (
+        <LeaveDetails
+          selectedLeave={selectedLeaveForDetails}
+          onClose={() => setSelectedLeaveForDetails(null)}
+        />
       )}
+
+      {/* Leave Approval Modal */}
+      {selectedLeave && isModalOpen && (
+        <LeaveApprovalModal
+          leaveId={selectedLeave._id}
+          leaveDays={selectedLeave.leaveDays}
+          appliedDays={selectedLeave.appliedDays}
+          leaveReason={selectedLeave.leaveReason}
+          leaveType={selectedLeave.leaveType.leaveType}
+          fromDate={selectedLeave.fromDate}
+          toDate={selectedLeave.toDate}
+          user={selectedLeave.user}
+          manager={selectedLeave.user.reportingManager}
+          onClose={handleModalClose}
+          onUpdate={fetchAllLeaves}
+        />
+      )}
+
+      {/* Reject Modal */}
+      {selectedLeave && isRejectModalOpen && (
+        <RejectModal
+          entryId={selectedLeave._id}
+          remarks={remarks}
+          setRemarks={setRemarks}
+          onClose={handleModalClose}
+          onSubmit={handleRejectSubmit}
+        />
+      )}
+
+      {/* Edit Leave Balance Modal */}
+      {isEditModalOpen && selectedUser && (
+        <EditLeaveBalanceModal
+          user={selectedUser}
+          leaveTypes={leaveTypes}
+          onClose={() => setIsEditModalOpen(false)}
+          onSubmit={handleLeaveModalSubmit}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={confirmDelete}
+        title="Confirm Delete"
+        description="Are you sure you want to delete this leave request? This action cannot be undone."
+      />
     </div>
   );
 }

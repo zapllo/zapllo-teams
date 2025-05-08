@@ -295,7 +295,7 @@ const Categories: React.FC = () => {
 
       {/* AI-Powered Categories Section - Featured as Hero */}
       {role === "orgAdmin" && (
-        <Card className="border-l-4 border-l-[#815BF5] shadow-md overflow-hidden relative">
+        <Card className="shadow-md overflow-hidden relative">
           <div className="absolute inset-0 bg-gradient-to-r from-[#815BF5]/5 to-transparent pointer-events-none"></div>
           <CardHeader className="pb-2">
             <div className="flex items-center gap-3">
@@ -358,99 +358,103 @@ const Categories: React.FC = () => {
                   </DialogTrigger>
 
                   {/* AI Suggestion Dialog Content */}
-                  <DialogContent className="p-6 h-fit max-h-screen overflow-y-auto w-full scrollbar-hide m-auto">
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-center gap-2">
-                        <img src="/branding/AII.png" className="h-10 dark:block hidden" alt="AI Logo" />
-                        <img src="/branding/zapllo ai.png" className="h-5 dark:block hidden" alt="Zapllo AI" />
-                        <img src="/branding/ai-light.png" className="h-9 dark:hidden block" alt="Zapllo AI Light" />
+                  <DialogContent className="m-auto p-6">
+                    <DialogHeader>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <img src="/branding/AII.png" className="h-8 dark:block hidden" alt="AI Logo" />
+                          <img src="/branding/ai-light.png" className="h-8 dark:hidden block" alt="Zapllo AI Light" />
+                        </div>
+                        <DialogClose>
+                          <X className="h-4 w-4" />
+                        </DialogClose>
                       </div>
-                      <DialogClose>
-                        <CrossCircledIcon className="scale-150 cursor-pointer hover:bg-white rounded-full hover:text-[#815BF5]" />
-                      </DialogClose>
-                    </div>
-
-                    <DialogTitle className="text-xl mt-2">AI-Suggested Categories</DialogTitle>
-                    <DialogDescription className="text-sm">
-                      Our intelligent AI engine has analyzed your industry and curated a selection of categories.
-                      Choose the ones that suit your business, and let us add them to your workflow effortlessly!
-                    </DialogDescription>
+                      <DialogTitle className="text-xl mt-4">AI-Suggested Categories</DialogTitle>
+                      <DialogDescription className="text-sm">
+                        Based on your industry data, we&apos;ve generated relevant categories that might benefit your organization.
+                        Select the ones you&apos;d like to add to your workflow.
+                      </DialogDescription>
+                    </DialogHeader>
 
                     {loadingAI ? (
-                      <div className="flex flex-col items-center justify-center py-16">
+                      <div className="flex flex-col items-center justify-center py-10">
                         <DotLottieReact
                           src="/lottie/ai-loader.lottie"
                           loop
                           autoplay
-                          className="h-32 w-32"
+                          className="h-28 w-28"
                         />
-                        <p className="mt-6 text-center text-muted-foreground">
-                          Our AI is analyzing your industry and generating the perfect categories...
+                        <p className="mt-4 text-center text-muted-foreground">
+                          Generating optimized categories for your industry...
                         </p>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 py-6">
-                        {suggestedCategories.map((category, index) => (
-                          <div
-                            key={index}
-                            onClick={() => {
-                              const categoryObj = typeof category === 'string' ? { _id: index.toString(), name: category, organization: '' } : category;
-                              if (selectedCategories.some(c => c.name === categoryObj.name)) {
-                                setSelectedCategories(
-                                  selectedCategories.filter(c => c.name !== categoryObj.name)
-                                );
-                              } else {
-                                setSelectedCategories([...selectedCategories, categoryObj]);
-                              }
-                            }}
-                            className={`
-                              cursor-pointer border-2 rounded-lg p-4 transition-all duration-300
-                              hover:shadow-lg relative overflow-hidden
-${selectedCategories.some(c => c.name === (typeof category === 'string' ? category : category))
-                                ? "bg-gradient-to-l from-[#815BF5] to-purple-900 text-white border-transparent"
-                                : "border hover:border-[#815BF5]/70"
-                              }
-                            `}
-                          >
-                            <div className="flex justify-between items-start">
-                              <h3 className="font-medium text-sm">
-                                {typeof category === "string" ? category : category}
-                              </h3>
-                              {selectedCategories.some(c => c.name === (typeof category === 'string' ? category : category)) && (
-                                <Badge className="bg- text-[#ffffff]">
-                                  <Check />
-                                </Badge>
-                              )}
-                            </div>
-                            <p className="text-xs mt-1 text-gray-400 dark:text-muted-foreground">
-                              {selectedCategories.some(c => c.name === (typeof category === 'string' ? category : category)) ? "Tap to deselect" : "Tap to select"}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
+                      <>
+                        <div className="flex justify-between items-center my-4">
+                          <span className="text-sm text-muted-foreground">
+                            {selectedCategories.length} of {suggestedCategories.length} selected
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto scrollbar-hide p-1">
+                          {suggestedCategories.map((category, index) => {
+                            const categoryObj = typeof category === 'string'
+                              ? { _id: index.toString(), name: category, organization: '' }
+                              : category;
+                            const isSelected = selectedCategories.some(c => c.name === categoryObj.name);
+
+                            return (
+                              <div
+                                key={index}
+                                onClick={() => {
+                                  if (isSelected) {
+                                    setSelectedCategories(
+                                      selectedCategories.filter(c => c.name !== categoryObj.name)
+                                    );
+                                  } else {
+                                    setSelectedCategories([...selectedCategories, categoryObj]);
+                                  }
+                                }}
+                                className={`
+                flex items-center gap-3 p-3 rounded-md cursor-pointer border
+                ${isSelected
+                                    ? "bg-primary/5 border-primary"
+                                    : "hover:border-primary/30 border-border"}
+              `}
+                              >
+                                <div className={`
+                h-5 w-5 rounded flex items-center justify-center flex-shrink-0
+                ${isSelected
+                                    ? "bg-primary text-primary-foreground"
+                                    : "border border-muted-foreground"}
+              `}>
+                                  {isSelected && <Check className="h-3 w-3" />}
+                                </div>
+                                <span className="text-sm font-medium">{typeof category === "string" ? category : category}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
                     )}
 
-                    <DialogFooter>
-                      <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-4">
-                        <div className="text-sm text-muted-foreground">
-                          {selectedCategories.length} categories selected
-                        </div>
-                        <Button
-                          onClick={handleCreateCategoriesFromSelection}
-                          disabled={selectedCategories.length === 0 || loading}
-                          className="w-full sm:w-auto bg-[#017a5b] hover:bg-[#017a5b]/90 relative group overflow-hidden"
-                        >
-                          {loading ? (
-                            <Loader />
-                          ) : (
-                            <Plus className="mr-2 h-4 w-4 group-hover:scale-110 transition-transform" />
-                          )}
-                          Confirm & Save
-                          <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300"></span>
-                        </Button>
-                      </div>
+                    <DialogFooter className="mt-6 gap-2">
+                      <Button variant="outline" onClick={handleClose}>
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleCreateCategoriesFromSelection}
+                        disabled={selectedCategories.length === 0 || loading}
+                        className="gap-2"
+                      >
+                        {loading ? <Loader /> : <>
+                          <Check className="h-4 w-4" />
+                          Add Selected ({selectedCategories.length})
+                        </>}
+                      </Button>
                     </DialogFooter>
                   </DialogContent>
+
                 </Dialog>
               </div>
 
@@ -594,15 +598,17 @@ ${selectedCategories.some(c => c.name === (typeof category === 'string' ? catego
                               />
                             </div>
                             <DialogFooter>
-                              <Button
-                                variant="outline"
-                                onClick={() => {
-                                  setEditingCategoryId(null);
-                                  setEditCategoryName("");
-                                }}
-                              >
-                                Cancel
-                              </Button>
+                              <DialogClose asChild>
+                                <Button
+                                  variant="outline"
+                                  onClick={() => {
+                                    setEditingCategoryId(null);
+                                    setEditCategoryName("");
+                                  }}
+                                >
+                                  Cancel
+                                </Button>
+                              </DialogClose>
                               <Button
                                 onClick={() => handleEditCategory(cat._id)}
                                 disabled={loading || !editCategoryName.trim()}

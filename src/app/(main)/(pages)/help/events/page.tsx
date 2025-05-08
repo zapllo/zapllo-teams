@@ -110,7 +110,6 @@ export default function Events() {
   if (loading) {
     return (
       <div className="flex mt-24">
-        <ChecklistSidebar />
         <div className="flex-1 p-4">
           <div className="w-full min-h-screen -mt-32 max-w-6xl mx-auto">
             <div className="flex justify-center items-center h-[60vh]">
@@ -129,8 +128,7 @@ export default function Events() {
 
   return (
     <div className="flex h-full max-h-screen overflow-y-scroll  pt-24">
-      <ChecklistSidebar />
-      <div className="flex-1 p-4 pl-64 mt-24">
+      <div className="flex-1 p-4  mt-24">
         <div className="w-full min-h-screen -mt-32  mx-auto">
           <div className="mb-10">
             <h1 className="text-3xl font-bold dark:text-white text-gray-900 mb-2">Events</h1>

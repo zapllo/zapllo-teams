@@ -89,7 +89,7 @@ const Layout = (props: Props) => {
 
 
 
- 
+
 
   useEffect(() => {
     if (trialExpires) {
@@ -232,33 +232,57 @@ const Layout = (props: Props) => {
         </div>
       )}
 
-      {isVisible && !isPro && !isSubscriptionActive && (
-        <div className={`p-2 ${isVisible2 ? "mt-10" : "mt-0"} flex fixed top-0 w-full justify-center z-[100] gap-2 bg-[#37384B] dark:border`}>
 
-          <div className="flex gap-2 justify-center w-full">
-            <h1 className="text-center mt-1 flex text-white text-xs">
-              {isTrialExpired ? (
-                <>Your trial period expired </>
-              ) : (
-                <>Your Trial Period will expire </>
-              )}
-              <strong className="text-yellow-500 ml-1">{timeMessage}</strong>,
-              Upgrade now for uninterrupted access
-            </h1>
-            <Link href="/dashboard/billing">
-              <Button className="h-5 rounded dark:bg-[#017a5b] dark:hover:bg-green-800 w-fit px-2 py-3 text-xs text-white">
-                Upgrade Now
-              </Button>
-            </Link>
+
+      {isVisible && !isPro && !isSubscriptionActive && (
+        <div className={`${isVisible2 ? "mt-14" : "mt-0"} fixed top-0 w-full z-[100]`}>
+          <div className="bg-gradient-to-r from-purple-900 via-indigo-800 to-blue-900 border-b border-indigo-700/50 backdrop-blur-sm shadow-lg">
+            <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="hidden md:flex h-8 w-8 bg-yellow-500/20 rounded-full items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+
+                <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-2">
+                  <p className="text-white/90 font-medium text-sm">
+                    {isTrialExpired ? (
+                      <span className="text-yellow-200">Trial expired:</span>
+                    ) : (
+                      <span className="text-yellow-200">Trial ending:</span>
+                    )}
+                  </p>
+                  <p className="text-white text-sm">
+                    <span className="font-bold text-yellow-300">{timeMessage}</span>
+                    <span className="ml-1 hidden sm:inline">• Upgrade for uninterrupted premium access</span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <Link href="/dashboard/billing">
+                  <Button className="h-9 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 border border-emerald-500/30 text-white shadow-md hover:shadow-xl transition-all duration-300 px-4 font-medium rounded-md">
+                    Upgrade Now
+                  </Button>
+                </Link>
+                <button
+                  onClick={handleClose}
+                  className="p-1.5 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors duration-200"
+                  aria-label="Dismiss notification"
+                >
+                  <CrossCircledIcon className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           </div>
-          <button onClick={handleClose} className="ml-auto text-white">
-            <CrossCircledIcon className="scale-150  hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
-          </button>
         </div>
       )}
+
+
       <div
-        className={`flex overflow-hidden ${isVisible && !isPro && !isSubscriptionActive ? "mt-10" : ""
-          }  ${isVisible2 && isVisible ? "mt-20" : !isVisible && isVisible2 ? "mt-10" : !isVisible && !isVisible2 ? "" : ""} dark:bg-[#04061E] scrollbar-hide h-full w-full`}
+        className={`flex overflow-hidden ${isVisible && !isPro && !isSubscriptionActive ? "mt-14" : ""
+          }  ${isVisible2 && isVisible ? "mt-20" : !isVisible && isVisible2 ? "mt-14" : !isVisible && !isVisible2 ? "" : ""} dark:bg-[#04061E] scrollbar-hide h-full w-full`}
       >
         <MenuOptions />
         <div className="w-full overflow-hidden h-screen">

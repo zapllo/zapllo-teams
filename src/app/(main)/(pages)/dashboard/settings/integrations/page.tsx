@@ -18,31 +18,27 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Tabs3 as Tabs, TabsContent3 as TabsContent, TabsList3 as TabsList, TabsTrigger3 as TabsTrigger } from "@/components/ui/tabs3";
 import {
   ArrowUpRight,
-  Bell,
   Box,
   CalendarDays,
   ChevronRight,
-  ClipboardList,
-  Download,
   ExternalLink,
   Globe,
   Grid3X3,
-  HelpCircle,
-  Info,
-  Layers,
+  Link,
   MessageSquare,
   Phone,
   Puzzle,
-  Shapes,
-  Sparkles,
+  Search,
   Star,
   Users,
   Webhook,
 } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import React, { useState } from "react";
-import { toast } from "sonner";
+import { Separator } from "@/components/ui/separator";
 
 type IntegrationStatus = "coming-soon" | "beta" | "available";
 
@@ -51,7 +47,6 @@ interface Integration {
   name: string;
   description: string;
   icon: React.ReactNode;
-  logo: string;
   status: IntegrationStatus;
   category: "zapllo" | "productivity" | "communication" | "other";
   popular?: boolean;
@@ -59,33 +54,14 @@ interface Integration {
 }
 
 export default function IntegrationsPage() {
-  const [email, setEmail] = useState("");
-  const [notifyLoading, setNotifyLoading] = useState(false);
-
-  const handleNotifyMe = async (integration: string) => {
-    if (!email) {
-      toast.error("Please enter your email address");
-      return;
-    }
-
-    setNotifyLoading(true);
-    // Simulating API call
-    setTimeout(() => {
-      toast.success("You'll be notified when this integration launches", {
-        description: `We'll send updates about ${integration} to ${email}`,
-      });
-      setEmail("");
-      setNotifyLoading(false);
-    }, 1500);
-  };
+  const [searchQuery, setSearchQuery] = useState("");
 
   const integrations: Integration[] = [
     {
       id: "zapllo-crm",
       name: "Zapllo CRM",
       description: "Sync tasks with your CRM contacts, deals, and opportunities. Automate follow-ups and never miss a client engagement.",
-      icon: <Users className="h-5 w-5 text-blue-500" />,
-      logo: "/branding/zapllo-crm-logo.svg",
+      icon: <Users className="h-5 w-5" />,
       status: "coming-soon",
       category: "zapllo",
       popular: true,
@@ -95,8 +71,7 @@ export default function IntegrationsPage() {
       id: "zapllo-calendar",
       name: "Zapllo Calendar",
       description: "Schedule tasks directly on your calendar. Convert events to tasks and vice versa.",
-      icon: <CalendarDays className="h-5 w-5 text-indigo-500" />,
-      logo: "/branding/zapllo-calendar-logo.svg",
+      icon: <CalendarDays className="h-5 w-5" />,
       status: "coming-soon",
       category: "zapllo",
       comingSoon: "Q3 2023"
@@ -105,8 +80,7 @@ export default function IntegrationsPage() {
       id: "zapllo-chat",
       name: "Zapllo Chat",
       description: "Turn conversations into actionable tasks. Collaborate on tasks within your team chat.",
-      icon: <MessageSquare className="h-5 w-5 text-green-500" />,
-      logo: "/branding/zapllo-chat-logo.svg",
+      icon: <MessageSquare className="h-5 w-5" />,
       status: "coming-soon",
       category: "zapllo",
       comingSoon: "Q4 2023"
@@ -115,8 +89,7 @@ export default function IntegrationsPage() {
       id: "google-workspace",
       name: "Google Workspace",
       description: "Integrate with Gmail, Google Calendar, and Google Drive for seamless task management.",
-      icon: <Globe className="h-5 w-5 text-red-500" />,
-      logo: "/integrations/google-workspace.svg",
+      icon: <Globe className="h-5 w-5" />,
       status: "coming-soon",
       category: "productivity",
       popular: true,
@@ -126,8 +99,7 @@ export default function IntegrationsPage() {
       id: "microsoft-365",
       name: "Microsoft 365",
       description: "Connect with Outlook, Teams, and other Microsoft tools to centralize your tasks.",
-      icon: <Grid3X3 className="h-5 w-5 text-blue-600" />,
-      logo: "/integrations/microsoft-365.svg",
+      icon: <Grid3X3 className="h-5 w-5" />,
       status: "coming-soon",
       category: "productivity",
       comingSoon: "Q3 2023"
@@ -136,8 +108,7 @@ export default function IntegrationsPage() {
       id: "slack",
       name: "Slack",
       description: "Convert messages to tasks, get notifications, and manage tasks without leaving Slack.",
-      icon: <MessageSquare className="h-5 w-5 text-purple-500" />,
-      logo: "/integrations/slack.svg",
+      icon: <MessageSquare className="h-5 w-5" />,
       status: "coming-soon",
       category: "communication",
       popular: true,
@@ -147,8 +118,7 @@ export default function IntegrationsPage() {
       id: "zapier",
       name: "Zapier",
       description: "Connect Zapllo Tasks to 3,000+ apps and automate your workflows.",
-      icon: <Webhook className="h-5 w-5 text-orange-500" />,
-      logo: "/integrations/zapier.svg",
+      icon: <Webhook className="h-5 w-5" />,
       status: "coming-soon",
       category: "other",
       comingSoon: "Q4 2023"
@@ -157,227 +127,283 @@ export default function IntegrationsPage() {
       id: "whatsapp",
       name: "WhatsApp Business",
       description: "Create tasks from WhatsApp messages and receive task notifications via WhatsApp.",
-      icon: <Phone className="h-5 w-5 text-green-600" />,
-      logo: "/integrations/whatsapp.svg",
+      icon: <Phone className="h-5 w-5" />,
       status: "coming-soon",
       category: "communication",
       comingSoon: "Q3 2023"
     },
   ];
 
-  const categories = [
-    { id: "all", name: "All Integrations" },
-    { id: "zapllo", name: "Zapllo Ecosystem" },
-    { id: "productivity", name: "Productivity Tools" },
-    { id: "communication", name: "Communication" },
-    { id: "other", name: "Other Integrations" },
-  ];
+  // Filter integrations based on search query
+  const filteredIntegrations = integrations.filter(integration =>
+    integration.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    integration.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
-  const [activeCategory, setActiveCategory] = useState("all");
+  // Group filtered integrations by category
+  const zaplloIntegrations = filteredIntegrations.filter(i => i.category === "zapllo");
+  const productivityIntegrations = filteredIntegrations.filter(i => i.category === "productivity");
+  const communicationIntegrations = filteredIntegrations.filter(i => i.category === "communication");
+  const otherIntegrations = filteredIntegrations.filter(i => i.category === "other");
 
-  const filteredIntegrations = activeCategory === "all"
-    ? integrations
-    : integrations.filter(integration => integration.category === activeCategory);
-
-  return (
-    <div className=" h-fit max-h-screen overflow-y-scroll p-6 mx-auto max-w- scrollbar-hide space-y-8">
-      <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Integrations</h1>
-        <p className="text-muted-foreground">
-          Connect Zapllo Tasks with your favorite tools and services
-        </p>
-      </div>
-
-      {/* Featured Integration - Zapllo Ecosystem */}
-      <Card className="border-0 bg-gradient-to-br from-[#815BF5]/10 to-transparent shadow-lg relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#815BF5]/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#815BF5]/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
-
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <CardTitle className="text-2xl flex items-center">
-                <Puzzle className="mr-2 h-6 w-6 text-[#815BF5]" />
-                Zapllo Ecosystem
-              </CardTitle>
-              <CardDescription className="text-base mt-1">
-                Seamlessly connect with other Zapllo products for maximum productivity
-              </CardDescription>
+  const IntegrationCard = ({ integration }: { integration: Integration }) => (
+    <Card className="overflow-hidden border hover:shadow-md transition-all duration-200">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-primary/10 text-primary">
+              {integration.icon}
             </div>
-            <Badge variant="outline" className="bg-[#815BF5]/10 text-[#815BF5] border-[#815BF5]/30 px-3 py-1">
-              Coming Soon
-            </Badge>
-          </div>
-        </CardHeader>
-
-        <CardContent>
-          <div className="grid md:grid-cols-2 gap-6 mt-4">
-            {integrations
-              .filter(integration => integration.category === "zapllo")
-              .map(integration => (
-                <Card key={integration.id} className="border shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-center">
-                        <div className="w-10 h-10 rounded-full bg-[#815BF5]/10 flex items-center justify-center mr-3">
-                          {integration.icon}
-                        </div>
-                        <CardTitle className="text-lg">{integration.name}</CardTitle>
-                      </div>
-                      {integration.popular && (
-                        <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">
-                          <Star className="h-3 w-3 text-amber-500 mr-1" fill="currentColor" />
-                          Popular
-                        </Badge>
-                      )}
-                    </div>
-                    <CardDescription className="mt-2">
-                      {integration.description}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardFooter className="flex justify-between items-center pb-3 pt-2 border-t bg-muted/30">
-
-                    <Button variant="outline" size="sm" className="text-xs h-8">
-                      <span>Learn More</span>
-                      <ChevronRight className="h-3 w-3 ml-1" />
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Category Tabs */}
-      <div className="flex flex-wrap gap-2 items-center">
-        {categories.map(category => (
-          <Button
-            key={category.id}
-            variant={activeCategory === category.id ? "default" : "outline"}
-            size="sm"
-            onClick={() => setActiveCategory(category.id)}
-            className={`
-              rounded-full text-sm font-medium h-9
-              ${activeCategory === category.id ? "bg-primary" : "hover:bg-muted"}
-            `}
-          >
-            {category.name}
-          </Button>
-        ))}
-      </div>
-
-      {/* All Integrations Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredIntegrations.map(integration => (
-          <Card
-            key={integration.id}
-            className="border shadow-sm hover:shadow-md transition-all duration-200 flex flex-col"
-          >
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-start">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center bg-muted">
-                    {integration.icon}
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">{integration.name}</CardTitle>
-                    <Badge
-                      variant="outline"
-                      className="mt-1 text-xs px-2 py-0 h-5 bg-gradient-to-r from-amber-100/50 to-amber-50/30 text-amber-800 dark:text-amber-400"
-                    >
-                      Coming Soon
-                    </Badge>
-                  </div>
-                </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-base">{integration.name}</CardTitle>
                 {integration.popular && (
                   <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="w-6 h-6 flex items-center justify-center">
-                          <Star className="h-5 w-5 text-amber-400" fill="currentColor" />
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Popular integration</p>
-                      </TooltipContent>
-                    </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
+                    </TooltipTrigger>
+                    <TooltipContent>Popular integration</TooltipContent>
+                  </Tooltip>
                   </TooltipProvider>
                 )}
               </div>
-            </CardHeader>
+              <CardDescription className="text-xs">{`Coming Soon`}</CardDescription>
+            </div>
+          </div>
+          <Badge variant="outline" className="bg-primary/5 text-xs">Coming Soon</Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="text-sm text-muted-foreground">
+        {integration.description}
+      </CardContent>
+      <CardFooter className="flex justify-between pt-2 pb-3 border-t bg-muted/20">
+        <Button variant="ghost" size="sm" className="h-8 text-xs text-primary">
+          Learn More <ChevronRight className="h-3 w-3 ml-1" />
+        </Button>
+        <Button variant="outline" size="sm" className="h-8 text-xs">
+          Get Notified
+        </Button>
+      </CardFooter>
+    </Card>
+  );
 
-            <CardContent className="py-3">
-              <p className="text-sm text-muted-foreground">
-                {integration.description}
-              </p>
-            </CardContent>
+  return (
+    <div className="h-full p-6 pb-10">
+      <div className="max-w-5xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold tracking-tight">Integrations</h1>
+          <p className="text-muted-foreground">
+            Connect Zapllo with your favorite tools and services
+          </p>
+        </div>
 
-          </Card>
-        ))}
+        <Separator />
+
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search integrations..."
+            className="pl-9"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        {/* Integration Categories */}
+        <Tabs defaultValue="all" className="w-full">
+          <TabsList className="mb-6 gap-2 bg-muted/50">
+            <TabsTrigger value="all">All Integrations</TabsTrigger>
+            <TabsTrigger value="zapllo">Zapllo Ecosystem</TabsTrigger>
+            <TabsTrigger value="productivity">Productivity</TabsTrigger>
+            <TabsTrigger value="communication">Communication</TabsTrigger>
+            <TabsTrigger value="other">Other</TabsTrigger>
+          </TabsList>
+
+          {/* All Integrations */}
+          <TabsContent value="all" className="space-y-6">
+            {/* Featured integration */}
+            <div className="rounded-lg bg-gradient-to-r from-primary/10 via-primary/5 to-background p-6 border">
+              <div className="flex flex-col md:flex-row gap-6 items-center">
+                <div className="bg-primary/20 rounded-full p-5">
+                  <Puzzle className="h-8 w-8 text-primary" />
+                </div>
+                <div className="space-y-2 md:flex-1">
+                  <h2 className="text-xl font-medium">Zapllo Ecosystem</h2>
+                  <p className="text-muted-foreground">
+                    Connect with other Zapllo products for a seamless workflow experience.
+                    Manage everything from one place.
+                  </p>
+                </div>
+                <Link href="/" className="shrink-0">
+                <Button className="shrink-0">
+                  Explore Ecosystem <ExternalLink className="ml-2 h-4 w-4" />
+                </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Categories sections */}
+            {zaplloIntegrations.length > 0 && (
+              <div className="space-y-4">
+                <h2 className="text-lg font-medium flex items-center">
+                  <Puzzle className="mr-2 h-5 w-5 text-primary" />
+                  Zapllo Ecosystem
+                </h2>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {zaplloIntegrations.map(integration => (
+                    <IntegrationCard key={integration.id} integration={integration} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {productivityIntegrations.length > 0 && (
+              <div className="space-y-4">
+                <h2 className="text-lg font-medium flex items-center">
+                  <Box className="mr-2 h-5 w-5 text-emerald-500" />
+                  Productivity Tools
+                </h2>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {productivityIntegrations.map(integration => (
+                    <IntegrationCard key={integration.id} integration={integration} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {communicationIntegrations.length > 0 && (
+              <div className="space-y-4">
+                <h2 className="text-lg font-medium flex items-center">
+                  <MessageSquare className="mr-2 h-5 w-5 text-blue-500" />
+                  Communication
+                </h2>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {communicationIntegrations.map(integration => (
+                    <IntegrationCard key={integration.id} integration={integration} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {otherIntegrations.length > 0 && (
+              <div className="space-y-4">
+                <h2 className="text-lg font-medium flex items-center">
+                  <Webhook className="mr-2 h-5 w-5 text-amber-500" />
+                  Other Integrations
+                </h2>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {otherIntegrations.map(integration => (
+                    <IntegrationCard key={integration.id} integration={integration} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Developer Section */}
+            <Card className="bg-muted/30 border">
+              <CardHeader>
+                <CardTitle className="text-lg">For Developers</CardTitle>
+                <CardDescription>Build custom solutions with our API</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <h3 className="font-medium">REST API</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Coming soon: Programmatically manage tasks, users, and more with our comprehensive API.
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="font-medium">Webhooks</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Receive real-time notifications when events happen in your Zapllo workspace.
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="font-medium">App Directory</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Publish your integration to our upcoming app directory and reach more users.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+              {/* <CardFooter>
+                <Button variant="outline">
+                  Join Developer Waitlist
+                </Button>
+              </CardFooter> */}
+            </Card>
+          </TabsContent>
+
+          {/* Zapllo Tab */}
+          <TabsContent value="zapllo" className="space-y-6">
+            <div className="rounded-lg bg-gradient-to-r from-primary/10 via-primary/5 to-background p-6 border">
+              <div className="flex flex-col md:flex-row gap-6 items-center">
+                <div className="bg-primary/20 rounded-full p-5">
+                  <Puzzle className="h-8 w-8 text-primary" />
+                </div>
+                <div className="space-y-2 md:flex-1">
+                  <h2 className="text-xl font-medium">Zapllo Ecosystem</h2>
+                  <p className="text-muted-foreground">
+                    Connect with other Zapllo products for a seamless workflow experience.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              {zaplloIntegrations.map(integration => (
+                <IntegrationCard key={integration.id} integration={integration} />
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Productivity Tab */}
+          <TabsContent value="productivity" className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-4">
+              {productivityIntegrations.map(integration => (
+                <IntegrationCard key={integration.id} integration={integration} />
+              ))}
+            </div>
+            {productivityIntegrations.length === 0 && (
+              <div className="text-center py-10">
+                <p className="text-muted-foreground">No productivity integrations match your search.</p>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Communication Tab */}
+          <TabsContent value="communication" className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-4">
+              {communicationIntegrations.map(integration => (
+                <IntegrationCard key={integration.id} integration={integration} />
+              ))}
+            </div>
+            {communicationIntegrations.length === 0 && (
+              <div className="text-center py-10">
+                <p className="text-muted-foreground">No communication integrations match your search.</p>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Other Tab */}
+          <TabsContent value="other" className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-4">
+              {otherIntegrations.map(integration => (
+                <IntegrationCard key={integration.id} integration={integration} />
+              ))}
+            </div>
+            {otherIntegrations.length === 0 && (
+              <div className="text-center py-10">
+                <p className="text-muted-foreground">No other integrations match your search.</p>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
-
-      {/* Zapier/Developer Section */}
-      <Card className="shadow-sm border-0 bg-gradient-to-br from-slate-100 to-white dark:from-slate-900/40 dark:to-slate-900/20">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Box className="mr-2 h-5 w-5 text-primary" />
-            Build Custom Integrations
-          </CardTitle>
-          <CardDescription>
-            Coming soon: Connect Zapllo Tasks to thousands of apps with our API and webhooks
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col sm:flex-row items-center gap-6">
-            <div className="flex-1 space-y-2">
-              <h3 className="text-sm font-medium">Developer API</h3>
-              <p className="text-sm text-muted-foreground">
-                Our upcoming API will allow developers to build custom integrations and extend Zapllo&apos;s functionality.
-              </p>
-              {/* <Badge variant="outline" className="mt-2">Coming Q4 2023</Badge> */}
-            </div>
-
-            <div className="flex-1 space-y-2">
-              <h3 className="text-sm font-medium">Webhooks</h3>
-              <p className="text-sm text-muted-foreground">
-                Trigger actions in other systems based on events in Zapllo Tasks.
-              </p>
-              {/* <Badge variant="outline" className="mt-2">Coming Q4 2023</Badge> */}
-            </div>
-
-            <div className="flex-1 space-y-2">
-              <h3 className="text-sm font-medium">Zapier Integration</h3>
-              <p className="text-sm text-muted-foreground">
-                Connect to 3,000+ apps without coding through our upcoming Zapier integration.
-              </p>
-              {/* <Badge variant="outline" className="mt-2">Coming Q3 2023</Badge> */}
-            </div>
-          </div>
-        </CardContent>
-        <CardFooter className="flex justify-center pt-0">
-
-        </CardFooter>
-      </Card>
-
-      {/* Request Integration Section */}
-      {/* <Card className="shadow-sm border border-primary/20 ">
-        <CardContent className="pt-6 mb-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div className="space-y-2">
-              <h3 className="text-lg font-medium flex items-center">
-                <Sparkles className="mr-2 h-5 w-5 text-primary" />
-                Don't see what you need?
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Let us know which integrations would help your workflow. We're constantly adding new connections.
-              </p>
-            </div>
-            <Button className="shrink-0">
-              Request Integration
-            </Button>
-          </div>
-        </CardContent>
-      </Card> */}
     </div>
   );
 }

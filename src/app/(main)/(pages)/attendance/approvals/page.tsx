@@ -21,6 +21,8 @@ import {
   CheckCheck,
   CheckCircle,
   Circle,
+  Filter,
+  MoreHorizontal,
   Trash2,
   Users2,
   X,
@@ -39,9 +41,35 @@ import {
 } from "@radix-ui/react-icons";
 import Loader from "@/components/ui/loader";
 import CustomDatePicker from "@/components/globals/date-picker";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs3 as Tabs, TabsContent3 as TabsContent, TabsList3 as TabsList, TabsTrigger3 as TabsTrigger } from "@/components/ui/tabs3";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
+// Types remain the same
 type LeaveType = {
   _id: string;
   leaveType: string;
@@ -76,14 +104,14 @@ interface Leave {
   leaveType: LeaveType;
   fromDate: string;
   toDate: string;
-  status: "Pending" | "Approved" | "Rejected"; // Explicitly define possible statuses
+  status: "Pending" | "Approved" | "Rejected";
   leaveReason: string;
   appliedDays: number;
   leaveDays: LeaveDay[];
   remarks: string;
   user: User;
   updatedAt: string;
-  createdAt: string; // Add createdAt field
+  createdAt: string;
 }
 
 interface Regularization {
@@ -103,14 +131,13 @@ interface Regularization {
   approvalStatus?: "Pending" | "Approved" | "Rejected";
 }
 
-// Type Guard to check if an entry is Regularization
+// Type Guards remain the same
 function isRegularization(
   entry: Leave | Regularization
 ): entry is Regularization {
   return (entry as Regularization).loginTime !== undefined;
 }
 
-// Type Guard to check if an entry is Leave
 function isLeave(entry: Leave | Regularization): entry is Leave {
   return (entry as Leave).leaveType !== undefined;
 }
@@ -118,7 +145,7 @@ function isLeave(entry: Leave | Regularization): entry is Leave {
 export default function Approvals() {
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [regularizations, setRegularizations] = useState<Regularization[]>([]);
-  const [filter, setFilter] = useState<"Leave" | "Regularization">("Leave"); // New filter state
+  const [filter, setFilter] = useState<"Leave" | "Regularization">("Leave");
   const [statusFilter, setStatusFilter] = useState<
     "Pending" | "Approved" | "Rejected" | "All"
   >("All");
@@ -135,30 +162,30 @@ export default function Approvals() {
     start: Date | null;
     end: Date | null;
   }>({ start: null, end: null });
-  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false); // Custom Date Modal state
+  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<
     Leave | Regularization | null
-  >(null); // For triggering the modal
+  >(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false); // For triggering the reject modal
-  const [remarks, setRemarks] = useState<string>(""); // For storing the rejection remarks
-  const [isLeaveDetailsOpen, setIsLeaveDetailsOpen] = useState(false); // Leave Detail sheet state
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [remarks, setRemarks] = useState<string>("");
+  const [isLeaveDetailsOpen, setIsLeaveDetailsOpen] = useState(false);
   const [isRegularizationDetailsOpen, setIsRegularizationDetailsOpen] =
-    useState(false); // Regularization Detail sheet state
+    useState(false);
   const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // State to control the modal
-  const [loading, setLoading] = useState(false); // State to control the modal
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [leaveIdToDelete, setLeaveIdToDelete] = useState<string | null>(null);
   const [regularizationIdToDelete, setRegularizationIdToDelete] = useState<
     string | null
-  >(null); // Store regularization ID
-  const [isStartPickerOpen, setIsStartPickerOpen] = useState(false); // For triggering the start date picker
-  const [isEndPickerOpen, setIsEndPickerOpen] = useState(false); // For triggering the end date picker
+  >(null);
+  const [isStartPickerOpen, setIsStartPickerOpen] = useState(false);
+  const [isEndPickerOpen, setIsEndPickerOpen] = useState(false);
 
   useEffect(() => {
     const fetchUserRole = async () => {
       try {
-        const response = await axios.get("/api/users/me"); // Adjust this endpoint to fetch user data
+        const response = await axios.get("/api/users/me");
         if (response.data && response.data.data.role) {
           setCurrentUserRole(response.data.data.role);
         }
@@ -170,68 +197,93 @@ export default function Approvals() {
     fetchUserRole();
   }, []);
 
+  // Fetch both data types on initial render
   useEffect(() => {
-    const fetchUserLeaves = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get("/api/leaves");
-        if (response.data.success) {
-          setLeaves(response.data.leaves);
-        } else {
-          console.error("Error fetching user leaves");
-        }
-      } catch (error) {
-        console.error("Error fetching user leaves:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    if (!currentUserRole) return;
 
-
-    const fetchOrganizationLeaves = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get("/api/leaves/all");
-        if (response.data.success) {
-          setLeaves(response.data.leaves);
-        } else {
-          console.error("Error fetching organization leaves");
-          // toast.error(response.data.error || "Failed to fetch organization leaves.");
-        }
-      } catch (error: any) {
-        console.error("Error fetching organization leaves:", error);
-        // toast.error(error.response?.data?.error || "Failed to fetch organization leaves.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (currentUserRole === "member") {
-      fetchUserLeaves();
-    } else if (currentUserRole === "orgAdmin") {
-      fetchOrganizationLeaves();
-    }
+    fetchLeaveData();
+    fetchRegularizationData();
   }, [currentUserRole]);
 
+  // Separate data fetching functions
+  const fetchLeaveData = async () => {
+    try {
+      setLoading(true);
+      let response;
+
+      if (currentUserRole === "member") {
+        response = await axios.get("/api/leaves");
+      } else if (currentUserRole === "orgAdmin" || currentUserRole === "manager") {
+        response = await axios.get("/api/leaves/all");
+      } else {
+        response = await axios.get("/api/leaveApprovals/get");
+      }
+
+      if (response.data.success) {
+        setLeaves(response.data.leaves);
+      } else {
+        console.error("Error fetching leaves:", response.data.error);
+      }
+    } catch (error) {
+      console.error("Error fetching leaves:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchRegularizationData = async () => {
+    try {
+      setLoading(true);
+      if (currentUserRole === "member") {
+        const resEntries = await fetch("/api/loginEntries");
+        const dataEntries = await resEntries.json();
+        setRegularizations(dataEntries.entries);
+      } else {
+        const response = await axios.get("/api/regularization-approvals");
+        if (response.data.success) {
+          setRegularizations(response.data.regularizations);
+        } else {
+          console.error("Error fetching regularizations:", response.data.error);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching regularizations:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle tab changes
+  const handleFilterChange = (value: "Leave" | "Regularization") => {
+    setFilter(value);
+
+    // Refresh data when tab changes
+    if (value === "Leave") {
+      fetchLeaveData();
+    } else {
+      fetchRegularizationData();
+    }
+  };
+
   const openDeleteDialog = (leaveId: string) => {
-    setLeaveIdToDelete(leaveId); // Store the leave._id before opening the dialog
-    setRegularizationIdToDelete(null); // Ensure regularization ID is null
-    setIsDeleteDialogOpen(true); // Open the delete confirmation dialog
+    setLeaveIdToDelete(leaveId);
+    setRegularizationIdToDelete(null);
+    setIsDeleteDialogOpen(true);
   };
 
   const openRegularizationDeleteDialog = (regularizationId: string) => {
-    setRegularizationIdToDelete(regularizationId); // Store the regularization._id
-    setLeaveIdToDelete(null); // Ensure leave ID is null
-    setIsDeleteDialogOpen(true); // Open the delete confirmation dialog
+    setRegularizationIdToDelete(regularizationId);
+    setLeaveIdToDelete(null);
+    setIsDeleteDialogOpen(true);
   };
 
   const handleDeleteLeave = async (leaveId: string) => {
     try {
       const response = await axios.delete(`/api/leaveApprovals/${leaveId}`);
       if (response.data.success) {
-        // Refetch leaves or update the UI to remove the deleted leave
         const updatedLeaves = await axios.get("/api/leaves/all");
         setLeaves(updatedLeaves.data.leaves);
+        toast.success("Leave request deleted successfully");
       } else {
         console.error(response.data.error);
         toast.error(response.data.error || "Failed to delete leave.");
@@ -239,8 +291,7 @@ export default function Approvals() {
     } catch (error: any) {
       console.error("Error deleting leave:", error);
       toast.error(
-        `Error deleting leave: ${error.response?.data?.message || error.message
-        }`
+        `Error deleting leave: ${error.response?.data?.message || error.message}`
       );
     }
   };
@@ -251,11 +302,11 @@ export default function Approvals() {
         `/api/regularization-approvals/${regularizationId}`
       );
       if (response.data.success) {
-        // Refetch regularizations or update the UI to remove the deleted regularization
         const updatedRegularizations = await axios.get(
           "/api/regularization-approvals"
         );
         setRegularizations(updatedRegularizations.data.regularizations);
+        toast.success("Regularization request deleted successfully");
       } else {
         console.error(response.data.error);
         toast.error(response.data.error || "Failed to delete regularization.");
@@ -263,8 +314,7 @@ export default function Approvals() {
     } catch (error: any) {
       console.error("Error deleting regularization:", error);
       toast.error(
-        `Error deleting regularization: ${error.response?.data?.message || error.message
-        }`
+        `Error deleting regularization: ${error.response?.data?.message || error.message}`
       );
     }
   };
@@ -272,116 +322,25 @@ export default function Approvals() {
   const confirmDelete = async () => {
     try {
       if (leaveIdToDelete) {
-        await handleDeleteLeave(leaveIdToDelete); // Handle leave deletion
+        await handleDeleteLeave(leaveIdToDelete);
       } else if (regularizationIdToDelete) {
-        await handleDeleteRegularization(regularizationIdToDelete); // Handle regularization deletion
+        await handleDeleteRegularization(regularizationIdToDelete);
       }
-      setIsDeleteDialogOpen(false); // Close the dialog after deletion
+      setIsDeleteDialogOpen(false);
     } catch (error) {
       console.error("Error deleting entry:", error);
     }
   };
 
-  useEffect(() => {
-    const fetchLoginEntriesAndStatus = async () => {
-      try {
-        // Fetch login entries
-        const resEntries = await fetch("/api/loginEntries");
-        const dataEntries = await resEntries.json();
-        setRegularizations(dataEntries.entries);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    if (currentUserRole === "member") {
-      fetchLoginEntriesAndStatus();
-    }
-  }, []);
-
-
-
-  useEffect(() => {
-    const fetchApprovals = async () => {
-      try {
-        setLoading(true);
-        if (filter === "Leave") {
-          const response = await axios.get("/api/leaveApprovals/get");
-          if (response.data.success) {
-            setLeaves(response.data.leaves);
-          } else {
-            console.error(response.data.error);
-            // toast.error(
-            //   response.data.error || "Failed to fetch leave approvals."
-            // );
-          }
-        } else if (filter === "Regularization") {
-          const response = await axios.get("/api/regularization-approvals");
-          if (response.data.success) {
-            setRegularizations(response.data.regularizations);
-          } else {
-            console.error(response.data.error);
-            // toast.error(
-            //   response.data.error || "Failed to fetch regularization approvals."
-            // );
-          }
-        }
-      } catch (error: any) {
-        console.error(
-          `Error fetching ${filter} approvals:`,
-          error.response?.data || error.message
-        );
-        // toast.error(
-        //   `Failed to fetch ${filter} approvals: ${error.response?.data?.message || error.message
-        //   }`
-        // );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchApprovals();
-  }, [filter]);
-
   const refetchApprovals = async () => {
-    try {
-      setLoading(true);
-      if (filter === "Leave") {
-        let response;
-        // For members, use the personal leaves endpoint
-        if (currentUserRole === "member") {
-          response = await axios.get("/api/leaves");
-        } else if (currentUserRole === "orgAdmin" || currentUserRole === "manager") {
-          // For orgAdmin and reporting managers, use the organization-wide endpoint
-          response = await axios.get("/api/leaves/all");
-        } else {
-          // Fallback to approvals endpoint if needed
-          response = await axios.get("/api/leaveApprovals/get");
-        }
-        if (response.data.success) {
-          setLeaves(response.data.leaves);
-        } else {
-          console.error(response.data.error);
-        }
-      } else if (filter === "Regularization") {
-        const response = await axios.get("/api/regularization-approvals");
-        if (response.data.success) {
-          setRegularizations(response.data.regularizations);
-        } else {
-          console.error(response.data.error);
-        }
-      }
-    } catch (error: any) {
-      console.error(
-        `Error fetching ${filter} approvals:`,
-        error.response?.data || error.message
-      );
-    } finally {
-      setLoading(false);
+    if (filter === "Leave") {
+      await fetchLeaveData();
+    } else if (filter === "Regularization") {
+      await fetchRegularizationData();
     }
   };
 
-  // Separate filter functions for Leave and Regularization to maintain type integrity
+  // Filter functions
   const filterLeavesByDate = (leaves: Leave[]): Leave[] => {
     const today = new Date();
     const yesterday = subDays(today, 1);
@@ -396,7 +355,7 @@ export default function Approvals() {
     );
 
     return leaves.filter((leave) => {
-      const entryDate = new Date(leave.createdAt); // Filter based on createdAt
+      const entryDate = new Date(leave.createdAt);
 
       switch (dateFilter) {
         case "Today":
@@ -408,1035 +367,725 @@ export default function Approvals() {
           );
         case "ThisWeek":
           return entryDate >= weekStart && entryDate <= today;
-        case "ThisMonth":
-          return entryDate >= thisMonthStart && entryDate <= today;
-        case "LastMonth":
-          return entryDate >= lastMonthStart && entryDate <= lastMonthEnd;
-        case "Custom":
-          if (customDateRange.start && customDateRange.end) {
-            return (
-              entryDate >= customDateRange.start &&
-              entryDate <= customDateRange.end
-            );
-          }
-          return true;
-        case "AllTime":
-          return true;
-        default:
-          return true;
-      }
-    });
-  };
-
-  const filterRegularizationsByDate = (
-    regularizations: Regularization[]
-  ): Regularization[] => {
-    const today = new Date();
-    const yesterday = subDays(today, 1);
-    const todayStart = startOfDay(today);
-    const weekStart = startOfWeek(today);
-    const thisMonthStart = startOfMonth(today);
-    const lastMonthStart = startOfMonth(
-      new Date(today.getFullYear(), today.getMonth() - 1, 1)
-    );
-    const lastMonthEnd = endOfMonth(
-      new Date(today.getFullYear(), today.getMonth() - 1, 1)
-    );
-
-    return regularizations.filter((reg) => {
-      const entryDate = new Date(reg.timestamp);
-
-      switch (dateFilter) {
-        case "Today":
-          return normalizeDate(entryDate).getTime() === todayStart.getTime();
-        case "Yesterday":
-          return (
-            normalizeDate(entryDate).getTime() ===
-            normalizeDate(yesterday).getTime()
-          );
-        case "ThisWeek":
-          return entryDate >= weekStart && entryDate <= today;
-        case "ThisMonth":
-          return entryDate >= thisMonthStart && entryDate <= today;
-        case "LastMonth":
-          return entryDate >= lastMonthStart && entryDate <= lastMonthEnd;
-        case "Custom":
-          if (customDateRange.start && customDateRange.end) {
-            return (
-              entryDate >= customDateRange.start &&
-              entryDate <= customDateRange.end
-            );
-          }
-          return true;
-        case "AllTime":
-          return true;
-        default:
-          return true;
-      }
-    });
-  };
-
-  // Helper to normalize dates for filtering
-  const normalizeDate = (date: Date) =>
-    new Date(date.getFullYear(), date.getMonth(), date.getDate());
-
-  const handleCustomDateSubmit = (start: Date, end: Date) => {
-    setCustomDateRange({ start, end });
-    setIsCustomModalOpen(false); // Close the modal after date selection
-    setDateFilter("Custom");
-  };
-
-  const handleClose = () => {
-    // Reset date range when closing
-    setCustomDateRange({ start: null, end: null });
-    setIsCustomModalOpen(false);
-  };
-
-  const handleApproval = async (
-    entry: Leave | Regularization,
-    e: React.MouseEvent
-  ) => {
-    e.stopPropagation(); // Stop event from triggering parent handlers
-    setSelectedEntry(entry);
-    setIsModalOpen(true);
-  };
-
-  const handleReject = (entry: Leave | Regularization, e: React.MouseEvent) => {
-    e.stopPropagation(); // Stop event from triggering parent handlers
-    setSelectedEntry(entry);
-    setIsRejectModalOpen(true); // Open the reject modal
-  };
-
-  // const handleRejectSubmit = async () => {
-  //     if (!remarks) {
-  //         toast.error('Please enter remarks for rejection.');
-  //         return;
-  //     }
-  //     try {
-  //         // setLoading(true);
-  //         if (!selectedEntry) return;
-
-  //         if (isLeave(selectedEntry)) {
-  //             // Handle rejection for Leave
-  //             const response = await axios.post(`/api/leaveApprovals/${selectedEntry._id}`, {
-  //                 action: 'reject',
-  //                 notes: remarks,
-  //             });
-
-  //             if (response.data.success) {
-  //                 setLoading(false);
-  //                 const updatedLeaves = await axios.get('/api/leaves/all');
-  //                 setLeaves(updatedLeaves.data.leaves);
-  //                 toast.success("Leave Rejected successfully!");
-  //                 setIsRejectModalOpen(false);
-  //                 setSelectedEntry(null);
-  //                 setRemarks('');  // Clear remarks
-  //             } else {
-  //                 throw new Error(response.data.message || 'Failed to reject leave request.');
-  //             }
-  //         } else if (isRegularization(selectedEntry)) {
-  //             // Handle rejection for Regularization
-  //             const response = await axios.post(`/api/regularization-approvals/${selectedEntry._id}`, {
-  //                 action: 'reject',
-  //                 notes: remarks,
-  //             });
-
-  //             if (response.data.success) {
-  //                 const updatedRegularizations = await axios.get('/api/regularization-approvals');
-  //                 setRegularizations(updatedRegularizations.data.regularizations);
-  //                 setIsRejectModalOpen(false);
-  //                 setSelectedEntry(null);
-  //                 setRemarks('');  // Clear remarks
-  //             } else {
-  //                 throw new Error(response.data.message || 'Failed to reject regularization request.');
-  //             }
-  //         }
-  //     } catch (error: any) {
-  //         console.error(`Error rejecting entry:`, error.response?.data || error.message);
-  //         toast.error(`Failed to reject entry: ${error.response?.data?.message || error.message}`);
-  //     }
-  // };
-
-  // const handleApproveSubmit = async () => {
-  //   if (!selectedEntry || !isLeave(selectedEntry)) return;
-
-  //   const leaveDays = selectedEntry.leaveDays.map((day) => ({
-  //     date: day.date,
-  //     unit: day.unit,
-  //     status: "Approved",
-  //   }));
-
-  //   try {
-  //     const response = await axios.post(
-  //       `/api/leaveApprovals/${selectedEntry._id}`,
-  //       {
-  //         action: "approve",
-  //         leaveDays,
-  //       }
-  //     );
-
-  //     if (response.data.success) {
-  //       toast.success("Leave approved successfully!");
-  //       setIsModalOpen(false);
-  //       setSelectedEntry(null);
-  //       handleModalSubmit(); // Refresh data
-  //     } else {
-  //       throw new Error(
-  //         response.data.message || "Failed to approve leave request."
-  //       );
-  //     }
-  //   } catch (error: any) {
-  //     console.error(
-  //       `Error approving entry:`,
-  //       error.response?.data || error.message
-  //     );
-  //     toast.error(
-  //       `Failed to approve entry: ${error.response?.data?.message || error.message
-  //       }`
-  //     );
-  //   }
-  // };
-
-  const handleRejectSubmit = async () => {
-    if (!selectedEntry || !isLeave(selectedEntry)) return;
-
-    const leaveDays = selectedEntry.leaveDays.map((day) => ({
-      date: day.date,
-      unit: day.unit,
-      status: "Rejected",
-    }));
-
-    try {
-      const response = await axios.post(
-        `/api/leaveApprovals/${selectedEntry._id}`,
-        {
-          action: "reject",
-          leaveDays,
-          remarks,
+          case "ThisMonth":
+            return entryDate >= thisMonthStart && entryDate <= today;
+          case "LastMonth":
+            return entryDate >= lastMonthStart && entryDate <= lastMonthEnd;
+          case "Custom":
+            if (customDateRange.start && customDateRange.end) {
+              return (
+                entryDate >= customDateRange.start &&
+                entryDate <= customDateRange.end
+              );
+            }
+            return true;
+          case "AllTime":
+            return true;
+          default:
+            return true;
         }
+      });
+    };
+
+    const filterRegularizationsByDate = (
+      regularizations: Regularization[]
+    ): Regularization[] => {
+      const today = new Date();
+      const yesterday = subDays(today, 1);
+      const todayStart = startOfDay(today);
+      const weekStart = startOfWeek(today);
+      const thisMonthStart = startOfMonth(today);
+      const lastMonthStart = startOfMonth(
+        new Date(today.getFullYear(), today.getMonth() - 1, 1)
+      );
+      const lastMonthEnd = endOfMonth(
+        new Date(today.getFullYear(), today.getMonth() - 1, 1)
       );
 
-      if (response.data.success) {
-        toast(<div className=" w-full mb-6 gap-2 m-auto  ">
-          <div className="w-full flex  justify-center">
-            <DotLottieReact
-              src="/lottie/tick.lottie"
-              loop
-              autoplay
-            />
-          </div>
-          <h1 className="text-black text-center font-medium text-lg">Leave Rejected successfully</h1>
-        </div>);
-        setIsRejectModalOpen(false);
-        setSelectedEntry(null);
-        setRemarks("");
-        handleModalSubmit(); // Refresh data
-      } else {
-        throw new Error(
-          response.data.message || "Failed to reject leave request."
+      return regularizations.filter((reg) => {
+        const entryDate = new Date(reg.timestamp);
+
+        switch (dateFilter) {
+          case "Today":
+            return normalizeDate(entryDate).getTime() === todayStart.getTime();
+          case "Yesterday":
+            return (
+              normalizeDate(entryDate).getTime() ===
+              normalizeDate(yesterday).getTime()
+            );
+          case "ThisWeek":
+            return entryDate >= weekStart && entryDate <= today;
+          case "ThisMonth":
+            return entryDate >= thisMonthStart && entryDate <= today;
+          case "LastMonth":
+            return entryDate >= lastMonthStart && entryDate <= lastMonthEnd;
+          case "Custom":
+            if (customDateRange.start && customDateRange.end) {
+              return (
+                entryDate >= customDateRange.start &&
+                entryDate <= customDateRange.end
+              );
+            }
+            return true;
+          case "AllTime":
+            return true;
+          default:
+            return true;
+        }
+      });
+    };
+
+    const normalizeDate = (date: Date) =>
+      new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    const handleCustomDateSubmit = (start: Date, end: Date) => {
+      setCustomDateRange({ start, end });
+      setIsCustomModalOpen(false);
+      setDateFilter("Custom");
+    };
+
+    const handleClose = () => {
+      setCustomDateRange({ start: null, end: null });
+      setIsCustomModalOpen(false);
+    };
+
+    const handleApproval = async (
+      entry: Leave | Regularization,
+      e: React.MouseEvent
+    ) => {
+      e.stopPropagation();
+      setSelectedEntry(entry);
+      setIsModalOpen(true);
+    };
+
+    const handleReject = (entry: Leave | Regularization, e: React.MouseEvent) => {
+      e.stopPropagation();
+      setSelectedEntry(entry);
+      setIsRejectModalOpen(true);
+    };
+
+    const handleRejectSubmit = async () => {
+      if (!selectedEntry || !isLeave(selectedEntry)) return;
+
+      const leaveDays = selectedEntry.leaveDays.map((day) => ({
+        date: day.date,
+        unit: day.unit,
+        status: "Rejected",
+      }));
+
+      try {
+        const response = await axios.post(
+          `/api/leaveApprovals/${selectedEntry._id}`,
+          {
+            action: "reject",
+            leaveDays,
+            remarks,
+          }
+        );
+
+        if (response.data.success) {
+          toast(<div className="w-full mb-6 gap-2 m-auto">
+            <div className="w-full flex justify-center">
+              <DotLottieReact
+                src="/lottie/tick.lottie"
+                loop
+                autoplay
+              />
+            </div>
+            <h1 className="text-black text-center font-medium text-lg">Leave Rejected successfully</h1>
+          </div>);
+          setIsRejectModalOpen(false);
+          setSelectedEntry(null);
+          setRemarks("");
+          refetchApprovals();
+        } else {
+          throw new Error(
+            response.data.message || "Failed to reject leave request."
+          );
+        }
+      } catch (error: any) {
+        console.error(
+          `Error rejecting entry:`,
+          error.response?.data || error.message
+        );
+        toast.error(
+          `Failed to reject entry: ${error.response?.data?.message || error.message}`
         );
       }
-    } catch (error: any) {
-      console.error(
-        `Error rejecting entry:`,
-        error.response?.data || error.message
-      );
-      toast.error(
-        `Failed to reject entry: ${error.response?.data?.message || error.message
-        }`
-      );
-    }
-  };
+    };
 
-  const handleLeaveClick = (leave: Leave) => {
-    setSelectedEntry(leave); // Set the clicked leave in state
-    setIsLeaveDetailsOpen(true); // Open the Leave Details sheet
-  };
+    const handleLeaveClick = (leave: Leave) => {
+      setSelectedEntry(leave);
+      setIsLeaveDetailsOpen(true);
+    };
 
-  const handleRegularizationClick = (regularization: Regularization) => {
-    setSelectedEntry(regularization); // Set the clicked regularization in state
-    setIsRegularizationDetailsOpen(true); // Open the Regularization Details sheet
-  };
+    const handleRegularizationClick = (regularization: Regularization) => {
+      setSelectedEntry(regularization);
+      setIsRegularizationDetailsOpen(true);
+    };
 
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setIsRejectModalOpen(false); // Close reject modal as well
-    setSelectedEntry(null);
-    setIsLeaveDetailsOpen(false); // Close the Leave Details sheet
-    setIsRegularizationDetailsOpen(false); // Close the Regularization Details sheet
-    setRemarks("");
-  };
+    const handleModalClose = () => {
+      setIsModalOpen(false);
+      setIsRejectModalOpen(false);
+      setSelectedEntry(null);
+      setIsLeaveDetailsOpen(false);
+      setIsRegularizationDetailsOpen(false);
+      setRemarks("");
+    };
 
-  const handleModalSubmit = async () => {
-    // This function can be used to refresh data after approval/rejection
-    try {
-      setLoading(true);
-      if (filter === "Leave") {
-        const response = await axios.get("/api/leaveApprovals/get");
-        if (response.data.success) {
-          setLeaves(response.data.leaves);
-        }
-      } else if (filter === "Regularization") {
-        const response = await axios.get("/api/regularization-approvals");
-        if (response.data.success) {
-          setRegularizations(response.data.regularizations);
-        }
-      }
-    } catch (error: any) {
-      console.error(
-        `Error refetching ${filter} approvals:`,
-        error.response?.data || error.message
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+    const handleModalSubmit = async () => {
+      await refetchApprovals();
+    };
 
-  // Separate filtered arrays to maintain type integrity
-  const filteredLeaves =
-    statusFilter === "All"
-      ? leaves
-      : leaves.filter((leave) => leave.status === statusFilter);
-  const filteredRegularizations =
-    statusFilter === "All"
-      ? regularizations
-      : regularizations.filter((reg) => reg.approvalStatus === statusFilter);
+    // Filtered arrays
+    const filteredLeaves =
+      statusFilter === "All"
+        ? leaves
+        : leaves.filter((leave) => leave.status === statusFilter);
 
-  // Apply date filters
-  const finalFilteredLeaves = filterLeavesByDate(filteredLeaves);
-  const finalFilteredRegularizations = filterRegularizationsByDate(
-    filteredRegularizations
-  );
+    const filteredRegularizations =
+      statusFilter === "All"
+        ? regularizations
+        : regularizations.filter((reg) => reg.approvalStatus === statusFilter);
 
-  if (loading) {
-    return (
-      <div className="mt-28 h-full w-full flex justify-center items-center">
-        <Loader />
-      </div>
+    // Apply date filters
+    const finalFilteredLeaves = filterLeavesByDate(filteredLeaves);
+    const finalFilteredRegularizations = filterRegularizationsByDate(
+      filteredRegularizations
     );
-  }
 
-  console.log(regularizations, 'regularizations');
-  console.log(finalFilteredRegularizations, 'filtered');
-
-  return (
-    <div className="container mx-auto p-6">
-      {/* Date Filter Buttons */}
-      {/* <Toaster /> */}
-      <div className="flex justify-center gap-4 mb-6">
-        <button
-          onClick={() => setDateFilter("Today")}
-          className={`px-4 text-xs h-8 rounded ${dateFilter === "Today"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          Today
-        </button>
-        <button
-          onClick={() => setDateFilter("Yesterday")}
-          className={`px-4 text-xs h-8 rounded ${dateFilter === "Yesterday"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          Yesterday
-        </button>
-        <button
-          onClick={() => setDateFilter("ThisWeek")}
-          className={`px-4 text-xs h-8 rounded ${dateFilter === "ThisWeek"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          This Week
-        </button>
-        <button
-          onClick={() => setDateFilter("ThisMonth")}
-          className={`px-4 text-xs h-8 rounded ${dateFilter === "ThisMonth"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          This Month
-        </button>
-        <button
-          onClick={() => setDateFilter("LastMonth")}
-          className={`px-4 text-xs h-8 rounded ${dateFilter === "LastMonth"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          Last Month
-        </button>
-        <button
-          onClick={() => setDateFilter("AllTime")}
-          className={`px-4 text-xs h-8 rounded ${dateFilter === "AllTime"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          All Time
-        </button>
-        <button
-          onClick={() => setIsCustomModalOpen(true)}
-          className={`px-4 text-xs h-8 rounded ${dateFilter === "Custom"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          Custom
-        </button>
-      </div>
-
-      {/* Filter Buttons */}
-      <div className="flex items-center justify-center gap-4 mb-6">
-        <button
-          onClick={() => setFilter("Leave")}
-          className={`px-4 text-xs py-2 rounded flex items-center ${filter === "Leave"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          <Calendar className="h-4" />
-          <h1 className="mt-[1px] ml-1">Leave</h1>
-        </button>
-        <button
-          onClick={() => setFilter("Regularization")}
-          className={`px-4 text-xs py-2 rounded flex items-center ${filter === "Regularization"
-            ? "bg-[#815BF5] text-white"
-            : "bg-[#] border dark:text-white"
-            }`}
-        >
-          <Users2 className="h-4" />
-          <h1 className="mt-[1px] ml-1">Regularization</h1>
-        </button>
-      </div>
-
-      {/* Status Filter Buttons */}
-      <div className="flex justify-center gap-4 mb-6">
-        {filter === "Leave" ? (
-          <>
-            <button
-              onClick={() => setStatusFilter("All")}
-              className={`px-4 py-2 flex gap-2 rounded text-xs ${statusFilter === "All"
-                ? "bg-[#815BF5] text-white"
-                : "bg-[#] border dark:text-white"
-                }`}
-            >
-              <HamburgerMenuIcon />
-              All
-            </button>
-            <button
-              onClick={() => setStatusFilter("Pending")}
-              className={`px-4 py-2 flex gap-2 rounded text-xs ${statusFilter === "Pending"
-                ? "bg-[#815BF5] text-white"
-                : "bg-[#] border hover:border-orange-400 dark:text-white"
-                }`}
-            >
-              <Circle
-                className={`h-4 text-red-500 ${statusFilter === "Pending" ? "dark:text-white" : ""
-                  } `}
-              />
-              Pending
-
-            </button>
-            {/* <button
-              onClick={() => setStatusFilter("Approved")}
-              className={`px-4 py-2 flex gap-2 rounded text-xs ${
-                statusFilter === "Approved"
-              className={`px-4 py-2 flex gap-2 rounded text-xs ${
-                statusFilter === "Approved"
-                  ? "bg-[#7c3987] text-white"
-                  : "bg-[#28152e] text-white"
-              }`}
-              }`}
-            >
-              <CheckCircle className="h-4 text-green-500" />
-              Approved (
-              {
-                finalFilteredLeaves.filter(
-                  (leave) => leave.status === "Approved"
-                ).length
-              }
-              )
-            </button> */}
-
-            <div className="flex">
-              <button
-                onClick={() => setStatusFilter("Approved")}
-                className={`px-4 py-2 flex gap-2 rounded text-xs border ${statusFilter === "Approved"
-                  ? "bg-[#815BF5] text-white border-transparent hover:border-green-500"
-                  : "bg-[#] border dark:text-white  hover:border-green-500"
-                  }`}
-              >
-                <CheckCircle
-                  className={`h-4 text-green-500 ${statusFilter === "Approved" ? "text-white" : ""
-                    } `}
-                />
-                Approved
-              </button>
-              <button
-                onClick={() => setStatusFilter("Rejected")}
-                className={`px-4 py-2 flex gap-2 ml-4 rounded text-xs border ${statusFilter === "Rejected"
-                  ? "bg-[#815BF5] text-white border-transparent hover:border-red-500"
-                  : "bg-[#] dark:text-white border hover:border-red-500"
-                  }`}
-              >
-                <Cross1Icon
-                  className={`h-4 text-red-500 ${statusFilter === "Rejected" ? "text-white" : ""
-                    } `}
-                />
-                Rejected
-              </button>
-            </div>
-
-          </>
-        ) : (
-          <>
-            <button
-              onClick={() => setStatusFilter("All")}
-              className={`px-4 py-2 flex gap-2 rounded text-xs ${statusFilter === "All"
-                ? "bg-[#815BF5] text-white"
-                : "bg-[#] border dark:text-white"
-                }`}
-            >
-              <HamburgerMenuIcon />
-              All
-            </button>
-            <button
-              onClick={() => setStatusFilter("Pending")}
-              className={`px-4 py-2 flex gap-2 rounded text-xs ${statusFilter === "Pending"
-                ? "bg-[#815BF5] text-white"
-                : "bg-[#] border hover:border-orange-400 dark:text-white"
-                }`}
-            >
-              <Circle
-                className={`h-4 text-red-500  ${statusFilter === "Pending" ? "text-white" : ""
-                  } `}
-              />
-              Pending
-            </button>
-            {/* <button
-              onClick={() => setStatusFilter("Approved")}
-              className={`px-4 py-2 flex gap-2 rounded text-xs ${
-                statusFilter === "Approved"
-              className={`px-4 py-2 flex gap-2 rounded text-xs ${
-                statusFilter === "Approved"
-                  ? "bg-[#7c3987] text-white"
-                  : "bg-[#28152e] text-white"
-              }`}
-              }`}
-            >
-              <CheckCircle className="h-4 text-green-500" />
-              Approved (
-              {
-                filteredRegularizations.filter(
-                  (reg) => reg.approvalStatus === "Approved"
-                ).length
-              }
-              )
-            </button> */}
-            <button
-              onClick={() => setStatusFilter("Approved")}
-              className={`px-4 py-2 flex gap-2 rounded text-xs border ${statusFilter === "Approved"
-                ? "bg-[#815BF5] text-white border"
-                : "bg-[#] border dark:text-white "
-                } hover:border-green-500`}
-            >
-              <CheckCircle
-                className={`h-4 text-green-500 ${statusFilter === "Approved" ? "text-white" : ""
-                  } `}
-              />
-              Approved
-            </button>
-
-            {/* <button
-              onClick={() => setStatusFilter("Rejected")}
-              className={`px-4 py-2 flex gap-2 rounded text-xs ${
-                statusFilter === "Rejected"
-              className={`px-4 py-2 flex gap-2 rounded text-xs ${
-                statusFilter === "Rejected"
-                  ? "bg-[#7c3987] text-white"
-                  : "bg-[#28152e] text-white"
-              }`}
-            >
-              <Cross1Icon className="h-4 text-red-500" />
-              Rejected (
-              {
-                filteredRegularizations.filter(
-                  (reg) => reg.approvalStatus === "Rejected"
-                ).length
-              }
-              )
-            </button> */}
-            <button
-              onClick={() => setStatusFilter("Rejected")}
-              className={`px-4 py-2 flex gap-2 rounded text-xs border ${statusFilter === "Rejected"
-                ? "bg-[#815BF5] text-white border-transparent"
-                : "bg-[#] border dark:text-white border-"
-                } hover:border-red-500`}
-            >
-              <Cross1Icon
-                className={`h-4 text-red-500 ${statusFilter === "Rejected" ? "text-white" : ""
-                  } `}
-              />
-              Rejected
-            </button>
-          </>
-        )}
-      </div>
-
-      {/* Entries Display */}
-      {filter === "Leave" ? (
-        <div className="space-y-4 mb-12">
-          {finalFilteredLeaves.length === 0 ? (
-            <div className="flex w-full justify-center ">
-              <div className="mt-8 ml-4">
-                <DotLottieReact
-                  src="/lottie/empty.lottie"
-                  loop
-                  className="h-56"
-                  autoplay
-                />
-                <h1 className="text-center font-bold text-md m ">
-                  No Leaves Found
-                </h1>
-                <p className="text-center text-sm p-2">
-                  The list is currently empty for the selected filters
-                </p>
-              </div>
-            </div>
-          ) : (
-            finalFilteredLeaves.map((leave) => (
-              <div
-                className="border hover:border-[#815BF5] cursor-pointer"
-                key={leave._id}
-                onClick={() => handleLeaveClick(leave)}
-              >
-                <div className="flex items-center justify-between   px-4 rounded shadow-sm py-3">
-                  <div className="flex items-center gap-4">
-                    {/* User Profile Icon */}
-                    <div className="h-6 w-6 rounded-full bg-[#815BF5] flex items-center justify-center text-white text-sm">
-                      {leave.user.firstName[0]}
-                    </div>
-                    <h3 className="text-md dark:text-white">
-                      {leave.user.firstName}
-                    </h3>
-                    <div className="flex gap-4">
-                      <p className="text-sm text-gray-400">
-                        From:{" "}
-                        <span className="dark:text-white">
-                          {format(new Date(leave.fromDate), "MMM d, yyyy")}
-                        </span>
-                      </p>
-                      <p className="text-sm text-gray-400 ml-4">
-                        To:{" "}
-                        <span className="dark:text-white">
-                          {format(new Date(leave.toDate), "MMM d, yyyy")}
-                        </span>
-                      </p>
-                      <p className="text-sm text-gray-400 ml-4">
-                        Applied:{" "}
-                        <span className="dark:text-white">
-                          {leave.appliedDays} Day(s)
-                        </span>
-                      </p>
-                      <p className="text-sm text-gray-400 ml-4">
-                        Approved:{" "}
-                        <span className="dark:text-white">
-                          {
-                            leave.leaveDays.filter(
-                              (day) => day.status === "Approved"
-                            ).length
-                          }{" "}
-                          Day(s)
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2 justify-end">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs ${leave.status === "Pending"
-                        ? "bg-yellow-800 text-white"
-                        : leave.status === "Approved"
-                          ? "bg-green-800 text-white"
-                          : leave.status === "Rejected"
-                            ? "bg-red-800 text-white"
-                            : leave.status === "Partially Approved"
-                              ? "bg-red-900 text-white"
-                              : "bg-gray-500 text-white"
-                        }`}
-                    >
-                      {leave.status}
-                    </span>
-                    {leave.leaveReason === "Penalty" && (
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs ${leave.leaveReason === "Penalty"
-                          ? "bg-red-800 text-white"
-                          : ""
-                          }`}
-                      >
-                        {leave.leaveReason === "Penalty" ? "Penalty" : ""}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                {/* Approve/Reject/Delete Buttons (shown only for orgAdmin and Pending leave status) */}
-                {currentUserRole === "orgAdmin" &&
-                  leave.status === "Pending" && (
-                    <div className="flex gap-2 ml-4 w-full mb-4 justify-start">
-                      <button
-                        className="bg-transparent py-2 flex gap-2 border text-xs dark:text-white hover:border-green-500 px-4 rounded"
-                        onClick={(e) => handleApproval(leave, e)}
-                      >
-                        <CheckCheck className="w-4 h-4 text-[#017a5b]" />
-                        Approve
-                      </button>
-                      <button
-                        className="bg-transparent border flex gap-2  hover:border-red-500 dark:text-white px-4 py-2 text-xs rounded"
-                        onClick={(e) => handleReject(leave, e)}
-                      >
-                        <X className="w-4 h-4 text-red-500" />
-                        Reject
-                      </button>
-                      <button
-                        className="text-red-500 px-4 py-1 text-xs rounded"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openDeleteDialog(leave._id);
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  )}
-              </div>
-            ))
-          )}
+    if (loading) {
+      return (
+        <div className="flex h-[80vh] w-full items-center justify-center">
+          <Loader />
         </div>
-      ) : (
-        <div className="space-y-4">
-          {finalFilteredRegularizations.length === 0 ? (
-            <div className="flex w-full justify-center ">
-              <div className="mt-8 ml-4">
-                <DotLottieReact
-                  src="/lottie/empty.lottie"
-                  loop
-                  className="h-56"
-                  autoplay
-                />
-                <h1 className="text-center font-bold text-md  ">
-                  No Entries Found
-                </h1>
-                <p className="text-center text-sm p-2 ">
-                  The list is currently empty for the selected filters
-                </p>
+      );
+    }
+
+    // Status color mapping helper
+    const getStatusColor = (status: string) => {
+      switch(status) {
+        case 'Pending': return 'bg-yellow-500';
+        case 'Approved': return 'bg-green-500';
+        case 'Rejected': return 'bg-red-500';
+        default: return 'bg-gray-500';
+      }
+    };
+
+    // Status badge component for better reusability
+    const StatusBadge = ({ status }: { status: string }) => (
+      <Badge
+        variant="outline"
+        className={`${getStatusColor(status)} text-white border-none px-2 py-1`}
+      >
+        {status}
+      </Badge>
+    );
+
+    return (
+      <div className="container mx-auto p-4 max-w-7xl">
+        <Card className="mb-8">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-2xl font-bold">Approval Requests</CardTitle>
+              <div className="flex gap-2">
+                <Tabs
+                  value={filter}
+                  onValueChange={(value) => handleFilterChange(value as "Leave" | "Regularization")}
+                  className="mr-2"
+                >
+                  <TabsList className="gap-2">
+                    <TabsTrigger value="Leave" className="flex items-center gap-1">
+                      <Calendar className="h-4 w-4" />
+                      Leave
+                    </TabsTrigger>
+                    <TabsTrigger value="Regularization" className="flex items-center gap-1">
+                      <Users2 className="h-4 w-4" />
+                      Regularization
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
               </div>
             </div>
-          ) : (
-            finalFilteredRegularizations.map((reg) => (
-              <div
-                key={reg._id}
-                className="border cursor-pointer hover:border-[#815BF5]"
-                onClick={() => handleRegularizationClick(reg)}
-              >
-                <div className="flex items-center justify-between px-4 rounded shadow-sm py-2">
-                  <div className="flex items-center gap-4">
-                    {/* User Profile Icon */}
-                    <div className="h-6 w-6 rounded-full bg-[#7c3987] flex items-center justify-center text-white text-sm">
-                      {reg?.userId?.firstName[0]}
-                    </div>
-                    <h3 className="text-md dark:text-white">
-                      {reg?.userId?.firstName}
-                    </h3>
-                    <p className="text-sm text-gray-400">
-                      Date:{" "}
-                      <span className="dark:text-white">
-                        {format(new Date(reg?.timestamp), "MMM d, yyyy")}
-                      </span>
-                    </p>
-                  </div>
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs ${reg.approvalStatus === "Pending"
-                      ? "bg-yellow-800 text-white"
-                      : reg.approvalStatus === "Approved"
-                        ? "bg-green-800 text-white"
-                        : reg.approvalStatus === "Rejected"
-                          ? "bg-red-500 text-white"
-                          : "bg-gray-500 text-white"
-                      }`}
-                  >
-                    {reg?.approvalStatus}
-                  </span>
-                </div>
-                {currentUserRole === "orgAdmin" && (
-                  <div>
-                    {
-                      reg.approvalStatus === "Pending" && (
-                        <div className="flex gap-2 ml-4 w-full mb-4 justify-start">
-                          <button
-                            className="bg-transparent py-2 flex gap-2 hover:border-green-600 border text-xs dark:text-white px-4 rounded"
-                            onClick={(e) => {
-                              e.stopPropagation(); // Prevent triggering sheet
-                              handleApproval(reg, e);
-                            }}
-                          >
-                            <CheckCheck className="w-4 h-4 text-[#017a5b]" />
-                            Approve
-                          </button>
-                          <button
-                            className="bg-transparent border flex gap-2 hover:border-red-600 dark:text-white px-4 py-2 text-xs rounded"
-                            onClick={(e) => {
-                              e.stopPropagation(); // Prevent triggering sheet
-                              handleReject(reg, e);
-                            }}
-                          >
-                            <X className="w-4 h-4 text-red-500" />
-                            Reject
-                          </button>
-                          <button
-                            className="bg-transparent flex gap-2 dark:text-white px-4 py-2 text-xs rounded"
-                            onClick={(e) => {
-                              e.stopPropagation(); // Prevent triggering sheet
-                              openRegularizationDeleteDialog(reg._id); // Open delete confirmation for Regularization
-                            }}
-                          >
-                            <Trash2 className="w-4 h-4 text-red-500" />
-                          </button>
-                        </div>
-                      )
-                    }
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col md:flex-row justify-between gap-3 mb-6">
+              <div className="flex flex-wrap items-center gap-2">
+                <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as any)}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="All">All Status</SelectItem>
+                    <SelectItem value="Pending">Pending</SelectItem>
+                    <SelectItem value="Approved">Approved</SelectItem>
+                    <SelectItem value="Rejected">Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={dateFilter} onValueChange={(value) => setDateFilter(value as any)}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue placeholder="Date Range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Today">Today</SelectItem>
+                    <SelectItem value="Yesterday">Yesterday</SelectItem>
+                    <SelectItem value="ThisWeek">This Week</SelectItem>
+                    <SelectItem value="ThisMonth">This Month</SelectItem>
+                    <SelectItem value="LastMonth">Last Month</SelectItem>
+                    <SelectItem value="AllTime">All Time</SelectItem>
+                    <SelectItem value="Custom">Custom Range</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {dateFilter === "Custom" && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setIsCustomModalOpen(true)}
+                      className="flex items-center gap-1"
+                    >
+                      <Calendar className="h-4 w-4" />
+                      {customDateRange.start && customDateRange.end
+                        ? `${format(customDateRange.start, 'dd/MM/yy')} - ${format(customDateRange.end, 'dd/MM/yy')}`
+                        : "Select Dates"}
+                    </Button>
                   </div>
                 )}
               </div>
-            ))
-          )}
-        </div>
-      )}
+            </div>
 
-      {/* Render the approval modal */}
-      {selectedEntry && isModalOpen && (
-        <>
-          {!isRegularization(selectedEntry) ? (
-            <LeaveApprovalModal
-              leaveId={selectedEntry._id}
-              leaveDays={selectedEntry.leaveDays}
-              appliedDays={selectedEntry.appliedDays}
-              fromDate={selectedEntry.fromDate}
-              toDate={selectedEntry.toDate}
-              leaveReason={selectedEntry.leaveReason}
-              leaveType={selectedEntry?.leaveType?.leaveType}
-              user={selectedEntry.user}
-              manager={selectedEntry.user.reportingManager}
-              onClose={handleModalClose}
-              onUpdate={refetchApprovals}
-            />
-          ) : (
-            <RegularizationApprovalModal
-              regularizationId={selectedEntry._id}
-              timestamp={selectedEntry.timestamp}
-              loginTime={selectedEntry.loginTime}
-              logoutTime={selectedEntry.logoutTime}
-              remarks={selectedEntry.remarks}
-              onClose={handleModalClose}
-              onSubmit={() => {
-                setIsModalOpen(false);
-                setSelectedEntry(null);
-                refetchApprovals();
-                // handleModalSubmit(); // Refresh data
-              }}
-            />
-          )}
-        </>
-      )}
+            <Separator className="mb-6" />
 
-      {/* Reject Modal */}
-      {selectedEntry && isRejectModalOpen && (
-        <>
-          {!isRegularization(selectedEntry) ? (
-            <RejectModal
-              entryId={selectedEntry._id}
-              remarks={remarks}
-              setRemarks={setRemarks}
-              onClose={handleModalClose}
-              onSubmit={handleRejectSubmit}
-            />
-          ) : (
-            <RegularizationRejectModal
-              regularizationId={selectedEntry._id}
-              remarks={remarks}
-              setRemarks={setRemarks}
-              onClose={handleModalClose}
-            />
-          )}
-        </>
-      )}
+            {filter === "Leave" ? (
+              <div className="space-y-4">
+                {finalFilteredLeaves.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <DotLottieReact
+                      src="/lottie/empty.lottie"
+                      loop
+                      className="h-40"
+                      autoplay
+                    />
+                    <h2 className="text-lg font-semibold mt-4">No Leaves Found</h2>
+                    <p className="text-sm text-muted-foreground">
+                      The list is currently empty for the selected filters
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {finalFilteredLeaves.map((leave) => (
+                      <Card
+                        key={leave._id}
+                        className="overflow-hidden transition-all hover:shadow-md cursor-pointer"
+                        onClick={() => handleLeaveClick(leave)}
+                      >
+                        <CardContent className="p-0">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4">
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-10 w-10 bg-primary">
+                                <AvatarFallback>{leave.user.firstName[0]}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium">{`${leave.user.firstName} ${leave.user.lastName}`}</p>
+                                <div className="flex flex-wrap gap-2 mt-1 text-sm text-muted-foreground">
+                                  <span>{leave.leaveType?.leaveType}</span>
+                                  <span>•</span>
+                                  <span>{`${format(new Date(leave.fromDate), "MMM d")} - ${format(new Date(leave.toDate), "MMM d, yyyy")}`}</span>
+                                  <span>•</span>
+                                  <span>{`${leave.appliedDays} day${leave.appliedDays > 1 ? 's' : ''}`}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3 mt-3 sm:mt-0">
+                              {leave.leaveReason === "Penalty" && (
+                                <Badge variant="destructive">Penalty</Badge>
+                              )}
+                              <StatusBadge status={leave.status} />
+                            </div>
+                          </div>
 
-      {/* Leave Details Sheet */}
-      {selectedEntry && isLeave(selectedEntry) && isLeaveDetailsOpen && (
-        <LeaveDetails
-          selectedLeave={selectedEntry}
-          onClose={handleModalClose}
-        />
-      )}
+                          {currentUserRole === "orgAdmin" && leave.status === "Pending" && (
+                            <div className="bg-muted/50 p-2 flex justify-end gap-2 border-t">
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50"
+                                      onClick={(e) => handleApproval(leave, e)}
+                                    >
+                                      <CheckCheck className="h-4 w-4" />
+                                      Approve
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Approve this leave request</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
 
-      {/* Regularization Details Sheet */}
-      {selectedEntry &&
-        isRegularization(selectedEntry) &&
-        isRegularizationDetailsOpen && (
-          <RegularizationDetails
-            selectedRegularization={selectedEntry}
-            onClose={handleModalClose}
-          />
-        )}
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                      onClick={(e) => handleReject(leave, e)}
+                                    >
+                                      <X className="h-4 w-4" />
+                                      Reject
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Reject this leave request</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
 
-      {/* Custom Date Range Modal */}
-      <Dialog open={isCustomModalOpen} onOpenChange={setIsCustomModalOpen}>
-        <DialogContent className="w-96 z-[100] p-6 ml-12 ">
-          <div className="flex justify-between">
-            <DialogTitle className="text-md  font-medium dark:text-white">
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 text-red-600"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        openDeleteDialog(leave._id);
+                                      }}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Delete this leave request</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {finalFilteredRegularizations.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <DotLottieReact
+                      src="/lottie/empty.lottie"
+                      loop
+                      className="h-40"
+                      autoplay
+                    />
+                    <h2 className="text-lg font-semibold mt-4">No Entries Found</h2>
+                    <p className="text-sm text-muted-foreground">
+                      The list is currently empty for the selected filters
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {finalFilteredRegularizations.map((reg) => (
+                      <Card
+                        key={reg._id}
+                        className="overflow-hidden transition-all hover:shadow-md cursor-pointer"
+                        onClick={() => handleRegularizationClick(reg)}
+                      >
+                        <CardContent className="p-0">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4">
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-10 w-10 bg-primary">
+                                <AvatarFallback>{reg?.userId?.firstName?.[0] || "U"}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <p className="font-medium">{`${reg?.userId?.firstName || ""} ${reg?.userId?.lastName || ""}`}</p>
+                                <div className="flex flex-wrap gap-2 mt-1 text-sm text-muted-foreground">
+                                  <span>{format(new Date(reg?.timestamp), "MMM d, yyyy")}</span>
+                                  <span>•</span>
+                                  <span>{`Login: ${reg.loginTime?.substring(0, 5) || "N/A"}`}</span>
+                                  <span>•</span>
+                                  <span>{`Logout: ${reg.logoutTime?.substring(0, 5) || "N/A"}`}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3 mt-3 sm:mt-0">
+                              <StatusBadge status={reg.approvalStatus || "Pending"} />
+                            </div>
+                          </div>
+
+                          {currentUserRole === "orgAdmin" && reg.approvalStatus === "Pending" && (
+                            <div className="bg-muted/50 p-2 flex justify-end gap-2 border-t">
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="gap-1 text-green-600 hover:text-green-700 hover:bg-green-50"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleApproval(reg, e);
+                                      }}
+                                    >
+                                      <CheckCheck className="h-4 w-4" />
+                                      Approve
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Approve this regularization request</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="gap-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleReject(reg, e);
+                                      }}
+                                    >
+                                      <X className="h-4 w-4" />
+                                      Reject
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Reject this regularization request</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-8 w-8 text-red-600"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        openRegularizationDeleteDialog(reg._id);
+                                      }}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Delete this regularization request</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Custom Date Range Modal */}
+        <Dialog open={isCustomModalOpen} onOpenChange={setIsCustomModalOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogTitle className="text-lg font-semibold">
               Select Custom Date Range
             </DialogTitle>
-            <DialogClose className="" onClick={handleClose}>
-              {" "}
-              <CrossCircledIcon className="scale-150  hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
-              {/* <X className="cursor-pointer border -mt-4 rounded-full border-white h-6 hover:bg-white hover:text-black w-6" /> */}
-            </DialogClose>
-          </div>
 
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (customDateRange.start && customDateRange.end) {
-                handleCustomDateSubmit(
-                  customDateRange.start,
-                  customDateRange.end
-                );
-              }
-            }}
-            className="space-y-4"
-          >
-            <div className="flex justify-between gap-2">
-              {/* Start Date Button */}
-              <div className="w-full">
-                {/* <h1 className="absolute bg-[#0B0D29] ml-2 text-xs font-medium text-white">
-                  Start Date
-                </h1> */}
-                <button
-                  type="button"
-                  className="text-start text-xs text-gray-400 mt-2 w-full border p-2 rounded"
-                  onClick={() => setIsStartPickerOpen(true)} // Open end date picker
-                >
-                  {customDateRange.start ? (
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4" />
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (customDateRange.start && customDateRange.end) {
+                  handleCustomDateSubmit(
+                    customDateRange.start,
+                    customDateRange.end
+                  );
+                }
+              }}
+              className="space-y-4 pt-2"
+            >
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Start Date</label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal"
+                    onClick={() => setIsStartPickerOpen(true)}
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    {customDateRange.start
+                      ? format(customDateRange.start, "PPP")
+                      : "Select date"}
+                  </Button>
+                </div>
 
-                      {new Date(customDateRange.start).toLocaleDateString(
-                        "en-GB"
-                      )}
-                    </div> // Format date as dd/mm/yyyy
-                  ) : (
-                    <div className="flex gap-1">
-                      <Calendar className="h-4" />
-                      <h1 className="text-xs">Start Date</h1>
-                    </div>
-                  )}
-                </button>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">End Date</label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal"
+                    onClick={() => setIsEndPickerOpen(true)}
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    {customDateRange.end
+                      ? format(customDateRange.end, "PPP")
+                      : "Select date"}
+                  </Button>
+                </div>
               </div>
 
-              {/* End Date Button */}
-              <div className="w-full">
-                {/* <h1 className="absolute bg-[#0B0D29] ml-2 text-xs font-medium text-white">
-                  End Date
-                </h1> */}
-                <button
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button
                   type="button"
-                  className="text-start text-xs text-gray-400 mt-2 w-full border p-2 rounded"
-                  onClick={() => setIsEndPickerOpen(true)} // Open end date picker
+                  variant="outline"
+                  onClick={handleClose}
                 >
-                  {customDateRange.end ? (
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-4" />
-
-                      {new Date(customDateRange.end).toLocaleDateString(
-                        "en-GB"
-                      )}
-                    </div> // Format date as dd/mm/yyyy
-                  ) : (
-                    <div className="flex gap-1">
-                      <Calendar className="h-4" />
-                      <h1 className="text-xs">End date</h1>
-                    </div>
-                  )}
-                </button>
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={!customDateRange.start || !customDateRange.end}
+                >
+                  Apply Range
+                </Button>
               </div>
-            </div>
-            {/* Submit Button */}
-            <div>
-              <button
-                type="submit"
-                className="bg-[#815BF5] text-white py-2 px-4 rounded w-full text-xs"
-              >
-                Apply
-              </button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+            </form>
+          </DialogContent>
+        </Dialog>
 
-      {/* Start Date Picker Modal */}
-      <Dialog open={isStartPickerOpen} onOpenChange={setIsStartPickerOpen}>
-
-        <DialogContent className=" z-[100] bg-black dark:bg-[#0a0d28]  scale-90 flex justify-center ">
-          <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
-            <div className="w-full flex mb-4 justify-between">
+        {/* Start & End Date Picker Modals */}
+        <Dialog open={isStartPickerOpen} onOpenChange={setIsStartPickerOpen}>
+          <DialogContent className="p-0 bg-transparent border-none shadow-none">
+            <div className="rounded-lg bg-background shadow-lg p-4">
               <CustomDatePicker
                 selectedDate={customDateRange.start}
                 onDateChange={(newDate) => {
                   setCustomDateRange((prev) => ({ ...prev, start: newDate }));
-                  setIsStartPickerOpen(false); // Close picker after selecting the date
+                  setIsStartPickerOpen(false);
                 }}
                 onCloseDialog={() => setIsStartPickerOpen(false)}
               />
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
 
-      {/* End Date Picker Modal */}
-      <Dialog open={isEndPickerOpen} onOpenChange={setIsEndPickerOpen}>
-
-        <DialogContent className=" z-[100]  bg-black dark:bg-[#0a0d28] scale-90 flex justify-center ">
-          <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
-            <div className="w-full flex mb-4 justify-between">
+        <Dialog open={isEndPickerOpen} onOpenChange={setIsEndPickerOpen}>
+          <DialogContent className="p-0 bg-transparent border-none shadow-none">
+            <div className="rounded-lg bg-background shadow-lg p-4">
               <CustomDatePicker
                 selectedDate={customDateRange.end}
                 onDateChange={(newDate) => {
                   setCustomDateRange((prev) => ({ ...prev, end: newDate }));
-                  setIsEndPickerOpen(false); // Close picker after selecting the date
+                  setIsEndPickerOpen(false);
                 }}
                 onCloseDialog={() => setIsEndPickerOpen(false)}
               />
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
 
-      {/* Delete Confirmation Dialog */}
-      <DeleteConfirmationDialog
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        onConfirm={confirmDelete} // Confirm delete action
-        title="Confirm Delete"
-        description={
-          leaveIdToDelete
-            ? "Are you sure you want to delete this leave request? This action cannot be undone."
-            : regularizationIdToDelete
-              ? "Are you sure you want to delete this regularization request? This action cannot be undone."
-              : "Are you sure you want to delete this request? This action cannot be undone."
-        }
-      />
-    </div>
-  );
-}
+        {/* Modals and Sheets */}
+        {selectedEntry && isModalOpen && (
+          <>
+            {!isRegularization(selectedEntry) ? (
+              <LeaveApprovalModal
+                leaveId={selectedEntry._id}
+                leaveDays={selectedEntry.leaveDays}
+                appliedDays={selectedEntry.appliedDays}
+                fromDate={selectedEntry.fromDate}
+                toDate={selectedEntry.toDate}
+                leaveReason={selectedEntry.leaveReason}
+                leaveType={selectedEntry?.leaveType?.leaveType}
+                user={selectedEntry.user}
+                manager={selectedEntry.user.reportingManager}
+                onClose={handleModalClose}
+                onUpdate={refetchApprovals}
+              />
+            ) : (
+              <RegularizationApprovalModal
+                regularizationId={selectedEntry._id}
+                timestamp={selectedEntry.timestamp}
+                loginTime={selectedEntry.loginTime}
+                logoutTime={selectedEntry.logoutTime}
+                remarks={selectedEntry.remarks}
+                onClose={handleModalClose}
+                onSubmit={() => {
+                  setIsModalOpen(false);
+                  setSelectedEntry(null);
+                  refetchApprovals();
+                }}
+              />
+            )}
+          </>
+        )}
+
+        {/* Reject Modals */}
+        {selectedEntry && isRejectModalOpen && (
+          <>
+            {!isRegularization(selectedEntry) ? (
+              <RejectModal
+                entryId={selectedEntry._id}
+                remarks={remarks}
+                setRemarks={setRemarks}
+                onClose={handleModalClose}
+                onSubmit={handleRejectSubmit}
+              />
+            ) : (
+              <RegularizationRejectModal
+                regularizationId={selectedEntry._id}
+                remarks={remarks}
+                setRemarks={setRemarks}
+                onClose={handleModalClose}
+              />
+            )}
+          </>
+        )}
+
+        {/* Detail Sheets */}
+        {selectedEntry && isLeave(selectedEntry) && isLeaveDetailsOpen && (
+          <LeaveDetails
+            selectedLeave={selectedEntry}
+            onClose={handleModalClose}
+          />
+        )}
+
+        {selectedEntry &&
+          isRegularization(selectedEntry) &&
+          isRegularizationDetailsOpen && (
+            <RegularizationDetails
+              selectedRegularization={selectedEntry}
+              onClose={handleModalClose}
+            />
+          )}
+
+        {/* Delete Confirmation Dialog */}
+        <DeleteConfirmationDialog
+          isOpen={isDeleteDialogOpen}
+          onClose={() => setIsDeleteDialogOpen(false)}
+          onConfirm={confirmDelete}
+          title="Confirm Delete"
+          description={
+            leaveIdToDelete
+              ? "Are you sure you want to delete this leave request? This action cannot be undone."
+              : regularizationIdToDelete
+                ? "Are you sure you want to delete this regularization request? This action cannot be undone."
+                : "Are you sure you want to delete this request? This action cannot be undone."
+          }
+        />
+      </div>
+    );
+  }

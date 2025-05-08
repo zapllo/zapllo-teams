@@ -1,55 +1,38 @@
 'use client';
 
-import CustomDatePicker from '@/components/globals/date-picker';
-import { startOfWeek, endOfWeek, subWeeks, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isWeekend, endOfDay } from 'date-fns';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogTrigger, DialogContent, DialogClose } from '@/components/ui/dialog';
-import axios from 'axios';
-import { Calendar } from 'lucide-react';
-import { format } from 'date-fns';
 import React, { useState, useEffect } from 'react';
+import { format, startOfWeek, endOfWeek, subWeeks, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isWeekend, endOfDay } from 'date-fns';
+import axios from 'axios';
+import {
+  BadgeCheck,
+  Calendar,
+  CalendarDays,
+  CalendarX2,
+  Clock,
+  Download,
+  BarChart4,
+  UserRoundCheck,
+  UsersRound,
+  PieChart,
+  ArrowUpDown,
+  FileSpreadsheet
+} from 'lucide-react';
+import { saveAs } from 'file-saver';
+import Papa from 'papaparse';
+
+// UI Components
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
+import { Tabs3 as Tabs, TabsContent3 as TabsContent, TabsList3 as TabsList, TabsTrigger3 as TabsTrigger } from '@/components/ui/tabs3';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
 import Loader from '@/components/ui/loader';
+import CustomDatePicker from '@/components/globals/date-picker';
 
-// Generate all weekdays of a selected month, excluding weekends (Saturday, Sunday)
-const generateWeekdaysInMonth = (year: number, month: number) => {
-  const date = new Date(year, month, 1);
-  const weekdays = [];
-  while (date.getMonth() === month) {
-    // Exclude weekends
-    if (date.getDay() !== 0 && date.getDay() !== 6) {
-      weekdays.push(new Date(date));
-    }
-    date.setDate(date.getDate() + 1);
-  }
-  return weekdays;
-};
-
-// Client-side: generateMonthOptions function
-const generateMonthOptions = () => {
-  const months = [
-    { name: 'Jan', value: '01' },
-    { name: 'Feb', value: '02' },
-    { name: 'Mar', value: '03' },
-    { name: 'Apr', value: '04' },
-    { name: 'May', value: '05' },
-    { name: 'Jun', value: '06' },
-    { name: 'Jul', value: '07' },
-    { name: 'Aug', value: '08' },
-    { name: 'Sep', value: '09' },
-    { name: 'Oct', value: '10' },
-    { name: 'Nov', value: '11' },
-    { name: 'Dec', value: '12' }
-  ];
-
-  const currentYear = new Date().getFullYear();
-
-  // Return an array with both the display format and the actual value
-  return months.map((month) => ({
-    display: `${month.name}-${currentYear.toString().slice(-2)}`, // e.g., Sep-24
-    value: `${currentYear}-${month.value}` // e.g., 2024-09
-  }));
-};
-
+// Type definitions
 interface AttendanceEntry {
   date: string;
   day: string;
@@ -71,6 +54,7 @@ interface HolidayEntry {
   holidayName: string;
   holidayDate: string;
 }
+
 interface User {
   _id: string;
   firstName: string;
@@ -94,25 +78,50 @@ interface ReportEntry {
   totalDuration: string;
 }
 
-interface AttendanceEntry {
-  date: string;
-  day: string;
-  present: number;
-  leave: number;
-  absent: number;
-  total: number;
-}
+// Helper function: Generate month options
+const generateMonthOptions = () => {
+  const months = [
+    { name: 'Jan', value: '01' },
+    { name: 'Feb', value: '02' },
+    { name: 'Mar', value: '03' },
+    { name: 'Apr', value: '04' },
+    { name: 'May', value: '05' },
+    { name: 'Jun', value: '06' },
+    { name: 'Jul', value: '07' },
+    { name: 'Aug', value: '08' },
+    { name: 'Sep', value: '09' },
+    { name: 'Oct', value: '10' },
+    { name: 'Nov', value: '11' },
+    { name: 'Dec', value: '12' }
+  ];
 
-let startDate: Date | undefined;
-let endDate: Date | undefined;
+  const currentYear = new Date().getFullYear();
 
+  return months.map((month) => ({
+    display: `${month.name}-${currentYear.toString().slice(-2)}`,
+    value: `${currentYear}-${month.value}`
+  }));
+};
+
+// Helper function: Generate weekdays in a month
+const generateWeekdaysInMonth = (year: number, month: number) => {
+  const date = new Date(year, month, 1);
+  const weekdays = [];
+  while (date.getMonth() === month) {
+    if (date.getDay() !== 0 && date.getDay() !== 6) {
+      weekdays.push(new Date(date));
+    }
+    date.setDate(date.getDate() + 1);
+  }
+  return weekdays;
+};
 
 const AttendanceDashboard: React.FC = () => {
+  // State variables
   const [attendance, setAttendance] = useState<AttendanceEntry[]>([]);
-  const [leaves, setLeaves] = useState<LeaveEntry[]>([]); // State for leaves
-  const [holidays, setHolidays] = useState<HolidayEntry[]>([]); // State for holidays
-  const [holidaysCumulative, setHolidaysCumulative] = useState<number>(0); // State for holidays
-  // const [selectedDate, setSelectedDate] = useState<string>('2024-09');
+  const [leaves, setLeaves] = useState<LeaveEntry[]>([]);
+  const [holidays, setHolidays] = useState<HolidayEntry[]>([]);
+  const [holidaysCumulative, setHolidaysCumulative] = useState<number>(0);
   const [totalDays, setTotalDays] = useState<number>(0);
   const [totalCumulativeDays, setTotalCumulativeDays] = useState<number>(0);
   const [presentCount, setPresentCount] = useState<number>(0);
@@ -127,34 +136,28 @@ const AttendanceDashboard: React.FC = () => {
   const [managerId, setManagerId] = useState('');
   const [managers, setManagers] = useState<User[]>([]);
   const [employees, setEmployees] = useState<User[]>([]);
-  const monthOptions = generateMonthOptions(); // Generate months dynamically
-  const [selectedDate, setSelectedDate] = useState<string>(Date());
-  const [isDateSelected, setIsDateSelected] = useState<boolean>(false); // Track whether the user manually selects a date
+  const monthOptions = generateMonthOptions();
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [isDateSelected, setIsDateSelected] = useState<boolean>(false);
   const currentYear = new Date().getFullYear();
-  const currentMonth = String(new Date().getMonth() + 1).padStart(2, '0'); // Formats month as two digits
+  const currentMonth = String(new Date().getMonth() + 1).padStart(2, '0');
   const [selectedAttendanceDate, setSelectedAttendanceDate] = useState<string>(`${currentYear}-${currentMonth}`);
   const [dailyReport, setDailyReport] = useState<ReportEntry[]>([]);
   const [employeeId, setEmployeeId] = useState<string | undefined>(undefined);
   const [weekOffs, setWeekOffs] = useState<number>(0);
   const [attendanceLoading, setAttendanceLoading] = useState<boolean | null>(true);
-  // const [totalDailyDays, setTotalDailyDays] = useState(1); // Total days for daily report (default 1)
-  // const [holidaysDaily, setHolidaysDaily] = useState(0);   // Number of holidays in the daily report
-  // const [weekOffsDaily, setWeekOffsDaily] = useState(0);   // Number of week offs (0 or 1)
   const [dailytotalCount, setDailyTotalCount] = useState<number>(0);
   const [dailypresentCount, setDailyPresentCount] = useState<number>(0);
   const [dailyonLeaveCount, setDailyOnLeaveCount] = useState<number>(0);
   const [dailyabsentCount, setDailyAbsentCount] = useState<number>(0);
   const [monthlyReport, setMonthlyReport] = useState<AttendanceEntry[]>([]);
-  const [role, setRole] = useState<any>();
+  const [role, setRole] = useState<string>("");
+  const [activeTab, setActiveTab] = useState("daily");
 
-
-
-
-
+  // Effect for computing daily report counts
   useEffect(() => {
     const computeCounts = () => {
       setDailyTotalCount(dailyReport?.length || 0);
-
       setDailyPresentCount(dailyReport?.filter(entry => entry.status === 'Present').length || 0);
       setDailyOnLeaveCount(dailyReport?.filter(entry => entry.status === 'On Leave').length || 0);
       setDailyAbsentCount(dailyReport?.filter(entry => entry.status === 'Absent').length || 0);
@@ -163,9 +166,7 @@ const AttendanceDashboard: React.FC = () => {
     computeCounts();
   }, [dailyReport]);
 
-
-
-
+  // Fetch users from organization
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -186,9 +187,7 @@ const AttendanceDashboard: React.FC = () => {
     fetchUsers();
   }, []);
 
-
-
-
+  // Fetch cumulative report based on selected period
   useEffect(() => {
     const fetchCumulativeReport = async () => {
       let startDate: Date;
@@ -233,12 +232,10 @@ const AttendanceDashboard: React.FC = () => {
       }
     };
 
-
     if (period) fetchCumulativeReport();
   }, [managerId, period, employeeId]);
 
-  // Fetch attendance, leave, and holiday data for the entire organization
-  // Fetch attendance, leave, and holiday data for the entire organization
+  // Fetch attendance data
   useEffect(() => {
     async function fetchAttendanceData() {
       setAttendanceLoading(true);
@@ -262,7 +259,6 @@ const AttendanceDashboard: React.FC = () => {
         const currentMonth = today.getMonth();
 
         // Determine startDate and endDate
-        // Determine startDate and endDate
         const startDate = new Date(selectedYear, selectedMonth, 1);
         let endDate: Date;
 
@@ -274,7 +270,6 @@ const AttendanceDashboard: React.FC = () => {
           const lastDayOfMonth = new Date(selectedYear, selectedMonth + 1, 0); // Last day of the selected month
           endDate = endOfDay(lastDayOfMonth); // Set to 23:59:59 of the last day
         }
-
 
         // Generate all days from startDate to endDate
         const allDaysInMonth = eachDayOfInterval({ start: startDate, end: endDate });
@@ -319,59 +314,43 @@ const AttendanceDashboard: React.FC = () => {
 
       } catch (error) {
         console.error('Error fetching attendance data:', error);
+        setAttendanceLoading(false);
       }
     }
 
     fetchAttendanceData();
   }, [selectedAttendanceDate]);
 
-
-  // useEffect(() => {
-  //   async function fetchAttendanceData() {
-  //     setAttendanceLoading(true);
-  //     try {
-  //       const response = await fetch(`/api/userAttendance?date=${selectedAttendanceDate}`);
-  //       const data = await response.json();
-
-  //       // Update state with the user-specific report
-  //       setMonthlyReport(data.monthlyReport);
-  //       setAttendanceLoading(false);
-
-  //     } catch (error) {
-  //       console.error('Error fetching attendance data:', error);
-  //     }
-  //   }
-
-  //   fetchAttendanceData();
-  // }, [selectedAttendanceDate]);
-
-  // Function to fetch the daily report from the server
+  // Fetch daily report
   const fetchDailyReport = async (date: string) => {
     try {
-      setAttendanceLoading(true)
+      setAttendanceLoading(true);
       const res = await fetch('/api/reports/daily', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          date, managerId,
+          date,
+          managerId,
           employeeId,
         }),
       });
       const data = await res.json();
       setDailyReport(data.report);
-      setAttendanceLoading(false)
+      setAttendanceLoading(false);
     } catch (error) {
       console.error('Error fetching daily report:', error);
+      setAttendanceLoading(false);
     }
   };
 
-  // Fetch the report when the date is selected
+  // Fetch daily report when date changes
   useEffect(() => {
     if (selectedDate) {
       fetchDailyReport(selectedDate);
     }
-  }, [selectedDate, employeeId]);
+  }, [selectedDate, employeeId, managerId]);
 
+  // Handler functions
   const handleDateChange = (date: Date) => {
     setSelectedDate(date.toISOString().split('T')[0]); // Convert to YYYY-MM-DD string format
     setIsDateSelected(true);
@@ -381,356 +360,657 @@ const AttendanceDashboard: React.FC = () => {
     setIsDatePickerOpen(false); // Close the dialog
   };
 
+  // Export functions
+  const exportDailyReportAsCSV = () => {
+    // Transform the data for CSV export
+    const csvData = dailyReport.map(entry => ({
+      Name: entry.user,
+      Status: entry.status,
+      'Login Time': entry.loginTime !== 'N/A' && !isNaN(new Date(entry.loginTime).getTime())
+        ? format(new Date(entry.loginTime), 'hh:mm a')
+        : 'N/A',
+      'Logout Time': entry.logoutTime !== 'N/A' && !isNaN(new Date(entry.logoutTime).getTime())
+        ? format(new Date(entry.logoutTime), 'hh:mm a')
+        : 'N/A',
+      'Total Duration': entry.totalDuration
+    }));
+
+    // Convert data to CSV
+    const csv = Papa.unparse(csvData);
+
+    // Create Blob and download
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    saveAs(blob, `Daily_Attendance_Report_${format(new Date(selectedDate), 'yyyy-MM-dd')}.csv`);
+  };
+
+  const exportCumulativeReportAsCSV = () => {
+    // Transform the data for CSV export
+    const csvData = report.map(entry => ({
+      Name: entry.user,
+      Present: entry.present,
+      Leave: entry.leave,
+      Absent: entry.absent,
+      'Reporting Manager': entry.reportingManager || "Not Assigned"
+    }));
+
+    // Convert data to CSV
+    const csv = Papa.unparse(csvData);
+
+    // Create Blob and download
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    saveAs(blob, `Cumulative_Attendance_Report_${period}.csv`);
+  };
+
+  const exportMonthlyReportAsCSV = () => {
+    // Transform the data for CSV export
+    const csvData = monthlyReport.map(day => ({
+      Date: format(new Date(day.date), 'dd MMM yyyy'),
+      Day: day.day,
+      Present: day.present,
+      Leave: day.leave,
+      Absent: day.absent,
+      Holiday: day.holiday,
+      Total: day.total
+    }));
+
+    // Convert data to CSV
+    const csv = Papa.unparse(csvData);
+
+    // Create Blob and download
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    saveAs(blob, `Monthly_Attendance_Report_${selectedAttendanceDate}.csv`);
+  };
+
+  // Get current user's role
+  useEffect(() => {
+    const getUserDetails = async () => {
+      try {
+        const res = await axios.get('/api/users/me');
+        setRole(res.data.data.role);
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    }
+    getUserDetails();
+  }, []);
+
+  // Role-based permissions
   const allowedRoles = ['orgAdmin', 'manager'];
   const adminRoles = ['orgAdmin'];
   const disallowedRoles = ['member'];
 
-  useEffect(() => {
-    const getUserDetails = async () => {
-      const res = await axios.get('/api/users/me')
-      setRole(res.data.data.role);
-    }
-    getUserDetails();
-  }, [])
-
-
+  // Loading state
   if (attendanceLoading) {
     return <Loader />;
   }
 
   return (
-    <div className="p-6 h-screen overflow-y-scroll scrollbar-hide">
+    <div className="p-6 h-screen overflow-y-auto scrollbar-hide">
       {attendanceLoading && (
-        <div className="absolute w-screen h-screen z-[100]  inset-0 dark:bg-[#04061e] bg-[#FEFEFE] -900  bg-opacity-90 rounded-xl flex justify-center items-center">
-          <div
-            className=" z-[100]  max-h-screen max-w-screen text-[#D0D3D3] w-[100%] rounded-lg ">
-            <div className="">
-              <div className="absolute z-50 inset-0 flex flex-col items-center justify-center text-white font-bold px-4 pointer-events-none text-3xl text-center md:text-4xl lg:text-7xl">
-                <img src="/logo/loader.png" className="h-[15%] animate-pulse" />
-                <p className="bg-clip-text text-transparent drop-shadow-2xl bg-gradient-to-b text-sm from-white/80 to-white/20">
-                  Loading...
-                </p>
-              </div>
-            </div>
-          </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
+          <Loader />
         </div>
       )}
-      {allowedRoles.includes(role) && (
-        <div className='mb-12  gap-2'>
-          {adminRoles.includes(role) && (
-            <div className="mb-4 flex gap-2 justify-center w-full">
 
-              <select
-                className="border rounded text-xs border-[] dark:bg-[#04061E]  outline-none p-2"
-                onChange={(e) => setManagerId(e.target.value)}
-              >
-                <option value="">Select Manager</option>
-                {managers?.map((manager) => (
-                  <option key={manager._id} value={manager._id}>
-                    {manager.firstName} {manager.lastName}
-                  </option>
-                ))}
-              </select>
-              {/* <label htmlFor="employee" className="mr-2">Employee:</label> */}
-              <select
-                className="border-[#] border outline-none dark:bg-[#04061E] text-xs  rounded p-2"
-                id="employee"
-                onChange={(e) => setEmployeeId(e.target.value)} // Update selected employee
-              >
-                <option value="">Select Employee</option>
-                {employees?.map((employee) => (
-                  <option key={employee._id} value={employee._id}>
-                    {employee.firstName} {employee.lastName}
-                  </option>
-                ))}
-              </select>
-              {/* <button onClick={fetchCumulativeReport} className="ml-4 bg-blue-500 text-white px-4 py-2 rounded-lg">
-                Fetch Report
-              </button> */}
-            </div>
+      {/* Dashboard Header */}
+      <div className="flex flex-col space-y-2 mb-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <CalendarDays className="h-6 w-6 text-primary" />
+            <h1 className="text-2xl font-bold tracking-tight">Attendance Dashboard</h1>
+          </div>
+          {allowedRoles.includes(role) && (
+            <Button variant="outline" size="sm" className="gap-1" onClick={() => {
+              // Determine which export function to call based on active tab
+              if (activeTab === "daily") {
+                exportDailyReportAsCSV();
+              } else if (activeTab === "cumulative") {
+                exportCumulativeReportAsCSV();
+              } else if (activeTab === "monthly") {
+                exportMonthlyReportAsCSV();
+              }
+            }}>
+              <Download className="h-4 w-4" />
+              <span>Export Report</span>
+            </Button>
           )}
-          <div className='grid grid-cols-2 gap-2'>
-            <div className="flex-1 border  shadow-md rounded-3xl p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-sm font-medium ">Daily Report</h3>
-                <div>
-                  {/* <span className="text-sm mr-2">Date:</span> */}
-                  {/* <input
-                    type="date"
-                    className="border rounded-lg p-2 text-xs"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                  /> */}
-                  <Dialog open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
-                    <DialogTrigger>
-                      <Button
-                        type="button"
-                        onClick={() => setIsDatePickerOpen(true)}
-                        className=" rounded  border border-[#] bg-[#] hover:bg-primary hover:text-white dark:hover:bg-[#37384B] text-black dark:text-white px-3 flex gap-1 py-2"
-                      >
-                        <Calendar className="h-5 text-sm" />
-                        {/* // Show the selected date if the user has interacted */}
-                        <h1 className='text-xs'> {format(selectedDate, 'PPP')}</h1>
+        </div>
+        <p className="text-muted-foreground text-sm">
+          Track and manage attendance and leaves for your organization
+        </p>
+      </div>
 
-                        {/* <h1 className="text-xs">Select Date & Time</h1> */}
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="z-[100] scale-90 bg-[#0a0d28] flex justify-center ">
-                      <div className="z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
-                        <div className="w-full flex mb-4 justify-between">
-                          <CustomDatePicker
-                            selectedDate={new Date(selectedDate)} // Convert the string to a Date object
-                            onDateChange={handleDateChange}
-                            onCloseDialog={handleCloseDialog} // Close the dialog on date selection
-                          />
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+      {/* Admin & Manager Filters */}
+      {allowedRoles.includes(role) && (
+        <Card className="mb-6">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">Filter Options</CardTitle>
+            <CardDescription>
+              Filter attendance data by manager and employee
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-4">
+              {adminRoles.includes(role) && (
+                <div className="flex flex-col space-y-1.5">
+                  <label htmlFor="manager" className="text-xs font-medium text-muted-foreground">Manager</label>
+                  <Select onValueChange={setManagerId} value={managerId}>
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Select Manager" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="All">All Managers</SelectItem>
+                      {managers?.map((manager) => (
+                        <SelectItem key={manager._id} value={manager._id}>
+                          {manager.firstName} {manager.lastName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <div className="flex flex-col space-y-1.5">
+                <label htmlFor="employee" className="text-xs font-medium text-muted-foreground">Employee</label>
+                <Select onValueChange={setEmployeeId} value={employeeId}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Select Employee" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="All">All Employees</SelectItem>
+                    {employees?.map((employee) => (
+                      <SelectItem key={employee._id} value={employee._id}>
+                        {employee.firstName} {employee.lastName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Dashboard Overview Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Employees</CardTitle>
+            <UsersRound className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{employees.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">Active organizational members</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Present Today</CardTitle>
+            <UserRoundCheck className="h-4 w-4 text-emerald-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-emerald-600">{dailypresentCount}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {Math.round((dailypresentCount / (dailytotalCount || 1)) * 100)}% of workforce present
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">On Leave</CardTitle>
+            <CalendarX2 className="h-4 w-4 text-amber-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-amber-600">{dailyonLeaveCount}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {Math.round((dailyonLeaveCount / (dailytotalCount || 1)) * 100)}% of workforce on leave
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Absent</CardTitle>
+            <Clock className="h-4 w-4 text-rose-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-rose-600">{dailyabsentCount}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {Math.round((dailyabsentCount / (dailytotalCount || 1)) * 100)}% of workforce absent
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Main Content Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList className="grid w-full gap-2 grid-cols-3">
+          <TabsTrigger value="daily" className="flex items-center gap-1.5">
+            <CalendarDays className="h-4 w-4" />
+            <span>Daily View</span>
+          </TabsTrigger>
+          <TabsTrigger value="cumulative" className="flex items-center gap-1.5">
+            <BarChart4 className="h-4 w-4" />
+            <span>Cumulative</span>
+          </TabsTrigger>
+          <TabsTrigger value="monthly" className="flex items-center gap-1.5">
+            <PieChart className="h-4 w-4" />
+            <span>Monthly</span>
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Daily Report Tab */}
+        <TabsContent value="daily" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <div>
+                <CardTitle>Daily Attendance Report</CardTitle>
+                <CardDescription>
+                  Detailed view of employee attendance status for {format(new Date(selectedDate), 'MMMM d, yyyy')}
+                </CardDescription>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Dialog open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      <span>{format(new Date(selectedDate), 'MMM d, yyyy')}</span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-background p-0 border-none max-w-md">
+                    <CustomDatePicker
+                      selectedDate={new Date(selectedDate)}
+                      onDateChange={handleDateChange}
+                      onCloseDialog={handleCloseDialog}
+                    />
+                  </DialogContent>
+                </Dialog>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={exportDailyReportAsCSV}
+                  title="Export Daily Report"
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="flex justify-between items-center flex-wrap gap-2 mb-4">
+                <div className="flex gap-2">
+                  <Badge variant="outline" className="flex items-center gap-1.5">
+                    <span>Total:</span> <span className="font-semibold">{dailytotalCount}</span>
+                  </Badge>
+                  <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100">
+                    <span>Present:</span> <span className="font-semibold">{dailypresentCount}</span>
+                  </Badge>
+                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100">
+                    <span>On Leave:</span> <span className="font-semibold">{dailyonLeaveCount}</span>
+                  </Badge>
+                  <Badge variant="outline" className="bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100">
+                    <span>Absent:</span> <span className="font-semibold">{dailyabsentCount}</span>
+                  </Badge>
                 </div>
               </div>
-              <div className="flex justify-center space-x-4 mb-4">
-                <div className="flex gap-2 items-center  dark:text-white border p-2 text-xs  rounded">
-                  All: {dailytotalCount}
-                </div>
-                <div className="flex flex-col items-center text-green-500 dark:text-green-400 border p-2 text-xs  rounded">
-                  Present : {dailypresentCount}
-                </div>
-                <div className="flex flex-col items-center text-yellow-500  dark:text-yellow-400   border p-2 text-xs  rounded">
-                  On Leave : {dailyonLeaveCount}
-                </div>
-                <div className="flex flex-col items-center dark:text-red-500 text-red-400  border p-2 text-xs  rounded">
-                  Absent : {dailyabsentCount}
-                </div>
-              </div>
-              <div className=' border rounded-xl w-full '>
-                <table className="table- dark:bg-[#0A0D28] rounded-xl w-full ">
-                  <thead className=' rounded-xl'>
-                    <tr className="text-xs   rounded-xl ">
-                      <th className=" px-4 text-muted-foreground py-2 text-left">Name</th>
-                      <th className=" px-4 py-2 text-left text-muted-foreground">Status</th>
-                      <th className=" px-4 py-2 text-left text-muted-foreground">Login Time</th>
-                      <th className=" px-4 py-2 text-left text-muted-foreground">Logout Time</th>
-                      <th className=" px-4 py-2  text-muted-foreground text-left">Total Duration</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Login Time</TableHead>
+                      <TableHead>Logout Time</TableHead>
+                      <TableHead className="text-right">Duration</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {dailyReport?.map((entry, index) => (
-                      <tr key={index} className='border-t'>
-                        <td className="px-4 text-xs py-2">{entry.user}</td>
-                        <td
-                          className={`px-4 text-xs py-2 ${entry.status === 'Present'
-                            ? 'text-green-600'
-                            : entry.status === 'On Leave'
-                              ? 'text-yellow-600'
-                              : 'text-red-600'
-                            }`}
-                        >
-                          {entry.status}
-                        </td>
-                        <td className="text-xs px-4 py-2">
+                      <TableRow key={index}>
+                        <TableCell className="font-medium">{entry.user}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={
+                              entry.status === 'Present'
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                : entry.status === 'On Leave'
+                                ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                : 'bg-rose-50 text-rose-700 border-rose-200'
+                            }
+                          >
+                            {entry.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
                           {entry.loginTime !== 'N/A' && !isNaN(new Date(entry.loginTime).getTime())
                             ? format(new Date(entry.loginTime), 'hh:mm a')
                             : 'N/A'}
-
-                        </td>
-                        <td className="text-xs px-4 py-2">
+                        </TableCell>
+                        <TableCell>
                           {entry.logoutTime !== 'N/A' && !isNaN(new Date(entry.logoutTime).getTime())
                             ? format(new Date(entry.logoutTime), 'hh:mm a')
                             : 'N/A'}
-                        </td>
-                        <td className="text-xs px-4 py-2">{entry.totalDuration}</td>
-                      </tr>
+                        </TableCell>
+                        <TableCell className="text-right">{entry.totalDuration}</TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                    {dailyReport?.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
+                          No attendance records found for this day
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
               </div>
-            </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-            <div className="flex-1 border b  shadow-md rounded-3xl p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-sm font-medium">Cumulative Report</h3>
+        {/* Cumulative Report Tab */}
+        <TabsContent value="cumulative" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <div>
+                <CardTitle>Cumulative Attendance Report</CardTitle>
+                <CardDescription>
+                  Track attendance patterns over time periods
+                </CardDescription>
+              </div>
 
-                <div>
-                  <select
-                    className="border-[#] dark:bg-[#04061E] border-2 outline-none text-xs rounded p-2"
-                    onChange={(e) => setPeriod(e.target.value)}
-                  >
-                    <option value="thisWeek">This Week</option>
-                    <option value="lastWeek">Last Week</option>
-                    <option value="thisMonth">This Month</option>
-                    <option value="lastMonth">Last Month</option>
-                  </select>
-                </div>
+              <div className="flex items-center gap-2">
+                <Select value={period} onValueChange={setPeriod}>
+                <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select period" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="thisWeek">This Week</SelectItem>
+                    <SelectItem value="lastWeek">Last Week</SelectItem>
+                    <SelectItem value="thisMonth">This Month</SelectItem>
+                    <SelectItem value="lastMonth">Last Month</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={exportCumulativeReportAsCSV}
+                  title="Export Cumulative Report"
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
               </div>
-              <div className="flex space-x-4 justify-center mb-2 mt-2">
-                <span className="border text-xs text-blue-400 text-= p-2 rounded">Total Days: {totalCumulativeDays}</span>
-                <span className="border text-xs text-yellow-400  p-2 rounded">Working: {workingDays}</span>
-                <span className="border text-xs text-green-400  p-2 rounded">Week Offs: {weekOffs}</span>
-                <span className="border text-xs text-red-500  p-2 rounded">Holidays: {holidaysCumulative}</span>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-4 gap-4 mb-6">
+                <Card>
+                  <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                    <Calendar className="h-5 w-5 text-primary mb-2" />
+                    <p className="text-xs font-medium text-muted-foreground">Total Days</p>
+                    <h3 className="text-xl font-bold">{totalCumulativeDays}</h3>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                    <BadgeCheck className="h-5 w-5 text-emerald-500 mb-2" />
+                    <p className="text-xs font-medium text-muted-foreground">Working Days</p>
+                    <h3 className="text-xl font-bold text-emerald-600">{workingDays}</h3>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                    <Calendar className="h-5 w-5 text-amber-500 mb-2" />
+                    <p className="text-xs font-medium text-muted-foreground">Week Offs</p>
+                    <h3 className="text-xl font-bold text-amber-600">{weekOffs}</h3>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-4 flex flex-col items-center justify-center text-center">
+                    <CalendarX2 className="h-5 w-5 text-rose-500 mb-2" />
+                    <p className="text-xs font-medium text-muted-foreground">Holidays</p>
+                    <h3 className="text-xl font-bold text-rose-600">{holidaysCumulative}</h3>
+                  </CardContent>
+                </Card>
               </div>
-              <div className=' border dark:bg-[#0A0D28] rounded-xl w-full '>
-                <table className="table-  rounded-xl w-full ">
-                  <thead className=' rounded'>
-                    <tr className="text-muted-foreground text-xs">
-                      <th className=" px-4 py-2 text-left">Name</th>
-                      <th className=" px-4 py-2 text-left">Present</th>
-                      <th className=" px-4 py-2 text-left">Leave</th>
-                      <th className=" px-4 py-2 text-left">Absent</th>
-                      <th className=" px-4 py-2 text-left">Reporting Manager</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead className="text-center">Present</TableHead>
+                      <TableHead className="text-center">Leave</TableHead>
+                      <TableHead className="text-center">Absent</TableHead>
+                      <TableHead>Reporting Manager</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {report?.map((entry, index) => (
-                      <tr className='text-xs border-t' key={index}>
-                        <td className=" px-4 py-2">{entry.user}</td>
-                        <td className=" px-4 py-2 text-center">{entry.present}</td>
-                        <td className=" px-4 py-2 text-center">{entry.leave}</td>
-                        <td className=" px-4 py-2 text-center">{entry.absent}</td>
-                        <td className=" px-4 py-2">{entry.reportingManager || "Not Assigned"}</td>
-                      </tr>
+                      <TableRow key={index}>
+                        <TableCell className="font-medium">{entry.user}</TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
+                            {entry.present}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                            {entry.leave}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="outline" className="bg-rose-50 text-rose-700 border-rose-200">
+                            {entry.absent}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{entry.reportingManager || "Not Assigned"}</TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                    {report?.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
+                          No cumulative data available for this period
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-      {disallowedRoles.includes(role) && (
-        <div className="mb-4 flex gap-2 w-full">
-          <div className='flex gap-2 w-full'>
-            <div>
-              <h2 className="text-lg font-semibold 4">My Report</h2>
-            </div>
-          </div>
-        </div>
-      )}
-      {disallowedRoles.includes(role) && (
-        <div className="relative mt-2 mb-12">
-          <div className="h-full rounded-md">
-            <div className='dark:bg-[#0A0D28] border rounded-xl w-full '>
-              <table className="table-  rounded-xl w-full ">
-                <thead className='border-b text-muted-foreground'>
-                  <tr>
-                    <th className="rounded-l text-sm font-medium text-start p-2 w-24 px-4">Date</th>
-                    <th className="text-sm text-start font-medium w-24 p-2 px-4">Day</th>
-                    <th className="text-sm text-start w-24 font-medium p-2 px-4">Present</th>
-                    <th className="text-sm text-start w-24 font-medium p-2 px-4">Leave</th>
-                    <th className="text-sm text-start w-24 font-medium p-2 px-4">Holiday</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {monthlyReport.map((day, index) => (
-                    <tr key={index} className="border-b">
-                      <td className="px-4 py-2 text-xs">
-                        {format(new Date(day.date), 'dd MMM yyyy')}
-                      </td>
-                      <td className="px-4 py-2 text-xs">{day.day}</td>
-                      <td className="px-4 py-2 text-start">
-                        <input type="checkbox" className='text-[#017a5b]' checked={!!day.present} readOnly />
-                      </td>
-                      <td className="px-4 py-2 text-start">
-                        <input type="checkbox" checked={!!day.leave} readOnly />
-                      </td>
-                      <td className="px-4 py-2 text-start">
-                        <input type="checkbox" checked={!!day.holiday} readOnly />
-                      </td>
-                    </tr>
-                  ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
-      {allowedRoles.includes(role) && (
-        <div className=" flex gap-2 w-full">
-          <div className='flex gap-2 w-full'>
-            <div>
-              <h2 className="text-lg font-semibold 4">Monthly Report</h2>
-            </div>
-            <div className="flex items-center  ">
-              {/* Month selector */}
-              <select
-                className="p-2 text-sm border-2 outline-none w-24 border-[#] dark:bg-[#04061E] rounded"
-                value={selectedAttendanceDate}
-                onChange={(e) => setSelectedAttendanceDate(e.target.value)}
-              >
-                {monthOptions.map((month) => (
-                  <option key={month.value} value={month.value}>
-                    {month.display}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+        {/* Monthly Report Tab */}
+        <TabsContent value="monthly" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <div>
+                <CardTitle>Monthly Attendance Report</CardTitle>
+                <CardDescription>
+                  View attendance trends for the entire month
+                </CardDescription>
+              </div>
 
-        </div>
-      )}
-      {/* Summary */}
-      {allowedRoles.includes(role) && (
-        <div className="mb-4 mt-4 flex w-full justify-start space-x-2">
-          <span className="border text-xs bg-blue-900 text-white p-2 rounded">
-            Total Days: {totalDays}
-          </span>
-          <span className="border text-xs bg-yellow-600 text-white p-2 rounded">
-            Total Employees: {employees.length}
-          </span>
-          <span className="border text-xs bg-green-700 text-white p-2 rounded">
-            Present: {presentCount}
-          </span>
-          <span className="border text-xs bg-red-700 text-white p-2 rounded">
-            Leave: {leaveCount}
-          </span>
-          <span className="border text-xs bg-gray-700 text-white p-2 rounded">
-            Absent: {absentCount}
-          </span>
-          <span className="border text-xs bg-purple-700 text-white p-2 rounded">
-            Holidays: {holidayCount}
-          </span>
-        </div>
-      )}
-      {/* // Table rendering */}
+              <div className="flex items-center gap-2">
+                <Select
+                  value={selectedAttendanceDate}
+                  onValueChange={setSelectedAttendanceDate}
+                >
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select month" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {monthOptions.map((month) => (
+                      <SelectItem key={month.value} value={month.value}>
+                        {month.display}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-      {/* Monthly Attendance Report */}
-      {allowedRoles.includes(role) && (
-        <div className="relative mt-2 mb-12">
-          <div className="h-full  rounded-md">
-            <div className='dark:bg-[#0A0D28] border rounded-xl w-full '>
-              <table className="table-  rounded-xl w-full ">
-                <thead className='border-b text-muted-foreground'>
-                  <th className="rounded-l text-sm font-medium text-end p-2 w-24 px-4">Date</th>
-                  <th className="text-sm text-end font-medium w-24 p-2 px-4">Day</th>
-                  <th className="text-sm text-end w-24 font-medium p-2 px-4">Present</th>
-                  <th className="text-sm text-end w-24 font-medium p-2 px-4">Leave</th>
-                  <th className="text-sm text-end w-24 font-medium p-2 px-4">Absent</th>
-                  <th className="text-sm text-end w-24 font-medium p-2 px-4">Holiday</th>
-                  <th className="text-sm w-24 text-end rounded-r font-medium p-2 px-4">Total</th>
-                </thead>
-                <tbody>
-                  {monthlyReport.map((day, index) => (
-                    <tr key={index} className="border-b text-end">
-                      <td className="px-4 py-2 text-xs">
-                        {format(new Date(day.date), 'dd MMM yyyy')}
-                      </td>
-                      <td className="px-4 py-2 text-end text-xs">{day.day}</td>
-                      <td className="px-4 py-2 text-end text-xs">{day.present}</td>
-                      <td className="px-4 py-2 text-end text-xs">{day.leave}</td>
-                      <td className="px-4 py-2 text-end  text-xs">{day.absent}</td>
-                      <td className="px-4 py-2 text-end text-xs">{day.holiday}</td>
-                      <td className="px-4 py-2 text-end text-xs">{day.total}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={exportMonthlyReportAsCSV}
+                  title="Export Monthly Report"
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2 mb-6">
+                <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-800">
+                  <span>Total Days:</span> <span className="font-semibold">{totalDays}</span>
+                </Badge>
+                <Badge variant="outline" className="border-yellow-200 bg-yellow-50 text-yellow-800">
+                  <span>Total Employees:</span> <span className="font-semibold">{employees.length}</span>
+                </Badge>
+                <Badge variant="outline" className="border-green-200 bg-green-50 text-green-800">
+                  <span>Present:</span> <span className="font-semibold">{presentCount}</span>
+                </Badge>
+                <Badge variant="outline" className="border-red-200 bg-red-50 text-red-800">
+                  <span>Leave:</span> <span className="font-semibold">{leaveCount}</span>
+                </Badge>
+                <Badge variant="outline" className="border-gray-200 bg-gray-50 text-gray-800">
+                  <span>Absent:</span> <span className="font-semibold">{absentCount}</span>
+                </Badge>
+                <Badge variant="outline" className="border-purple-200 bg-purple-50 text-purple-800">
+                  <span>Holidays:</span> <span className="font-semibold">{holidayCount}</span>
+                </Badge>
+              </div>
+
+              {/* For admin and manager roles */}
+              {allowedRoles.includes(role) && (
+                <div className="rounded-md border mb-8">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Day</TableHead>
+                        <TableHead className="text-center">Present</TableHead>
+                        <TableHead className="text-center">Leave</TableHead>
+                        <TableHead className="text-center">Absent</TableHead>
+                        <TableHead className="text-center">Holiday</TableHead>
+                        <TableHead className="text-right">Total</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {monthlyReport.map((day, index) => (
+                        <TableRow key={index}>
+                          <TableCell className="font-medium">
+                            {format(new Date(day.date), 'dd MMM yyyy')}
+                          </TableCell>
+                          <TableCell>{day.day}</TableCell>
+                          <TableCell className="text-center">{day.present}</TableCell>
+                          <TableCell className="text-center">{day.leave}</TableCell>
+                          <TableCell className="text-center">{day.absent}</TableCell>
+                          <TableCell className="text-center">{day.holiday}</TableCell>
+                          <TableCell className="text-right font-medium">{day.total}</TableCell>
+                        </TableRow>
+                      ))}
+                      {monthlyReport.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
+                            No monthly report data available
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+
+              {/* For regular members */}
+              {disallowedRoles.includes(role) && (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Day</TableHead>
+                        <TableHead className="text-center">Present</TableHead>
+                        <TableHead className="text-center">Leave</TableHead>
+                        <TableHead className="text-center">Holiday</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {monthlyReport.map((day, index) => (
+                        <TableRow key={index}>
+                          <TableCell className="font-medium">
+                            {format(new Date(day.date), 'dd MMM yyyy')}
+                          </TableCell>
+                          <TableCell>{day.day}</TableCell>
+                          <TableCell className="text-center">
+                            <Checkbox checked={!!day.present} disabled />
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Checkbox checked={!!day.leave} disabled />
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Checkbox checked={!!day.holiday} disabled />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {monthlyReport.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
+                            No personal attendance data available
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+            <CardFooter className="border-t px-6 py-4">
+              <div className="flex items-center justify-between w-full">
+                <div className="text-xs text-muted-foreground">
+                  Showing data for {format(new Date(selectedAttendanceDate), 'MMMM yyyy')}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1"
+                  onClick={exportMonthlyReportAsCSV}
+                >
+                  <FileSpreadsheet className="h-4 w-4" />
+                  <span>Export as CSV</span>
+                </Button>
+              </div>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      {/* Additional Summary Information */}
+      <div className="mt-6">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Key Insights</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-sm text-muted-foreground space-y-2">
+              <p className="flex items-center gap-2">
+                <ArrowUpDown className="h-4 w-4 text-primary" />
+                <span>
+                  Attendance rate: {presentCount ? Math.round((presentCount / (presentCount + absentCount + leaveCount)) * 100) : 0}%
+                  for the selected month
+                </span>
+              </p>
+              <p className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-primary" />
+                <span>
+                  {holidays.length} holidays {holidays.length > 0 ? `(${holidays.map(h => h.holidayName).join(', ')})` : ''} in the selected month
+                </span>
+              </p>
             </div>
-          </div>
-
-
-        </div>
-      )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

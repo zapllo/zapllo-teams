@@ -29,7 +29,8 @@ import { CrossCircledIcon, StopwatchIcon } from '@radix-ui/react-icons'
 import {
     Calendar, Clock, ChevronRight, MapPin, Timer, Bell,
     Shield, CreditCard, ArrowRight, User, AlertTriangle,
-    Settings2
+    Settings2,
+    X
 } from 'lucide-react'
 
 // Types
@@ -388,7 +389,7 @@ export default function Settings({ }: {}) {
     // Custom component for settings section
     const SettingsSection = ({ title, icon, description, onClick, linkHref, badge }: SettingsSectionProps) => {
         const content = (
-            <Card className="relative cursor-pointer hover:shadow-md transition-all duration-300 border border-muted">
+            <Card className="relative cursor-pointer mt-4 hover:shadow-md transition-all duration-300 border border-muted">
                 <CardContent className="flex items-center justify-between p-4">
                     <div className="flex items-center gap-3">
                         <div className="text-primary p-2 rounded-full bg-primary/10">
@@ -597,15 +598,15 @@ export default function Settings({ }: {}) {
             <Dialog open={isLoginLogoutDialogOpen} onOpenChange={setIsLoginLogoutDialogOpen}>
                 <DialogContent className='p-6 z-[100]'>
                     <div className='flex justify-between'>
-                    <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <Clock className="h-5 w-5 text-primary" />
-                            Set Working Hours
-                        </DialogTitle>
-                    </DialogHeader>
-                    <DialogClose>
-                        <CrossCircledIcon className="scale-150  hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
-                    </DialogClose>
+                        <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                                <Clock className="h-5 w-5 text-primary" />
+                                Set Working Hours
+                            </DialogTitle>
+                        </DialogHeader>
+                        <DialogClose>
+                            <CrossCircledIcon className="scale-150  hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
+                        </DialogClose>
                     </div>
                     <div className="grid gap-4 py-4">
                         <Card className="cursor-pointer hover:border-primary" onClick={() => setIsLoginTimePickerOpen(true)}>
@@ -786,22 +787,49 @@ export default function Settings({ }: {}) {
 
             {/* Location Dialog */}
             <Dialog open={isLocationDialogOpen} onOpenChange={setIsLocationDialogOpen}>
-                <DialogContent className="sm:max-w-[550px] m-auto z-[100] p-6 overflow-y-scroll h-screen">
-                    <DialogHeader className='flex justify-between'>
-                        <div className='flex justify-between'>
-                            <DialogTitle className="flex items-center gap-2">
-                                <MapPin className="h-5 w-5 text-primary" />
-                                Office Location
-                            </DialogTitle>
-                            <DialogClose>
-                                <CrossCircledIcon className="scale-150  hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
-                            </DialogClose>
-                        </div>
-                    </DialogHeader>
+                <DialogContent className="m-auto z-[100] p-6 overflow-y-auto h-fit max-h-screen">
+                    <div className="flex justify-between items-start">
+                        <DialogTitle className="flex items-center gap-2">
+                            <MapPin className="h-5 w-5 text-primary" />
+                            Office Location
+                        </DialogTitle>
+                        <DialogClose>
+                            <X className="h-4 w-4 hover:text-primary transition-colors" />
+                        </DialogClose>
+                    </div>
 
                     <div className="py-4 space-y-6">
-                        <div className="rounded-md overflow-hidden border">
-                            {currentLocation ? (
+                        {!currentLocation ? (
+                            <div className="rounded-md border p-6 flex flex-col items-center justify-center space-y-4">
+                                <AlertTriangle className="h-10 w-10 text-amber-500" />
+                                <div className="text-center">
+                                    <h3 className="font-medium">Location Access Required</h3>
+                                    <p className="text-sm text-muted-foreground mt-1">
+                                        To set your office location, please allow access to your current location
+                                    </p>
+                                </div>
+                                <Button
+                                    onClick={() => {
+                                        navigator.geolocation.getCurrentPosition(
+                                            (position) => {
+                                                setCurrentLocation({
+                                                    lat: position.coords.latitude,
+                                                    lng: position.coords.longitude,
+                                                });
+                                            },
+                                            (error) => {
+                                                console.error('Error fetching location:', error);
+                                                toast.error("Unable to access location. Please check your browser permissions.");
+                                            }
+                                        );
+                                    }}
+                                    className="mt-2"
+                                >
+                                    Allow Location Access
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="rounded-md overflow-hidden border">
                                 <LoadScript googleMapsApiKey="AIzaSyASY9lRvSpjIR2skVaTLd6x7M1Kx2zY-4k">
                                     <GoogleMap
                                         mapContainerStyle={mapContainerStyle}
@@ -812,16 +840,30 @@ export default function Settings({ }: {}) {
                                             zoomControl: true,
                                             styles: [{ featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }]
                                         }}
+                                        onClick={(e) => {
+                                            if (e.latLng) {
+                                                setCurrentLocation({
+                                                    lat: e.latLng.lat(),
+                                                    lng: e.latLng.lng(),
+                                                });
+                                            }
+                                        }}
                                     >
-                                        <Marker position={currentLocation} />
+                                        <Marker position={currentLocation} draggable={true} onDragEnd={(e) => {
+                                            if (e.latLng) {
+                                                setCurrentLocation({
+                                                    lat: e.latLng.lat(),
+                                                    lng: e.latLng.lng(),
+                                                });
+                                            }
+                                        }} />
                                     </GoogleMap>
                                 </LoadScript>
-                            ) : (
-                                <div className="flex items-center justify-center h-[300px]">
-                                    <Loader />
-                                </div>
-                            )}
-                        </div>
+                                <p className="text-xs text-muted-foreground mt-2 text-center">
+                                    Click to set location or drag the marker to adjust precisely
+                                </p>
+                            </div>
+                        )}
 
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
@@ -831,10 +873,14 @@ export default function Settings({ }: {}) {
                                         Enable to restrict attendance based on location
                                     </p>
                                 </div>
-                                <Switch checked={allowGeofencing} onCheckedChange={setAllowGeofencing} />
+                                <Switch
+                                    checked={allowGeofencing}
+                                    onCheckedChange={setAllowGeofencing}
+                                    disabled={!currentLocation}
+                                />
                             </div>
 
-                            {allowGeofencing && (
+                            {allowGeofencing && currentLocation && (
                                 <div className="space-y-3">
                                     <Card className="border-primary/20">
                                         <CardContent className="p-4 space-y-4">
@@ -868,7 +914,11 @@ export default function Settings({ }: {}) {
                     </div>
 
                     <DialogFooter>
-                        <Button onClick={handleSaveLocation} className="w-full">
+                        <Button
+                            onClick={handleSaveLocation}
+                            className="w-full"
+                            disabled={!currentLocation}
+                        >
                             Save Location Settings
                         </Button>
                     </DialogFooter>

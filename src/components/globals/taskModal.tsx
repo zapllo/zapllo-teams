@@ -1280,17 +1280,12 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal, prefillData }) => {
                 open={isDatePickerOpen}
                 onOpenChange={setIsDatePickerOpen}
               >
-
-                <DialogContent className=" z-[100] bg-[#0a0d28] scale-90 pb-4 flex justify-center ">
-                  <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
-                    <div className="w-full flex mb-4  justify-between">
-                      <CustomDatePicker
-                        selectedDate={dueDate ?? new Date()}
-                        onDateChange={handleDateChange}
-                        onCloseDialog={() => setIsDatePickerOpen(false)}
-                      />
-                    </div>
-                  </div>
+                <DialogContent className=" z-[100] scale-90 pb-4 flex justify-center ">
+                  <CustomDatePicker
+                    selectedDate={dueDate ?? new Date()}
+                    onDateChange={handleDateChange}
+                    onCloseDialog={() => setIsDatePickerOpen(false)}
+                  />
                 </DialogContent>
               </Dialog>
             )}
@@ -1301,9 +1296,8 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal, prefillData }) => {
                 open={isTimePickerOpen}
                 onOpenChange={setIsTimePickerOpen}
               >
-                <DialogContent className="z-[100] scale-90 bg-[#0a0d28] flex justify-center ">
-                  <div className="z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
-                    <div className="w-full flex mb-4 justify-between">
+                <DialogContent className="z-[100] scale-90  flex justify-center ">
+
                       <CustomTimePicker
                         selectedTime={dueTime} // Pass the selected time
                         onTimeChange={handleTimeChange} // Update the time state when changed
@@ -1314,8 +1308,6 @@ const TaskModal: React.FC<TaskModalProps> = ({ closeModal, prefillData }) => {
                           setIsDatePickerOpen(true); // Reopen the date picker
                         }}
                       />
-                    </div>
-                  </div>
                 </DialogContent>
               </Dialog>
             )}

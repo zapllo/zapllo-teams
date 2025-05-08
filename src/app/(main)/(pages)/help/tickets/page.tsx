@@ -280,10 +280,8 @@ export default function Tickets() {
 
   return (
     <div className="flex mt-12 h-screen">
-      <div className="mt-12 h-full">
-        <ChecklistSidebar />
-      </div>
-      <div className="flex-1 ml-52 p-6">
+
+      <div className="flex-1  p-6">
         <Card className="w-full max-w-6xl bg-transparent mx-auto">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">

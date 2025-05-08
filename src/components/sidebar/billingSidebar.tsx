@@ -1,63 +1,117 @@
-'use client'
-// components/BillingSidebar.tsx
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Button } from "@/components/ui/button";
 import { usePathname, useRouter } from 'next/navigation';
-import { File, Wallet } from 'lucide-react';
+import {
+  File,
+  Wallet,
+  CreditCard,
+  Receipt,
+  Clock,
+} from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
+import { cn } from "@/lib/utils";
 
-const BillingSidebar: React.FC = () => {
-    const pathname = usePathname();
-    const router = useRouter();
+interface BillingSidebarProps {
+  sidebarWidth?: number;
+}
 
-    const handleNavigation = (path: string) => {
-        router.push(path);
+const BillingSidebar: React.FC<BillingSidebarProps> = ({ sidebarWidth = 20 }) => {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const response = await axios.get("/api/users/me");
+        setUserRole(response.data.data.role);
+      } catch (error) {
+        console.error("Error fetching user role:", error);
+      }
     };
 
-    const isActive = (path: string) => pathname === path;
+    fetchUserRole();
+  }, []);
 
-    return (
-        <div className="w-52 border-r dark:bg-[#04061E] text-white h-screen">
-            <div className='space-y-4'>
-                <div className='flex justify-center'>
-                    <Button
-                        variant={isActive('/dashboard/billing') ? 'default' : 'default'}
-                        className={`w-[90%] rounded-lg mt-6 gap-2 shadow-none px-4 justify-start hover:bg-accent dark:hover:bg-[#815BF5] hover:rounded-lg bg-transparent mb-2 ${isActive('/dashboard/billing') ? 'bg-[#815BF5] hover:bg-[#815BF5] rounded-lg text-white' : 'text-black dark:text-gray-400'}`}
-                        onClick={() => handleNavigation('/dashboard/billing')}
-                    >
-                        <File className='h-5' /> Billing
-                    </Button>
-                </div>
-                <div className='flex justify-center'>
-                    <Button
-                        variant={isActive('/dashboard/billing/wallet-logs') ? 'default' : 'default'}
-                        className={`w-[90%] rounded-lg gap-2 px-4 shadow-none bg-transparent justify-start hover:bg-accent dark:hover:bg-[#815BF5] hover:rounded-lg mb-2 ${isActive('/dashboard/billing/wallet-logs') ? 'bg-[#815BF5] hover:bg-[#815BF5] rounded-lg text-white' : 'text-black dark:text-gray-400'}`}
-                        onClick={() => handleNavigation('/dashboard/billing/wallet-logs')}
-                    >
-                        <Wallet className='h-5' /> Billing Logs
-                    </Button>
-                </div>
-                <div className='flex justify-center'>
-                    <Button
-                        variant={isActive('/dashboard/wallet-recharge') ? 'default' : 'default'}
-                        className={`w-[90%] rounded-lg gap-2 ml-2 shadow-none bg-transparent justify-start hover:bg-accent dark:hover:bg-[#815BF5] hover:rounded-lg mb-2 ${isActive('/dashboard/bwallet-recharge') ? 'bg-[#815BF5] hover:bg-[#815BF5] rounded-lg text-white' : 'text-black dark:text-gray-400'}`}
-                        onClick={() => handleNavigation('/dashboard/wallet-recharge')}
-                    >
-                        <FaWhatsapp className='h-5' /> WABA Wallet
-                    </Button>
-                </div>
-                {/* <div className='flex justify-center'>
-                    <Button
-                        variant={isActive('/active-plan') ? 'default' : 'default'}
-                        className={`w-[90%] rounded-none gap-2 px-4 bg-transparent justify-start hover:bg-transparent mb-2 ${isActive('/active-plan') ? 'bg-[#815BF5] text-white' : 'text-gray-400'}`}
-                        onClick={() => handleNavigation('/active-plan')}
-                    >
-                        Active Plan
-                    </Button>
-                </div> */}
-            </div>
+  const handleNavigation = (path: string) => {
+    router.push(path);
+  };
+
+  const isActive = (path: string) => pathname === path;
+  const isOrgAdmin = userRole === "orgAdmin";
+
+  return (
+    <div className="h-screen overflow-y-scroll scrollbar-hide mt-4 dark:bg-[#04061e]">
+      <div className="px-4 py-6 flex flex-col h-full">
+        {/* Header */}
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-1">
+            <CreditCard className="h-5 w-5 text-primary" />
+            <h2 className="font-semibold">Billing & Payments</h2>
+          </div>
+          <div className="h-0.5 bg-gradient-to-r from-primary/60 to-transparent mt-2"></div>
         </div>
-    );
+
+        {/* Navigation Groups */}
+        <div className="space-y-6">
+          {/* Main Billing Section */}
+          <div className="space-y-1">
+            <h3 className="text-xs font-medium text-muted-foreground ml-2 mb-2">OVERVIEW</h3>
+            <Button
+              variant="ghost"
+              className={cn(
+                "w-full justify-start rounded-md gap-3 py-2 h-auto",
+                isActive('/dashboard/billing')
+                  ? "bg-primary/10 text-primary font-medium"
+                  : "hover:bg-muted"
+              )}
+              onClick={() => handleNavigation('/dashboard/billing')}
+            >
+              <File className={cn("h-4 w-4", isActive('/dashboard/billing') && "text-primary")} />
+              <span>Billing</span>
+            </Button>
+          </div>
+
+          {/* Transaction Section */}
+          <div className="space-y-1">
+            <h3 className="text-xs font-medium text-muted-foreground ml-2 mb-2">TRANSACTIONS</h3>
+            <Button
+              variant="ghost"
+              className={cn(
+                "w-full justify-start rounded-md gap-3 py-2 h-auto",
+                isActive('/dashboard/billing/wallet-logs')
+                  ? "bg-primary/10 text-primary font-medium"
+                  : "hover:bg-muted"
+              )}
+              onClick={() => handleNavigation('/dashboard/billing/wallet-logs')}
+            >
+              <Wallet className={cn("h-4 w-4", isActive('/dashboard/billing/wallet-logs') && "text-primary")} />
+              <span>Billing Logs</span>
+            </Button>
+
+            <Button
+              variant="ghost"
+              className={cn(
+                "w-full justify-start rounded-md gap-3 py-2 h-auto",
+                isActive('/dashboard/wallet-recharge')
+                  ? "bg-primary/10 text-primary font-medium"
+                  : "hover:bg-muted"
+              )}
+              onClick={() => handleNavigation('/dashboard/wallet-recharge')}
+            >
+              <FaWhatsapp className={cn("h-4 w-4", isActive('/dashboard/wallet-recharge') && "text-primary")} />
+              <span>WABA Wallet</span>
+            </Button>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default BillingSidebar;

@@ -120,24 +120,22 @@ const HolidayFormModal: React.FC<HolidayFormModalProps> = ({
                                     </button>
                                 </DialogTrigger>
 
-                                <DialogContent className="z-[100] bg-black dark:bg-[#0a0d28] scale-90 flex justify-center">
-                                    <div className="z-[20] rounded-lg scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
-                                        <div className="w-full flex mb-4 justify-between">
-                                            <CustomDatePicker
-                                                selectedDate={holidayDate ? new Date(holidayDate) : null}
-                                                onDateChange={(newDate) => {
-                                                    const localDate = new Date(
-                                                        newDate.getTime() - newDate.getTimezoneOffset() * 60000
-                                                    )
-                                                        .toISOString()
-                                                        .split("T")[0];
-                                                    setHolidayDate(localDate);
-                                                    setIsDatePickerOpen(false); // Close the picker after selecting the date
-                                                }}
-                                                onCloseDialog={() => setIsDatePickerOpen(false)}
-                                            />
-                                        </div>
-                                    </div>
+
+                                <DialogContent className=" scale-90 flex justify-center">
+
+                                    <CustomDatePicker
+                                        selectedDate={holidayDate ? new Date(holidayDate) : null}
+                                        onDateChange={(newDate) => {
+                                            const localDate = new Date(
+                                                newDate.getTime() - newDate.getTimezoneOffset() * 60000
+                                            )
+                                                .toISOString()
+                                                .split("T")[0];
+                                            setHolidayDate(localDate);
+                                            setIsDatePickerOpen(false); // Close the picker after selecting the date
+                                        }}
+                                        onCloseDialog={() => setIsDatePickerOpen(false)}
+                                    />
                                 </DialogContent>
                             </Dialog>
                         </div>

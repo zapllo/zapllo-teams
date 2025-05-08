@@ -2,23 +2,61 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import { Paperclip, Mic, Calendar } from "lucide-react";
-import { FaTimes, FaUpload } from "react-icons/fa";
+import {
+  Calendar,
+  FileText,
+  Mic,
+  Calendar as CalendarIcon,
+  X,
+  Info,
+  PauseCircle,
+  UploadCloud,
+  Clock
+} from "lucide-react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { format, parseISO } from "date-fns";
+import { toast } from "sonner";
+import { useAnimation, motion } from "framer-motion";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+import CustomDatePicker from "../globals/date-picker";
 import CustomAudioPlayer from "../globals/customAudioPlayer";
 import Loader from "../ui/loader";
-import { toast, Toaster } from "sonner";
-import CustomDatePicker from "../globals/date-picker";
-import { useAnimation, motion } from "framer-motion";
-import { Separator } from "../ui/separator";
-import { CrossCircledIcon, StopIcon } from "@radix-ui/react-icons";
-import { Button } from "../ui/button";
-import { Dialog, DialogClose, DialogContent, DialogOverlay, DialogPortal, DialogTitle } from "../ui/dialog";
-import { format, parseISO } from "date-fns";
-import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 interface LeaveFormProps {
   leaveTypes: any[]; // Leave types passed as prop
-
   onClose: () => void; // Prop to close the modal
 }
 
@@ -64,8 +102,8 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
   const [availableUnits, setAvailableUnits] = useState<LeaveDay["unit"][]>([]);
   const [allotedLeaves, setAllotedLeaves] = useState<number | null>(null);
   const [userLeaveBalance, setUserLeaveBalance] = useState<number | null>(null);
-  const [userLeaveBalances, setUserLeaveBalances] = useState<any[]>([]); // Store user leave balances
-  const [error, setError] = useState<string | null>(null); // Error message state
+  const [userLeaveBalances, setUserLeaveBalances] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const audioURLRef = useRef<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [recording, setRecording] = useState(false);
@@ -73,44 +111,25 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
-  const [files, setFiles] = useState<File[]>([]); // State to manage file uploads
+  const [files, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [totalAppliedDays, setTotalAppliedDays] = useState<number>(0); // State to store total applied days
-  const [isFromDatePickerOpen, setIsFromDatePickerOpen] = useState(false); // Manage From Date Picker
-  const [isToDatePickerOpen, setIsToDatePickerOpen] = useState(false); // Manage To Date Picker
+  const [totalAppliedDays, setTotalAppliedDays] = useState<number>(0);
+  const [isFromDatePickerOpen, setIsFromDatePickerOpen] = useState(false);
+  const [isToDatePickerOpen, setIsToDatePickerOpen] = useState(false);
   const controls = useAnimation();
   const intervalRef = useRef<number | null>(null);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [showDateControls, setShowDateControls] = useState(false);
 
-  const modalVariants = {
-    hidden: {
-      opacity: 0,
-      y: "100%",
-    },
-    visible: {
-      opacity: 1,
-      y: "0%",
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 40,
-      },
-    },
-  };
-
-  // Trigger the animation when the component mounts
   useEffect(() => {
     controls.start("visible");
-  }, [controls]);
 
-  useEffect(() => {
+    // Fetch user data when component mounts
     const fetchUserData = async () => {
       try {
-        const response = await axios.get("/api/users/me"); // Adjust API endpoint as needed
+        const response = await axios.get("/api/users/me");
         const user = response.data.data;
-
         if (user) {
-          // Set the user's leave balances
           setUserLeaveBalances(user.leaveBalances);
         }
       } catch (error) {
@@ -119,7 +138,7 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
     };
 
     fetchUserData();
-  }, []);
+  }, [controls]);
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -147,20 +166,25 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
           );
         }
         setAvailableUnits(selectedUnits as LeaveDay["unit"][]);
-
-        // Set allotted leaves and user balance
         setAllotedLeaves(selectedLeaveType.allotedLeaves);
-        // Find the user's leave balance for the selected leave type
+
         const userLeaveBalanceForType = userLeaveBalances.find(
           (balance) => balance.leaveType === value
         );
-
-        // Set the leave balance for the selected leave type
         setUserLeaveBalance(
           userLeaveBalanceForType ? userLeaveBalanceForType.balance : null
         );
+
+        // Show date controls after selecting leave type
+        setShowDateControls(true);
       }
     }
+  };
+
+  const handleSelectChange = (value: string) => {
+    handleInputChange({
+      target: { name: "leaveType", value }
+    } as React.ChangeEvent<HTMLSelectElement>);
   };
 
   const handleUnitChange = (date: string, newUnit: LeaveDay["unit"]) => {
@@ -176,14 +200,22 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
       const start = new Date(fromDate);
       const end = new Date(toDate);
       const diffTime = Math.abs(end.getTime() - start.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Include both start and end date
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
       return diffDays;
     }
     return 0;
   };
 
+  // Adjust the submit handler to match the original implementation
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // First check for required fields and errors
+    if (!formData.leaveType || formData.leaveDays.length === 0 || error) {
+      return;
+    }
+
+    setLoading(true);
 
     // First, upload files (including audio) to /api/upload
     let fileUrls: string[] = [];
@@ -214,10 +246,12 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
           audioUrl = uploadData.audioUrl || null; // Audio URL if present
         } else {
           console.error("Failed to upload files.");
+          setLoading(false);
           return;
         }
       } catch (error) {
         console.error("Error uploading files:", error);
+        setLoading(false);
         return;
       }
     }
@@ -234,7 +268,6 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
     };
 
     try {
-      setLoading(true);
       const response = await fetch("/api/leaves", {
         method: "POST",
         headers: {
@@ -245,29 +278,30 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
 
       if (response.ok) {
         const data = await response.json();
-        toast(<div className=" w-full mb-6 gap-2 m-auto  ">
-          <div className="w-full flex  justify-center">
-            <DotLottieReact
-              src="/lottie/tick.lottie"
-              loop
-              autoplay
-            />
+        toast(
+          <div className="w-full mb-6 gap-2 m-auto">
+            <div className="w-full flex justify-center">
+              <DotLottieReact src="/lottie/tick.lottie" loop autoplay />
+            </div>
+            <h1 className="text-black dark:text-white text-center font-medium text-lg">
+              Leave request submitted successfully
+            </h1>
           </div>
-          <h1 className="text-black text-center font-medium text-lg">Leave request submitted successfully</h1>
-        </div>);
+        );
         console.log("Leave request submitted successfully:", data);
         onClose(); // Close the modal on successful submission
       } else {
-        console.error("Failed to submit leave request.");
+        const errorData = await response.json();
+        console.error("Failed to submit leave request:", errorData);
+        toast.error(errorData.message || "Failed to submit leave request");
       }
-      setLoading(false);
     } catch (error) {
       console.error("Error submitting leave request:", error);
+      toast.error("Error submitting leave request");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-    onClose();
   };
-
   useEffect(() => {
     if (formData.fromDate && formData.toDate) {
       const start = new Date(formData.fromDate);
@@ -285,14 +319,18 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
   }, [formData.fromDate, formData.toDate]);
 
   useEffect(() => {
+    // Calculate and update total applied days whenever leaveDays change
+    const totalDays = calculateTotalAppliedDays();
+    setTotalAppliedDays(totalDays);
+
     // Check if the requested leave days exceed the user's balance
-    const requestedDays = calculateRequestedDays();
-    if (userLeaveBalance !== null && requestedDays > userLeaveBalance) {
-      setError("Exceeded leave request balance");
+    if (userLeaveBalance !== null && totalDays > userLeaveBalance) {
+      const exceededDays = totalDays - userLeaveBalance;
+      setError(`Leave request exceeds balance by ${exceededDays} day(s)`);
     } else {
       setError(null);
     }
-  }, [formData.fromDate, formData.toDate, userLeaveBalance]);
+  }, [formData.leaveDays, userLeaveBalance]);
 
   // Handle file upload logic
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -307,13 +345,13 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
       }
 
       if (validFiles.length > 0) {
-        setFiles(validFiles); // Update state with all selected files
+        setFiles((prevFiles) => [...prevFiles, ...validFiles]);
       }
     }
   };
 
   const removeFile = (index: number) => {
-    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index)); // Remove the file at the specified index
+    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
   };
 
   // Handle audio recording logic
@@ -321,8 +359,7 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
-      const AudioContext =
-        window.AudioContext || (window as any).webkitAudioContext; // Type assertion
+      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
       const audioContext = new AudioContext();
       const analyser = audioContext.createAnalyser();
       const source = audioContext.createMediaStreamSource(stream);
@@ -344,10 +381,10 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
       mediaRecorder.onstop = () => {
         setRecording(false);
         if (intervalRef.current !== null) {
-          clearInterval(intervalRef.current); // Clear the timer
-          intervalRef.current = null; // Reset the ref
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
         }
-        setRecordingTime(0); // Reset timer
+        setRecordingTime(0);
       };
 
       mediaRecorder.start();
@@ -359,9 +396,7 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
       }, 1000);
 
       // Real-time waveform visualization
-      // Real-time waveform visualization (Bars Version)
       const canvas = canvasRef.current;
-      console.log(canvas);
       if (canvas) {
         const canvasCtx = canvas.getContext("2d");
         if (canvasCtx) {
@@ -370,24 +405,22 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
               requestAnimationFrame(drawWaveform);
               analyserRef.current.getByteFrequencyData(dataArray);
 
-              // Clear the canvas before rendering bars
-              canvasCtx.fillStyle = "rgb(255, 255, 255)";
+              canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+              canvasCtx.fillStyle = "rgba(255, 255, 255, 0.1)";
               canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
 
               const bars = 40;
               const barWidth = 2;
               const totalBarWidth = bars * barWidth;
               const gapWidth = (canvas.width - totalBarWidth) / (bars - 1);
-              const step = Math.floor(bufferLength / bars); // Number of bars to draw
+              const step = Math.floor(bufferLength / bars);
 
               for (let i = 0; i < bars; i++) {
-                const barHeight =
-                  (dataArray[i * step] / 255) * canvas.height * 0.8; // Normalizing bar height
+                const barHeight = (dataArray[i * step] / 255) * canvas.height * 0.8;
                 const x = i * (barWidth + gapWidth);
-                const y = (canvas.height - barHeight) / 2; // Center the bars vertically
+                const y = (canvas.height - barHeight) / 2;
 
-                // Draw each bar
-                canvasCtx.fillStyle = "rgb(99, 102, 241)"; // Bar color
+                canvasCtx.fillStyle = "rgb(129, 91, 245)";
                 canvasCtx.fillRect(x, y, barWidth, barHeight);
               }
             }
@@ -400,12 +433,12 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
       mediaRecorderRef.current = mediaRecorder;
     } catch (error) {
       console.error("Error accessing microphone:", error);
+      toast.error("Could not access microphone");
     }
   };
 
   const stopRecording = () => {
     mediaRecorderRef.current?.stop();
-    // Stop all tracks of the media stream to release the microphone
     if (mediaRecorderRef.current?.stream) {
       mediaRecorderRef.current.stream
         .getTracks()
@@ -415,383 +448,373 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
 
   const calculateTotalAppliedDays = () => {
     let totalDays = 0;
-
     for (const leaveDay of formData.leaveDays) {
-      totalDays += unitMapping[leaveDay.unit]; // Use the unit mapping to calculate total days
+      totalDays += unitMapping[leaveDay.unit];
     }
-
     return totalDays;
   };
 
-  useEffect(() => {
-    // Calculate and update total applied days whenever leaveDays change
-    const totalDays = calculateTotalAppliedDays();
-    setTotalAppliedDays(totalDays);
-  }, [formData.leaveDays]);
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
 
-
-  useEffect(() => {
-    const requestedDays = calculateTotalAppliedDays(); // Calculate requested days based on leaveDays
-    if (userLeaveBalance !== null && requestedDays > userLeaveBalance) {
-      const exceededDays = requestedDays - userLeaveBalance; // Calculate exceeded days
-      setError(`Leave request exceeds balance by ${exceededDays} day(s), please apply them under any other leave type`);
-    } else {
-      setError(null);
-    }
-  }, [formData.leaveDays, userLeaveBalance]);
-
+  const getLeaveTypeName = (id: string) => {
+    const leaveType = leaveTypes.find(type => type._id === id);
+    return leaveType ? leaveType.leaveType : 'Select Leave Type';
+  };
 
   return (
-    <Dialog open onOpenChange={onClose}>
-      {/* <Toaster /> */}
-      <DialogContent className="z-[100]  overflow-y-scroll h-full max-h-screen m-auto flex w-full max-w-lg  ">
-        <div className=" scrollbar-hide    shadow-lg w-full   max-w-lg  rounded-lg">
-          <div className="flex border-b py-2  w-full justify-between ">
-            <DialogTitle className="text-md   px-6 py-2 font-medium">
-              Submit Leave Request
-            </DialogTitle>
-            <DialogClose className=" px-6 py-2">
-              <CrossCircledIcon className="scale-150 mt-1 hover:bg-[#ffffff] rounded-full hover:text-[#815BF5]" />
-            </DialogClose>
-          </div>
+    <DialogContent className="p-6 h-fit max-h-screen  overflow-y-scroll">
+      <DialogHeader>
+        <DialogTitle className="text-xl flex items-center gap-2">
+          <Calendar className="h-5 w-5 text-primary" />
+          Apply for Leave
+        </DialogTitle>
+        <DialogDescription>
+          Fill out the form below to submit your leave request
+        </DialogDescription>
+      </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-4 p-6 h-full">
-            <div className="relative">
-              <label className="absolute bg-white dark:bg-[#0b0d29] ml-2 text-xs text-[#787CA5] -mt-2 px-1">
-                Leave Type
-              </label>
-              <select
-                name="leaveType"
-                value={formData.leaveType}
-                onChange={handleInputChange}
-                className="w-full text-xs p-2  outline-none border rounded bg-transparent"
-              >
-                <option className="dark:bg-[#1A1C20]" value="">
-                  Select Leave Type
-                </option>
+      <form onSubmit={handleSubmit} className="space-y-5 mt-2 ">
+        {/* Leave Type Selection */}
+        <div className="space-y-2">
+          <Label htmlFor="leaveType">Leave Type</Label>
+          <Select
+            value={formData.leaveType}
+            onValueChange={handleSelectChange}
+          >
+            <SelectTrigger id="leaveType" className="w-full">
+              <SelectValue placeholder="Select Leave Type" />
+            </SelectTrigger>
+            <SelectContent className="z-[100]">
+              <SelectGroup>
+                <SelectLabel>Available Leave Types</SelectLabel>
                 {leaveTypes.map((type) => (
-                  <option
-                    key={type._id}
-                    className="dark:bg-[#1A1C20]"
-                    value={type._id}
-                  >
+                  <SelectItem key={type._id} value={type._id}>
                     {type.leaveType}
-                  </option>
+                  </SelectItem>
                 ))}
-              </select>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Leave Balance Info */}
+        {allotedLeaves !== null && userLeaveBalance !== null && (
+          <Card className="bg-muted/50">
+            <CardContent className="p-4">
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-sm font-medium">Leave Balance</span>
+                <Badge variant="outline">
+                  {getLeaveTypeName(formData.leaveType)}
+                </Badge>
+              </div>
+
+              {/* <div className="h-2 mb-4">
+                <Progress
+                  value={(userLeaveBalance / allotedLeaves) * 100}
+                  className="h-2"
+                />
+              </div> */}
+
+              <div className="flex justify-between text-sm">
+                <span>Used: {allotedLeaves - userLeaveBalance} / {allotedLeaves}</span>
+                <span className="font-medium">
+                  Available: {userLeaveBalance} days
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Date Selection */}
+        {showDateControls && (
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="fromDate">Start Date</Label>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full justify-start text-left font-normal"
+                onClick={() => setIsFromDatePickerOpen(true)}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {formData.fromDate ? (
+                  format(new Date(formData.fromDate), "PPP")
+                ) : (
+                  "Select start date"
+                )}
+              </Button>
             </div>
 
-            {/* Display Allotted Leaves and Balance */}
-            {allotedLeaves !== null && userLeaveBalance !== null && (
-              <div className="mt-2 flex justify-between text-xs dark:text-white border dark:border-none dark:bg-[#252738] p-3 rounded">
-                <p>Total Allotted Leaves: {allotedLeaves}</p>
-                <p>Remaining Balance: {userLeaveBalance}</p>
-              </div>
-            )}
-
-            <div className="flex justify-between space-x-4">
-              <div className="relative w-full">
-                <button
-                  type="button"
-                  onClick={() => setIsFromDatePickerOpen(true)}
-                  className="w-full text-sm p-2 outline-none border rounded bg-[#] flex gap-1 mt-auto dark:text-gray-300"
-                  disabled={!formData.leaveType}
-                >
-                  <Calendar className="h-5" />{" "}
-                  {formData.fromDate ? (
-                    new Date(formData.fromDate).toLocaleDateString("en-GB")
-                  ) : (
-                    <h1 className="dark:text-[#787CA5]">Start Date</h1>
-                  )}
-                </button>
-                {/* {isFromDatePickerOpen && (
-                    <div className="fixed inset-0  bg-black/50 opacity- z-[10]">
-                      <div className="bg-[#1A1C20] ml-80 mt-32 scale-75   absolute z-[50] h-[510px] max-h-screen text-[#D0D3D3] w-1/2 rounded-lg p-8">
-                        <CustomDatePicker
-                          selectedDate={
-                            formData.fromDate
-                              ? new Date(formData.fromDate)
-                              : null
-                          }
-                          onDateChange={(date) => {
-                            setFormData({
-                              ...formData,
-                              fromDate: date.toISOString().split("T")[0],
-                            });
-                            setIsFromDatePickerOpen(false);
-                          }}
-                          onCloseDialog={() => setIsFromDatePickerOpen(false)}
-                        />
-                      </div>
-                    </div>
-                  )} */}
-                {isFromDatePickerOpen && (
-                  <Dialog
-                    open={isFromDatePickerOpen}
-                    onOpenChange={setIsFromDatePickerOpen}
-                  >
-                    <DialogContent className=" z-[100] bg-black dark:bg-[#0a0d28] scale-90  flex justify-center ">
-                      <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
-                        <div className="w-full flex mb-4 justify-between">
-                          <CustomDatePicker
-                            selectedDate={
-                              formData.fromDate
-                                ? new Date(formData.fromDate)
-                                : null
-                            }
-                            onDateChange={(date) => {
-                              setFormData({
-                                ...formData,
-                                fromDate: date.toISOString().split("T")[0],
-                              });
-                              setIsFromDatePickerOpen(false);
-                            }}
-                            onCloseDialog={() =>
-                              setIsFromDatePickerOpen(false)
-                            }
-                          />
-                        </div>
-                      </div>
-                    </DialogContent>
-
-                  </Dialog>
+            <div className="space-y-2">
+              <Label htmlFor="toDate">End Date</Label>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full justify-start text-left font-normal"
+                onClick={() => setIsToDatePickerOpen(true)}
+                disabled={!formData.fromDate}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {formData.toDate ? (
+                  format(new Date(formData.toDate), "PPP")
+                ) : (
+                  "Select end date"
                 )}
-              </div>
-              <div className="relative w-full">
-                <button
-                  type="button"
-                  onClick={() => setIsToDatePickerOpen(true)}
-                  className="w-full text-sm flex gap-1 p-2 outline-none border rounded bg-[#] dark:text-gray-300"
-                  disabled={!formData.leaveType}
-                >
-                  <Calendar className="h-5" />{" "}
-                  {formData.toDate ? (
-                    new Date(formData.toDate).toLocaleDateString("en-GB")
-                  ) : (
-                    <h1 className="dark:text-[#787CA5]">End Date</h1>
-                  )}
-                </button>
-                {/* {isToDatePickerOpen && (
-                    <div className="fixed inset-0  bg-black/50 opacity- z-[10]">
-                      <div className="bg-[#1A1C20] ml-80 mt-32 scale-75   absolute z-[50] h-[510px] max-h-screen text-[#D0D3D3] w-1/2 rounded-lg p-8">
-                        <CustomDatePicker
-                          selectedDate={
-                            formData.toDate ? new Date(formData.toDate) : null
-                          }
-                          onDateChange={(date) => {
-                            setFormData({
-                              ...formData,
-                              toDate: date.toISOString().split("T")[0],
-                            });
-                            setIsToDatePickerOpen(false);
-                          }}
-                          onCloseDialog={() => setIsToDatePickerOpen(false)}
-                        />
-                      </div>
-                    </div>
-                  )} */}
+              </Button>
+            </div>
+          </div>
+        )}
 
-                {isToDatePickerOpen && (
-                  <Dialog
-                    open={isToDatePickerOpen}
-                    onOpenChange={setIsToDatePickerOpen}
-                  >
-                    <DialogPortal>
-
-                      <DialogContent className=" z-[100] bg-black dark:bg-[#0a0d28] scale-90 flex justify-center ">
-                        <div className=" z-[20] rounded-lg  scale-[80%] max-w-4xl flex justify-center items-center w-full relative">
-                          <div className="w-full flex mb-4 justify-between">
-                            <CustomDatePicker
-                              selectedDate={
-                                formData.toDate
-                                  ? new Date(formData.toDate)
-                                  : null
-                              }
-                              onDateChange={(date) => {
-                                setFormData({
-                                  ...formData,
-                                  toDate: date.toISOString().split("T")[0],
-                                });
-                                setIsToDatePickerOpen(false);
-                              }}
-                              onCloseDialog={() =>
-                                setIsToDatePickerOpen(false)
-                              }
-                            />
-                          </div>
-                        </div>
-                      </DialogContent>
-                    </DialogPortal>
-                  </Dialog>
-                )}
-              </div>
+        {/* Leave Days Configuration */}
+        {formData.leaveDays.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <Label>Leave Days Configuration</Label>
+              <Badge variant={error ? "destructive" : "outline"}>
+                {totalAppliedDays} day(s)
+              </Badge>
             </div>
 
-            {/* Dynamically generated leave days with unit selection */}
-            <div>
-              {formData.toDate &&
-                formData.fromDate &&
-                formData.leaveDays.map((day, index) => (
+            <ScrollArea className="h-[200px] rounded-md border p-2">
+              <div className="space-y-2">
+                {formData.leaveDays.map((day, index) => (
                   <div
                     key={index}
-                    className="mb-2 flex border p-2 justify-between"
+                    className="flex items-center justify-between p-2 rounded-md bg-muted/50"
                   >
-                    <span className="text-sm mt-2">
-                      {format(parseISO(day.date), "dd-MM-yyyy")}
+                    <span className="text-sm">
+                      {format(parseISO(day.date), "EEE, dd MMM yyyy")}
                     </span>
-                    <select
+
+                    <Select
                       value={day.unit}
-                      onChange={(e) =>
-                        handleUnitChange(
-                          day.date,
-                          e.target.value as LeaveDay["unit"]
-                        )
+                      onValueChange={(value) =>
+                        handleUnitChange(day.date, value as LeaveDay["unit"])
                       }
-                      className="ml-2 p-2 border bg-transparent outline-none rounded text-sm"
                     >
-                      {availableUnits.map((unit) => (
-                        <option
-                          key={unit}
-                          className="dark:bg-[#1A1C20]"
-                          value={unit}
-                        >
-                          {unit}
-                        </option>
-                      ))}
-                    </select>
+                      <SelectTrigger className="w-[140px] h-8">
+                        <SelectValue placeholder="Select unit" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableUnits.map((unit) => (
+                          <SelectItem key={unit} value={unit}>
+                            {unit}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 ))}
-            </div>
-            <div className="mt-2  text-xs dark:text-white border dark:border-none dark:bg-[#252738] p-3 rounded">
-              <p className="text-right">Leave Application for : {totalAppliedDays} day(s)</p>
-              <div>
-              {error && <p className="text-[#787CA5] text-xs">{error}</p>}
               </div>
-            </div>
-            <div>
-              <div className="relative">
-                <label className="absolute bg-white dark:bg-[#0b0d29] text-[#787CA5] ml-2 text-xs -mt-2 px-1">
-                  Leave Reason
-                </label>
+            </ScrollArea>
+
+            {error && (
+              <div className="text-sm text-destructive flex items-center gap-2">
+                <Info className="h-4 w-4" />
+                {error}
               </div>
-              <textarea
-                name="leaveReason"
-                value={formData.leaveReason}
-                onChange={handleInputChange}
-                className="w-full focus-within:border-[#815BF5] text-sm p-2 border bg-transparent outline-none rounded"
-              />
-            </div>
+            )}
+          </div>
+        )}
 
+        {/* Leave Reason */}
+        <div className="space-y-2">
+          <Label htmlFor="leaveReason">Reason for Leave</Label>
+          <Textarea
+            id="leaveReason"
+            name="leaveReason"
+            value={formData.leaveReason}
+            onChange={handleInputChange}
+            placeholder="Please provide details about your leave request"
+            className="resize-none min-h-[100px]"
+          />
+        </div>
 
-            {/* Audio Recording and File Attachment */}
-            <div className="flex gap-4">
-              {/* <div  className={`h-8 w-8 rounded-full items-center text-center  border cursor-pointer hover:shadow-white shadow-sm  bg-[#282D32]`}> */}
-              {recording ? (
-                <div
-                  onClick={stopRecording}
-                  className="h-8  w-8 rounded-full text-white items-center text-center  border cursor-pointer hover:shadow-white shadow-sm   bg-red-500"
-                >
-                  <Mic className="h-5 text-center m-auto mt-1" />
-                </div>
-              ) : (
-                <div
-                  onClick={startRecording}
-                  className="h-8  w-8 rounded-full text-white items-center text-center  border cursor-pointer hover:shadow-white shadow-sm  bg-[#815BF5]"
-                >
-                  <Mic className="h-5 text-center m-auto mt-1" />
-                </div>
-              )}
-              {/* </div> */}
-              <input
-                ref={fileInputRef}
-                id="file-upload"
-                type="file"
-                className=""
-                multiple
-                onChange={handleFileUpload}
-                style={{ display: "none" }} // Hide the file input
-              />
-              <label htmlFor="file-upload" className=" ">
-                <img
-                  className="h-8 text-center cursor-pointer "
-                  src="/icons/imagee.png"
-                />
-                {/* <span>Attach Files</span> */}
-              </label>
-              {/* <canvas
-                  ref={canvasRef}
-                  className={` ${recording ? `w-1/2 ml-auto h-12` : "hidden"} `}
-                ></canvas> */}
-            </div>
-
-            {/* Audio Wave  */}
-
-            <div
-              className={` ${recording ? `w-full  ` : "hidden"
-                } border rounded border-dashed border-[#815BF5] px-4 py-2  bg-white flex justify-center`}
-            >
-              <canvas
-                ref={canvasRef}
-                className={` ${recording ? `w-full h-12` : "hidden"} `}
-              ></canvas>
-              {recording && (
-                <div className="flex justify-center items-center">
+        {/* Attachments and Recording */}
+        <div className="space-y-3">
+          <Label>Attachments</Label>
+          <div className="flex flex-wrap gap-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
                   <Button
                     type="button"
-                    onClick={stopRecording} // Call the stopRecording function when clicked
-                    className="bg- flex gap-2 border hover:bg-gray-400 bg-gray-300 text-black px-4 py-2 rounded ml-4"
+                    size="icon"
+                    variant={recording ? "destructive" : "secondary"}
+                    onClick={recording ? stopRecording : startRecording}
                   >
-                    <StopIcon className=" bg-red-500 text-red-500 h-3 w-3" />{" "}
-                    Stop
+                    {recording ? <PauseCircle className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                   </Button>
-                </div>
-              )}
-            </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {recording ? "Stop recording" : "Record voice note"}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
 
-            {/* Display selected files */}
-            {files.length > 0 && (
-              <ul className="list-disc list-inside">
-                {files.map((file, index) => (
-                  <li
-                    key={index}
-                    className="flex justify-between items-center"
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="secondary"
+                    onClick={() => fileInputRef.current?.click()}
                   >
-                    {file.name.slice(0, 7)}....
-                    <button
-                      onClick={() => removeFile(index)}
-                      className="text-red-500 ml-2"
-                    >
-                      <FaTimes className="h-4 w-4" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
+                    <UploadCloud className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Upload files
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
 
-            {audioBlob && (
+            <input
+              ref={fileInputRef}
+              id="file-upload"
+              type="file"
+              className="hidden"
+              multiple
+              onChange={handleFileUpload}
+            />
+
+            {recording && (
+              <Badge variant="outline" className="flex items-center gap-1">
+                <Clock className="h-3 w-3 animate-pulse text-red-500" />
+                Recording: {formatTime(recordingTime)}
+              </Badge>
+            )}
+          </div>
+
+          {/* Audio Visualization */}
+          {recording && (
+            <div className="border rounded-md border-dashed border-primary p-2 bg-primary/5">
+              <canvas
+                ref={canvasRef}
+                className="w-full h-12"
+              ></canvas>
+
+              <Button
+                type="button"
+                onClick={stopRecording}
+                variant="destructive"
+                size="sm"
+                className="mt-2 w-full"
+              >
+                Stop Recording
+              </Button>
+            </div>
+          )}
+
+          {/* Display selected files */}
+          {files.length > 0 && (
+            <div className="border rounded-md p-2">
+              <div className="text-sm font-medium mb-2">Attachments ({files.length})</div>
+              <div className="space-y-1">
+                {files.map((file, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between text-sm p-1 rounded-sm bg-muted"
+                  >
+                    <div className="flex items-center">
+                      <FileText className="h-3 w-3 mr-2" />
+                      <span className="truncate max-w-[150px]">{file.name}</span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={() => removeFile(index)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Audio Player */}
+          {audioBlob && (
+            <div className="border rounded-md p-2">
               <CustomAudioPlayer
                 audioBlob={audioBlob}
                 setAudioBlob={setAudioBlob}
               />
-            )}
-
-            <div className="flex justify-end ">
-              <button
-                type="submit"
-                className="bg-[#815BF5] w-full text-sm cursor-pointer  text-white px-4 mt-6  py-2 rounded"
-                disabled={
-                  !formData.leaveType ||
-                  formData.leaveDays.length === 0 ||
-                  error !== null
-                }
-              >
-                {loading ? <Loader /> : "Submit Now"}
-              </button>
             </div>
-          </form>
+          )}
         </div>
-      </DialogContent>
-    </Dialog>
+
+        <DialogFooter className="mt-6">
+          <DialogClose asChild>
+            <Button type="button" variant="outline">Cancel</Button>
+          </DialogClose>
+          <Button
+            type="submit"
+            disabled={
+              !formData.leaveType ||
+              formData.leaveDays.length === 0 ||
+              error !== null ||
+              loading
+            }
+          >
+            {loading ? <Loader /> : "Submit Leave Request"}
+          </Button>
+        </DialogFooter>
+      </form>
+
+      {/* Date pickers in dialogs */}
+      <Dialog open={isFromDatePickerOpen} onOpenChange={setIsFromDatePickerOpen}>
+        <DialogContent className="p-0 scale-90 bg-transparent border-none shadow-none max-w-full">
+
+          <CustomDatePicker
+            selectedDate={formData.fromDate ? new Date(formData.fromDate) : null}
+            onDateChange={(date) => {
+              const newDate = new Date(date);
+              // Ensure we don't select a date before today
+              if (newDate < new Date()) {
+                newDate.setHours(0, 0, 0, 0);
+              }
+              setFormData({
+                ...formData,
+                fromDate: date.toISOString().split("T")[0],
+                // Reset toDate if it's before the new fromDate
+                toDate: formData.toDate && new Date(formData.toDate) < date
+                  ? date.toISOString().split("T")[0]
+                  : formData.toDate
+              });
+              setIsFromDatePickerOpen(false);
+            }}
+            onCloseDialog={() => setIsFromDatePickerOpen(false)}
+          />
+
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isToDatePickerOpen} onOpenChange={setIsToDatePickerOpen}>
+        <DialogContent className="p-0 scale-90 bg-transparent border-none shadow-none max-w-full">
+
+          <CustomDatePicker
+            selectedDate={formData.toDate ? new Date(formData.toDate) : null}
+            onDateChange={(date) => {
+              setFormData({
+                ...formData,
+                toDate: date.toISOString().split("T")[0],
+              });
+              setIsToDatePickerOpen(false);
+            }}
+            onCloseDialog={() => setIsToDatePickerOpen(false)}
+          />
+
+        </DialogContent>
+      </Dialog>
+    </DialogContent>
   );
 };
 

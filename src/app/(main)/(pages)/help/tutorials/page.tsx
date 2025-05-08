@@ -5,160 +5,227 @@ import axios from "axios";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { useRouter } from "next/navigation";
 import { FaSearch } from "react-icons/fa";
-import { VideoIcon } from "lucide-react";
+import { VideoIcon, Bookmark, Info } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const categories = [
-    "All Tutorials",
-    "Task Delegation App",
-    "Leave and Attendance App",
-    "Zapllo WABA",
+  "All Tutorials",
+  "Task Delegation App",
+  "Leave and Attendance App",
+  "Zapllo WABA",
 ];
 
 export default function Tutorials() {
-    const [tutorials, setTutorials] = useState<any[]>([]);
-    const [filteredTutorials, setFilteredTutorials] = useState<any[]>([]);
-    const [searchQuery, setSearchQuery] = useState<string>("");
-    const [selectedCategory, setSelectedCategory] = useState<string>("All Tutorials");
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
-    const router = useRouter();
+  const [tutorials, setTutorials] = useState<any[]>([]);
+  const [filteredTutorials, setFilteredTutorials] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("All Tutorials");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
-    useEffect(() => {
-        const fetchTutorials = async () => {
-            try {
-                const response = await axios.get("/api/tutorials");
-                setTutorials(response.data.tutorials);
-                setFilteredTutorials(response.data.tutorials);
-            } catch (err) {
-                console.error("Failed to fetch tutorials:", err);
-                setError("Failed to load tutorials.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchTutorials();
-    }, []);
-
-    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchQuery(e.target.value);
-        const filtered = tutorials.filter((tutorial) =>
-            tutorial.title.toLowerCase().includes(e.target.value.toLowerCase())
-        );
-        filterByCategory(selectedCategory, filtered);
+  useEffect(() => {
+    const fetchTutorials = async () => {
+      try {
+        const response = await axios.get("/api/tutorials");
+        setTutorials(response.data.tutorials);
+        setFilteredTutorials(response.data.tutorials);
+      } catch (err) {
+        console.error("Failed to fetch tutorials:", err);
+        setError("Failed to load tutorials.");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setSelectedCategory(e.target.value);
-        filterByCategory(e.target.value, tutorials);
-    };
+    fetchTutorials();
+  }, []);
 
-    const filterByCategory = (category: string, tutorialList: any[]) => {
-        if (category === "All Tutorials") {
-            setFilteredTutorials(
-                tutorialList.filter((tutorial) =>
-                    tutorial.title.toLowerCase().includes(searchQuery.toLowerCase())
-                )
-            );
-        } else {
-            const filtered = tutorialList.filter(
-                (tutorial) =>
-                    tutorial.category === category &&
-                    tutorial.title.toLowerCase().includes(searchQuery.toLowerCase())
-            );
-            setFilteredTutorials(filtered);
-        }
-    };
-
-    const handleTutorialClick = (id: string) => {
-        router.push(`/help/tutorials/${id}`);
-    };
-
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center h-screen">
-                <DotLottieReact
-                    src="/lottie/loading.lottie"
-                    loop
-                    autoplay
-                    className="h-56"
-                />
-            </div>
-        );
-    }
-
-    if (error) {
-        return <p className="text-center text-red-500">{error}</p>;
-    }
-
-    return (
-        <div className="h-fit max-h-screen mt-4 scrollbar-hide  overflow-y-scroll">
-            <div className="p-4">
-                <div className="mb-6 flex flex-wrap justify-center items-center gap-4">
-                    {/* Search Bar */}
-
-                    {/* Category Dropdown */}
-                    <div className="flex items-center justify-between w-full">
-                        <h1 className="ml-24 text-lg font-bold text-center">{selectedCategory}</h1>
-                        <div className="flex gap-2">
-                        <div className=" flex items-center w-full px-4 focus-within:border-[#815bf5] rounded border py-2 gap-3 dark:bg-[#0B0D29]">
-                                <FaSearch className="text-gray-400" />
-                                <input
-                                    type="text"
-                                    value={searchQuery}
-                                    onChange={handleSearch}
-                                    placeholder="Search Tutorials"
-                                    className="text-sm w-full bg-transparent  dark:text-white  focus:outline-none"
-                                />
-                            </div>
-                            <select
-                                value={selectedCategory}
-                                onChange={handleCategoryChange}
-                                className="px-4 py-2 border dark:border-gray-700 text-sm dark:bg-[#0B0D29] dark:text-white rounded focus:outline-none"
-                            >
-                                {categories.map((category) => (
-                                    <option key={category} value={category}>
-                                        {category}
-                                    </option>
-                                ))}
-                            </select>
-                           
-                        </div>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 mt-12  lg:grid-cols-4 mb-12 2xl:grid-cols-5 ml-24 gap-4">
-                    {filteredTutorials.length > 0 ? (
-                        filteredTutorials.map((tutorial) => (
-                            <div
-                                key={tutorial._id}
-                                className="border-2 hover:border-[#815BF5] rounded-lg  w-full dark:text-white cursor-pointer hover:shadow-lg transition"
-                                onClick={() => handleTutorialClick(tutorial._id)}
-                            >
-                                <img
-                                    src={tutorial.thumbnail}
-                                    alt={tutorial.title}
-                                    className="w-full h-36 object-cover rounded-lg rounded-b-none"
-                                />
-                                <div className="flex gap-2  mt-2 p-4 h-fit text-sm rounded-2xl items-center">
-                                   
-                                    <h3 className="text-md ">{tutorial.title}</h3>
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        <div className="col-span-full text-center text-white -500">
-                            <DotLottieReact
-                                src="/lottie/empty.lottie"
-                                loop
-                                className="h-56"
-                                autoplay
-                            />
-                            No Tutorials Found
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    const filtered = tutorials.filter((tutorial) =>
+      tutorial.title.toLowerCase().includes(e.target.value.toLowerCase())
     );
+    filterByCategory(selectedCategory, filtered);
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value);
+    filterByCategory(value, tutorials);
+  };
+
+  const filterByCategory = (category: string, tutorialList: any[]) => {
+    if (category === "All Tutorials") {
+      setFilteredTutorials(
+        tutorialList.filter((tutorial) =>
+          tutorial.title.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      );
+    } else {
+      const filtered = tutorialList.filter(
+        (tutorial) =>
+          tutorial.category === category &&
+          tutorial.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredTutorials(filtered);
+    }
+  };
+
+  const handleTutorialClick = (id: string) => {
+    router.push(`/help/tutorials/${id}`);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-[calc(100vh-4rem)]">
+        <DotLottieReact
+          src="/lottie/loading.lottie"
+          loop
+          autoplay
+          className="h-56"
+        />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6">
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto p-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Video Tutorials</h1>
+        <p className="text-muted-foreground">
+          Learn how to use Zapllo with step-by-step video guides
+        </p>
+      </div>
+
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div className="relative w-full md:w-72">
+          <Input
+            value={searchQuery}
+            onChange={handleSearch}
+            placeholder="Search tutorials..."
+            className="pl-10"
+          />
+          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+        </div>
+
+        <Select
+          value={selectedCategory}
+          onValueChange={handleCategoryChange}
+        >
+          <SelectTrigger className="w-full md:w-64">
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            {categories.map((category) => (
+              <SelectItem key={category} value={category}>
+                {category}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {selectedCategory !== "All Tutorials" && (
+        <Alert className="mb-6 bg-muted/50">
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            Showing tutorials for <strong>{selectedCategory}</strong>.
+            <Button
+              variant="link"
+              className="p-0 h-auto"
+              onClick={() => handleCategoryChange("All Tutorials")}
+            >
+              View all tutorials
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-6">
+        {filteredTutorials.length > 0 ? (
+          filteredTutorials.map((tutorial) => (
+            <Card
+              key={tutorial._id}
+              className="overflow-hidden hover:shadow-lg transition-all cursor-pointer group"
+              onClick={() => handleTutorialClick(tutorial._id)}
+            >
+              <div className="relative">
+                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                  <Button size="sm" variant="secondary" className="gap-2">
+                    <VideoIcon className="h-4 w-4" />
+                    Watch Now
+                  </Button>
+                </div>
+                <img
+                  src={tutorial.thumbnail}
+                  alt={tutorial.title}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="absolute bottom-2 right-2 bg-black/70 px-2 py-1 rounded text-xs text-white flex items-center gap-1">
+                  <VideoIcon className="h-3 w-3" />
+                  Tutorial
+                </div>
+              </div>
+              <CardContent className="p-4">
+                <h3 className="font-medium line-clamp-2">{tutorial.title}</h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {tutorial.category || "General"}
+                </p>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <div className="col-span-full flex flex-col items-center justify-center py-12">
+            <DotLottieReact
+              src="/lottie/empty.lottie"
+              loop
+              autoplay
+              className="h-40"
+            />
+            <h3 className="font-medium mt-4">No tutorials found</h3>
+            <p className="text-muted-foreground text-sm mt-1">
+              Try adjusting your search or category filter
+            </p>
+            <Button
+              variant="outline"
+              className="mt-4"
+              onClick={() => {
+                setSearchQuery("");
+                setSelectedCategory("All Tutorials");
+                setFilteredTutorials(tutorials);
+              }}
+            >
+              Reset filters
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
