@@ -1,9 +1,17 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { Cross2Icon, CrossCircledIcon } from '@radix-ui/react-icons';
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
+import { X, Check, Search, Filter, Tag, Users, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Tabs3 as Tabs, TabsContent3 as TabsContent, TabsList3 as TabsList, TabsTrigger3 as TabsTrigger } from '../ui/tabs3';
+import { Badge } from '../ui/badge';
+import { ScrollArea } from '../ui/scroll-area';
+import { Checkbox } from '../ui/checkbox';
+import { Label } from '../ui/label';
+import { cn } from '@/lib/utils';
 
 interface FilterModalProps {
     isOpen: boolean;
@@ -11,20 +19,39 @@ interface FilterModalProps {
     categories: { _id: string; name: string; imgSrc: string }[];
     users: { _id: string; firstName: string; lastName: string; email: string; }[];
     applyFilters: (filters: any) => void;
-    initialSelectedCategories: string[]; // New
-    initialSelectedUsers: string[]; // New
-    initialSelectedFrequency: string[]; // New
-    initialSelectedPriority: string[]; // New
+    initialSelectedCategories: string[];
+    initialSelectedUsers: string[];
+    initialSelectedFrequency: string[];
+    initialSelectedPriority: string[];
 }
 
-const FilterModal: React.FC<FilterModalProps> = ({ isOpen, closeModal, categories, users, applyFilters, initialSelectedCategories, initialSelectedFrequency, initialSelectedPriority, initialSelectedUsers }) => {
+const FilterModal: React.FC<FilterModalProps> = ({
+    isOpen,
+    closeModal,
+    categories,
+    users,
+    applyFilters,
+    initialSelectedCategories,
+    initialSelectedFrequency,
+    initialSelectedPriority,
+    initialSelectedUsers
+}) => {
     const [selectedCategories, setSelectedCategories] = useState<string[]>(initialSelectedCategories);
     const [selectedUsers, setSelectedUsers] = useState<string[]>(initialSelectedUsers);
     const [selectedFrequency, setSelectedFrequency] = useState<string[]>(initialSelectedFrequency);
     const [selectedPriority, setSelectedPriority] = useState<string[]>(initialSelectedPriority);
-    const [activeSection, setActiveSection] = useState<string>('Category');
+    const [activeTab, setActiveTab] = useState<string>('category');
     const [searchTerm, setSearchTerm] = useState<string>('');
 
+    // Reset selections when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            setSelectedCategories(initialSelectedCategories);
+            setSelectedUsers(initialSelectedUsers);
+            setSelectedFrequency(initialSelectedFrequency);
+            setSelectedPriority(initialSelectedPriority);
+        }
+    }, [isOpen, initialSelectedCategories, initialSelectedUsers, initialSelectedFrequency, initialSelectedPriority]);
 
     const toggleSelection = (selectedItems: string[], setSelectedItems: React.Dispatch<React.SetStateAction<string[]>>, item: string) => {
         if (selectedItems.includes(item)) {
@@ -51,219 +78,318 @@ const FilterModal: React.FC<FilterModalProps> = ({ isOpen, closeModal, categorie
         setSelectedPriority([]);
     };
 
-    const renderContent = () => {
+    // Get count of total selected filters
+    const getTotalSelectedCount = () => {
+        return selectedCategories.length + selectedUsers.length + selectedFrequency.length + selectedPriority.length;
+    };
+
+    // Get selection count for each tab
+    const getCategoryCount = () => selectedCategories.length;
+    const getUsersCount = () => selectedUsers.length;
+    const getFrequencyCount = () => selectedFrequency.length;
+    const getPriorityCount = () => selectedPriority.length;
+
+    // Filter items based on search
+    const getFilteredCategories = () => {
         const lowercasedSearchTerm = searchTerm.toLowerCase();
-        switch (activeSection) {
-            case 'Category':
-                return (
-                    <div className='-mt-4'>
-                        <input
-                            type="text"
-                            placeholder="Search categories"
-                            className="w-full px-2 py-2 text-[#787CA5] bg-transparent border outline-none  mb-4 rounded-md"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <div className="grid grid-cols-1 px-2 py-1 max-h-56 h-full overflow-y-scroll scrollbar-hide gap-2">
-                            {categories.filter(category => category.name.toLowerCase().includes(lowercasedSearchTerm)).map(category => (
-                                <div key={category._id} className="flex gap-2 items-center">
-                                    <Avatar className="h-9 w-9 rounded-full flex border-[#815BF5] items-center">
-                                        {/* <AvatarImage className='h-6 w-6 ml-1 ' src={`/icons/${category.name.toLowerCase()}.png`} /> */}
-                                        <AvatarFallback className="">
-                                            <h1 className="text-sm">
-                                                {`${category.name}`.slice(0, 1)}
-                                                {/* {`${user.lastName}`.slice(0, 1)} */}
-                                            </h1>
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    {/* <img src={`/icons/${category.name.toLowerCase()}.png`} /> */}
-                                    <div className='flex justify-between w-full p-2'>
-                                        <label className="flex items-center justify-between w-full cursor-pointer">
-                                            {category.name}
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedCategories.includes(category._id)}
-                                                onChange={() => toggleSelection(selectedCategories, setSelectedCategories, category._id)}
-                                                className="mr-2 rounded-full"
-                                            />
-                                        </label>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                );
-            case 'Assigned By':
-                return (
-                    <div className='-mt-4'>
-                        <input
-                            type="text"
-                            placeholder="Search users"
-                            className="w-full px-2 py-2 bg-transparent outline-none text-[#787CA5]  border mb-4 rounded-md"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <div className="grid grid-cols-1 max-h-56 h-full overflow-y-scroll scrollbar-hide gap-2">
-                            {users.filter(user => (`${user.firstName} ${user.lastName}`).toLowerCase().includes(lowercasedSearchTerm)).map(user => (
-                                <label key={user._id} className='flex justify-between cursor-pointer'>
-                                    <div className='flex items-center'>
-                                        <div className='h-8 w-8 bg-[#815BF5] flex items-center m-auto text-lg rounded-full'>
-                                            <h1 className=' text-sm ml-1 text-white'>
-                                                {`${user.firstName}`.slice(0, 1)}{`${user.lastName}`.slice(0, 1)}
-                                            </h1>
-                                        </div>
-                                        <div className='ml-2 '>
-                                            <div className='flex items-center'>
-                                                {user.firstName} {user.lastName}
-                                            </div>
-                                            <h1 className=' text-xs '>
-                                                {user.email}
-                                            </h1>
-                                        </div>
-                                    </div>
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedUsers.includes(user._id)}
-                                        onChange={() => toggleSelection(selectedUsers, setSelectedUsers, user._id)}
-                                        className="mr-2 rounded-full"
-                                    />
-                                </label>
-                            ))}
-                        </div>
-                    </div>
-                );
-            case 'Frequency':
-                return (
-                    <div className='-mt-4'>
-                        <input
-                            type="text"
-                            placeholder="Search frequency"
-                            className="w-full px-2 py-2 bg-transparent border outline-none text-[#787CA5] mb-4 rounded-md"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <div className="grid grid-cols-1 gap-2 space-y-4">
-                            {['Daily', 'Weekly', 'Monthly', 'Once'].filter(frequency => frequency.toLowerCase().includes(lowercasedSearchTerm)).map(frequency => (
-                                <label key={frequency} className="flex justify-between w-full cursor-pointer">
-                                    <div className='flex'>
-                                        <img src={`/icons/${frequency.toLowerCase()}.png`} alt={frequency} className="mr-2 h-6" />
-                                        {frequency}
-                                    </div>
+        return categories.filter(category =>
+            category.name.toLowerCase().includes(lowercasedSearchTerm)
+        );
+    };
 
+    const getFilteredUsers = () => {
+        const lowercasedSearchTerm = searchTerm.toLowerCase();
+        return users.filter(user =>
+            `${user.firstName} ${user.lastName}`.toLowerCase().includes(lowercasedSearchTerm) ||
+            user.email.toLowerCase().includes(lowercasedSearchTerm)
+        );
+    };
 
-                                    {/* <input
-                                        type="radio"
-                                        checked={selectedFrequency.includes(frequency)}
-                                        onChange={() => toggleSelection(selectedFrequency, setSelectedFrequency, frequency)}
-                                        className="mr-2"
-                                    /> */}
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedFrequency.includes(frequency)}
-                                        onChange={() => toggleSelection(selectedFrequency, setSelectedFrequency, frequency)}
-                                        className="mr-2 rounded-full"
-                                    />
-                                </label>
-                            ))}
-                        </div>
-                    </div>
-                );
-            case 'Priority':
-                return (
-                    <div className='-mt-4 '>
-                        <input
-                            type="text"
-                            placeholder="Search priority"
-                            className="w-full px-2 py-2 bg-transparent outline-none border text-[#787CA5] mb-4 rounded-md"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <div className="grid grid-cols-1 gap-2 space-y-2">
-                            {['High', 'Medium', 'Low'].filter(priority => priority.toLowerCase().includes(lowercasedSearchTerm)).map(priority => (
-                                <label key={priority} className="flex justify-between cursor-pointer">
-                                    <div className='flex'>
-                                        <img src={`/icons/${priority.toLowerCase()}.png`} alt={priority} className="mr-2 h-6" />
-                                        {priority}
+    const getFilteredFrequencies = () => {
+        const frequencies = ['Daily', 'Weekly', 'Monthly', 'Once'];
+        const lowercasedSearchTerm = searchTerm.toLowerCase();
+        return frequencies.filter(frequency =>
+            frequency.toLowerCase().includes(lowercasedSearchTerm)
+        );
+    };
 
-                                    </div>
+    const getFilteredPriorities = () => {
+        const priorities = ['High', 'Medium', 'Low'];
+        const lowercasedSearchTerm = searchTerm.toLowerCase();
+        return priorities.filter(priority =>
+            priority.toLowerCase().includes(lowercasedSearchTerm)
+        );
+    };
 
-
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedPriority.includes(priority)}
-                                        onChange={() => toggleSelection(selectedPriority, setSelectedPriority, priority)}
-                                        className="mr-2 rounded-full"
-                                    />
-                                </label>
-                            ))}
-                        </div>
-                    </div>
-                );
+    // Priority color mappings
+    const getPriorityColor = (priority: string) => {
+        switch (priority) {
+            case 'High':
+                return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+            case 'Medium':
+                return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
+            case 'Low':
+                return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
             default:
-                return null;
+                return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400';
         }
     };
 
-    if (!isOpen) return null;
-
-    const sections = [
-        { name: 'Category', imgSrc: '/icons/grid.png' },
-        { name: 'Assigned By', imgSrc: '/icons/assigned.png' },
-        { name: 'Frequency', imgSrc: '/icons/frequency.png' },
-        { name: 'Priority', imgSrc: '/icons/priority.png' },
-    ];
-
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && closeModal()}>
-            <DialogContent className='h-fit '>
-                <DialogHeader>
-                    <div className="flex justify-between items-center border-b py-4 px-6">
-                        <DialogTitle className="text-lg dark:text-white">Filter Tasks</DialogTitle>
-                        <DialogClose className="dark:text-white hover:bg-white rounded-full hover:text-[#815BF5]">
-                            <CrossCircledIcon className="scale-150 cursor-pointer " />
-                        </DialogClose>
+            <DialogContent className=" p-6 m-auto h-fit max-h-screen overflow-y-scroll gap-0">
+                <DialogHeader className=" ">
+                    <div className="flex items-center justify-between">
+                        <DialogTitle className="text-xl font-semibold flex items-center gap-2">
+                            <Filter className="h-5 w-5" />
+                            Filter Tasks
+                            {getTotalSelectedCount() > 0 && (
+                                <Badge variant="secondary" className="ml-2">
+                                    {getTotalSelectedCount()}
+                                </Badge>
+                            )}
+                        </DialogTitle>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={closeModal}
+                            className="rounded-full h-8 w-8"
+                        >
+                            <X className="h-4 w-4" />
+                        </Button>
                     </div>
                 </DialogHeader>
-                <div className="flex">
-                    <div className="border-r h-[300px]   -mt-4">
-                        <ul className="space-y-2 mt-2">
-                            {sections.map((section) => (
-                                <li
-                                    key={section.name}
-                                    className={`cursor-pointer text-xs px-12 p-3 w-full flex items-center ${activeSection === section.name ? 'dark:bg-[#282D32] bg-primary text-white' : ''
-                                        }`}
-                                    onClick={() => {
-                                        setActiveSection(section.name);
-                                        setSearchTerm('');
-                                    }}
-                                >
-                                    <img src={section.imgSrc} alt={section.name} className="mr-2 h-4 dark:invert-0 invert-[100]" />
-                                    {section.name}
-                                </li>
-                            ))}
-                        </ul>
+
+                <Tabs
+                    defaultValue="category"
+                    value={activeTab}
+                    onValueChange={(value) => {
+                        setActiveTab(value);
+                        setSearchTerm('');
+                    }}
+                    className="w-full"
+                >
+                    <div className="flex  pt-4 g">
+                        <TabsList className="gap-2 text-xs">
+                            <TabsTrigger
+                                value="category"
+                                className="gap-1"
+                            >
+                                {/* <Tag className="h-4 w-4" /> */}
+                                Categories
+                                {getCategoryCount() > 0 && (
+                                    <Badge className="ml-1">
+                                        {getCategoryCount()}
+                                    </Badge>
+                                )}
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="users"
+                                className=""
+                            >
+                                {/* <Users className="h-4 w-4" /> */}
+                                Assigned By
+                                {getUsersCount() > 0 && (
+                                    <Badge className="ml-1">
+                                        {getUsersCount()}
+                                    </Badge>
+                                )}
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="frequency"
+                                className=""
+                            >
+                                {/* <RefreshCw className="h-4 w-4" /> */}
+                                Frequency
+                                {getFrequencyCount() > 0 && (
+                                    <Badge className="ml-1">
+                                        {getFrequencyCount()}
+                                    </Badge>
+                                )}
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="priority"
+                                className=""
+                            >
+                                {/* <AlertTriangle className="h-4 w-4" /> */}
+                                Priority
+                                {getPriorityCount() > 0 && (
+                                    <Badge className="ml-1">
+                                        {getPriorityCount()}
+                                    </Badge>
+                                )}
+                            </TabsTrigger>
+                        </TabsList>
                     </div>
-                    <div className="w-[60%] p-6 overflow-y-auto scrollbar-hide" style={{ maxHeight: '400px' }}>
-                        {renderContent()}
+
+                    <div className="mt-4">
+                        <div className="relative mb-4">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                type="text"
+                                placeholder={`Search ${activeTab}...`}
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="pl-10"
+                            />
+                        </div>
+
+                        <ScrollArea className="h-[300px] pr-4">
+                            <TabsContent value="category" className="mt-0 space-y-2">
+                                {getFilteredCategories().length === 0 ? (
+                                    <div className="text-center py-4 text-muted-foreground">
+                                        No categories match your search
+                                    </div>
+                                ) : (
+                                    getFilteredCategories().map(category => (
+                                        <div key={category._id} className="flex items-center space-x-3 border rounded-lg p-3 hover:bg-accent transition-colors">
+                                            <Checkbox
+                                                id={`category-${category._id}`}
+                                                checked={selectedCategories.includes(category._id)}
+                                                onCheckedChange={() => toggleSelection(selectedCategories, setSelectedCategories, category._id)}
+                                            />
+                                            <div className="flex items-center space-x-3 flex-1">
+                                                <Avatar className="h-8 w-8">
+                                                    <AvatarFallback className="bg-primary/10 text-primary">
+                                                        {category.name.slice(0, 1)}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                <Label
+                                                    htmlFor={`category-${category._id}`}
+                                                    className="flex-1 cursor-pointer font-medium"
+                                                >
+                                                    {category.name}
+                                                </Label>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </TabsContent>
+
+                            <TabsContent value="users" className="mt-0 space-y-2">
+                                {getFilteredUsers().length === 0 ? (
+                                    <div className="text-center py-4 text-muted-foreground">
+                                        No users match your search
+                                    </div>
+                                ) : (
+                                    getFilteredUsers().map(user => (
+                                        <div key={user._id} className="flex items-center space-x-3 border rounded-lg p-3 hover:bg-accent transition-colors">
+                                            <Checkbox
+                                                id={`user-${user._id}`}
+                                                checked={selectedUsers.includes(user._id)}
+                                                onCheckedChange={() => toggleSelection(selectedUsers, setSelectedUsers, user._id)}
+                                            />
+                                            <div className="flex items-center space-x-3 flex-1">
+                                                <Avatar className="h-8 w-8">
+                                                    <AvatarFallback className="bg-primary text-white">
+                                                        {user.firstName.slice(0, 1)}{user.lastName.slice(0, 1)}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                <div className="flex-1">
+                                                    <Label
+                                                        htmlFor={`user-${user._id}`}
+                                                        className="flex-1 cursor-pointer font-medium"
+                                                    >
+                                                        {user.firstName} {user.lastName}
+                                                    </Label>
+                                                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </TabsContent>
+
+                            <TabsContent value="frequency" className="mt-0 space-y-2">
+                                {getFilteredFrequencies().length === 0 ? (
+                                    <div className="text-center py-4 text-muted-foreground">
+                                        No frequencies match your search
+                                    </div>
+                                ) : (
+                                    getFilteredFrequencies().map(frequency => (
+                                        <div key={frequency} className="flex items-center space-x-3 border rounded-lg p-3 hover:bg-accent transition-colors">
+                                            <Checkbox
+                                                id={`frequency-${frequency}`}
+                                                checked={selectedFrequency.includes(frequency)}
+                                                onCheckedChange={() => toggleSelection(selectedFrequency, setSelectedFrequency, frequency)}
+                                            />
+                                            <div className="flex items-center space-x-3 flex-1">
+                                                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                                    <RefreshCw className="h-4 w-4 text-primary" />
+                                                </div>
+                                                <Label
+                                                    htmlFor={`frequency-${frequency}`}
+                                                    className="flex-1 cursor-pointer font-medium"
+                                                >
+                                                    {frequency}
+                                                </Label>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </TabsContent>
+
+                            <TabsContent value="priority" className="mt-0 space-y-2">
+                                {getFilteredPriorities().length === 0 ? (
+                                    <div className="text-center py-4 text-muted-foreground">
+                                        No priorities match your search
+                                    </div>
+                                ) : (
+                                    getFilteredPriorities().map(priority => (
+                                        <div key={priority} className="flex items-center space-x-3 border rounded-lg p-3 hover:bg-accent transition-colors">
+                                            <Checkbox
+                                                id={`priority-${priority}`}
+                                                checked={selectedPriority.includes(priority)}
+                                                onCheckedChange={() => toggleSelection(selectedPriority, setSelectedPriority, priority)}
+                                            />
+                                            <div className="flex items-center space-x-3 flex-1">
+                                                <div className={cn(
+                                                    "h-8 w-8 rounded-full flex items-center justify-center",
+                                                    getPriorityColor(priority)
+                                                )}>
+                                                    <AlertTriangle className="h-4 w-4" />
+                                                </div>
+                                                <Label
+                                                    htmlFor={`priority-${priority}`}
+                                                    className="flex-1 cursor-pointer font-medium"
+                                                >
+                                                    {priority}
+                                                </Label>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </TabsContent>
+                        </ScrollArea>
                     </div>
-                </div>
-                <DialogFooter>
-                    <div className="flex justify-between px-6 space-x-4 py-4">
-                        <button
-                            type="button"
-                            className="inline-flex justify-center text-xs rounded-md border px-4 py-2 bg-[#017a5b] text-white hover:bg-[#017a5b]"
-                            onClick={handleApplyFilters}
-                        >
-                            Apply Filters
-                        </button>
-                        <button
-                            type="button"
-                            className="inline-flex justify-center text-xs rounded-md border px-4 py-2 bg-transparent dark:text-white hover:bg-red-500"
+                </Tabs>
+
+                <DialogFooter className="px-6 py-4 border-t flex-row justify-between">
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
                             onClick={handleClearFilters}
+                            className="border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600"
+                            disabled={getTotalSelectedCount() === 0}
                         >
-                            Clear
-                        </button>
+                            <X className="h-4 w-4 mr-2" />
+                            Clear Filters
+                        </Button>
+
+                        {getTotalSelectedCount() > 0 && (
+                            <Badge variant="secondary" className="text-xs">
+                                {getTotalSelectedCount()} filter{getTotalSelectedCount() !== 1 ? 's' : ''} selected
+                            </Badge>
+                        )}
                     </div>
+
+                    <Button
+                        onClick={handleApplyFilters}
+                        className="bg-primary hover:bg-primary/90"
+                    >
+                        <Check className="h-4 w-4 mr-2" />
+                        Apply Filters
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

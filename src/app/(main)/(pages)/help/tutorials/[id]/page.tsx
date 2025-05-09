@@ -52,7 +52,7 @@ export default function Tutorials() {
 
     return (
         <div className="   h-fit max-h-screen   scrollbar-hide overflow-y-scroll ">
-            <div className="ml-28 dark:bg-[#04061e] dark:text-white">
+            <div className="ml-6 dark:bg-[#04061e] dark:text-white">
                 <div className='flex gap-2 mb-4 mt-8 items-center'>
                     <Link href='/help/tutorials'>
                         <div className='h-7 w-7 flex items-center hover:bg-[#ffffff] hover:text-black cursor-pointer border rounded-full'>
@@ -62,7 +62,7 @@ export default function Tutorials() {
                     <h1 className="text-xl ">{tutorial.title}</h1>
                 </div>
 
-                <div className="w-full border rounded max-w-4xl mt-4 aspect-video">
+                <div className="w-full border rounded max-w-5xl mt-4 aspect-video">
                     <iframe className='rounded w-full h-full' src={tutorial.link} title="Zapllo Tutorials" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen ></iframe>
                 </div>
             </div>

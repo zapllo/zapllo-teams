@@ -536,12 +536,12 @@ export default function Page() {
                         <div className="flex items-center space-x-2 text-sm">
                           <ExternalLink className="h-4 w-4 text-primary" />
                           <a
-                            href="http://waba.zapllo.com"
+                            href="http://app.zapllo.com"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-primary hover:underline"
                           >
-                            Get your Channel ID from waba.zapllo.com
+                            Get your Channel ID from app.zapllo.com
                           </a>
                         </div>
                       </div>
@@ -705,7 +705,7 @@ export default function Page() {
                                     {dueTime ? formatTimeToAMPM(dueTime) : "Set Time"}
                                   </Button>
                                 </DialogTrigger>
-                                <DialogContent className="p-6 scale-75 bg-[#0a0d28] dark:bg-[#0a0d28]">
+                             <DialogContent className=" scale-75 w-[550px] bg-transparent border-none">
                                   <CustomTimePicker
                                     onCancel={() => setIsDialogOpen(false)}
                                     onAccept={() => setIsDialogOpen(false)}

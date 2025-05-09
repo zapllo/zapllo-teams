@@ -299,79 +299,79 @@ export default function MyAttendance() {
 
 
   // Replace the fetchLocation function completely
-const fetchLocation = async (): Promise<{ lat: number; lng: number } | null> => {
-  setIsLocationLoading(true);
-  setLocationError(null);
+  const fetchLocation = async (): Promise<{ lat: number; lng: number } | null> => {
+    setIsLocationLoading(true);
+    setLocationError(null);
 
-  /* --------------------------------------------------------------------
-   * 1. Try the cached copy in the `userLocation` cookie (valid ≤1 h)
-   * ------------------------------------------------------------------*/
-  try {
-    const cached = Cookies.get("userLocation");
-    if (cached) {
-      const { location: savedLoc, timestamp } = JSON.parse(cached);
-      const ONE_HOUR = 60 * 60 * 1000;
+    /* --------------------------------------------------------------------
+     * 1. Try the cached copy in the `userLocation` cookie (valid ≤1 h)
+     * ------------------------------------------------------------------*/
+    try {
+      const cached = Cookies.get("userLocation");
+      if (cached) {
+        const { location: savedLoc, timestamp } = JSON.parse(cached);
+        const ONE_HOUR = 60 * 60 * 1000;
 
-      if (Date.now() - timestamp < ONE_HOUR) {
-        setLocation(savedLoc);
-        setIsLocationLoading(false);
-        return savedLoc;
+        if (Date.now() - timestamp < ONE_HOUR) {
+          setLocation(savedLoc);
+          setIsLocationLoading(false);
+          return savedLoc;
+        }
+        Cookies.remove("userLocation");
       }
-      Cookies.remove("userLocation");
+    } catch {
+      Cookies.remove("userLocation"); // corrupted cookie – just wipe it
     }
-  } catch {
-    Cookies.remove("userLocation"); // corrupted cookie – just wipe it
-  }
 
-  /* --------------------------------------------------------------------
-   * 2. Ask the Permissions API – bail early if the user already blocked us
-   * ------------------------------------------------------------------*/
-  try {
-    if ("permissions" in navigator) {
-      const { state } = await navigator.permissions.query({ name: "geolocation" });
-      if (state === "denied") {
-        const msg = "Location permission is blocked. Enable it in site settings and retry.";
-        setLocationError(msg);
-        toast.error(msg);
-        return null;                       // early exit – no point asking again
+    /* --------------------------------------------------------------------
+     * 2. Ask the Permissions API – bail early if the user already blocked us
+     * ------------------------------------------------------------------*/
+    try {
+      if ("permissions" in navigator) {
+        const { state } = await navigator.permissions.query({ name: "geolocation" });
+        if (state === "denied") {
+          const msg = "Location permission is blocked. Enable it in site settings and retry.";
+          setLocationError(msg);
+          toast.error(msg);
+          return null;                       // early exit – no point asking again
+        }
       }
+    } catch {
+      /* ignore – not every browser supports Permissions API */
     }
-  } catch {
-    /* ignore – not every browser supports Permissions API */
-  }
 
-  /* --------------------------------------------------------------------
-   * 3. Call the helper that wraps navigator.geolocation
-   * ------------------------------------------------------------------*/
-  try {
-    const loc = await getBrowserLocation();       // <-- may throw
-    setLocation(loc);
-    Cookies.set(
-      "userLocation",
-      JSON.stringify({ location: loc, timestamp: Date.now() }),
-      { expires: 1 / 24 }                         // 1 hour
-    );
-    return loc;
-  } catch (err: any) {
-    /* -----------------------------------------------
-     * Map Geolocation errors to user-friendly text
-     * ---------------------------------------------*/
-    const message =
-      err.code === 1
-        ? "You blocked location permission. Enable it in your browser settings and retry."
-        : err.code === 2
-        ? "Position unavailable. Are you on a simulator or is GPS switched off?"
-        : err.code === 3
-        ? "Location request timed out. Please try again."
-        : err.message || "Failed to retrieve location.";
+    /* --------------------------------------------------------------------
+     * 3. Call the helper that wraps navigator.geolocation
+     * ------------------------------------------------------------------*/
+    try {
+      const loc = await getBrowserLocation();       // <-- may throw
+      setLocation(loc);
+      Cookies.set(
+        "userLocation",
+        JSON.stringify({ location: loc, timestamp: Date.now() }),
+        { expires: 1 / 24 }                         // 1 hour
+      );
+      return loc;
+    } catch (err: any) {
+      /* -----------------------------------------------
+       * Map Geolocation errors to user-friendly text
+       * ---------------------------------------------*/
+      const message =
+        err.code === 1
+          ? "You blocked location permission. Enable it in your browser settings and retry."
+          : err.code === 2
+            ? "Position unavailable. Are you on a simulator or is GPS switched off?"
+            : err.code === 3
+              ? "Location request timed out. Please try again."
+              : err.message || "Failed to retrieve location.";
 
-    setLocationError(message);
-    toast.error(message);
-    return null;                               // always resolve ↔ never throw
-  } finally {
-    setIsLocationLoading(false);
-  }
-};
+      setLocationError(message);
+      toast.error(message);
+      return null;                               // always resolve ↔ never throw
+    } finally {
+      setIsLocationLoading(false);
+    }
+  };
 
   /// Dialog handlers
   const handleModalChange = async (isOpen: boolean) => {
@@ -1239,42 +1239,42 @@ const fetchLocation = async (): Promise<{ lat: number; lng: number } | null> => 
     filterApprovedEntries(filteredEntries)
   );
 
-const AttendanceLoader = () => {
-  return (
-    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center">
-      <div className="flex flex-col items-center gap-6">
-        <div className="relative">
-          {/* Outer ring */}
-          <div className="absolute inset-0 rounded-full border-4 border-primary/10 animate-pulse"></div>
+  const AttendanceLoader = () => {
+    return (
+      <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+        <div className="flex flex-col items-center gap-6">
+          <div className="relative">
+            {/* Outer ring */}
+            <div className="absolute inset-0 rounded-full border-4 border-primary/10 animate-pulse"></div>
 
-          {/* Multiple spinning rings */}
-          <div className="h-24 w-24 rounded-full border-t-4 border-r-2 border-primary animate-spin"></div>
-          <div className="absolute inset-0 h-20 w-20 m-auto rounded-full border-b-4 border-l-2 border-primary/70 animate-spin" style={{ animationDuration: '1.5s', animationDirection: 'reverse' }}></div>
-          <div className="absolute inset-0 h-16 w-16 m-auto rounded-full border-l-4 border-t-2 border-primary/40 animate-spin" style={{ animationDuration: '2s' }}></div>
+            {/* Multiple spinning rings */}
+            <div className="h-24 w-24 rounded-full border-t-4 border-r-2 border-primary animate-spin"></div>
+            <div className="absolute inset-0 h-20 w-20 m-auto rounded-full border-b-4 border-l-2 border-primary/70 animate-spin" style={{ animationDuration: '1.5s', animationDirection: 'reverse' }}></div>
+            <div className="absolute inset-0 h-16 w-16 m-auto rounded-full border-l-4 border-t-2 border-primary/40 animate-spin" style={{ animationDuration: '2s' }}></div>
 
-          {/* Center icon */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Clock className="h-8 w-8 text-primary animate-pulse" />
+            {/* Center icon */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Clock className="h-8 w-8 text-primary animate-pulse" />
+            </div>
           </div>
-        </div>
 
-        <div className="space-y-2 text-center">
-          <h3 className="font-semibold text-xl">Loading Your Attendance</h3>
-          <p className="text-muted-foreground text-sm">Preparing your attendance records...</p>
+          <div className="space-y-2 text-center">
+            <h3 className="font-semibold text-xl">Loading Your Attendance</h3>
+            <p className="text-muted-foreground text-sm">Preparing your attendance records...</p>
 
-          {/* Progress bar */}
-          <div className="w-56 h-1.5 bg-muted rounded-full overflow-hidden mt-2">
-            <div className="h-full bg-primary rounded-full animate-loader-progress"></div>
+            {/* Progress bar */}
+            <div className="w-56 h-1.5 bg-muted rounded-full overflow-hidden mt-2">
+              <div className="h-full bg-primary rounded-full animate-loader-progress"></div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
-// Add these keyframes to the global style tag in the component
-// or you can move this to your globals.css
-const loaderStyles = `
+  // Add these keyframes to the global style tag in the component
+  // or you can move this to your globals.css
+  const loaderStyles = `
   @keyframes loader-progress {
     0% { width: 0%; }
     20% { width: 20%; }
@@ -1296,7 +1296,7 @@ const loaderStyles = `
   return (
     <div className="container mx-auto p-4 space-y-6">
       {/* Loading overlay */}
-    {(displayLoader || attendanceLoading) && <AttendanceLoader />}
+      {(displayLoader || attendanceLoading) && <AttendanceLoader />}
 
       {/* Page header */}
       <div className="flex flex-col space-y-2">
@@ -1950,64 +1950,64 @@ const loaderStyles = `
             )}
 
             {/* Webcam or Captured Image */}
-          {/* Webcam or Captured Image - Enhanced Animation */}
-<div className="relative overflow-hidden rounded-lg border">
-  {capturedImage ? (
-    <div className="relative w-full">
-      <img
-        src={capturedImage}
-        alt="Captured"
-        className="w-full h-auto aspect-video object-cover"
-      />
+            {/* Webcam or Captured Image - Enhanced Animation */}
+            <div className="relative overflow-hidden rounded-lg border">
+              {capturedImage ? (
+                <div className="relative w-full">
+                  <img
+                    src={capturedImage}
+                    alt="Captured"
+                    className="w-full h-auto aspect-video object-cover"
+                  />
 
-      {/* Enhanced Face Detection Animation Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/60 backdrop-blur-sm flex flex-col items-center justify-center">
-        {/* Main animation in center */}
-        <div className="relative flex items-center justify-center w-full">
-          <DotLottieReact
-            src="/lottie/facescan.lottie"
-            loop
-            className="h-36 z-10"
-            autoplay
-          />
+                  {/* Enhanced Face Detection Animation Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-black/60 backdrop-blur-sm flex flex-col items-center justify-center">
+                    {/* Main animation in center */}
+                    <div className="relative flex items-center justify-center w-full">
+                      <DotLottieReact
+                        src="/lottie/facescan.lottie"
+                        loop
+                        className="h-36 z-10"
+                        autoplay
+                      />
 
-          {/* Pulsing ring effect */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="h-32 w-32 rounded-full border-4 border-primary/50 animate-ping opacity-30"></div>
-          </div>
-        </div>
+                      {/* Pulsing ring effect */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="h-32 w-32 rounded-full border-4 border-primary/50 animate-ping opacity-30"></div>
+                      </div>
+                    </div>
 
-        {/* Progress indicators */}
-        <div className="mt-4 flex flex-col items-center">
-          <div className="text-white font-medium text-sm tracking-wide mb-2">
-            Analyzing your face...
-          </div>
+                    {/* Progress indicators */}
+                    <div className="mt-4 flex flex-col items-center">
+                      <div className="text-white font-medium text-sm tracking-wide mb-2">
+                        Analyzing your face...
+                      </div>
 
-          <div className="w-48 h-1.5 bg-white/20 rounded-full overflow-hidden">
-            <div className="h-full bg-primary rounded-full animate-progressBar"></div>
-          </div>
+                      <div className="w-48 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                        <div className="h-full bg-primary rounded-full animate-progressBar"></div>
+                      </div>
 
-          <div className="mt-3 flex items-center gap-1.5">
-            <div className="h-2 w-2 rounded-full bg-primary animate-pulse"></div>
-            <span className="text-xs text-white">Secure verification in progress</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  ) : (
-    <Webcam
-      audio={false}
-      ref={webcamRef}
-      screenshotFormat="image/jpeg"
-      className="w-full h-auto aspect-video object-cover"
-      videoConstraints={{
-        facingMode: "user"
-      }}
-    />
-  )}
+                      <div className="mt-3 flex items-center gap-1.5">
+                        <div className="h-2 w-2 rounded-full bg-primary animate-pulse"></div>
+                        <span className="text-xs text-white">Secure verification in progress</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Webcam
+                  audio={false}
+                  ref={webcamRef}
+                  screenshotFormat="image/jpeg"
+                  className="w-full h-auto aspect-video object-cover"
+                  videoConstraints={{
+                    facingMode: "user"
+                  }}
+                />
+              )}
 
-  {/* Face alignment guide when not captured yet */}
-  {/* {!capturedImage && (
+              {/* Face alignment guide when not captured yet */}
+              {/* {!capturedImage && (
     <div className="absolute inset-0 pointer-events-none">
       <div className="h-full w-full flex items-center justify-center">
         <div className="w-48 h-48 border-2 border-dashed border-primary/40 rounded-full flex items-center justify-center">
@@ -2020,10 +2020,10 @@ const loaderStyles = `
       </div>
     </div>
   )} */}
-</div>
+            </div>
 
-{/* Add this CSS animation definition somewhere in your globals.css or a style tag */}
-<style jsx global>{`
+            {/* Add this CSS animation definition somewhere in your globals.css or a style tag */}
+            <style jsx global>{`
   @keyframes progressBar {
     0% { width: 0%; }
     20% { width: 20%; }
@@ -2079,8 +2079,8 @@ const loaderStyles = `
             {/* Location info in dialog */}
             <div className="flex justify-center">
               <div className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs ${locationError ? "bg-red-100 text-red-800" :
-                  isLocationLoading ? "bg-amber-100 text-amber-800" :
-                    location ? "bg-green-100 text-green-800" : "bg-muted text-muted-foreground"
+                isLocationLoading ? "bg-amber-100 text-amber-800" :
+                  location ? "bg-green-100 text-green-800" : "bg-muted text-muted-foreground"
                 }`}>
                 <MapPinIcon className={`h-3.5 w-3.5 ${isLocationLoading ? "animate-pulse" : ""
                   }`} />
@@ -2096,15 +2096,15 @@ const loaderStyles = `
                 </span>
 
 
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 ml-2 px-2"
-                    onClick={() => fetchLocation()}
-                  >
-                    <RefreshCw className="h-3 w-3 mr-1" />
-                    Retry
-                  </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 ml-2 px-2"
+                  onClick={() => fetchLocation()}
+                >
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  Retry
+                </Button>
 
               </div>
             </div>
@@ -2131,16 +2131,13 @@ const loaderStyles = `
 
             <Separator />
 
-            <div className="text-center">
-              <h3 className="text-lg font-semibold">
-                {isBreakOpen ? "End Break" : "Take a Break"}
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium">
+                {isBreakOpen ? `End Break at ${format(new Date(), 'hh:mm a')}` : `Start Break at ${format(new Date(), 'hh:mm a')}`}
               </h3>
-              <p className="text-sm text-muted-foreground">
-                {format(new Date(), 'EEEE, MMMM d, yyyy, hh:mm a')}
-              </p>
             </div>
 
-            {/* Enterprise mode selector for breaks */}
+            {/* Enterprise mode selector */}
             {organization?.isEnterprise && (user?.role === 'admin' || user?.role === 'orgAdmin') && (
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
@@ -2163,8 +2160,8 @@ const loaderStyles = `
                   </Button>
 
                   {showBreakUserDropdown && (
-                    <div id="break-user-dropdown" className="absolute z-50 mt-1 w-full bg-popover rounded-md border shadow-md">
-                      <div className="p-2 border-b">
+                    <div id="break-user-dropdown" className="absolute top-full mt-1 w-full z-50 max-h-[300px] overflow-auto rounded-md border bg-popover shadow-md">
+                      <div className="sticky top-0 z-10 p-2 bg-popover border-b">
                         <Input
                           placeholder="Search workers..."
                           value={userSearchQuery}
@@ -2172,11 +2169,10 @@ const loaderStyles = `
                           className="h-8"
                         />
                       </div>
-
-                      <div className="max-h-60 overflow-y-auto py-1">
+                      <div className="p-1">
                         <Button
                           variant={!selectedTargetUser ? "secondary" : "ghost"}
-                          className="w-full justify-start text-left"
+                          className="w-full justify-start text-left mb-1"
                           onClick={() => {
                             handleWorkerSelect(null);
                             setShowBreakUserDropdown(false);
@@ -2187,7 +2183,7 @@ const loaderStyles = `
                         </Button>
 
                         {filteredUsers.length === 0 ? (
-                          <div className="px-3 py-2 text-center text-sm text-muted-foreground">
+                          <div className="py-6 text-center text-sm text-muted-foreground">
                             No workers found
                           </div>
                         ) : (
@@ -2195,7 +2191,7 @@ const loaderStyles = `
                             <Button
                               key={user._id}
                               variant={selectedTargetUser === user._id ? "secondary" : "ghost"}
-                              className="w-full justify-start text-left"
+                              className="w-full justify-start text-left mb-1"
                               onClick={() => {
                                 handleWorkerSelect(user._id);
                                 setShowBreakUserDropdown(false);
@@ -2227,7 +2223,7 @@ const loaderStyles = `
                           {orgUsers.find(u => u._id === selectedTargetUser)?.firstName} {orgUsers.find(u => u._id === selectedTargetUser)?.lastName}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {isBreakOpen ? "End break" : "Start break"} for this worker
+                          {isBreakOpen ? `Recording break end for this worker` : `Recording break start for this worker`}
                         </p>
                       </div>
                     </div>
@@ -2244,79 +2240,66 @@ const loaderStyles = `
               </div>
             )}
 
-           {/* Webcam for Break - Enhanced Animation */}
-<div className="relative overflow-hidden rounded-lg border">
-  {capturedBreakImage ? (
-    <div className="relative w-full">
-      <img
-        src={capturedBreakImage}
-        alt="Captured"
-        className="w-full h-auto aspect-video object-cover"
-      />
+            {/* Webcam for Break - Enhanced Animation */}
+            <div className="relative overflow-hidden rounded-lg border">
+              {capturedBreakImage ? (
+                <div className="relative w-full">
+                  <img
+                    src={capturedBreakImage}
+                    alt="Captured"
+                    className="w-full h-auto aspect-video object-cover"
+                  />
 
-      {/* Enhanced Break Detection Animation Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-amber-500/20 to-amber-800/60 backdrop-blur-sm flex flex-col items-center justify-center">
-        {/* Main animation in center */}
-        <div className="relative flex items-center justify-center w-full">
-          <DotLottieReact
-            src="/lottie/facescan.lottie"
-            loop
-            className="h-36 z-10"
-            autoplay
-          />
+                  {/* Enhanced Break Detection Animation Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-amber-500/20 to-amber-800/60 backdrop-blur-sm flex flex-col items-center justify-center">
+                    {/* Main animation in center */}
+                    <div className="relative flex items-center justify-center w-full">
+                      <DotLottieReact
+                        src="/lottie/facescan.lottie"
+                        loop
+                        className="h-36 z-10"
+                        autoplay
+                      />
 
-          {/* Spinning clock effect for break */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="h-40 w-40 rounded-full border-4 border-amber-400/50 animate-spin opacity-30" style={{ animationDuration: '3s' }}></div>
-          </div>
-        </div>
+                      {/* Spinning clock effect for break */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="h-40 w-40 rounded-full border-4 border-amber-400/50 animate-spin opacity-30" style={{ animationDuration: '3s' }}></div>
+                      </div>
+                    </div>
 
-        {/* Progress indicators */}
-        <div className="mt-4 flex flex-col items-center">
-          <div className="text-white font-medium text-sm tracking-wide mb-2">
-            {isBreakOpen ? "Ending your break..." : "Starting your break..."}
-          </div>
+                    {/* Progress indicators */}
+                    <div className="mt-4 flex flex-col items-center">
+                      <div className="text-white font-medium text-sm tracking-wide mb-2">
+                        {isBreakOpen ? "Ending your break..." : "Starting your break..."}
+                      </div>
 
-          <div className="w-48 h-1.5 bg-white/20 rounded-full overflow-hidden">
-            <div className="h-full bg-amber-400 rounded-full animate-progressBar"></div>
-          </div>
+                      <div className="w-48 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                        <div className="h-full bg-amber-400 rounded-full animate-progressBar"></div>
+                      </div>
 
-          <div className="mt-3 flex items-center gap-1.5">
-            <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></div>
-            <span className="text-xs text-white">Verifying your identity</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  ) : (
-    <Webcam
-      audio={false}
-      ref={webcamRef}
-      screenshotFormat="image/jpeg"
-      className="w-full h-auto aspect-video object-cover"
-      videoConstraints={{
-        facingMode: "user"
-      }}
-    />
-  )}
+                      <div className="mt-3 flex items-center gap-1.5">
+                        <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></div>
+                        <span className="text-xs text-white">Verifying your identity</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Webcam
+                  audio={false}
+                  ref={webcamRef}
+                  screenshotFormat="image/jpeg"
+                  className="w-full h-auto aspect-video object-cover"
+                  videoConstraints={{
+                    facingMode: "user"
+                  }}
+                />
+              )}
 
-  {/* Face alignment guide when not captured yet */}
-  {!capturedBreakImage && (
-    <div className="absolute inset-0 pointer-events-none">
-      <div className="h-full w-full flex items-center justify-center">
-        <div className="w-48 h-48 border-2 border-dashed border-amber-400/40 rounded-full flex items-center justify-center">
-          <div className="w-36 h-36 border border-amber-400/30 rounded-full flex items-center justify-center">
-            <div className="text-xs text-amber-500/70 font-medium text-center">
-              Center your face here
+             
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )}
-</div>
 
-            {/* Capture button for break */}
+            {/* Capture button */}
             <div className="flex justify-center">
               <Button
                 onClick={captureImageAndSubmitBreakStart}
@@ -2335,18 +2318,36 @@ const loaderStyles = `
 
             {/* Location info */}
             <div className="flex justify-center">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-md text-xs text-muted-foreground">
-                <MapPinIcon className="h-3.5 w-3.5 text-amber-500" />
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs ${locationError ? "bg-red-100 text-red-800" :
+                isLocationLoading ? "bg-amber-100 text-amber-800" :
+                  location ? "bg-amber-100 text-amber-800" : "bg-muted text-muted-foreground"
+                }`}>
+                <MapPinIcon className={`h-3.5 w-3.5 ${isLocationLoading ? "animate-pulse" : ""}`} />
                 <span>
-                  {location
-                    ? `Lat: ${location.lat.toFixed(6)}, Long: ${location.lng.toFixed(6)}`
-                    : "Fetching location..."}
+                  {isLocationLoading
+                    ? "Getting your location..."
+                    : locationError
+                      ? locationError
+                      : location
+                        ? `Lat: ${location.lat.toFixed(6)}, Long: ${location.lng.toFixed(6)}`
+                        : "Location unavailable. Please allow location access."
+                  }
                 </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 ml-2 px-2"
+                  onClick={() => fetchLocation()}
+                >
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  Retry
+                </Button>
               </div>
             </div>
           </div>
         </DialogContent>
       </Dialog>
+
 
       {/* Map Modal */}
       <Dialog open={mapModalOpen} onOpenChange={setMapModalOpen}>

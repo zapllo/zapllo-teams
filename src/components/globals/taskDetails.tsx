@@ -1,12 +1,33 @@
 'use client'
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
-import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '../ui/sheet';
+import React, { useState, useEffect } from 'react'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '../ui/sheet';
 import { Separator } from '../ui/separator';
-import { CheckboxIcon, UpdateIcon } from '@radix-ui/react-icons';
 import { Label } from '../ui/label';
 import { Button } from '../ui/button';
-import { ArrowLeft, Bell, Calendar, CheckCheck, CheckCircle, Circle, Clock, Edit, File, FileTextIcon, Flag, GlobeIcon, Link, Loader, Mail, MailIcon, PlayIcon, Repeat, RepeatIcon, Tag, Trash } from 'lucide-react';
-import EditTaskDialog from './editTask';
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+    AlertCircle,
+    ArrowLeft,
+    Calendar,
+    CheckCircle,
+    Circle,
+    Clock,
+    Edit,
+    FileTextIcon,
+    Flag,
+    GlobeIcon,
+    Link2,
+    Loader2,
+    MessageSquare,
+    PlayCircle,
+    Tag,
+    Trash2,
+    ExternalLink,
+    Paperclip,
+    Bell,
+    LinkIcon
+} from 'lucide-react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { IconCopy, IconProgress } from '@tabler/icons-react';
 import CustomAudioPlayer from './customAudioPlayer';
@@ -15,11 +36,34 @@ import axios from 'axios';
 import { formatDistanceToNow, intervalToDuration } from 'date-fns';
 import { usePathname, useRouter } from 'next/navigation';
 import { Task, TaskDetailsProps } from '@/types/tasksTab';
+import EditTaskDialog from './editTask';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from '@/lib/utils';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import {
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+    DialogClose,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
-type Props = {}
-
-
-const TaskDetails: React.FC<TaskDetailsProps> = ({ selectedTask,
+const TaskDetails: React.FC<TaskDetailsProps> = ({
+    selectedTask,
     onTaskUpdate,
     onClose,
     handleUpdateTaskStatus,
@@ -38,8 +82,9 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ selectedTask,
     sortedComments,
     formatDate,
     categories,
-    formatTaskDate, }) => {
-
+    formatTaskDate,
+    onTaskStatusChange
+}) => {
     const router = useRouter();
     const pathname = usePathname();
     const [isVisible, setIsVisible] = useState(true);
@@ -48,7 +93,132 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ selectedTask,
     const [timeMessage, setTimeMessage] = useState("");
     const [userLoading, setUserLoading] = useState<boolean | null>(false);
 
-    const handleClose = () => setIsVisible(false);
+    // Status dialog state
+    const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+    const [reopenDialogOpen, setReopenDialogOpen] = useState(false);
+    const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [commentText, setCommentText] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [currentAction, setCurrentAction] = useState<'progress' | 'complete' | 'reopen' | null>(null);
+
+    // Get status badge styling
+    const getStatusBadge = (status: string) => {
+        switch (status) {
+            case 'Pending':
+                return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 border-yellow-300">Pending</Badge>;
+            case 'In Progress':
+                return <Badge variant="outline" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 border-blue-300">In Progress</Badge>;
+            case 'Completed':
+                return <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 border-green-300">Completed</Badge>;
+            default:
+                return <Badge variant="outline">{status}</Badge>;
+        }
+    };
+
+    // Get priority badge styling
+    const getPriorityBadge = (priority: string) => {
+        switch (priority) {
+            case 'High':
+                return <Badge variant="outline" className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 border-red-300">High</Badge>;
+            case 'Medium':
+                return <Badge variant="outline" className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300 border-orange-300">Medium</Badge>;
+            case 'Low':
+                return <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 border-green-300">Low</Badge>;
+            default:
+                return <Badge variant="outline">{priority}</Badge>;
+        }
+    };
+
+    // Determine file type icon
+    const getFileIcon = (fileName: string) => {
+        if (fileName.match(/\.(jpeg|jpg|gif|png)$/i)) {
+            return <img src="/icons/image-file.svg" alt="Image" className="h-5 w-5" />;
+        } else if (fileName.match(/\.(pdf)$/i)) {
+            return <img src="/icons/pdf-file.svg" alt="PDF" className="h-5 w-5" />;
+        } else if (fileName.match(/\.(doc|docx)$/i)) {
+            return <img src="/icons/word-file.svg" alt="Word" className="h-5 w-5" />;
+        } else if (fileName.match(/\.(xls|xlsx)$/i)) {
+            return <img src="/icons/excel-file.svg" alt="Excel" className="h-5 w-5" />;
+        } else {
+            return <Paperclip className="h-5 w-5" />;
+        }
+    };
+
+    // Handle status update
+    const handleStatusUpdate = (action: 'progress' | 'complete' | 'reopen') => {
+        // Instead of opening dialogs directly, call the parent component's handler
+        if (onTaskStatusChange && selectedTask) {
+            onTaskStatusChange(selectedTask, action);
+        }
+    };
+    // Submit status update
+    const submitStatusUpdate = async () => {
+        if (!commentText.trim()) {
+            toast.error('Please add a comment before updating the task');
+            return;
+        }
+
+        if (!currentAction || !selectedTask) return;
+
+        setIsSubmitting(true);
+
+        try {
+            // Call the passed-in handler function
+            if (onTaskStatusChange) {
+                await onTaskStatusChange(selectedTask, currentAction);
+            }
+
+            // Reset states
+            setStatusDialogOpen(false);
+            setCompleteDialogOpen(false);
+            setReopenDialogOpen(false);
+
+            // Reset the parent component's dialog states
+            setIsDialogOpen(false);
+            setIsCompleteDialogOpen(false);
+            setIsReopenDialogOpen(false);
+
+            // Refresh data
+            if (onTaskUpdate) {
+                await onTaskUpdate();
+            }
+
+            const statusText =
+                currentAction === 'progress' ? 'In Progress' :
+                    currentAction === 'complete' ? 'Completed' : 'Reopened';
+
+            toast.success(`Task marked as ${statusText} successfully`);
+        } catch (error: any) {
+            console.error('Error updating task status:', error);
+            toast.error(error.message || 'An error occurred while updating the task');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    // Get comment for task update
+    const getCommentForTaskUpdate = () => {
+        return commentText;
+    };
+
+    // Handle task deletion confirmation
+    const handleDeleteConfirmation = async () => {
+        setIsSubmitting(true);
+        try {
+            if (selectedTask && handleDeleteConfirm) {
+                await handleDeleteConfirm();
+                setDeleteDialogOpen(false);
+                setSelectedTask(null);
+                toast.success('Task deleted successfully');
+            }
+        } catch (error) {
+            console.error('Error deleting task:', error);
+            toast.error('Failed to delete task');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     useEffect(() => {
         const getUserDetails = async () => {
@@ -101,216 +271,256 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ selectedTask,
     }, [isTrialExpired, trialExpires]);
 
     return (
-        <div>
-            <Sheet open={!!selectedTask} onOpenChange={() => setSelectedTask(null)}>
-                <SheetContent className={`max-w-4xl scrollbar-hide z-[100] w-full `}>
-                    <SheetHeader>
-                        <div className="flex gap-2">
-                            <div className="cursor-pointer h-7 w-7 dark:bg-[#121212] bg- dark:hover:bg-white hover:text-black dar border border-white rounded-full" onClick={() => setSelectedTask(null)}>
-                                <ArrowLeft />
-                            </div>
-                            <SheetTitle className="dark:text-white mb-4">
-                                Task details
-                            </SheetTitle>
-                        </div>
-                    </SheetHeader>
-                    <div className="border overflow-y-scroll scrollbar-hide   h-10/11 p-4 rounded-lg">
-                        <h1 className="font-bold text-sm px-2">{selectedTask.title}</h1>
-                        <div className="flex mt-4 justify-start space-x-12  text-start items-center gap-6 px-2">
-                            <div className="flex items-center gap-4">
-                                <Label htmlFor="user" className="text-right text-xs">
+        <Sheet open={!!selectedTask} onOpenChange={(open) => {
+            if (!open) setSelectedTask(null);
+        }}>
+            <SheetContent className="max-w-5xl z-[100] w-[95vw] p-0 overflow-y-auto scrollbar-hide">
+                {/* Header with back button and title */}
+                <SheetHeader className="sticky top-0 z-10 bg-background border-b p-4 flex flex-row items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setSelectedTask(null)}
+                            className="h-8 w-8 rounded-full"
+                        >
+                            <ArrowLeft className="h-4 w-4" />
+                        </Button>
+                        <SheetTitle className="text-lg">{selectedTask?.title}</SheetTitle>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        {selectedTask && getStatusBadge(selectedTask.status)}
+                        {selectedTask && getPriorityBadge(selectedTask.priority)}
+                    </div>
+                </SheetHeader>
+
+                <div className="p-6 space-y-6 max-h-[calc(100vh-160px)] overflow-y-auto">
+                    {/* Assigned people section */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Card>
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-sm flex items-center gap-2">
                                     Assigned To
-                                </Label>
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
                                 {selectedTask?.assignedUser?.firstName ? (
-                                    <div className="flex gap-2  justify-start">
-                                        <div className="h-7 w-7  rounded-full bg-primary -400">
-                                            <h1 className="text-center uppercase text-white text-xs mt-1">
-                                                {`${selectedTask?.assignedUser?.firstName?.slice(0, 1)}`}
-                                                {`${selectedTask?.assignedUser?.lastName?.slice(0, 1)}`}
-                                            </h1>
+                                    <div className="flex items-center gap-3">
+                                        <Avatar className="h-10 w-10">
+                                            <AvatarImage
+                                                src={selectedTask?.assignedUser?.profilePic}
+                                                alt={`${selectedTask?.assignedUser?.firstName} ${selectedTask?.assignedUser?.lastName}`}
+                                            />
+                                            <AvatarFallback className="bg-primary text-primary-foreground">
+                                                {selectedTask?.assignedUser?.firstName?.slice(0, 1)}
+                                                {selectedTask?.assignedUser?.lastName?.slice(0, 1)}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <div className="font-medium">
+                                                {`${selectedTask?.assignedUser?.firstName} ${selectedTask?.assignedUser?.lastName}`}
+                                            </div>
+                                            <div className="text-xs text-muted-foreground">
+                                                {selectedTask?.assignedUser?.email}
+                                            </div>
                                         </div>
-                                        <h1 id="assignedUser" className="col-span-3 text-sm">{`${selectedTask.assignedUser.firstName} ${selectedTask.assignedUser.lastName}`}</h1>
+                                    </div>
+                                ) : (
+                                    <div className="text-sm text-muted-foreground">No user assigned</div>
+                                )}
+                            </CardContent>
+                        </Card>
 
-                                    </div >
-                                ) : null}
-                            </div >
-                            <div className=" flex items-center gap-4">
-                                <Label htmlFor="user" className="text-right text-xs">
-                                    Assigned By
-                                </Label>
+                        <Card>
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-sm flex items-center gap-2">
+                                    Created By
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
                                 {selectedTask?.user?.firstName ? (
-                                    <div className="flex gap-2 justify-start">
-                                        <div className="h-7 w-7 rounded-full bg-[#4F2A2B]">
-                                            <h1 className="text-center text-xs mt-1 text-white uppercase">
-                                                {selectedTask.user.firstName.slice(0, 1)}
-                                                {selectedTask.user.lastName.slice(0, 1)}
-                                            </h1>
+                                    <div className="flex items-center gap-3">
+                                        <Avatar className="h-10 w-10">
+                                            <AvatarImage
+                                                src={selectedTask?.user?.profilePic}
+                                                alt={`${selectedTask?.user?.firstName} ${selectedTask?.user?.lastName}`}
+                                            />
+                                            <AvatarFallback className="bg-primary text-primary-foreground">
+                                                {selectedTask?.user?.firstName?.slice(0, 1)}
+                                                {selectedTask?.user?.lastName?.slice(0, 1)}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <div className="font-medium">
+                                                {`${selectedTask?.user?.firstName} ${selectedTask?.user?.lastName}`}
+                                            </div>
+                                            <div className="text-xs text-muted-foreground">
+                                                {selectedTask?.user?.email}
+                                            </div>
                                         </div>
-                                        <h1 id="assignedUser" className="col-span-3 text-sm">
-                                            {`${selectedTask.user.firstName} ${selectedTask.user.lastName}`}
-                                        </h1>
                                     </div>
-                                ) : null}
-                            </div>
-                        </div >
-                        <div className=" flex items-center gap-1 mt-4">
-                            <Calendar className="h-4 text-[#E94C4C]" />
-                            <Label htmlFor="user" className="text-right text-sm">
-                                Created At
-                            </Label>
-                            <div className="flex gap-2 ml-2 text-xs  justify-start">
-                                {/* <Calendar className="h-5" /> */}
-                                <h1 id="assignedUser" className="col-span-3 font-">
-                                    {formatTaskDate(selectedTask.createdAt)}
-                                </h1>
-                            </div>
-                        </div>
-                        <div className=" flex items-center gap-1 mt-4">
-                            <Clock className="h-4 text-[#E94C4C]" />
-                            <Label htmlFor="user" className="text-right text-sm">
-                                Due Date
-                            </Label>
-                            <div className="flex gap-2 ml-5 justify-start">
-                                <h1 id="assignedUser" className="col-span-3  text-xs ">
-                                    {formatTaskDate(selectedTask.dueDate)}
-                                </h1>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-1 mt-4">
-                            <RepeatIcon className="h-4 text-[#0D751C]" />
-                            <Label htmlFor="user" className="text-right text-sm">
-                                Frequency
-                            </Label>
-                            <div className="flex gap-2 ml-3  justify-start">
-                                {/* <Repeat className="h-5" /> */}
-                                <h1 id="assignedUser" className="col-span-3 flex  text-xs">
-                                    {selectedTask.repeatType ? selectedTask.repeatType : "Once"}
-                                    <span>
-                                        {selectedTask.repeatType && (
-                                            <div className="ml-2">
-                                                {selectedTask.days && selectedTask.days.length > 0 ? (
-                                                    <h1>({selectedTask.days.join(', ')})</h1>
-                                                ) : null}
-                                            </div>
-                                        )}
-                                    </span>
-                                    <span>
-                                        {selectedTask.repeatType && (
-                                            <div className="ml-2">
-                                                {selectedTask.dates && selectedTask.dates.length > 0 ? (
-                                                    <h1>({selectedTask.dates.join(', ')})</h1>
-                                                ) : null}
-                                            </div>
-                                        )}
-                                    </span>
-                                </h1>
+                                ) : (
+                                    <div className="text-sm text-muted-foreground">Unknown</div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </div>
 
-
-                            </div>
-                        </div>
-
-
-                        <div className=" flex items-center gap-1 mt-4">
-                            {selectedTask.status === 'Pending' && <Circle className="h-4 text-red-500" />}
-                            {selectedTask.status === 'Completed' && <CheckCircle className="h-4 text-green-500" />}
-                            {selectedTask.status === 'In Progress' && <Loader className="h-4 text-orange-500" />}
-                            <Label htmlFor="user" className="text-right text-sm">
-                                Status
-                            </Label>
-                            <div className="flex gap-2 ml-9  justify-start">
-
-                                <h1 id="assignedUser" className="col-span-3 text-xs ml-1 ">
-                                    {`${selectedTask.status}`}
-                                </h1>
-                            </div>
-                        </div>
-                        <div className=" flex items-center gap-1 mt-4">
-                            <Tag className="h-4 text-[#C3AB1E]" />
-                            <Label htmlFor="user" className="text-right text-sm">
-                                Category
-                            </Label>
-                            <div className="flex  ml-6  justify-start">
-                                <h1 id="assignedUser" className="col-span-3 text-xs">
-                                    {selectedTask.category?.name}
-                                </h1>
-                            </div>
-                        </div>
-                        <div className=" flex items-center gap-1 mt-4">
-                            {selectedTask.priority === 'High' && <Flag className="h-4 text-red-500" />}
-                            {selectedTask.priority === 'Medium' && <Flag className="h-4 text-orange-500" />}
-                            {selectedTask.priority === 'Low' && <Flag className="h-4 text-green-500" />}
-                            <Label htmlFor="user" className="text-right">
-                                Priority
-                            </Label>
-                            <div className="flex gap-2 ml-9  justify-start">
-                                <h1 id="assignedUser" className={`col-span-3 text-xs  font-bold ${selectedTask.priority === 'High'
-                                    ? 'text-red-500'
-                                    : selectedTask.priority === 'Medium'
-                                        ? 'text-orange-500'
-                                        : selectedTask.priority === 'Low'
-                                            ? 'text-green-500'
-                                            : ''
-                                    }`}>
-                                    {`${selectedTask.priority}`}
-                                </h1>
+                    {/* Dates and category section */}
+                    <Card>
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm">Schedule Information</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+                                        <Calendar className="h-5 w-5 text-primary" />
+                                    </div>
+                                    <div>
+                                        <div className="text-sm font-medium">Created Date</div>
+                                        <div className="text-xs text-muted-foreground">{selectedTask?.createdAt ? formatTaskDate(selectedTask.createdAt) : 'N/A'}</div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+                                        <Clock className="h-5 w-5 text-primary" />
+                                    </div>
+                                    <div>
+                                        <div className="text-sm font-medium">Due Date</div>
+                                        <div className="text-xs text-muted-foreground">{selectedTask?.dueDate ? formatTaskDate(selectedTask.dueDate) : 'N/A'}</div>
+                                    </div>
+                                </div>
                             </div>
 
-                        </div>
-                        <div className=" flex items-center gap-1 mt-4">
-                            <FileTextIcon className="h-4 text-[#4662D2]" />
-                            <Label htmlFor="user" className="text-right text-sm">
+                            <Separator />
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+                                        <Tag className="h-5 w-5 text-primary" />
+                                    </div>
+                                    <div>
+                                        <div className="text-sm font-medium">Category</div>
+                                        <div className="text-xs text-muted-foreground">
+                                            {selectedTask?.category?.name || "Uncategorized"}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+                                        <Bell className="h-5 w-5 text-primary" />
+                                    </div>
+                                    <div>
+                                        <div className="text-sm font-medium">Frequency</div>
+                                        <div className="text-xs text-muted-foreground flex flex-wrap gap-1">
+                                            {selectedTask?.repeatType ? selectedTask?.repeatType : "Once"}
+                                            {selectedTask?.days && selectedTask?.days.length > 0 && (
+                                                <span>({selectedTask?.days.join(', ')})</span>
+                                            )}
+                                            {selectedTask?.dates && selectedTask?.dates.length > 0 && (
+                                                <span>({selectedTask?.dates.join(', ')})</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Description section */}
+                    <Card>
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm flex items-center gap-2">
+                                <FileTextIcon className="h-4 w-4" />
                                 Description
-                            </Label>
-                            <div className="flex gap-2 ml-2  justify-start">
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-sm whitespace-pre-wrap">
+                                {selectedTask?.description || "No description provided."}
+                            </div>
+                        </CardContent>
+                    </Card>
 
-                                <h1 id="assignedUser" className="col-span-3 text-xs ">
-                                    {`${selectedTask.description}`}
-                                </h1>
-                            </div>
-                        </div>
-                        <Separator className="mt-4   " />
-                        <div className="flex p-4 gap-2">
-                            <h1 className="text-sm  ">Links</h1>
-                            <div className='h-6 w-6 rounded-full items-center text-center border cursor-pointer shadow-white shadow-sm  bg-[#282D32] '>
-                                <Link className='h-4 text-center text-white m-auto mt-1' />
-                            </div>
-                        </div>
-                        <div className="">
-                            {selectedTask.links && selectedTask.links.filter(link => link.trim() !== "").length > 0 ? (
-                                selectedTask.links.map((link, index) => (
-                                    <div key={index} className="flex justify-between w-full space-x-2 my-2">
-                                        <div className="flex justify-between w-full text-sm">
-                                            <a href={link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline ">
-                                                {link}
-                                            </a>
-                                            <div>
-                                                <CopyToClipboard text={link} onCopy={() => handleCopy(link)}>
-                                                    <button className="px-2 py-2"><IconCopy className="h-4 text-white" /></button>
-                                                </CopyToClipboard>
-                                                <a href={link} target="_blank" rel="noopener noreferrer">
-                                                    <button className="px-2 py-1"><GlobeIcon className="h-4 text-white" /></button>
-                                                </a>
+                    {/* Links section */}
+                    <Card>
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm flex items-center gap-2">
+                                <LinkIcon className="h-4 w-4" />
+                                Links
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            {selectedTask?.links && selectedTask?.links.filter(link => link.trim() !== "").length > 0 ? (
+                                <div className="space-y-2">
+                                    {selectedTask?.links.map((link, index) => (
+                                        <div key={index} className="group flex items-center justify-between p-2 rounded-md border hover:bg-accent/50 transition-colors">
+                                            <div className="flex items-center gap-2 overflow-hidden">
+                                                <LinkIcon className="h-4 w-4 flex-shrink-0 text-blue-500" />
+                                                <div className="truncate text-sm text-blue-600 dark:text-blue-400">
+                                                    <a href={link} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                                                        {link}
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <TooltipProvider>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleCopy && handleCopy(link)}>
+                                                                <IconCopy className="h-4 w-4" />
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            <p>Copy link</p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
+
+                                                <TooltipProvider>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="icon"
+                                                                className="h-8 w-8"
+                                                                asChild
+                                                            >
+                                                                <a href={link} target="_blank" rel="noopener noreferrer">
+                                                                    <ExternalLink className="h-4 w-4" />
+                                                                </a>
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            <p>Open link</p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
                                             </div>
                                         </div>
-                                    </div>
-                                ))
+                                    ))}
+                                </div>
                             ) : (
-                                <p className="text-xs p-4">No links attached.</p>
+                                <div className="text-sm text-muted-foreground py-2">No links attached.</div>
                             )}
-                        </div>
-                        <Separator className="mt-4   " />
-                        <div className="flex p-4 gap-2">
-                            <h1 className=" text-sm ">Files</h1>
-                            <div className="bg-green-600 h-6 w-6 text-center items-center rounded-full">
-                                <File className="h-4 mt-1 text-white text-center" />
-                            </div>
-                        </div>
-                        <div className="px-4">
-                            {selectedTask.attachment && selectedTask.attachment.length > 0 && (
-                                <div className="flex flex-col gap-2">
-                                    {selectedTask.attachment.map((url: string, index: number) => {
-                                        // Extract the filename after the last '-' in the URL
+                        </CardContent>
+                    </Card>
+
+                    {/* Attachments section */}
+                    <Card>
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm flex items-center gap-2">
+                                <Paperclip className="h-4 w-4" />
+                                Attachments
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            {selectedTask?.attachment && selectedTask?.attachment.length > 0 ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {selectedTask?.attachment.map((url: string, index: number) => {
                                         const fileName = url.split('/').pop()?.split('-').pop() || 'Unknown file';
+                                        const isImage = fileName.match(/\.(jpeg|jpg|gif|png)$/i);
 
                                         return (
                                             <a
@@ -318,232 +528,277 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({ selectedTask,
                                                 href={url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="text-blue-500 text-sm underline"
+                                                className="flex items-center gap-2 p-2 rounded-md border hover:bg-accent/50 transition-colors group"
                                                 download={fileName}
                                             >
-                                                {fileName}
+                                                {isImage ? (
+                                                    <div className="h-12 w-12 rounded-md overflow-hidden bg-muted flex-shrink-0">
+                                                        <img src={url} alt={fileName} className="h-full w-full object-cover" />
+                                                    </div>
+                                                ) : (
+                                                    <div className="h-10 w-10 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                                        {getFileIcon(fileName)}
+                                                    </div>
+                                                )}
+                                                <div className="overflow-hidden">
+                                                    <div className="text-sm font-medium truncate">{fileName}</div>
+                                                    <div className="text-xs text-muted-foreground">Click to download</div>
+                                                </div>
+                                                <ExternalLink className="h-4 w-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
                                             </a>
                                         );
                                     })}
                                 </div>
-                            )}
-                        </div>
-
-                        <Separator className="mt-4  " />
-                        <div className="flex p-4 gap-2">
-                            <h1 className="  ">Reminders</h1>
-                            <div className="bg-red-600 h-6 w-6 rounded-full">
-                                <Bell className="h-4 mt-1 text-white" />
-                            </div>
-                        </div>
-
-                        {selectedTask.reminders && selectedTask.reminders.length > 0 ? (
-                            <div className="flex flex-col gap-2">
-                                {selectedTask.reminders.map((reminder, index) => (
-                                    <div key={index} className="flex items-center ml-4 gap-2 text-sm">
-                                        <div className="flex items-center gap-1">
-                                            {reminder.notificationType === 'email' ? (
-                                                <Mail className="h-4 w-4 text-blue-500" />
-                                            ) : (
-                                                <img src="/whatsapp.png" className="h-4 w-4 text-green-500" alt="WhatsApp Icon" />
-                                            )}
-                                        </div>
-                                        {reminder.type === 'specific' && reminder.date ? (
-                                            <span>
-                                                {new Date(reminder.date).toLocaleString()} (Specific Date)
-                                            </span>
-                                        ) : (
-                                            <span>
-                                                {reminder.value} {reminder.type}
-                                            </span>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="text-gray-500 ml-4 text-sm">No Reminders created</div>
-                        )}
-
-
-
-                        {
-                            selectedTask.audioUrl && (
-                                <div className=" p-4 w-1/2 border rounded-xl ml-2 dark:bg-[#121212]">
-                                    <CustomAudioPlayer audioUrl={selectedTask.audioUrl} />
-                                </div>
-                            )
-                        }
-
-                        <div className="gap-2 w-1/2 px-4 mt-4 mb-4 flex">
-                            {selectedTask.status === "Completed" ? (
-                                <>
-                                    <Button
-                                        onClick={() => {
-                                            setStatusToUpdate("Reopen"); // Assuming 'In Progress' status is used for reopening
-                                            setIsReopenDialogOpen(true);
-                                        }}
-                                        className="gap-2 border bg-transparent dark:text-white  text-black hover:border-yellow-500 hover:bg-transparent border-gray-600 w-fit"
-                                    >
-                                        <PlayIcon className="h-4 bg-[#FDB077] rounded-full w-4" />
-                                        Reopen
-                                    </Button>
-                                    <Button
-                                        onClick={handleEditClick}
-                                        className="border bg-transparent hover:-sm dark:text-white text-black hover:border-blue-500 hover:bg-transparent border-gray-600 w-fit"
-                                    >
-                                        <Edit className="h-4 rounded-full text-blue-400" />
-                                        Edit
-                                    </Button>
-                                    <Button
-                                        onClick={() => handleDeleteClick(selectedTask._id)}
-                                        className="border bg-transparent hover:-sm dark:text-white text-black hover:border-red-500 hover:bg-transparent border-gray-600 w-fit "
-                                    >
-                                        <Trash className="h-4 rounded-full text-red-400" />
-                                        Delete
-                                    </Button>
-                                </>
                             ) : (
-                                <>
-                                    <Button
-                                        onClick={() => {
-                                            setStatusToUpdate("In Progress");
-                                            setIsDialogOpen(true);
-                                        }}
-                                        className="gap-1 border bg-transparent hover:-sm dark:text-white text-black hover:border-orange-500 hover:bg-transparent border-gray-600 w-full"
-                                    >
-                                        <IconProgress className="scale-105 text-orange-500 rounded-full w-4" />
-                                        In Progress
-                                    </Button>
-                                    <Button
-                                        onClick={() => {
-                                            setStatusToUpdate("Completed");
-                                            setIsCompleteDialogOpen(true);
-                                        }}
-                                        className="border flex gap-1 bg-transparent hover:-sm dark:text-white text-black hover:border-green-500 hover:bg-transparent border-gray-600 w-full"
-                                    >
-                                        <CheckboxIcon className="scale-125 rounded-full text-green-400" />
-                                        Completed
-                                    </Button>
-                                    <Button
-                                        onClick={handleEditClick}
-                                        className="border flex items-center gap-1 bg-transparent dark:text-white text-black hover:-sm hover:border-blue-500 hover:bg-transparent border-gray-600 w-full"
-                                    >
-                                        <Edit className="h-4 rounded-full text-blue-400" />
-                                        Edit
-                                    </Button>
-                                    <Button
-                                        onClick={() => handleDeleteClick(selectedTask._id)}
-                                        className="border flex gap-1 items-center rounded dark:text-white text-black hover:-sm hover:border-red-500 hover:bg-transparent bg-transparent border-gray-600 w-full"
-                                    >
-                                        <Trash className="h-4 rounded-full text-red-400 " />
-                                        Delete
-                                    </Button>
-                                </>
+                                <div className="text-sm text-muted-foreground py-2">No files attached.</div>
                             )}
+                        </CardContent>
+                    </Card>
 
-                            {/* Edit Task Dialog */}
-                            <EditTaskDialog
-                                open={isEditDialogOpen}
-                                onClose={() => setIsEditDialogOpen(false)}
-                                task={selectedTask as Task}
-                                users={users}
-                                categories={categories}
-                                onTaskUpdate={onTaskUpdate}
-                            />
-                        </div>
-
-                    </div >
-
-                    <Separator />
-                    <div className=" rounded-xl bg-[#] p-4 mt-4 mb-4">
-                        <div className="mb-4 gap-2 flex justify-start ">
-                            <CheckCheck className="h-5" />
-                            <Label className=" text-md mt-auto">Task Updates</Label>
-
-                        </div>
-                        <div className="space-y-2 h-full">
-                            {sortedComments && sortedComments.length > 0 ? (
-                                sortedComments.map((commentObj, index) => (
-                                    <div key={index} className="relative border dark:bg-[#121212] rounded-lg p-2">
-                                        <div className="flex gap-2 items-center">
-                                            <div className="h-7 w-7 text-xs  text-center rounded-full bg-red-700">
-
-                                                <h1 className='mt-1 text-white'>
-                                                    {commentObj.userName.slice(0, 1)}
-                                                </h1>
+                    {/* Reminders section */}
+                    <Card>
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm flex items-center gap-2">
+                                <Bell className="h-4 w-4" />
+                                Reminders
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            {selectedTask?.reminders && selectedTask?.reminders.length > 0 ? (
+                                <div className="space-y-2">
+                                    {selectedTask?.reminders.map((reminder, index) => (
+                                        <div key={index} className="flex items-center gap-3 p-2 rounded-md border bg-accent/50">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                                                {reminder.notificationType === 'email' ? (
+                                                    <Bell className="h-4 w-4 text-primary" />
+                                                ) : (
+                                                    <img src="/whatsapp.png" className="h-5 w-5" alt="WhatsApp Icon" />
+                                                )}
                                             </div>
-                                            <strong>{commentObj.userName}</strong>
+                                            <div className="text-sm">
+                                                {reminder.type === 'specific' && reminder.date ? (
+                                                    <span>
+                                                        {new Date(reminder.date).toLocaleString()} (Specific Date)
+                                                    </span>
+                                                ) : (
+                                                    <span>
+                                                        {reminder.value} {reminder.type} {reminder.notificationType === 'email' ? 'via Email' : 'via WhatsApp'}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
-                                        <p className="px-2 ml-6 text-xs">{formatDate(commentObj.createdAt)}</p>
-                                        <p className="p-2 text-sm ml-6">{commentObj.comment}</p>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-sm text-muted-foreground py-2">No reminders set.</div>
+                            )}
+                        </CardContent>
+                    </Card>
 
-                                        {/* Render fileUrl if it exists */}
-                                        {commentObj.fileUrl && commentObj.fileUrl.length > 0 && (
-                                            <div className="ml-6 mt-2">
-                                                {commentObj.fileUrl.map((url, fileIndex) => (
-                                                    <div key={fileIndex} className="mb-2 grid grid-cols-4">
-                                                        {url.match(/\.(jpeg|jpg|gif|png)$/) != null ? (
-                                                            <div className='relative group'>
-                                                                <a href={url} target="_blank" rel="noopener noreferrer" className="block overflow-hidden rounded-lg">
+                    {/* Audio section (if present) */}
+                    {selectedTask?.audioUrl && (
+                        <Card>
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-sm flex items-center gap-2">
+                                    <PlayCircle className="h-4 w-4" />
+                                    Voice Note
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <CustomAudioPlayer audioUrl={selectedTask.audioUrl} />
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* Task updates/comments section */}
+                    <Card>
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm flex items-center gap-2">
+                                <MessageSquare className="h-4 w-4" />
+                                Task Updates
+                            </CardTitle>
+                            <CardDescription>
+                                History of actions and comments on this task
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                {sortedComments && sortedComments.length > 0 ? (
+                                    sortedComments.map((commentObj, index) => (
+                                        <div key={index} className="relative border rounded-lg p-4 space-y-2">
+                                            <div className="flex items-center gap-3">
+                                                <Avatar className="h-8 w-8">
+                                                    <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                                                        {commentObj.userName.slice(0, 1)}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                <div>
+                                                    <div className="font-medium text-sm">{commentObj.userName}</div>
+                                                    <div className="text-xs text-muted-foreground">{formatDate && formatDate(commentObj.createdAt)}</div>
+                                                </div>
+                                                {commentObj.tag && (
+                                                    <Badge
+                                                        variant="outline"
+                                                        className={cn(
+                                                            "ml-auto",
+                                                            commentObj.tag === 'In Progress' && "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 border-blue-300",
+                                                            commentObj.tag === 'Completed' && "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 border-green-300",
+                                                            commentObj.tag === 'Reopen' && "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 border-yellow-300"
+                                                        )}
+                                                    >
+                                                        {commentObj.tag}
+                                                    </Badge>
+                                                )}
+                                            </div>
+
+                                            <div className="text-sm ml-11">{commentObj.comment}</div>
+
+                                            {/* Render fileUrl if it exists */}
+                                            {commentObj.fileUrl && commentObj.fileUrl.length > 0 && (
+                                                <div className="ml-11 mt-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                                                    {commentObj.fileUrl.map((url, fileIndex) => (
+                                                        <div key={fileIndex}>
+                                                            {url.match(/\.(jpeg|jpg|gif|png)$/) != null ? (
+                                                                <a
+                                                                    href={url}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="block overflow-hidden rounded-lg border hover:opacity-90 transition-opacity"
+                                                                >
                                                                     <img
                                                                         src={url}
                                                                         alt={`Attachment ${fileIndex}`}
-                                                                        className=" rounded-lg"
+                                                                        className="h-20 w-full object-cover"
                                                                     />
-                                                                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 transition-opacity duration-300 ease-in-out group-hover:opacity-100">
-                                                                        <h1 className="text-white text-xs font-bold">Click to open</h1>
-                                                                    </div>
                                                                 </a>
-                                                            </div>
-                                                        ) : (
-                                                            <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-500 text-xs ml-2">
-                                                                View File
-                                                            </a>
-                                                        )}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-
-                                        {commentObj.tag && (
-                                            <div
-                                                className={`absolute top-0 right-0 m-4 text-xs text-white px-2 py-1 rounded ${commentObj.tag === 'In Progress'
-                                                    ? 'bg-orange-600'
-                                                    : commentObj.tag === 'Completed'
-                                                        ? 'bg-green-500'
-                                                        : commentObj.tag === 'Reopen'
-                                                            ? 'bg-red-500'
-                                                            : ''
-                                                    }`}
-                                            >
-                                                {commentObj.tag}
-                                            </div>
-                                        )}
+                                                            ) : (
+                                                                <a
+                                                                    href={url}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="flex items-center gap-2 p-2 rounded-md border hover:bg-accent/50 transition-colors"
+                                                                >
+                                                                    <Paperclip className="h-4 w-4" />
+                                                                    <span className="text-blue-500 text-xs truncate">
+                                                                        Attachment {fileIndex + 1}
+                                                                    </span>
+                                                                    <ExternalLink className="h-4 w-4 ml-auto" />
+                                                                </a>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="text-center py-8">
+                                        <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-2 opacity-40" />
+                                        <h3 className="text-lg font-medium">No Activity</h3>
+                                        <p className="text-sm text-muted-foreground">
+                                            There&apos;s no activity for this task yet.
+                                        </p>
                                     </div>
-                                ))
-                            ) : (
-                                <div className="text-center dark:text-white mt-6 -500">
-                                    <div className='flex mt-4 justify-center'>
-                                        <Bell className='mt-2 dark:text-white' />
-                                    </div>
-                                    <h1 className='mt-1'>
-                                        No Activity
-                                    </h1>
-                                    <p className='text-xs mt-1'>It seems that you dont have any recent activity for this task.</p>
-                                </div>
-                            )}
-                        </div>
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Fixed action bar at bottom */}
+                <div className="sticky bottom-0 w-full bg-background border-t p-4 flex flex-wrap gap-2 justify-center sm:justify-end">
+                    {selectedTask?.status === "Completed" ? (
+                        <>
+                            <Button
+                                variant="outline"
+                                onClick={() => handleStatusUpdate('reopen')}
+                                className="gap-2"
+                            >
+                                <PlayCircle className="h-4 w-4 text-yellow-500" />
+                                Reopen Task
+                            </Button>
+
+                            <Button
+                                variant="outline"
+                                onClick={handleEditClick}
+                                className="gap-2"
+                            >
+                                <Edit className="h-4 w-4 text-blue-500" />
+                                Edit Task
+                            </Button>
+
+                            <Button
+                                variant="destructive"
+                                onClick={() => {
+                                    if (selectedTask && handleDeleteClick) {
+                                        handleDeleteClick(selectedTask._id);
+                                    }
+                                }}
+                                className="gap-2"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                                Delete Task
+                            </Button>
+                        </>
+                    ) : (
+                        <>
+                            <Button
+                                variant="outline"
+                                onClick={() => handleStatusUpdate('progress')}
+                                className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-800 dark:hover:bg-blue-950 dark:border-blue-800 dark:text-blue-400"
+                            >
+                                <IconProgress className="h-4 w-4" />
+                                Mark as In Progress
+                            </Button>
+
+                            <Button
+                                variant="outline"
+                                onClick={() => handleStatusUpdate('complete')}
+                                className="gap-2 border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800 dark:hover:bg-green-950 dark:border-green-800 dark:text-green-400"
+                            >
+                                <CheckCircle className="h-4 w-4" />
+                                Mark as Completed
+                            </Button>
+
+                            <Button
+                                variant="outline"
+                                onClick={handleEditClick}
+                                className="gap-2"
+                            >
+                                <Edit className="h-4 w-4" />
+                                Edit Task
+                            </Button>
+
+                            <Button
+                                variant="destructive"
+                                onClick={() => {
+                                    if (selectedTask && handleDeleteClick) {
+                                        handleDeleteClick(selectedTask._id);
+                                    }
+                                }}
+                                className="gap-2"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                                Delete Task
+                            </Button>
+                        </>
+                    )}
+
+                    {/* Edit Task Dialog */}
+                    <EditTaskDialog
+                        open={isEditDialogOpen}
+                        onClose={() => setIsEditDialogOpen(false)}
+                        task={selectedTask}
+                        users={users}
+                        categories={categories}
+                        onTaskUpdate={onTaskUpdate}
+                    />
+                </div>
+            </SheetContent>
 
 
-                    </div>
-
-                    <SheetFooter>
-
-                    </SheetFooter>
-                </SheetContent >
-            </Sheet >
-        </div >
-    )
-}
+        </Sheet>
+    );
+};
 
 export default TaskDetails;

@@ -203,9 +203,9 @@ export default function PayslipPage({
     const netPay = grossPay - totalDeductions;
 
     return (
-        <main className="bg-[#05071E] min-h-screen pb-16">
-            <FloatingNavbar />
-            <div className="container mt-24 mx-auto px-4 py-6 max-w-5xl">
+        <main className="bg-black min-h-screen pb-16">
+            {/* <FloatingNavbar /> */}
+            <div className="container  mx-auto px-4 py-6 max-w-5xl">
                 {/* <div className="flex items-center justify-center mb-6">
                     <img src="/logo.png" className="h-8" alt="Logo" />
                 </div> */}

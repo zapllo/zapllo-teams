@@ -97,15 +97,16 @@ export interface TaskStatusCounts {
 }
 
 
+// Update to include onTaskStatusChange
 export interface TaskDetailsProps {
   selectedTask: Task;
-  onTaskUpdate: (updatedTask: Task) => void;
+  onTaskUpdate: () => Promise<void>; // Changed to match implementation
   onClose: () => void;
   handleUpdateTaskStatus: () => Promise<void>;
   handleDelete: (taskId: string) => Promise<void>;
   handleEditClick: () => void;
   handleDeleteClick: (taskId: string) => void;
-  handleDeleteConfirm: () => void;
+  handleDeleteConfirm: () => Promise<void>;
   handleCopy: (link: string) => void;
   setSelectedTask: (task: Task | null) => void;
   setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
@@ -113,11 +114,11 @@ export interface TaskDetailsProps {
   isEditDialogOpen: boolean;
   setIsEditDialogOpen: Dispatch<SetStateAction<boolean>>;
   setIsCompleteDialogOpen: Dispatch<SetStateAction<boolean>>;
-  setStatusToUpdate: Dispatch<SetStateAction<string | null>>; // Update the type here
+  setStatusToUpdate: Dispatch<SetStateAction<string | null>>;
   formatTaskDate: (dateTimeString: string | Date) => string;
   users: User[];
   sortedComments?: Comment[];
   categories: Category[];
   formatDate: (dateTimeString: string) => string;
+  onTaskStatusChange?: (task: Task, action: 'progress' | 'complete' | 'reopen') => Promise<void>; // Added this line
 }
-
