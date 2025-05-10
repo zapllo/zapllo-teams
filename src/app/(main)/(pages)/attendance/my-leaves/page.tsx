@@ -42,6 +42,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs3, TabsList3, TabsTrigger3 } from "@/components/ui/tabs3";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRouter } from "next/navigation";
 
 interface LeaveType {
   allotedLeaves: number;
@@ -190,7 +191,9 @@ const MyLeaves: React.FC = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
   const textColor = theme === "dark" ? "#ffffff" : "#000000";
-
+  const [noLeaveTypes, setNoLeaveTypes] = useState(false);
+  const [dataFetched, setDataFetched] = useState(false);
+  const router = useRouter();
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollBy({
@@ -322,13 +325,20 @@ const MyLeaves: React.FC = () => {
     setCustomDateRange({ start: null, end: null });
     setIsCustomModalOpen(false);
   };
-
   const fetchLeaveTypes = async () => {
     try {
       const response = await axios.get("/api/leaves/leaveType");
-      setLeaveTypes(response.data);
+      if (response.data && response.data.length > 0) {
+        setLeaveTypes(response.data);
+        setNoLeaveTypes(false);
+      } else {
+        setNoLeaveTypes(true);
+      }
+      setDataFetched(true);
     } catch (error) {
       console.error("Error fetching leave types:", error);
+      setNoLeaveTypes(true);
+      setDataFetched(true);
     }
   };
 
@@ -365,14 +375,18 @@ const MyLeaves: React.FC = () => {
       const response = await axios.get("/api/leaves");
       if (response.data.success) {
         setLeaves(response.data.leaves);
-        setLoading(false);
       } else {
         console.error("Error: No leaves found");
       }
+      setLoading(false);
+      setDataFetched(true);
     } catch (error) {
       console.error("Error fetching user leaves:", error);
+      setLoading(false);
+      setDataFetched(true);
     }
   };
+
 
   useEffect(() => {
     fetchUserLeaves();
@@ -415,91 +429,91 @@ const MyLeaves: React.FC = () => {
   ).length;
 
 
-// Replace the loader return statement
-if (loading) {
-  return (
-    <div className="container max-w-7xl mx-auto py-6 space-y-6">
-      {/* Header skeleton */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-        <div className="flex flex-1 items-center space-x-4">
-          <Skeleton className="h-6 w-6 rounded-full" />
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-64" />
-            <Skeleton className="h-4 w-48" />
+  // Replace the loader return statement
+  if (loading) {
+    return (
+      <div className="container max-w-7xl mx-auto py-6 space-y-6">
+        {/* Header skeleton */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="flex flex-1 items-center space-x-4">
+            <Skeleton className="h-6 w-6 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-64" />
+              <Skeleton className="h-4 w-48" />
+            </div>
           </div>
+          <Skeleton className="h-10 w-32" />
         </div>
-        <Skeleton className="h-10 w-32" />
-      </div>
 
-      {/* Tabs skeleton */}
-      <div className="w-full">
-        <Skeleton className="h-10 w-full rounded-md" />
-      </div>
+        {/* Tabs skeleton */}
+        <div className="w-full">
+          <Skeleton className="h-10 w-full rounded-md" />
+        </div>
 
-      {/* Status filters skeleton */}
-      <div className="flex flex-wrap gap-2 justify-center">
-        {[1, 2, 3, 4].map((i) => (
-          <Skeleton key={i} className="h-8 w-24 rounded-full" />
-        ))}
-      </div>
+        {/* Status filters skeleton */}
+        <div className="flex flex-wrap gap-2 justify-center">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-8 w-24 rounded-full" />
+          ))}
+        </div>
 
-      {/* Leave balance cards skeleton */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 s gap-4">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="rounded-lg border p-4 space-y-3">
-            <div className="flex justify-between items-center">
-              <Skeleton className="h-5 w-32" />
-              <Skeleton className="h-8 w-8 rounded-full" />
-            </div>
-            <div className="flex flex-col items-center space-y-3 pt-0">
-              <Skeleton className="h-20 w-20 rounded-full" />
-              <div className="space-y-1 w-full">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-5 w-2/3 mx-auto" />
+        {/* Leave balance cards skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 s gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="rounded-lg border p-4 space-y-3">
+              <div className="flex justify-between items-center">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-8 w-8 rounded-full" />
               </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Leave applications skeleton */}
-      <div className="space-y-4">
-        <Skeleton className="h-7 w-48" />
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="border rounded-lg p-4">
-              <div className="flex flex-col sm:flex-row justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <Skeleton className="h-9 w-9 rounded-full" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-5 w-32" />
-                    <Skeleton className="h-4 w-24" />
-                  </div>
+              <div className="flex flex-col items-center space-y-3 pt-0">
+                <Skeleton className="h-20 w-20 rounded-full" />
+                <div className="space-y-1 w-full">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-5 w-2/3 mx-auto" />
                 </div>
-                <Skeleton className="h-6 w-20 rounded-full" />
-              </div>
-
-              <div className="my-3">
-                <Skeleton className="h-px w-full" />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                {[1, 2, 3].map((j) => (
-                  <div key={j} className="flex items-center gap-2">
-                    <Skeleton className="h-4 w-4 rounded-full" />
-                    <Skeleton className="h-4 w-full" />
-                  </div>
-                ))}
               </div>
             </div>
           ))}
         </div>
-      </div>
-    </div>
-  );
-}
 
-// ... rest of the existing code ...
+        {/* Leave applications skeleton */}
+        <div className="space-y-4">
+          <Skeleton className="h-7 w-48" />
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="border rounded-lg p-4">
+                <div className="flex flex-col sm:flex-row justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="h-9 w-9 rounded-full" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-5 w-32" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                  </div>
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                </div>
+
+                <div className="my-3">
+                  <Skeleton className="h-px w-full" />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                  {[1, 2, 3].map((j) => (
+                    <div key={j} className="flex items-center gap-2">
+                      <Skeleton className="h-4 w-4 rounded-full" />
+                      <Skeleton className="h-4 w-full" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ... rest of the existing code ...
   const LeaveCard = ({ leaveType }: { leaveType: LeaveType }) => {
     // Calculate consumed leaves and percentage
     const consumedLeaves = leaveType.allotedLeaves - leaveDetails[leaveType._id]?.userLeaveBalance;
@@ -630,7 +644,7 @@ if (loading) {
       </div>
 
       {/* Leave Balance Cards */}
-      {leaveTypes.length > 0 && (
+      {/* {leaveTypes.length > 0 && (
         <div className="relative ">
           <ScrollArea className=" whitespace-nowrap">
             <div className="grid grid-cols-3 gap-4">
@@ -640,6 +654,46 @@ if (loading) {
             </div>
           </ScrollArea>
         </div>
+      )} */}
+      {/* Leave Types and Balance Section */}
+      {noLeaveTypes ? (
+        <Card className="py-8">
+          <CardContent className="flex flex-col items-center justify-center">
+            <DotLottieReact
+              src="/lottie/setup.lottie"
+              loop
+              className="h-56"
+              autoplay
+            />
+            <h3 className="mt-4 text-lg font-semibold">No Leave Types Configured</h3>
+            <p className="text-muted-foreground text-sm text-center max-w-md mt-1">
+              Your organization hasn&apos;t set up any leave types yet. Please reach out to your administrator to configure leave types.
+            </p>
+            <Button
+              className="mt-4"
+              variant="outline"
+              onClick={() => router.push('/attendance/settings/leave-types')}
+            >
+              Go to Leave Type Settings
+            </Button>
+          </CardContent>
+        </Card>
+      ) : leaveTypes.length > 0 ? (
+        <div className="relative">
+          <ScrollArea className="whitespace-nowrap">
+            <div className="grid grid-cols-3 gap-4">
+              {leaveTypes.map((leaveType) => (
+                <LeaveCard key={leaveType._id} leaveType={leaveType} />
+              ))}
+            </div>
+          </ScrollArea>
+        </div>
+      ) : (
+        <Card className="py-6">
+          <CardContent className="flex items-center justify-center">
+            <Loader className="mr-2" /> Loading leave types...
+          </CardContent>
+        </Card>
       )}
 
       {/* Leave List */}

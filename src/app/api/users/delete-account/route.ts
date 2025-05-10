@@ -145,9 +145,6 @@ export async function POST(request: NextRequest) {
           <h1 style="margin: 0; font-size: 20px;">Account Deletion Request</h1>
         </div>
         <div style="padding: 20px;">
-          <img src="https://res.cloudinary.com/dndzbt8al/image/upload/v1731854541/account_deletion_qwdodx.png" alt="Account Deletion Illustration" style="max-width: 100%; height: auto;">
-        </div>
-        <div style="padding: 20px;">
           <p>Dear <strong>${user.firstName},</strong></p>
           <p>We have received your request to delete your Zapllo account. Your account has been deactivated and will be permanently deleted on <strong>${formattedDeletionDate}</strong>.</p>
           <p>During this 14-day period:</p>

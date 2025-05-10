@@ -15,7 +15,12 @@ import {
   TrendingUp,
   AlertCircle,
   Filter,
-  ChevronDown
+  ChevronDown,
+  BellRing,
+  ListChecks,
+  Timer,
+  CalendarCheck,
+  AlertTriangle
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
@@ -371,253 +376,331 @@ export default function AllTasksDashboard({
     return "#10B981"; // Green for 80%+
   };
 
+  // Determine status badge color
+  const getStatusBadgeClass = (count: number, type: string) => {
+    if (count === 0) return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
+
+    switch (type) {
+      case 'overdue':
+        return "bg-red-100 hover:bg-red-100/80 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+      case 'pending':
+        return "bg-yellow-100 hover:bg-yellow-100/80 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400";
+      case 'inProgress':
+        return "bg-blue-100 hover:bg-blue-100/80 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400";
+      case 'completed':
+        return "bg-green-100 hover:bg-green-100/80 text-green-700 dark:bg-green-900/30 dark:text-green-400";
+      case 'dueSoon':
+        return "bg-amber-100 hover:bg-amber-100/80 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400";
+      case 'delayed':
+        return "bg-red-100 hover:bg-red-100/80 text-red-700 dark:bg-red-900/30 dark:text-red-400";
+      case 'inTime':
+        return "bg-green-100 hover:bg-green-100/80 text-green-700 dark:bg-green-900/30 dark:text-green-400";
+      default:
+        return "bg-gray-100 hover:bg-gray-100/80 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Date Filter Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2 bg-card rounded-lg p-4 border">
-        <div className="flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-muted-foreground" />
-          <h3 className="text-sm font-medium">Data Period:</h3>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="gap-1 h-9">
+      <Card className="border shadow-sm">
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-muted-foreground" />
+              <h3 className="text-sm font-medium">Data Period:</h3>
+              <Badge variant="outline" className="text-xs font-normal">
                 {getDateFilterLabel()}
-                <ChevronDown className="h-4 w-4 opacity-50" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[200px]">
-              <DropdownMenuItem onSelect={() => setDateFilter("today")}>
-                Today
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setDateFilter("yesterday")}>
-                Yesterday
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setDateFilter("this-week")}>
-                This Week
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setDateFilter("last-week")}>
-                Last Week
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setDateFilter("next-week")}>
-                Next Week
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setDateFilter("this-month")}>
-                This Month
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setDateFilter("last-month")}>
-                Last Month
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setDateFilter("this-year")}>
-                This Year
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setDateFilter("all-time")}>
-                All Time
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+              </Badge>
+            </div>
 
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="gap-1 h-9">
-                Custom Range
-                <ChevronDown className="h-4 w-4 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
-              <div className="p-3 space-y-3">
-                <h4 className="font-medium text-sm">Select Date Range</h4>
-                <DateRangePicker
-                  value={customDateRange}
-                  onChange={(range) => {
-                    setCustomDateRange(range);
-                    setDateFilter("custom-range");
-                  }}
-                />
-              </div>
-            </PopoverContent>
-          </Popover>
+            <div className="flex flex-wrap gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-1 h-8">
+                    Select Period
+                    <ChevronDown className="h-3.5 w-3.5 opacity-50" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[200px]">
+                  <DropdownMenuItem onSelect={() => setDateFilter("today")}>
+                    Today
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setDateFilter("yesterday")}>
+                    Yesterday
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setDateFilter("this-week")}>
+                    This Week
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setDateFilter("last-week")}>
+                    Last Week
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setDateFilter("next-week")}>
+                    Next Week
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setDateFilter("this-month")}>
+                    This Month
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setDateFilter("last-month")}>
+                    Last Month
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setDateFilter("this-year")}>
+                    This Year
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={() => setDateFilter("all-time")}>
+                    All Time
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-          {dateFilter !== "all-time" && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9"
-              onClick={() => setDateFilter("all-time")}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          )}
-        </div>
-      </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-1 h-8">
+                    Custom Range
+                    <CalendarCheck className="h-3.5 w-3.5 opacity-70" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <div className="p-3 space-y-3">
+                    <h4 className="font-medium text-sm">Select Date Range</h4>
+                    <DateRangePicker
+                      value={customDateRange}
+                      onChange={(range) => {
+                        setCustomDateRange(range);
+                        setDateFilter("custom-range");
+                      }}
+                    />
+                  </div>
+                </PopoverContent>
+              </Popover>
+
+              {dateFilter !== "all-time" && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setDateFilter("all-time")}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Dashboard Overview */}
       <div>
-        <h2 className="text-2xl font-bold tracking-tight mb-4">Task Dashboard</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold tracking-tight">Task Dashboard</h2>
+          <Badge variant="outline" className="text-xs py-1 px-3 flex items-center gap-1.5">
+            <ListChecks className="h-3.5 w-3.5" />
+            {taskStats.totalTasks} Total Tasks
+          </Badge>
+        </div>
+
+        {/* Primary Stat Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           {/* Completion Summary Card */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-500" />
-                Completion Status
-              </CardTitle>
-              <CardDescription>Overall task completion</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
+          <Card className="overflow-hidden border-muted">
+            <div className="flex h-full">
+              <div className="p-4 flex-1">
+                <CardTitle className="text-lg flex items-center gap-2 mb-1">
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  Completion
+                </CardTitle>
+                <div className="space-y-1 mb-3">
                   <div className="text-2xl font-bold">{taskStats.completionRate}%</div>
                   <p className="text-xs text-muted-foreground">
-                    {taskStats.completedTasks} of {taskStats.totalTasks} tasks completed
+                    {taskStats.completedTasks} of {taskStats.totalTasks} tasks
                   </p>
                 </div>
-                <div style={{ width: 60, height: 60 }}>
+                <div className="space-y-2">
+                  <Badge className={`text-xs py-0.5 px-2 ${getStatusBadgeClass(taskStats.completedTasks, 'completed')}`}>
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    {taskStats.completedTasks} Completed
+                  </Badge>
+                  <Badge className={`text-xs py-0.5 px-2 ${getStatusBadgeClass(taskStats.inProgressTasks, 'inProgress')}`}>
+                    <IconProgress className="h-3 w-3 mr-1" />
+                    {taskStats.inProgressTasks} In Progress
+                  </Badge>
+                  <Badge className={`text-xs py-0.5 px-2 ${getStatusBadgeClass(taskStats.pendingTasks, 'pending')}`}>
+                    <Circle className="h-3 w-3 mr-1" />
+                    {taskStats.pendingTasks} Pending
+                  </Badge>
+                </div>
+              </div>
+              <div className="bg-muted/20 flex items-center justify-center p-4 w-24">
+                <div style={{ width: 80, height: 80 }}>
                   <CircularProgressbar
                     value={taskStats.completionRate}
+                    text={`${taskStats.completionRate}%`}
                     styles={buildStyles({
+                      textSize: '24px',
                       pathColor: getColorByPercentage(taskStats.completionRate),
                       textColor: theme === 'dark' ? '#ffffff' : '#000000',
-                      trailColor: '#e5e7eb',
+                      trailColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
                     })}
                   />
                 </div>
               </div>
-              <Separator className="my-3" />
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="flex items-center gap-1.5">
-                  <IconProgress className="text-orange-500 h-4 w-4" />
-                  <span>In Progress: {taskStats.inProgressTasks}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Circle className="text-yellow-500 h-4 w-4" />
-                  <span>Pending: {taskStats.pendingTasks}</span>
-                </div>
-              </div>
-            </CardContent>
+            </div>
           </Card>
 
           {/* Time Performance Card */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Clock className="h-5 w-5 text-blue-500" />
-                Time Performance
-              </CardTitle>
-              <CardDescription>Deadline adherence</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
+          <Card className="overflow-hidden border-muted">
+            <div className="flex h-full">
+              <div className="p-4 flex-1">
+                <CardTitle className="text-lg flex items-center gap-2 mb-1">
+                  <Clock className="h-5 w-5 text-blue-500" />
+                  On-Time Rate
+                </CardTitle>
+                <div className="space-y-1 mb-3">
                   <div className="text-2xl font-bold">{taskStats.onTimeRate}%</div>
                   <p className="text-xs text-muted-foreground">
-                    Tasks completed on time
+                    Completed tasks on time
                   </p>
                 </div>
-                <div style={{ width: 60, height: 60 }}>
+                <div className="space-y-2">
+                  <Badge className={`text-xs py-0.5 px-2 ${getStatusBadgeClass(taskStats.inTimeTasks, 'inTime')}`}>
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    {taskStats.inTimeTasks} In Time
+                  </Badge>
+                  <Badge className={`text-xs py-0.5 px-2 ${getStatusBadgeClass(taskStats.delayedTasks, 'delayed')}`}>
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    {taskStats.delayedTasks} Delayed
+                  </Badge>
+                </div>
+              </div>
+              <div className="bg-muted/20 flex items-center justify-center p-4 w-24">
+                <div style={{ width: 80, height: 80 }}>
                   <CircularProgressbar
                     value={taskStats.onTimeRate}
+                    text={`${taskStats.onTimeRate}%`}
                     styles={buildStyles({
+                      textSize: '24px',
                       pathColor: getColorByPercentage(taskStats.onTimeRate),
                       textColor: theme === 'dark' ? '#ffffff' : '#000000',
-                      trailColor: '#e5e7eb',
+                      trailColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
                     })}
                   />
                 </div>
               </div>
-              <Separator className="my-3" />
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div className="flex items-center gap-1.5">
-                  <CheckCircle className="text-green-500 h-4 w-4" />
-                  <span>In Time: {taskStats.inTimeTasks}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <AlertCircle className="text-red-500 h-4 w-4" />
-                  <span>Delayed: {taskStats.delayedTasks}</span>
-                </div>
-              </div>
-            </CardContent>
+            </div>
           </Card>
 
           {/* Attention Required Card */}
-          <Card className={taskStats.overdueTasks > 0 ? "border-red-200 dark:border-red-900" : ""}>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <CircleAlert className="h-5 w-5 text-red-500" />
-                Attention Required
-              </CardTitle>
-              <CardDescription>Tasks needing action</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">Overdue Tasks</span>
-                  <Badge variant="destructive" className="text-xs">
-                    {taskStats.overdueTasks}
+          <Card className={taskStats.overdueTasks > 0 ? "border-red-200 dark:border-red-900 overflow-hidden" : "overflow-hidden border-muted"}>
+            <div className="flex h-full">
+              <div className="p-4 flex-1">
+                <CardTitle className="text-lg flex items-center gap-2 mb-1">
+                  <AlertTriangle className="h-5 w-5 text-red-500" />
+                  Attention Needed
+                </CardTitle>
+                <div className="space-y-2 mb-3">
+                  <Badge className={`text-xs py-0.5 px-2 ${getStatusBadgeClass(taskStats.overdueTasks, 'overdue')}`}>
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    {taskStats.overdueTasks} Overdue
+                  </Badge>
+                  <Badge className={`text-xs py-0.5 px-2 ${getStatusBadgeClass(taskStats.dueSoonTasks, 'dueSoon')}`}>
+                    <Timer className="h-3 w-3 mr-1" />
+                    {taskStats.dueSoonTasks} Due Soon
                   </Badge>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">Due Soon </span>
-                  <Badge variant="outline" className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200 border-amber-300 dark:border-amber-800 text-xs">
-                    {taskStats.dueSoonTasks}
-                  </Badge>
-                </div>
-
-                <Separator className="my-1" />
-
                 <Button
                   variant="outline"
                   size="sm"
-                  className="w-full text-xs gap-1.5"
-                  onClick={() => setActiveTab('allTasks')}
+                  className="w-full text-xs gap-1.5 mt-2"
+                  onClick={() => {
+                    setActiveTab('allTasks');
+                    // Add a status parameter to specify which filter should be active
+                    if (typeof window !== 'undefined') {
+                      localStorage.setItem('initialTaskStatusFilter', 'overdue');
+                    }
+                  }}
                 >
                   <CircleAlert className="h-3.5 w-3.5" />
                   View All Overdue Tasks
                 </Button>
               </div>
+              <div className={`${taskStats.overdueTasks > 0 ? "bg-red-50 dark:bg-red-900/20" : "bg-muted/20"} flex items-center justify-center p-4 w-24`}>
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <AlertCircle className={`${taskStats.overdueTasks > 0 ? "text-red-500" : "text-yellow-500"} h-10 w-10 opacity-80`} />
+                  </div>
+                  <div style={{ width: 80, height: 80 }} className="opacity-20">
+                    <CircularProgressbar
+                      value={100}
+                      styles={buildStyles({
+                        pathColor: taskStats.overdueTasks > 0 ? "#EF4444" : "#F59E0B",
+                        trailColor: 'transparent',
+                      })}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Quick Actions Card Row */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card
+            className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100 hover:border-blue-300 cursor-pointer transition-all dark:from-blue-950/30 dark:to-indigo-950/30 dark:border-blue-900"
+            onClick={() => setActiveTab('myTasks')}
+          >
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="rounded-full bg-blue-100 dark:bg-blue-900/60 p-2">
+                <User2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <h3 className="font-medium">My Tasks</h3>
+                <p className="text-xs text-muted-foreground">View your assigned tasks</p>
+              </div>
             </CardContent>
           </Card>
 
-          {/* Quick Actions Card */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-indigo-500" />
-                Quick Actions
-              </CardTitle>
-              <CardDescription>Task management</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full justify-start gap-2 text-sm"
-                  onClick={() => setActiveTab('myTasks')}
-                >
-                  <File className="h-4 w-4" />
-                  <span>My Tasks</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full justify-start gap-2 text-sm"
-                  onClick={() => setActiveTab('delegatedTasks')}
-                >
-                  <ArrowRight className="h-4 w-4" />
-                  <span>Delegated Tasks</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full justify-start gap-2 text-sm"
-                  onClick={() => setActiveTab('allTasks')}
-                >
-                  <Tag className="h-4 w-4" />
-                  <span>All Tasks</span>
-                </Button>
+          <Card
+            className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-100 hover:border-purple-300 cursor-pointer transition-all dark:from-purple-950/30 dark:to-pink-950/30 dark:border-purple-900"
+            onClick={() => setActiveTab('delegatedTasks')}
+          >
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="rounded-full bg-purple-100 dark:bg-purple-900/60 p-2">
+                <ArrowRight className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div>
+                <h3 className="font-medium">Delegated</h3>
+                <p className="text-xs text-muted-foreground">Tasks assigned to others</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card
+            className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-100 hover:border-amber-300 cursor-pointer transition-all dark:from-amber-950/30 dark:to-orange-950/30 dark:border-amber-900"
+            onClick={() => setActiveTab('allTasks')}
+          >
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="rounded-full bg-amber-100 dark:bg-amber-900/60 p-2">
+                <Tag className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <h3 className="font-medium">All Tasks</h3>
+                <p className="text-xs text-muted-foreground">View all organization tasks</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card
+            className="bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-100 hover:border-emerald-300 cursor-pointer transition-all dark:from-emerald-950/30 dark:to-teal-950/30 dark:border-emerald-900"
+            onClick={() => setActiveTab('taskTemplates')}
+          >
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="rounded-full bg-emerald-100 dark:bg-emerald-900/60 p-2">
+                <File className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div>
+                <h3 className="font-medium">Templates</h3>
+                <p className="text-xs text-muted-foreground">Manage task templates</p>
               </div>
             </CardContent>
           </Card>
@@ -628,19 +711,19 @@ export default function AllTasksDashboard({
       <Tabs
         value={activeDashboardTab}
         onValueChange={setActiveDashboardTab}
-        className="w-full"
+        className="w-full pt-2"
       >
-        <div className="flex items-center justify-between mb-4">
-          <TabsList className="h-auto justify-start gap-2 bg-transparent">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+          <TabsList className="h-10 gap-2 p-1 bg-muted/50">
             {(currentUser?.role === "orgAdmin" || currentUser?.role === "manager") && (
               <>
-                <TabsTrigger value="employee-wise">
+                <TabsTrigger value="employee-wise" className="">
                   <div className="flex items-center gap-1.5">
                     <User2 className="h-4 w-4" />
                     <span>By Employee</span>
                   </div>
                 </TabsTrigger>
-                <TabsTrigger value="category-wise">
+                <TabsTrigger value="category-wise" className="">
                   <div className="flex items-center gap-1.5">
                     <Tag className="h-4 w-4" />
                     <span>By Category</span>
@@ -648,13 +731,13 @@ export default function AllTasksDashboard({
                 </TabsTrigger>
               </>
             )}
-            <TabsTrigger value="my-report">
+            <TabsTrigger value="my-report" className="">
               <div className="flex items-center gap-1.5">
                 <File className="h-4 w-4" />
                 <span>My Report</span>
               </div>
             </TabsTrigger>
-            <TabsTrigger value="delegatedTasks">
+            <TabsTrigger value="delegatedTasks" className="">
               <div className="flex items-center gap-1.5">
                 <ArrowRight className="h-4 w-4" />
                 <span>Delegated</span>
@@ -663,14 +746,14 @@ export default function AllTasksDashboard({
           </TabsList>
 
           {/* Search Input */}
-          <div className="relative w-full max-w-xs">
+          <div className="relative w-full md:w-64">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder={`Search ${activeDashboardTab === 'employee-wise' ? 'Employee' : 'Category'}`}
+              placeholder={`Search ${activeDashboardTab === 'employee-wise' ? 'Employee' : activeDashboardTab === 'category-wise' ? 'Category' : 'Tasks'}`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-10"
+              className="pl-10 pr-10 h-10 bg-background"
             />
             {searchQuery && (
               <X
@@ -682,14 +765,16 @@ export default function AllTasksDashboard({
         </div>
 
         {/* Employee Tab Content */}
-        <TabsContent value="employee-wise" className="mb-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <TabsContent value="employee-wise" className="mb-12 mt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {users
               .filter((user) => {
                 const query = searchQuery.toLowerCase();
                 return (
-                  user.firstName.toLowerCase().includes(query) ||
-                  user.lastName.toLowerCase().includes(query)
+                  user.firstName?.toLowerCase().includes(query) ||
+                  user.lastName?.toLowerCase().includes(query) ||
+                  `${user.firstName} ${user.lastName}`.toLowerCase().includes(query) ||
+                  user.email?.toLowerCase().includes(query)
                 );
               })
               .filter((user) => {
@@ -716,52 +801,64 @@ export default function AllTasksDashboard({
                       setSelectedUserId(user);
                       setActiveTab("allTasks");
                     }}
-                    className="hover:border-primary transition-colors cursor-pointer overflow-hidden group"
+                    className="hover:border-primary transition-all cursor-pointer overflow-hidden group"
                   >
-                    <CardHeader className="pb-2">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start gap-3">
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage src={user.profilePic} alt={`${user.firstName} ${user.lastName}`} />
-                            <AvatarFallback className="bg-primary text-primary-foreground">
-                              {`${user?.firstName?.slice(0, 1)}`}
-                              {`${user?.lastName?.slice(0, 1)}`}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <CardTitle className="text-sm">
-                              {user.firstName} {user.lastName}
-                            </CardTitle>
-                            <CardDescription className="text-xs truncate ">
-                              {`${user.email}`.slice(0, 15)}...
-                            </CardDescription>
-                          </div>
-                        </div>
-                        <div style={{ width: 36, height: 36 }}>
-                          <CircularProgressbar
-                            value={stats.completionRate}
-                            text={`${stats.completionRate}%`}
-                            styles={buildStyles({
-                              textSize: "28px",
-                              pathColor: pathColor,
-                              textColor: theme === "dark" ? "#ffffff" : "#000000",
-                              trailColor: "#6C636E33",
-                            })}
-                          />
+                    <CardHeader className="p-4 pb-2 flex flex-row items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-11 w-11 border-2 border-background">
+                          <AvatarImage src={user.profilePic} alt={`${user.firstName} ${user.lastName}`} />
+                          <AvatarFallback className="bg-primary text-primary-foreground">
+                            {`${user?.firstName?.slice(0, 1) || ''}`}
+                            {`${user?.lastName?.slice(0, 1) || ''}`}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <CardTitle className="text-base font-medium">
+                            {user.firstName} {user.lastName}
+                          </CardTitle>
+                          <CardDescription className="text-xs truncate max-w-[120px]">
+                            {user.email ? (user.email.length > 18 ? `${user.email.slice(0, 15)}...` : user.email) : ''}
+                          </CardDescription>
                         </div>
                       </div>
+                      <div className="relative" style={{ width: 44, height: 44 }}>
+                        <CircularProgressbar
+                          value={stats.completionRate}
+                          text={`${stats.completionRate}%`}
+                          styles={buildStyles({
+                            textSize: "26px",
+                            pathColor: pathColor,
+                            textColor: theme === "dark" ? "#ffffff" : "#000000",
+                            trailColor: theme === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
+                          })}
+                        />
+                      </div>
                     </CardHeader>
-                    <CardContent className="pb-3">
-                      <div className="grid grid-cols-2 gap-2 text-xs">
+                    <Separator className="mb-2" />
+                    <CardContent className="p-4 pt-1">
+                      <div className="grid grid-cols-2 gap-2 mb-3">
+                        <div className="flex flex-col">
+                          <span className="text-xs text-muted-foreground mb-1">Total Tasks</span>
+                          <span className="font-medium">{stats.totalTasks}</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-xs text-muted-foreground mb-1">Completed</span>
+                          <span className="font-medium text-green-600 dark:text-green-400">{stats.completedTasks}</span>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <div className="flex items-center gap-1.5">
-                                <CircleAlert className="text-red-500 h-4 w-4" />
-                           <span>Overdue: {stats.overdueTasks}</span>
+                              <div className="flex items-center gap-2 text-xs">
+                                <Badge variant="outline" className={getStatusBadgeClass(stats.overdueTasks, 'overdue')}>
+                                  {stats.overdueTasks}
+                                </Badge>
+                                <span>Overdue</span>
                               </div>
                             </TooltipTrigger>
-                            <TooltipContent>
+                            <TooltipContent side="bottom">
                               <p>Tasks past their due date</p>
                             </TooltipContent>
                           </Tooltip>
@@ -770,12 +867,14 @@ export default function AllTasksDashboard({
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <div className="flex items-center gap-1.5">
-                                <Circle className="text-yellow-500 h-4 w-4" />
-                                <span>Pending: {stats.pendingTasks}</span>
+                              <div className="flex items-center gap-2 text-xs">
+                                <Badge variant="outline" className={getStatusBadgeClass(stats.pendingTasks, 'pending')}>
+                                  {stats.pendingTasks}
+                                </Badge>
+                                <span>Pending</span>
                               </div>
                             </TooltipTrigger>
-                            <TooltipContent>
+                            <TooltipContent side="bottom">
                               <p>Tasks not yet started</p>
                             </TooltipContent>
                           </Tooltip>
@@ -784,32 +883,29 @@ export default function AllTasksDashboard({
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <div className="flex items-center gap-1.5">
-                                <IconProgress className="text-orange-500 h-4 w-4" />
-                                <span>In Progress: {stats.inProgressTasks}</span>
+                              <div className="flex items-center gap-2 text-xs">
+                                <Badge variant="outline" className={getStatusBadgeClass(stats.inProgressTasks, 'inProgress')}>
+                                  {stats.inProgressTasks}
+                                </Badge>
+                                <span>In Progress</span>
                               </div>
                             </TooltipTrigger>
-                            <TooltipContent>
+                            <TooltipContent side="bottom">
                               <p>Tasks currently being worked on</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="flex items-center gap-1.5">
-                                <CheckCircle className="text-green-500 h-4 w-4" />
-                                <span>Completed: {stats.completedTasks}</span>
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Tasks finished</p>
                             </TooltipContent>
                           </Tooltip>
                         </TooltipProvider>
                       </div>
                     </CardContent>
+                    <CardFooter className="p-0">
+                      <Button
+                        variant="ghost"
+                        className="w-full rounded-none rounded-b-lg border-t h-9 text-xs group-hover:bg-primary/5"
+                      >
+                        View Employee Tasks
+                        <ArrowRight className="h-3.5 w-3.5 ml-1.5 opacity-70" />
+                      </Button>
+                    </CardFooter>
                   </Card>
                 );
               })}
@@ -817,25 +913,37 @@ export default function AllTasksDashboard({
           {users.filter(u => {
             const query = searchQuery.toLowerCase();
             return (
-              u.firstName.toLowerCase().includes(query) ||
-              u.lastName.toLowerCase().includes(query)
+              u.firstName?.toLowerCase().includes(query) ||
+              u.lastName?.toLowerCase().includes(query) ||
+              `${u.firstName} ${u.lastName}`.toLowerCase().includes(query) ||
+              u.email?.toLowerCase().includes(query)
             );
           }).length === 0 && (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <User2 className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium">No employees found</h3>
-              <p className="text-sm text-muted-foreground">Try adjusting your search criteria</p>
-            </div>
-          )}
+              <div className="flex flex-col items-center justify-center py-12 text-center bg-muted/20 rounded-lg">
+                <User2 className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium">No employees found</h3>
+                <p className="text-sm text-muted-foreground">Try adjusting your search criteria</p>
+                {searchQuery && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-4"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    Clear Search
+                  </Button>
+                )}
+              </div>
+            )}
         </TabsContent>
 
         {/* Category Tab Content */}
-        <TabsContent value="category-wise" className="mb-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <TabsContent value="category-wise" className="mb-12 mt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {categories
               .filter((category) => {
                 const query = searchQuery.toLowerCase();
-                return category?.name.toLowerCase().includes(query);
+                return category?.name?.toLowerCase().includes(query);
               })
               .map((category) => {
                 const stats = getCategoryTaskStats(category._id);
@@ -851,74 +959,109 @@ export default function AllTasksDashboard({
                       setSelectedCategory(category);
                       setActiveTab("allTasks");
                     }}
-                    className="hover:border-primary transition-colors cursor-pointer overflow-hidden group"
+                    className="hover:border-primary transition-all cursor-pointer overflow-hidden group"
                   >
-                    <CardHeader className="pb-2">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="h-8 w-8 rounded-full flex items-center justify-center bg-primary text-primary-foreground">
-                            <Tag className="h-4 w-4" />
-                          </div>
-                          <CardTitle className="text-sm">{category.name}</CardTitle>
+                    <CardHeader className="p-4 pb-0 flex flex-row items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full flex items-center justify-center bg-primary/10 text-primary">
+                          <Tag className="h-5 w-5" />
                         </div>
-                        <div style={{ width: 36, height: 36 }}>
-                          <CircularProgressbar
-                            value={stats.completionRate}
-                            text={`${stats.completionRate}%`}
-                            styles={buildStyles({
-                              textSize: "28px",
-                              pathColor: pathColor,
-                              textColor: theme === "dark" ? "#ffffff" : "#000000",
-                              trailColor: "#6C636E33",
-                            })}
-                          />
+                        <div>
+                          <CardTitle className="text-base font-medium">{category.name}</CardTitle>
+                          <CardDescription className="text-xs">
+                            {stats.totalTasks} {stats.totalTasks === 1 ? 'task' : 'tasks'}
+                          </CardDescription>
                         </div>
                       </div>
+                      <div className="relative" style={{ width: 44, height: 44 }}>
+                        <CircularProgressbar
+                          value={stats.completionRate}
+                          text={`${stats.completionRate}%`}
+                          styles={buildStyles({
+                            textSize: "26px",
+                            pathColor: pathColor,
+                            textColor: theme === "dark" ? "#ffffff" : "#000000",
+                            trailColor: theme === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
+                          })}
+                        />
+                      </div>
                     </CardHeader>
-                    <CardContent className="pb-3">
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="flex items-center gap-1.5">
-                          <CircleAlert className="text-red-500 h-4 w-4" />
-                          <span>Overdue: {stats.overdueTasks}</span>
+                    <CardContent className="p-4">
+                      {/* <Progress
+                        value={stats.completionRate}
+                        className="h-2 mb-4"
+                        indicatorClassName={stats.completionRate >= 80 ? "bg-green-500" : stats.completionRate >= 50 ? "bg-amber-500" : "bg-red-500"}
+                      /> */}
+
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                        <div className="flex items-center gap-2 text-xs">
+                          <Badge variant="outline" className={getStatusBadgeClass(stats.overdueTasks, 'overdue')}>
+                            {stats.overdueTasks}
+                          </Badge>
+                          <span>Overdue</span>
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          <Circle className="text-yellow-500 h-4 w-4" />
-                          <span>Pending: {stats.pendingTasks}</span>
+                        <div className="flex items-center gap-2 text-xs">
+                          <Badge variant="outline" className={getStatusBadgeClass(stats.pendingTasks, 'pending')}>
+                            {stats.pendingTasks}
+                          </Badge>
+                          <span>Pending</span>
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          <IconProgress className="text-orange-500 h-4 w-4" />
-                          <span>In Progress: {stats.inProgressTasks}</span>
+                        <div className="flex items-center gap-2 text-xs">
+                          <Badge variant="outline" className={getStatusBadgeClass(stats.inProgressTasks, 'inProgress')}>
+                            {stats.inProgressTasks}
+                          </Badge>
+                          <span>In Progress</span>
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          <CheckCircle className="text-green-500 h-4 w-4" />
-                          <span>Completed: {stats.completedTasks}</span>
+                        <div className="flex items-center gap-2 text-xs">
+                          <Badge variant="outline" className={getStatusBadgeClass(stats.completedTasks, 'completed')}>
+                            {stats.completedTasks}
+                          </Badge>
+                          <span>Completed</span>
                         </div>
                       </div>
                     </CardContent>
-
+                    <CardFooter className="p-0">
+                      <Button
+                        variant="ghost"
+                        className="w-full rounded-none rounded-b-lg border-t h-9 text-xs group-hover:bg-primary/5"
+                      >
+                        View Category Tasks
+                        <ArrowRight className="h-3.5 w-3.5 ml-1.5 opacity-70" />
+                      </Button>
+                    </CardFooter>
                   </Card>
                 );
               })}
           </div>
           {categories.filter(c => {
             const query = searchQuery.toLowerCase();
-            return c?.name.toLowerCase().includes(query);
+            return c?.name?.toLowerCase().includes(query);
           }).length === 0 && (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Tag className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium">No categories found</h3>
-              <p className="text-sm text-muted-foreground">Try adjusting your search criteria</p>
-            </div>
-          )}
+              <div className="flex flex-col items-center justify-center py-12 text-center bg-muted/20 rounded-lg">
+                <Tag className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium">No categories found</h3>
+                <p className="text-sm text-muted-foreground">Try adjusting your search criteria</p>
+                {searchQuery && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-4"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    Clear Search
+                  </Button>
+                )}
+              </div>
+            )}
         </TabsContent>
 
         {/* My Report Tab Content */}
-        <TabsContent value="my-report" className="mb-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <TabsContent value="my-report" className="mb-12 mt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {categories
               .filter((category) => {
                 const query = searchQuery.toLowerCase();
-                return category?.name.toLowerCase().includes(query);
+                return category?.name?.toLowerCase().includes(query);
               })
               .filter((category) => {
                 // Fetch task stats for the category
@@ -944,77 +1087,129 @@ export default function AllTasksDashboard({
                       setSelectedCategory(category);
                       setActiveTab("allTasks");
                     }}
-                    className="hover:border-primary transition-colors cursor-pointer overflow-hidden group"
+                    className={`
+                      hover:border-primary transition-all cursor-pointer overflow-hidden group
+                      ${stats.overdueTasks > 0 ? 'border-red-200 dark:border-red-900' : ''}
+                    `}
                   >
-                    <CardHeader className="pb-2">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="h-8 w-8 rounded-full flex items-center justify-center bg-primary text-primary-foreground">
-                            <Tag className="h-4 w-4" />
-                          </div>
-                          <CardTitle className="text-sm">{category.name}</CardTitle>
+                    <CardHeader className="p-4 pb-0 flex flex-row items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`
+                          h-10 w-10 rounded-full flex items-center justify-center
+                          ${stats.overdueTasks > 0
+                            ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+                            : 'bg-primary/10 text-primary'}
+                        `}>
+                          <Tag className="h-5 w-5" />
                         </div>
-                        <Badge variant={stats.overdueTasks > 0 ? "destructive" : "outline"}>
-                          {stats.totalTasks} tasks
-                        </Badge>
+                        <div>
+                          <CardTitle className="text-base font-medium">{category.name}</CardTitle>
+                          <CardDescription className="text-xs flex items-center gap-1">
+                            {stats.overdueTasks > 0 && (
+                              <Badge variant="destructive" className="text-[10px] h-4">
+                                {stats.overdueTasks} overdue
+                              </Badge>
+                            )}
+                            <span>{stats.totalTasks} tasks</span>
+                          </CardDescription>
+                        </div>
+                      </div>
+                      <div className="relative" style={{ width: 44, height: 44 }}>
+                        <CircularProgressbar
+                          value={stats.completionRate}
+                          text={`${stats.completionRate}%`}
+                          styles={buildStyles({
+                            textSize: "26px",
+                            pathColor: pathColor,
+                            textColor: theme === "dark" ? "#ffffff" : "#000000",
+                            trailColor: theme === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
+                          })}
+                        />
                       </div>
                     </CardHeader>
-                    <CardContent className="pb-3">
-                     <div className="space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm font-medium">Progress</span>
-                          <span className="text-xs">{stats.completionRate}%</span>
-                        </div>
+                    <CardContent className="p-4">
+                      {/* <Progress
+                        value={stats.completionRate}
+                        className="h-2 mb-4"
+                        indicatorClassName={stats.completionRate >= 80 ? "bg-green-500" : stats.completionRate >= 50 ? "bg-amber-500" : "bg-red-500"}
+                      /> */}
 
-                        <div className="grid grid-cols-2 gap-2 text-xs mt-2">
-                          <div className="flex items-center gap-1.5">
-                            <CircleAlert className="text-red-500 h-4 w-4" />
-                            <span>Overdue: {stats.overdueTasks}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <Circle className="text-yellow-500 h-4 w-4" />
-                            <span>Pending: {stats.pendingTasks}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <IconProgress className="text-orange-500 h-4 w-4" />
-                            <span>In Progress: {stats.inProgressTasks}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <CheckCircle className="text-green-500 h-4 w-4" />
-                            <span>Completed: {stats.completedTasks}</span>
-                          </div>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                        <div className="flex items-center gap-2 text-xs">
+                          <Badge variant="outline" className={getStatusBadgeClass(stats.overdueTasks, 'overdue')}>
+                            {stats.overdueTasks}
+                          </Badge>
+                          <span>Overdue</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs">
+                          <Badge variant="outline" className={getStatusBadgeClass(stats.pendingTasks, 'pending')}>
+                            {stats.pendingTasks}
+                          </Badge>
+                          <span>Pending</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs">
+                          <Badge variant="outline" className={getStatusBadgeClass(stats.inProgressTasks, 'inProgress')}>
+                            {stats.inProgressTasks}
+                          </Badge>
+                          <span>In Progress</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs">
+                          <Badge variant="outline" className={getStatusBadgeClass(stats.completedTasks, 'completed')}>
+                            {stats.completedTasks}
+                          </Badge>
+                          <span>Completed</span>
                         </div>
                       </div>
                     </CardContent>
-
+                    <CardFooter className="p-0">
+                      <Button
+                        variant="ghost"
+                        className="w-full rounded-none rounded-b-lg border-t h-9 text-xs group-hover:bg-primary/5"
+                      >
+                        View My Tasks in Category
+                        <ArrowRight className="h-3.5 w-3.5 ml-1.5 opacity-70" />
+                      </Button>
+                    </CardFooter>
                   </Card>
                 );
               })}
           </div>
           {categories.filter(c => {
             const query = searchQuery.toLowerCase();
-            return c?.name.toLowerCase().includes(query);
+            return c?.name?.toLowerCase().includes(query);
           }).filter((category) => {
             const { overdueTasks, inProgressTasks, pendingTasks } = getCategoryTaskStats(category._id);
             return (overdueTasks > 0 || pendingTasks > 0 || inProgressTasks > 0);
           }).length === 0 && (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <File className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium">No active tasks found</h3>
-              <p className="text-sm text-muted-foreground">You don&apos;t have any pending or in-progress tasks in any category</p>
-            </div>
-          )}
+              <div className="flex flex-col items-center justify-center py-12 text-center bg-muted/20 rounded-lg">
+                <File className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium">No active tasks found</h3>
+                <p className="text-sm text-muted-foreground">You don&apos;t have any pending or in-progress tasks in any category</p>
+                {searchQuery && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-4"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    Clear Search
+                  </Button>
+                )}
+              </div>
+            )}
         </TabsContent>
 
         {/* Delegated Tasks Tab Content */}
-        <TabsContent value="delegatedTasks" className="mb-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <TabsContent value="delegatedTasks" className="mb-12 mt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {users
               .filter((user) => {
                 const query = searchQuery.toLowerCase();
                 return (
-                  user.firstName.toLowerCase().includes(query) ||
-                  user.lastName.toLowerCase().includes(query)
+                  user.firstName?.toLowerCase().includes(query) ||
+                  user.lastName?.toLowerCase().includes(query) ||
+                  `${user.firstName} ${user.lastName}`.toLowerCase().includes(query) ||
+                  user.email?.toLowerCase().includes(query)
                 );
               })
               .filter((user) => {
@@ -1041,63 +1236,92 @@ export default function AllTasksDashboard({
                       setSelectedUserId(user);
                       setActiveTab("allTasks");
                     }}
-                    className="hover:border-primary transition-colors cursor-pointer overflow-hidden group"
+                    className={`
+                      hover:border-primary transition-all cursor-pointer overflow-hidden group
+                      ${stats.overdueTasks > 0 ? 'border-red-200 dark:border-red-900' : ''}
+                    `}
                   >
-                    <CardHeader className="pb-2">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start gap-3">
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage src={user.profilePic} alt={`${user.firstName} ${user.lastName}`} />
-                            <AvatarFallback className="bg-primary text-primary-foreground">
-                              {`${user?.firstName?.slice(0, 1)}`}
-                              {`${user?.lastName?.slice(0, 1)}`}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <CardTitle className="text-sm">
-                              {user.firstName} {user.lastName}
-                            </CardTitle>
-                            <CardDescription className="text-xs truncate max-w-[180px]">
-                              {`${user.email}`.slice(0,15)}...
-                            </CardDescription>
-                          </div>
+                    <CardHeader className="p-4 pb-0 flex flex-row items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-11 w-11 border-2 border-background">
+                          <AvatarImage src={user.profilePic} alt={`${user.firstName} ${user.lastName}`} />
+                          <AvatarFallback className="bg-primary text-primary-foreground">
+                            {`${user?.firstName?.slice(0, 1) || ''}`}
+                            {`${user?.lastName?.slice(0, 1) || ''}`}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <CardTitle className="text-base font-medium">
+                            {user.firstName} {user.lastName}
+                          </CardTitle>
+                          <CardDescription className="text-xs flex items-center gap-1">
+                            {/* {stats.overdueTasks > 0 && (
+                              <Badge variant="destructive" className="text-[10px] h-4">
+                                {stats.overdueTasks} overdue
+                              </Badge>
+                            )} */}
+                            <span className="truncate max-w-[100px]">
+                              {user.email ? (user.email.length > 15 ? `${user.email.slice(0, 12)}...` : user.email) : ''}
+                            </span>
+                          </CardDescription>
                         </div>
-
-                        {stats.overdueTasks > 0 && (
-                          <Badge variant="destructive" className="self-start text-[12px]">
-                            {stats.overdueTasks} overdue
-                          </Badge>
-                        )}
+                      </div>
+                      <div className="relative" style={{ width: 44, height: 44 }}>
+                        <CircularProgressbar
+                          value={stats.completionRate}
+                          text={`${stats.completionRate}%`}
+                          styles={buildStyles({
+                            textSize: "26px",
+                            pathColor: pathColor,
+                            textColor: theme === "dark" ? "#ffffff" : "#000000",
+                            trailColor: theme === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)",
+                          })}
+                        />
                       </div>
                     </CardHeader>
-                    <CardContent className="pb-3">
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm font-medium">Tasks Progress</span>
-                          <span className="text-xs">{stats.completionRate}%</span>
-                        </div>
+                    <CardContent className="p-4">
+                      {/* <Progress
+                        value={stats.completionRate}
+                        className="h-2 mb-4"
+                        indicatorClassName={stats.completionRate >= 80 ? "bg-green-500" : stats.completionRate >= 50 ? "bg-amber-500" : "bg-red-500"}
+                      /> */}
 
-                        <div className="grid grid-cols-2 gap-2 text-xs mt-2">
-                          <div className="flex items-center gap-1.5">
-                            <Circle className="text-yellow-500 h-4 w-4" />
-                            <span>Pending: {stats.pendingTasks}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <IconProgress className="text-orange-500 h-4 w-4" />
-                            <span>In Progress: {stats.inProgressTasks}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <CheckCircle className="text-green-500 h-4 w-4" />
-                            <span>Completed: {stats.completedTasks}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <TrendingUp className="text-blue-500 h-4 w-4" />
-                            <span>Total: {stats.totalTasks}</span>
-                          </div>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                        <div className="flex items-center gap-2 text-xs">
+                          <Badge variant="outline" className={getStatusBadgeClass(stats.overdueTasks, 'overdue')}>
+                            {stats.overdueTasks}
+                          </Badge>
+                          <span>Overdue</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs">
+                          <Badge variant="outline" className={getStatusBadgeClass(stats.pendingTasks, 'pending')}>
+                            {stats.pendingTasks}
+                          </Badge>
+                          <span>Pending</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs">
+                          <Badge variant="outline" className={getStatusBadgeClass(stats.inProgressTasks, 'inProgress')}>
+                            {stats.inProgressTasks}
+                          </Badge>
+                          <span>In Progress</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs">
+                          <Badge variant="outline" className={getStatusBadgeClass(stats.completedTasks, 'completed')}>
+                            {stats.completedTasks}
+                          </Badge>
+                          <span>Completed</span>
                         </div>
                       </div>
                     </CardContent>
-
+                    <CardFooter className="p-0">
+                      <Button
+                        variant="ghost"
+                        className="w-full rounded-none rounded-b-lg border-t h-9 text-xs group-hover:bg-primary/5"
+                      >
+                        View Delegated Tasks
+                        <ArrowRight className="h-3.5 w-3.5 ml-1.5 opacity-70" />
+                      </Button>
+                    </CardFooter>
                   </Card>
                 );
               })}
@@ -1105,19 +1329,31 @@ export default function AllTasksDashboard({
           {users.filter(u => {
             const query = searchQuery.toLowerCase();
             return (
-              u.firstName.toLowerCase().includes(query) ||
-              u.lastName.toLowerCase().includes(query)
+              u.firstName?.toLowerCase().includes(query) ||
+              u.lastName?.toLowerCase().includes(query) ||
+              `${u.firstName} ${u.lastName}`.toLowerCase().includes(query) ||
+              u.email?.toLowerCase().includes(query)
             );
           }).filter((user) => {
             const { overdueTasks, inProgressTasks, pendingTasks } = getUserTaskStats(user._id);
             return (overdueTasks > 0 || pendingTasks > 0 || inProgressTasks > 0);
           }).length === 0 && (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <ArrowRight className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium">No delegated tasks</h3>
-              <p className="text-sm text-muted-foreground">You haven&apos;t delegated any active tasks to team members</p>
-            </div>
-          )}
+              <div className="flex flex-col items-center justify-center py-12 text-center bg-muted/20 rounded-lg">
+                <ArrowRight className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium">No delegated tasks</h3>
+                <p className="text-sm text-muted-foreground">You haven&apos;t delegated any active tasks to team members</p>
+                {searchQuery && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-4"
+                    onClick={() => setSearchQuery("")}
+                  >
+                    Clear Search
+                  </Button>
+                )}
+              </div>
+            )}
         </TabsContent>
       </Tabs>
     </div>

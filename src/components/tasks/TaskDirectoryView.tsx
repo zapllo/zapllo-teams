@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogFooter, DialogClose, DialogHeader } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Eye, Copy, X } from 'lucide-react';
+import { Search, Eye, Copy, X, Filter, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { Badge } from '@/components/ui/badge';
+import { Tabs3 as Tabs, TabsContent3 as TabsContent, TabsList3 as TabsList, TabsTrigger3 as TabsTrigger } from '@/components/ui/tabs3';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 
+// Define necessary interfaces
 interface TemplateData {
   _id?: string;
   title?: string;
@@ -33,8 +38,13 @@ interface DirectoryData {
   templates: TemplateData[];
 }
 
+interface DirectoryTemplateCardProps {
+  template: TemplateData;
+  categoryName: string;
+}
+
 export default function TaskDirectoryView() {
-  const [selectedDirCategory, setSelectedDirCategory] = useState("");
+  const [selectedDirCategory, setSelectedDirCategory] = useState("All");
   const [directorySearchText, setDirectorySearchText] = useState("");
 
   // Build an array of all category names so we can populate the dropdown
@@ -71,32 +81,41 @@ export default function TaskDirectoryView() {
   }, [selectedDirCategory, directorySearchText]);
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <h1 className="text-2xl font-bold">Task Templates Directory</h1>
+    <div className="flex flex-col h-full space-y-6 max-w-7xl mx-auto px-4 pb-6">
+      <div className="flex flex-col space-y-4 pt-6">
+        <h1 className="text-3xl font-bold tracking-tight">Task Templates Directory</h1>
+        <p className="text-muted-foreground text-sm md:text-base max-w-3xl">
+          Browse our library of ready-made templates, sorted by category. Copy any
+          template into your organization with a single click.
+        </p>
+      </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-          {/* Search Input */}
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search directory..."
-              value={directorySearchText}
-              onChange={(e) => setDirectorySearchText(e.target.value)}
-              className="pl-10"
-            />
-            {directorySearchText && (
-              <X
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground cursor-pointer"
-                onClick={() => setDirectorySearchText("")}
-              />
-            )}
-          </div>
+      <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+        <div className="relative w-full md:w-96">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search templates..."
+            value={directorySearchText}
+            onChange={(e) => setDirectorySearchText(e.target.value)}
+            className="pl-10 w-full border-muted bg-background"
+          />
+          {directorySearchText && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8"
+              onClick={() => setDirectorySearchText("")}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
 
-          {/* Category Dropdown */}
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <Filter className="hidden md:block h-4 w-4 text-muted-foreground" />
           <Select value={selectedDirCategory} onValueChange={setSelectedDirCategory}>
-            <SelectTrigger className="w-full sm:w-[200px]">
+            <SelectTrigger className="w-full md:w-[200px]">
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
             <SelectContent>
@@ -111,53 +130,63 @@ export default function TaskDirectoryView() {
         </div>
       </div>
 
-      <p className="text-muted-foreground mt-2 text-sm max-w-prose">
-        Browse our library of ready-made templates, sorted by category. Copy any
-        template into your organization with a single click.
-      </p>
+      <Tabs defaultValue={allCategoryNames[0]} className="w-full">
+        <TabsList className="gap-2 mb-4">
+          <TabsTrigger value="All" onClick={() => setSelectedDirCategory("All")}>
+            All Categories
+          </TabsTrigger>
+          {allCategoryNames.map((category) => (
+            <TabsTrigger
+              key={category}
+              value={category}
+              onClick={() => setSelectedDirCategory(category)}
+            >
+              {category}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-      {/* Render filtered data */}
-      <div className="space-y-8">
-        {filteredData.length > 0 ? (
-          filteredData.map((categoryItem) => (
-            <div key={categoryItem.categoryName} className="space-y-4">
-              <h2 className="text-xl font-semibold border-b pb-2">
-                {categoryItem.categoryName}
-              </h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {categoryItem.templates.map((tmpl, idx) => (
+        <div className="w-full">
+          {filteredData.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {filteredData.flatMap((categoryItem) =>
+                categoryItem.templates.map((tmpl: TemplateData, idx: number) => (
                   <DirectoryTemplateCard
-                    key={idx}
+                    key={`${categoryItem.categoryName}-${idx}`}
                     template={tmpl}
                     categoryName={categoryItem.categoryName}
                   />
-                ))}
-              </div>
+                ))
+              )}
             </div>
-          ))
-        ) : (
-          <div className="text-center py-8">
-            <DotLottieReact
-              src="/lottie/empty.lottie"
-              loop
-              className="h-40 mx-auto"
-              autoplay
-            />
-            <h2 className="text-lg font-semibold mt-4">No Templates Found</h2>
-            <p className="text-muted-foreground mt-1">
-              Try adjusting your search or filters
-            </p>
-          </div>
-        )}
-      </div>
+          ) : (
+            <div className="bg-muted/30 rounded-lg flex flex-col items-center justify-center py-12">
+              <DotLottieReact
+                src="/lottie/empty.lottie"
+                loop
+                className="h-40 mx-auto"
+                autoplay
+              />
+              <h2 className="text-lg font-semibold mt-6">No Templates Found</h2>
+              <p className="text-muted-foreground mt-1 text-center max-w-md">
+                Try adjusting your search criteria or selecting a different category
+              </p>
+              <Button
+                variant="outline"
+                className="mt-4"
+                onClick={() => {
+                  setDirectorySearchText("");
+                  setSelectedDirCategory("All");
+                }}
+              >
+                Clear filters
+              </Button>
+            </div>
+          )}
+        </div>
+      </Tabs>
     </div>
   );
-}
-
-interface DirectoryTemplateCardProps {
-  template: TemplateData;
-  categoryName: string;
 }
 
 function DirectoryTemplateCard({ template, categoryName }: DirectoryTemplateCardProps) {
@@ -231,120 +260,155 @@ function DirectoryTemplateCard({ template, categoryName }: DirectoryTemplateCard
   }
 
   function handleConfirmCopy() {
-    // Close the confirmation dialog immediately
     setShowConfirmation(false);
-    // Then proceed with actual copying
     copyTemplate();
   }
 
+  // Helper function to get priority badge styling
+  const getPriorityBadgeStyles = (priority?: string) => {
+    switch (priority) {
+      case "High":
+        return "bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400";
+      case "Medium":
+        return "bg-orange-100 text-orange-700 hover:bg-orange-200 dark:bg-orange-900/30 dark:text-orange-400";
+      default:
+        return "bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400";
+    }
+  };
+
   return (
-    <Card className="p-4 border hover:border-primary transition-colors">
-      <div className="mb-1">
-        <h3 className="text-lg font-semibold truncate">{template.title}</h3>
-        <p className="text-sm text-muted-foreground line-clamp-2 h-">
+    <Card className="flex flex-col h-full hover:shadow-md transition-all border-muted">
+      <CardHeader className="p-5 pb-0">
+        <div className="flex justify-between items-start gap-2">
+          <CardTitle className="text-lg font-semibold line-clamp-2">
+            {template.title}
+          </CardTitle>
+          <Badge variant="outline" className="shrink-0 text-xs font-normal">
+            {categoryName}
+          </Badge>
+        </div>
+      </CardHeader>
+
+      <CardContent className="p-5 flex-grow">
+        <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
           {template.description}
         </p>
-      </div>
 
-      <div className="flex mt-4 flex-wrap gap-2 mb-3">
-        <span className={`text-xs px-2 py-1 rounded-full ${
-          template.priority === "High"
-            ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-            : template.priority === "Medium"
-              ? "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
-              : "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-        }`}>
-          {template.priority}
-        </span>
-      </div>
+        <Badge variant="secondary" className={getPriorityBadgeStyles(template.priority)}>
+          <Tag className="h-3 w-3 mr-1" />
+          {template.priority} Priority
+        </Badge>
+      </CardContent>
 
-      <div className="flex justify-end gap-2 mt-2">
+      <CardFooter className="p-4 pt-2 flex justify-between border-t bg-muted/20">
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={handleViewDetails}
-          className="hover:text-primary hover:bg-primary/10"
+          className="text-xs h-8"
         >
-          <Eye className="h-4 w-4" />
-          <span className="sr-only">View Details</span>
+          <Eye className="h-3.5 w-3.5 mr-1" />
+          View Details
         </Button>
 
         <Button
-          variant="ghost"
+          variant="secondary"
           size="sm"
           onClick={() => setShowConfirmation(true)}
-          className="hover:text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/20"
+          className="text-xs h-8"
         >
-          <Copy className="h-4 w-4" />
-          <span className="sr-only">Copy</span>
+          <Copy className="h-3.5 w-3.5 mr-1" />
+          Copy
         </Button>
-      </div>
+      </CardFooter>
 
       {/* Details Dialog */}
       <Dialog open={showDetails} onOpenChange={setShowDetails}>
         <DialogContent className="p-6">
-          <div className="flex items-center justify-between">
-            <DialogTitle>{template.title}</DialogTitle>
-            <DialogClose>
-              <X className="h-4 w-4 cursor-pointer" />
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-xl">{template.title}</DialogTitle>
+              <Badge variant="outline">{categoryName}</Badge>
+            </div>
+            <DialogDescription>
+              Template details and configuration
+            </DialogDescription>
+          </DialogHeader>
+
+          <ScrollArea className="max-h-[60vh] overflow-auto pr-4">
+            <div className="space-y-4 py-2">
+              <div>
+                <h4 className="text-sm font-medium text-muted-foreground mb-1">Description</h4>
+                <p className="text-sm">{template.description}</p>
+              </div>
+
+              <Separator />
+
+              <div className="flex gap-2 items-center">
+                <h4 className="text-sm font-medium text-muted-foreground">Priority:</h4>
+                <Badge variant="secondary" className={getPriorityBadgeStyles(template.priority)}>
+                  {template.priority}
+                </Badge>
+              </div>
+
+              {template.repeat && (
+                <>
+                  <Separator />
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-muted-foreground">Recurrence</h4>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <span className="text-muted-foreground">Type:</span>
+                      <span>{template.repeatType}</span>
+
+                      {template.days && template.days.length > 0 && (
+                        <>
+                          <span className="text-muted-foreground">Days:</span>
+                          <span>{template.days.join(", ")}</span>
+                        </>
+                      )}
+
+                      {template.dates && template.dates.length > 0 && (
+                        <>
+                          <span className="text-muted-foreground">Dates:</span>
+                          <span>{template.dates.join(", ")}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {template.reminders && template.reminders.length > 0 && (
+                <>
+                  <Separator />
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-muted-foreground">Reminders</h4>
+                    <div className="space-y-2">
+                      {template.reminders.map((rem, i: number) => (
+                        <div key={i} className="flex gap-2 text-sm bg-muted/50 p-2 rounded-md">
+                          <span className="text-muted-foreground">{rem.notificationType}:</span>
+                          <span>{rem.type} - {rem.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </ScrollArea>
+
+          <DialogFooter className="gap-2">
+            <DialogClose asChild>
+              <Button variant="outline">Close</Button>
             </DialogClose>
-          </div>
-
-          <div className="mt-4 space-y-3">
-            <div>
-              <span className="font-medium">Description:</span>
-              <p className="text-sm mt-1">{template.description}</p>
-            </div>
-
-            <div>
-              <span className="font-medium">Priority:</span>
-              <p className="text-sm mt-1">{template.priority}</p>
-            </div>
-
-            {template.repeat && (
-              <div>
-                <span className="font-medium">Repeat Type:</span>
-                <p className="text-sm mt-1">{template.repeatType}</p>
-
-                {template.days && template.days.length > 0 && (
-                  <div className="mt-2">
-                    <span className="font-medium">Days:</span>
-                    <p className="text-sm mt-1">{template.days.join(", ")}</p>
-                  </div>
-                )}
-
-                {template.dates && template.dates.length > 0 && (
-                  <div className="mt-2">
-                    <span className="font-medium">Dates:</span>
-                    <p className="text-sm mt-1">{template.dates.join(", ")}</p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {template.reminders && template.reminders.length > 0 && (
-              <div>
-                <span className="font-medium">Reminders:</span>
-                <ul className="list-disc list-inside text-sm mt-1">
-                  {template.reminders.map((rem, i) => (
-                    <li key={i}>
-                      {rem.notificationType} - {rem.type} - {rem.value}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-
-          <div className="flex justify-end mt-4">
             <Button
               onClick={() => setShowConfirmation(true)}
-              className="flex items-center gap-2"
+              className="gap-1.5"
             >
               <Copy className="h-4 w-4" />
-              <span>Copy to My Templates</span>
+              Copy to My Templates
             </Button>
-          </div>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
@@ -354,7 +418,7 @@ function DirectoryTemplateCard({ template, categoryName }: DirectoryTemplateCard
           <DialogHeader>
             <DialogTitle>Copy Template?</DialogTitle>
             <DialogDescription>
-              This will create a new copy of the template in your organization.
+              This will create a new copy of &quot;{template.title}&quot; in your organization.
               Are you sure you want to proceed?
             </DialogDescription>
           </DialogHeader>
@@ -369,7 +433,7 @@ function DirectoryTemplateCard({ template, categoryName }: DirectoryTemplateCard
             <Button
               onClick={handleConfirmCopy}
             >
-              Yes, copy
+              Yes, copy template
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -377,6 +441,7 @@ function DirectoryTemplateCard({ template, categoryName }: DirectoryTemplateCard
     </Card>
   );
 }
+
 
 // Sample directory data
 const directoryData: DirectoryData[] = [

@@ -276,7 +276,7 @@ const TaskDetails: React.FC<TaskDetailsProps> = ({
         }}>
             <SheetContent className="max-w-5xl z-[100] w-[95vw] p-0 overflow-y-auto scrollbar-hide">
                 {/* Header with back button and title */}
-                <SheetHeader className="sticky top-0 z-10 bg-background border-b p-4 flex flex-row items-center justify-between">
+                <SheetHeader className="sticky top-0 z- bg-background border-b p-4 flex flex-row items-center z-[0] justify-between">
                     <div className="flex items-center gap-3">
                         <Button
                             variant="ghost"

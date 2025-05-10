@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import {
   Search, FilterIcon, X, Play, CheckCircle, Repeat, Trash,
-  Circle, CircleAlert, Clock, User2, TagIcon, Plus
+  Circle, CircleAlert, Clock, User2, TagIcon, Plus,
+  CalendarIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -12,6 +13,16 @@ import TaskDetails from '../globals/taskDetails';
 import FilterModal from '../globals/filterModal';
 import { IconClock, IconProgressBolt } from "@tabler/icons-react";
 import { Badge } from '../ui/badge';
+import { DateRange } from "react-day-picker";
+import { DateRangePicker } from '@/components/ui/date-range-picker';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 
 interface TaskListProps {
   tasks: any[];
@@ -43,7 +54,17 @@ export default function TaskList({
   const [assignedByFilter, setAssignedByFilter] = useState<string[]>([]);
   const [frequencyFilter, setFrequencyFilter] = useState<string[]>([]);
   const [priorityFilterModal, setPriorityFilterModal] = useState<string[]>([]);
-  const [taskStatusFilter, setTaskStatusFilter] = useState<string>("pending");
+  const [taskStatusFilter, setTaskStatusFilter] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const savedFilter = localStorage.getItem('initialTaskStatusFilter');
+      if (savedFilter) {
+        localStorage.removeItem('initialTaskStatusFilter');
+        return savedFilter;
+      }
+    }
+    return "pending";
+  });
+
   const [selectedTask, setSelectedTask] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isCompleteDialogOpen, setIsCompleteDialogOpen] = useState(false);
@@ -56,6 +77,10 @@ export default function TaskList({
   const [activeDateFilter, setActiveDateFilter] = useState<string>("thisWeek");
   const [customStartDate, setCustomStartDate] = useState<Date | null>(null);
   const [customEndDate, setCustomEndDate] = useState<Date | null>(null);
+  const [customDateRange, setCustomDateRange] = useState<DateRange | undefined>({
+    from: customStartDate || undefined,
+    to: customEndDate || undefined
+  });
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
 
   // Fetch categories
@@ -163,11 +188,16 @@ export default function TaskList({
         break;
       case "custom":
         if (customStartDate && customEndDate) {
-          startDate = customStartDate;
-          endDate = customEndDate;
+          startDate = new Date(customStartDate);
+          // Set the end date to the end of the day for inclusive filtering
+          endDate = new Date(customEndDate);
+          endDate.setHours(23, 59, 59, 999);
         } else {
-          startDate = new Date();
-          endDate = new Date();
+          // Default to current week if no custom dates are set
+          startDate = new Date(startOfToday);
+          startDate.setDate(startDate.getDate() - startDate.getDay());
+          endDate = new Date(startDate);
+          endDate.setDate(startDate.getDate() + 7);
         }
         break;
       default:
@@ -385,10 +415,23 @@ export default function TaskList({
 
   // Handle the selection of date filter
   const handleButtonClick = (filter: string) => {
-    setCustomStartDate(null);
-    setCustomEndDate(null);
-    setIsCustomModalOpen(false);
     setActiveDateFilter(filter);
+    if (filter !== "custom") {
+      setCustomStartDate(null);
+      setCustomEndDate(null);
+      setCustomDateRange(undefined);
+    }
+  };
+
+  // Handle apply custom date range
+  const handleApplyCustomRange = () => {
+    if (customDateRange?.from) {
+      setCustomStartDate(customDateRange.from);
+      // If only single date is selected, use the same date as end
+      setCustomEndDate(customDateRange.to || customDateRange.from);
+      setActiveDateFilter("custom");
+    }
+    setIsCustomModalOpen(false);
   };
 
   // Handle delete task
@@ -423,20 +466,78 @@ export default function TaskList({
             {label}
           </Button>
         ))}
-        <Button
-          variant={activeDateFilter === "custom" ? "default" : "outline"}
-          size="sm"
-          onClick={() => setIsCustomModalOpen(true)}
-        >
-          Custom
-        </Button>
+        {/* Replace the Custom button with an inline DateRangePicker */}
+        <div className="flex-shrink-0">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={activeDateFilter === "custom" ? "default" : "outline"}
+                size="sm"
+                className="flex items-center gap-1"
+              >
+                <CalendarIcon className="h-3.5 w-3.5" />
+                Custom Range
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <div className="p-2">
+                <DateRangePicker
+                  value={customDateRange}
+                  onChange={setCustomDateRange}
+                />
+                <div className="flex justify-end gap-2 mt-4">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setCustomDateRange(undefined);
+                      setCustomStartDate(null);
+                      setCustomEndDate(null);
+                      setActiveDateFilter("thisWeek");
+                    }}
+                  >
+                    Reset
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      if (customDateRange?.from) {
+                        setCustomStartDate(customDateRange.from);
+                        setCustomEndDate(customDateRange.to || customDateRange.from);
+                        setActiveDateFilter("custom");
+                      }
+                    }}
+                    disabled={!customDateRange?.from}
+                  >
+                    Apply
+                  </Button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
 
       {/* Custom Date UI */}
-      {customStartDate && customEndDate && (
-        <div className="flex gap-4 items-center mb-4 text-sm">
-          <span>Date Range: {customStartDate.toLocaleDateString()} to {customEndDate.toLocaleDateString()}</span>
-        </div>
+      {activeDateFilter === "custom" && customStartDate && customEndDate && (
+        <Badge className="mb-4 flex text-white w-fit bg-primary items-center gap-2 py-1.5 pl-2">
+          <span>
+            {customStartDate.toLocaleDateString()} - {customEndDate.toLocaleDateString()}
+          </span>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-5 w-5 p-0 ml-1"
+            onClick={() => {
+              setCustomStartDate(null);
+              setCustomEndDate(null);
+              setCustomDateRange(undefined);
+              setActiveDateFilter("thisWeek");
+            }}
+          >
+            <X className="h-3 w-3" />
+          </Button>
+        </Badge>
       )}
 
       {/* Search and Filter */}
@@ -606,7 +707,6 @@ export default function TaskList({
                       <TagIcon className="h-4 w-4" />
                       <span>{task.category?.name}</span>
                     </div>
-
                     {task.repeat && (
                       <>
                         <span className="text-muted-foreground">|</span>
@@ -772,6 +872,36 @@ export default function TaskList({
         initialSelectedFrequency={frequencyFilter}
         initialSelectedPriority={priorityFilterModal}
       />
+
+      {/* Custom Date Range Dialog */}
+      <Dialog open={isCustomModalOpen} onOpenChange={setIsCustomModalOpen}>
+        <DialogContent className="sm:max-w-[425px] z-[100]">
+          <DialogHeader>
+            <DialogTitle>Select Date Range</DialogTitle>
+          </DialogHeader>
+          <div className="py-6 z-[100]">
+            <DateRangePicker
+              value={customDateRange}
+              onChange={setCustomDateRange}
+              className="w-full"
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsCustomModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleApplyCustomRange}
+              disabled={!customDateRange?.from}
+            >
+              Apply Range
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -49,6 +49,7 @@ export default function Profile({ }: Props) {
   const [industry, setIndustry] = useState("");
   const [teamSize, setTeamSize] = useState("");
   const [isTrialExpired, setIsTrialExpired] = useState(false);
+  const [isPro, setIsPro] = useState(false);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [whatsappNotifications, setWhatsappNotifications] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -102,9 +103,9 @@ export default function Profile({ }: Props) {
         setOrganizationName(org.companyName);
         setIndustry(org.industry);
         setTeamSize(org.teamSize);
-
-        // Check trial status
-        const isExpired = org.trialExpires && new Date(org.trialExpires) <= new Date();
+        setIsPro(org.isPro || false);
+        // Check trial status - only set if not a Pro account
+        const isExpired = !org.isPro && org.trialExpires && new Date(org.trialExpires) <= new Date();
         setIsTrialExpired(isExpired);
       } catch (error) {
         console.error('Error fetching organization details:', error);
@@ -112,6 +113,7 @@ export default function Profile({ }: Props) {
     };
     getOrganizationDetails();
   }, []);
+
 
   // Fetch categories
   useEffect(() => {
@@ -348,22 +350,23 @@ export default function Profile({ }: Props) {
                   {organizationName} • {industry} • {teamSize} team members
                 </p>
               )}
-              {isTrialExpired && (
-                <Badge variant="destructive" className="mt-2">
-                  Trial Expired
-                </Badge>
-              )}
+
             </div>
 
             <div className="ml-auto hidden md:block">
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={logout}
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
+             {isPro ? (
+              <Badge variant="secondary" className="px-3 py-1.5 text-sm">
+                Pro Account
+              </Badge>
+            ) : isTrialExpired ? (
+              <Badge variant="destructive" className="px-3 py-1.5 text-sm">
+                Trial Expired
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="px-3 py-1.5 text-sm">
+                Trial Account
+              </Badge>
+            )}
             </div>
           </div>
         </CardContent>

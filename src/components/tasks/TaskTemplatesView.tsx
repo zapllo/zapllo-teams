@@ -304,12 +304,12 @@ function TemplateCard({ template, onUseTemplate, onEdit, onSuccess }: TemplateCa
     <Card className="p-4 border hover:border-primary transition-colors">
       <div className="mb-1">
         <h2 className="text-lg font-semibold truncate">{template.title}</h2>
-        <p className="text-sm text-muted-foreground line-clamp-2 h-10">
+        <p className="text-sm text-muted-foreground line-clamp-2 h-">
           {template.description}
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-3">
+      <div className="flex flex-wrap gap-2 mt-2 mb-3">
         {template.category && (
           <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full">
             {template.category.name}

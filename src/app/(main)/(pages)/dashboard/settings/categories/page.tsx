@@ -495,7 +495,7 @@ const Categories: React.FC = () => {
       )}
 
       {/* Categories List Section */}
-      <Card className="shadow-sm">
+      <Card className="shadow-sm mb-56">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xl flex items-center">
@@ -555,7 +555,7 @@ const Categories: React.FC = () => {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 mb-12 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {filteredCategories.map((cat) => (
                 <div
                   key={cat._id}
