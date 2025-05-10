@@ -165,7 +165,7 @@ export default function TaskTemplatesView() {
               placeholder="Search templates..."
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              className="pl-10"
+              className="pl-10 "
             />
           </div>
 

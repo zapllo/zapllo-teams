@@ -191,7 +191,7 @@ export default function IntegrationsPage() {
 
   return (
     <div className="h-full p-6 pb-10">
-      <div className="max-w-5xl mx-auto space-y-8">
+      <div className=" mx-auto space-y-8">
         {/* Header */}
         <div className="space-y-1">
           <h1 className="text-2xl font-semibold tracking-tight">Integrations</h1>
@@ -224,7 +224,7 @@ export default function IntegrationsPage() {
           </TabsList>
 
           {/* All Integrations */}
-          <TabsContent value="all" className="space-y-6">
+          <TabsContent value="all" className="space-y-6 mb-12">
             {/* Featured integration */}
             <div className="rounded-lg bg-gradient-to-r from-primary/10 via-primary/5 to-background p-6 border">
               <div className="flex flex-col md:flex-row gap-6 items-center">
@@ -304,13 +304,13 @@ export default function IntegrationsPage() {
             )}
 
             {/* Developer Section */}
-            <Card className="bg-muted/30 border">
+            <Card className="bg-muted/30 mb-12 border">
               <CardHeader>
                 <CardTitle className="text-lg">For Developers</CardTitle>
                 <CardDescription>Build custom solutions with our API</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid md:grid-cols-3 gap-6">
+                <div className="grid md:grid-cols-3 mb-12 gap-6">
                   <div className="space-y-2">
                     <h3 className="font-medium">REST API</h3>
                     <p className="text-sm text-muted-foreground">

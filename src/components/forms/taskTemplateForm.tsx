@@ -173,6 +173,108 @@ export default function TaskTemplateDialog({ open, setOpen, existingTemplate, on
   const [popoverCategoryInputValue, setPopoverCategoryInputValue] =
     useState<string>(""); // State for input value in popover
 
+    // Add these references at the top of your functional component
+const analyserRef = useRef<AnalyserNode | null>(null);
+const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+const intervalRef = useRef<number | null>(null);
+const [recordingTime, setRecordingTime] = useState(0);
+const [audioURL, setAudioURL] = useState("");
+
+// Update the startRecording function to include waveform visualization
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mediaRecorder = new MediaRecorder(stream);
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    const audioContext = new AudioContext();
+    const analyser = audioContext.createAnalyser();
+    const source = audioContext.createMediaStreamSource(stream);
+    source.connect(analyser);
+    analyser.fftSize = 2048;
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    analyserRef.current = analyser;
+
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        const blob = new Blob([event.data], { type: "audio/wav" });
+        setAudioBlob(blob);
+        const audioURL = URL.createObjectURL(blob);
+        setAudioURL(audioURL);
+      }
+    };
+
+    mediaRecorder.onstop = () => {
+      setRecording(false);
+      if (intervalRef.current !== null) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      setRecordingTime(0);
+    };
+
+    mediaRecorder.start();
+    setRecording(true);
+
+    // Start timer
+    intervalRef.current = window.setInterval(() => {
+      setRecordingTime((prevTime) => prevTime + 1);
+    }, 1000);
+
+    // Real-time waveform visualization
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const canvasCtx = canvas.getContext('2d');
+      if (canvasCtx) {
+        const drawWaveform = () => {
+          if (analyserRef.current) {
+            requestAnimationFrame(drawWaveform);
+            analyserRef.current.getByteFrequencyData(dataArray);
+
+            // Clear the canvas before rendering bars
+            canvasCtx.fillStyle = "rgb(255, 255, 255)";
+            canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const bars = 40;
+            const barWidth = 2;
+            const totalBarWidth = bars * barWidth;
+            const gapWidth = (canvas.width - totalBarWidth) / (bars - 1);
+            const step = Math.floor(bufferLength / bars);
+
+            for (let i = 0; i < bars; i++) {
+              const barHeight = (dataArray[i * step] / 255) * canvas.height * 0.8;
+              const x = i * (barWidth + gapWidth);
+              const y = (canvas.height - barHeight) / 2;
+
+              // Draw each bar
+              canvasCtx.fillStyle = "rgb(99, 102, 241)"; // Bar color
+              canvasCtx.fillRect(x, y, barWidth, barHeight);
+            }
+          }
+        };
+
+        drawWaveform();
+      }
+    }
+
+    mediaRecorderRef.current = mediaRecorder;
+  } catch (error) {
+    console.error("Error accessing microphone:", error);
+  }
+}
+
+// Update the stopRecording function
+function stopRecording() {
+  if (mediaRecorderRef.current) {
+    mediaRecorderRef.current.stop();
+    // Stop all tracks of the media stream to release the microphone
+    if (mediaRecorderRef.current.stream) {
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+    }
+  }
+  setRecording(false);
+}
+
   // WATCH FOR CHANGES TO existingTemplate
   useEffect(() => {
     if (existingTemplate) {
@@ -376,12 +478,12 @@ export default function TaskTemplateDialog({ open, setOpen, existingTemplate, on
   // -------------------------
   // Audio Recording
   // -------------------------
-  async function startRecording() {
-    setRecording(true);
-  }
-  function stopRecording() {
-    setRecording(false);
-  }
+  // async function startRecording() {
+  //   setRecording(true);
+  // }
+  // function stopRecording() {
+  //   setRecording(false);
+  // }
 
   // -------------------------
   // CREATE TEMPLATE

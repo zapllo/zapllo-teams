@@ -20,7 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import Loader from "@/components/ui/loader";
 import { CrossCircledIcon } from "@radix-ui/react-icons";
 import axios from "axios";
-import { Mail, Phone, LogOut, HelpCircle, Lock, Languages, Clock, Trash2, Paperclip, Edit, UploadCloud, Globe, Users, FileCog, PanelLeft } from "lucide-react";
+import { Mail, Phone, LogOut, HelpCircle, Lock, Languages, Clock, Trash2, Paperclip, Edit, UploadCloud, Globe, Users, FileCog, PanelLeft, Shield } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -355,8 +355,8 @@ export default function Profile({ }: Props) {
 
             <div className="ml-auto hidden md:block">
              {isPro ? (
-              <Badge variant="secondary" className="px-3 py-1.5 text-sm">
-                Pro Account
+              <Badge variant="secondary" className="px-3 py-1.5 flex gap-1 items-center text-sm">
+               <Shield/> Pro Account
               </Badge>
             ) : isTrialExpired ? (
               <Badge variant="destructive" className="px-3 py-1.5 text-sm">

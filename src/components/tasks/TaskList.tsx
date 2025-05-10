@@ -593,7 +593,7 @@ export default function TaskList({
           )}
 
           {selectedCategory && (
-            <Badge className="bg-primary flex items-center gap-1">
+            <Badge className="bg-primary flex text-white items-center gap-1">
               Category: {selectedCategory.name}
               <Button
                 variant="ghost"

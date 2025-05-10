@@ -559,12 +559,12 @@ const Categories: React.FC = () => {
               {filteredCategories.map((cat) => (
                 <div
                   key={cat._id}
-                  className="border rounded-lg p-4 transition-all duration-200 hover:shadow-md bg-card"
+                  className="border rounded-lg text-sm p-4 transition-all duration-200 hover:shadow-md bg-card"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <CategoryAvatar name={cat.name} />
-                      <h3 className="font-medium truncate max-w-[150px]" title={cat.name}>
+                      <h3 className="font-medium truncate text-xs max-w-[100px]" title={cat.name}>
                         {cat.name}
                       </h3>
                     </div>

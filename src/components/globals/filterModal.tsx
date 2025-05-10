@@ -170,7 +170,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
                     className="w-full"
                 >
                     <div className="flex  pt-4 g">
-                        <TabsList className="gap-2 text-xs">
+                        <TabsList className="gap-2 text-xs w-full">
                             <TabsTrigger
                                 value="category"
                                 className="gap-1"
@@ -234,7 +234,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
                             />
                         </div>
 
-                        <ScrollArea className="h-[300px] pr-4">
+                        <div className="h-[300px] overflow-y-scroll scrollbar-hide p">
                             <TabsContent value="category" className="mt-0 space-y-2">
                                 {getFilteredCategories().length === 0 ? (
                                     <div className="text-center py-4 text-muted-foreground">
@@ -360,16 +360,16 @@ const FilterModal: React.FC<FilterModalProps> = ({
                                     ))
                                 )}
                             </TabsContent>
-                        </ScrollArea>
+                        </div>
                     </div>
                 </Tabs>
 
-                <DialogFooter className="px-6 py-4 border-t flex-row justify-between">
-                    <div className="flex items-center gap-2">
+                <DialogFooter className=" p py-4 border-t flex-row justify-end">
+                    <div className="flex ml-4 items-center gap-2">
                         <Button
                             variant="outline"
                             onClick={handleClearFilters}
-                            className="border-red-500 text-red-500 hover:bg-red-50 hover:text-red-600"
+                            className="border-red-500 text-red-500 mt-4 hover:bg-red-50 hover:text-red-600"
                             disabled={getTotalSelectedCount() === 0}
                         >
                             <X className="h-4 w-4 mr-2" />
@@ -385,7 +385,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
 
                     <Button
                         onClick={handleApplyFilters}
-                        className="bg-primary hover:bg-primary/90"
+                        className="bg-primary mt-4 hover:bg-primary/90"
                     >
                         <Check className="h-4 w-4 mr-2" />
                         Apply Filters

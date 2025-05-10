@@ -405,57 +405,75 @@ export default function AllTasksDashboard({
       {/* Date Filter Controls */}
       <Card className="border shadow-sm">
         <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center  gap-4">
             <div className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-muted-foreground" />
-              <h3 className="text-sm font-medium">Data Period:</h3>
-              <Badge variant="outline" className="text-xs font-normal">
+              {/* <h3 className="text-sm font-medium">Data Period:</h3> */}
+              <Badge  className="text-xs bg-primary/80 text-white font-normal">
                 {getDateFilterLabel()}
               </Badge>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-1 h-8">
-                    Select Period
-                    <ChevronDown className="h-3.5 w-3.5 opacity-50" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[200px]">
-                  <DropdownMenuItem onSelect={() => setDateFilter("today")}>
-                    Today
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setDateFilter("yesterday")}>
-                    Yesterday
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setDateFilter("this-week")}>
-                    This Week
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setDateFilter("last-week")}>
-                    Last Week
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setDateFilter("next-week")}>
-                    Next Week
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setDateFilter("this-month")}>
-                    This Month
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setDateFilter("last-month")}>
-                    Last Month
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setDateFilter("this-year")}>
-                    This Year
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => setDateFilter("all-time")}>
-                    All Time
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {/* Replace dropdown with button group */}
+              <div className="flex flex-wrap gap-1">
+                <Button
+                  variant={dateFilter === "today" ? "default" : "outline"}
+                  size="sm"
+                  className="gap-1 h-8"
+                  onClick={() => setDateFilter("today")}
+                >
+                  Today
+                </Button>
+                <Button
+                  variant={dateFilter === "yesterday" ? "default" : "outline"}
+                  size="sm"
+                  className="gap-1 h-8"
+                  onClick={() => setDateFilter("yesterday")}
+                >
+                  Yesterday
+                </Button>
+                <Button
+                  variant={dateFilter === "this-week" ? "default" : "outline"}
+                  size="sm"
+                  className="gap-1 h-8"
+                  onClick={() => setDateFilter("this-week")}
+                >
+                  This Week
+                </Button>
+                <Button
+                  variant={dateFilter === "last-week" ? "default" : "outline"}
+                  size="sm"
+                  className="gap-1 h-8"
+                  onClick={() => setDateFilter("last-week")}
+                >
+                  Last Week
+                </Button>
+                <Button
+                  variant={dateFilter === "this-month" ? "default" : "outline"}
+                  size="sm"
+                  className="gap-1 h-8"
+                  onClick={() => setDateFilter("this-month")}
+                >
+                  This Month
+                </Button>
+                <Button
+                  variant={dateFilter === "all-time" ? "default" : "outline"}
+                  size="sm"
+                  className="gap-1 h-8"
+                  onClick={() => setDateFilter("all-time")}
+                >
+                  All Time
+                </Button>
+              </div>
 
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-1 h-8">
+                  <Button
+                    variant={dateFilter === "custom-range" ? "default" : "outline"}
+                    size="sm"
+                    className="gap-1 h-8"
+                  >
                     Custom Range
                     <CalendarCheck className="h-3.5 w-3.5 opacity-70" />
                   </Button>
@@ -489,6 +507,7 @@ export default function AllTasksDashboard({
         </CardContent>
       </Card>
 
+
       {/* Dashboard Overview */}
       <div>
         <div className="flex items-center justify-between mb-4">
@@ -515,16 +534,16 @@ export default function AllTasksDashboard({
                     {taskStats.completedTasks} of {taskStats.totalTasks} tasks
                   </p>
                 </div>
-                <div className="space-y-2">
-                  <Badge className={`text-xs py-0.5 px-2 ${getStatusBadgeClass(taskStats.completedTasks, 'completed')}`}>
+                <div className="space-y-2  gap-2">
+                  <Badge className={`text-xs py-0.5 m-1 px-2 ${getStatusBadgeClass(taskStats.completedTasks, 'completed')}`}>
                     <CheckCircle className="h-3 w-3 mr-1" />
                     {taskStats.completedTasks} Completed
                   </Badge>
-                  <Badge className={`text-xs py-0.5 px-2 ${getStatusBadgeClass(taskStats.inProgressTasks, 'inProgress')}`}>
+                  <Badge className={`text-xs m-1 py-0.5 px-2 ${getStatusBadgeClass(taskStats.inProgressTasks, 'inProgress')}`}>
                     <IconProgress className="h-3 w-3 mr-1" />
                     {taskStats.inProgressTasks} In Progress
                   </Badge>
-                  <Badge className={`text-xs py-0.5 px-2 ${getStatusBadgeClass(taskStats.pendingTasks, 'pending')}`}>
+                  <Badge className={`text-xs m-1 py-0.5 px-2 ${getStatusBadgeClass(taskStats.pendingTasks, 'pending')}`}>
                     <Circle className="h-3 w-3 mr-1" />
                     {taskStats.pendingTasks} Pending
                   </Badge>
@@ -562,11 +581,11 @@ export default function AllTasksDashboard({
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <Badge className={`text-xs py-0.5 px-2 ${getStatusBadgeClass(taskStats.inTimeTasks, 'inTime')}`}>
+                  <Badge className={`text-xs py-0.5 m-2 px-2 ${getStatusBadgeClass(taskStats.inTimeTasks, 'inTime')}`}>
                     <CheckCircle className="h-3 w-3 mr-1" />
                     {taskStats.inTimeTasks} In Time
                   </Badge>
-                  <Badge className={`text-xs py-0.5 px-2 ${getStatusBadgeClass(taskStats.delayedTasks, 'delayed')}`}>
+                  <Badge className={`text-xs py-0.5 m-2  px-2 ${getStatusBadgeClass(taskStats.delayedTasks, 'delayed')}`}>
                     <AlertCircle className="h-3 w-3 mr-1" />
                     {taskStats.delayedTasks} Delayed
                   </Badge>

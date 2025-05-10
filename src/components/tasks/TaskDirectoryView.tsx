@@ -98,7 +98,7 @@ export default function TaskDirectoryView() {
             placeholder="Search templates..."
             value={directorySearchText}
             onChange={(e) => setDirectorySearchText(e.target.value)}
-            className="pl-10 w-full border-muted bg-background"
+            className="pl-10 w-full border- bg-background"
           />
           {directorySearchText && (
             <Button
