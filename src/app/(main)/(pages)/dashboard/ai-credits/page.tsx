@@ -289,7 +289,7 @@ export default function AiCreditsPage() {
           <div className="mb-8">
             <h1 className="text-3xl font-bold tracking-tight">AI Credits Management</h1>
             <p className="text-muted-foreground mt-2">
-              Manage your organization's AI credits and track usage
+              Manage your organization&apos;s AI credits and track usage
             </p>
           </div>
 
