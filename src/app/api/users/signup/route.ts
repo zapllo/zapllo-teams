@@ -193,6 +193,7 @@ export async function POST(request: NextRequest) {
         description,
         trialExpires,
         country, // New field
+        aiCredits: 100, // Initialize with 100 AI credits
       });
 
       const savedTempOrganization = await tempOrganization.save();

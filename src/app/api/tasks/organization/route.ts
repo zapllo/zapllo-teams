@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
             .populate({
                 path: 'category',
                 select: 'name', // Only include the category name
-            });
+            }).sort({ createdAt: -1 });
 
         return NextResponse.json({
             message: "Tasks fetched successfully",

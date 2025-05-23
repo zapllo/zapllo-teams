@@ -32,7 +32,7 @@ const config = {
       xl: '1.5rem',    // Increased from 1.25rem
       '2xl': '1.8rem', // Increased from 1.5rem
       '3xl': '1.9rem', // Increased from 1.5rem
-      '4xl': '2.2rem', 
+      '4xl': '2.2rem',
       '5xl':'2.35rem',
       '8xl':'4.25rem'
       // add or modify other sizes as needed
@@ -157,6 +157,7 @@ const config = {
             transform: "translate(calc(-50% - 0.5rem))",
           },
         },
+
         "spin-around": {
           "0%": {
             transform: "translateZ(0) rotate(0)",
@@ -203,6 +204,7 @@ const config = {
       },
       animation: {
         first: "moveVertical 30s ease infinite",
+        'spin-slow': 'spin 3s linear infinite',
         second: "moveInCircle 20s reverse infinite",
         third: "moveInCircle 40s linear infinite",
         fourth: "moveHorizontal 40s ease infinite",

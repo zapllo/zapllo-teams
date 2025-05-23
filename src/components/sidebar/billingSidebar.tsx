@@ -10,6 +10,7 @@ import {
   CreditCard,
   Receipt,
   Clock,
+  Sparkles
 } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import { cn } from "@/lib/utils";
@@ -73,6 +74,21 @@ const BillingSidebar: React.FC<BillingSidebarProps> = ({ sidebarWidth = 20 }) =>
               <File className={cn("h-4 w-4", isActive('/dashboard/billing') && "text-primary")} />
               <span>Billing</span>
             </Button>
+
+            {/* New AI Credits button */}
+            <Button
+              variant="ghost"
+              className={cn(
+                "w-full justify-start rounded-md gap-3 py-2 h-auto",
+                isActive('/dashboard/ai-credits')
+                  ? "bg-primary/10 text-primary font-medium"
+                  : "hover:bg-muted"
+              )}
+              onClick={() => handleNavigation('/dashboard/ai-credits')}
+            >
+              <Sparkles className={cn("h-4 w-4", isActive('/dashboard/ai-credits') && "text-primary")} />
+              <span>AI Credits</span>
+            </Button>
           </div>
 
           {/* Transaction Section */}
@@ -106,8 +122,6 @@ const BillingSidebar: React.FC<BillingSidebarProps> = ({ sidebarWidth = 20 }) =>
               <span>WABA Wallet</span>
             </Button>
           </div>
-
-
         </div>
       </div>
     </div>

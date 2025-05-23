@@ -64,8 +64,8 @@ const InfoBar = (props: Props) => {
   const [trialExpires, setTrialExpires] = useState<Date | null>(null);
   const [remainingTime, setRemainingTime] = useState("");
   const [userLoading, setUserLoading] = useState<boolean | null>(false);
-    const [orgData, setOrgData] = useState<OrgData | null>(null);
-    const [subscribedPlan, setSubscribedPlan] = useState<string>("")
+  const [orgData, setOrgData] = useState<OrgData | null>(null);
+  const [subscribedPlan, setSubscribedPlan] = useState<string>("")
 
   useEffect(() => {
     const getUserDetails = async () => {
@@ -100,24 +100,24 @@ const InfoBar = (props: Props) => {
   console.log(trialExpires, "trial");
 
 
-   useEffect(() => {
-      const fetchOrgData = async () => {
-        try {
-          const res = await axios.get("/api/organization/getById");
-          const org = res.data.data;
-          // Save the entire org data if needed:
-          setOrgData({
-            subscribedPlan: org.subscribedPlan,
-          });
-          // Also update the individual states so the inputs are prepopulated:
-          setSubscribedPlan(org.subscribedPlan);
+  useEffect(() => {
+    const fetchOrgData = async () => {
+      try {
+        const res = await axios.get("/api/organization/getById");
+        const org = res.data.data;
+        // Save the entire org data if needed:
+        setOrgData({
+          subscribedPlan: org.subscribedPlan,
+        });
+        // Also update the individual states so the inputs are prepopulated:
+        setSubscribedPlan(org.subscribedPlan);
 
-        } catch (error) {
-          console.error("Error fetching organization data", error);
-        }
-      };
-      fetchOrgData();
-    }, []);
+      } catch (error) {
+        console.error("Error fetching organization data", error);
+      }
+    };
+    fetchOrgData();
+  }, []);
 
   useEffect(() => {
     if (trialExpires) {
@@ -187,6 +187,8 @@ const InfoBar = (props: Props) => {
       return "Recharge WhatsApp Wallet";
     } else if (pathName === "/dashboard/settings/integrations") {
       return "Integrations";
+    } else if (pathName === "/dashboard/ai-credits") {
+      return "AI Credits";
     } else if (pathName === "/intranet") {
       return "Intranet";
     } else if (pathName === "/help/tutorials") {
@@ -246,7 +248,7 @@ const InfoBar = (props: Props) => {
             <Link href='/dashboard/billing'>
               <Badge className="border flex items-center gap-1 shadow-sm  hover:bg-transparent hover:border-white/50 bg-transparent border-muted cursor-pointer dark:text-white py-1 ">
                 <img src="/illustrations/diamond.png" className="h-5" />
-              {subscribedPlan ?"Subscribed" : "Premium Trial"}
+                {subscribedPlan ? "Subscribed" : "Premium Trial"}
               </Badge>
             </Link>
             <DropdownMenu>

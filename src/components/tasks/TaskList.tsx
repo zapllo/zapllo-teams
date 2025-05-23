@@ -445,7 +445,7 @@ export default function TaskList({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mb-24">
       {/* Task List Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">
@@ -670,7 +670,7 @@ export default function TaskList({
       </Tabs>
 
       {/* Task List */}
-      <div className="space-y-3">
+      <div className="space-y-3 mb-72">
         {filteredTasks.length > 0 ? (
           filteredTasks.map((task) => (
             <Card
