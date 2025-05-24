@@ -4,7 +4,7 @@ import Image from "next/image";
 import { FloatingNavbar } from "@/components/globals/navbar";
 import { InfiniteMoving2 } from "@/components/globals/infinite-moving2";
 import Footer from "@/components/globals/Footer";
-import {motion} from 'framer-motion'
+import { motion } from 'framer-motion'
 // Import enhanced landing components
 import HeroLanding from "@/components/product-components/landing/hero";
 import Autopilot from "@/components/product-components/landing/autopilot";
@@ -20,7 +20,9 @@ import SaveLanding from "@/components/product-components/landing/savelanding";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, ArrowRight, ArrowUpRight, Users, CheckCircle2 } from "lucide-react";
+import { Sparkles, ArrowRight, ArrowUpRight, Users, CheckCircle2, Apple } from "lucide-react";
+import { FaAppStore, FaGooglePlay } from "react-icons/fa";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -36,6 +38,68 @@ export default function Home() {
 
       {/* Hero Section */}
       <HeroLanding />
+
+      {/**  MOBILE APP CTA */}
+
+      {/** Mobile App CTA Section */}
+      <section className="relative py-16 mt-12 bg-gradient-to-b from-[#0A0D28] to-[#05071E]">
+        <div className="max-w-7xl mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="flex flex-col md:flex-row gap-8 items-center justify-between bg-gradient-to-br from-[#1a1e48]/50 to-[#0A0D28] border border-[#815bf5]/20 rounded-2xl p-8 md:p-12"
+          >
+            <div className="space-y-6 flex-1">
+              <div className="space-y-2">
+                <Badge variant="outline" className="px-4 py-2 border-purple-500/50 bg-purple-500/10 backdrop-blur-sm">
+                  <Sparkles className="h-4 w-4 mr-2 text-purple-400" />
+                  <span className="text-sm">Mobile Experience</span>
+                </Badge>
+                <h2 className="text-3xl md:text-4xl font-bold">
+                  Automation on the Go
+                </h2>
+                <p className="text-[#676B93] text-lg">
+                  Manage your workflows anywhere with our powerful mobile app.
+                  Available on both Android and iOS.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button className="bg-white text-black hover:bg-white/80 hover:opacity-90 h-14 px-8 rounded-xl">
+                  <FaAppStore className="h-10 w-10 mr-4" />
+                  <div className="text-left">
+                    <p className="text-xs">Get it on</p>
+                    <p className="text-lg font-semibold">App Store</p>
+                  </div>
+                </Button>
+                <Link href="https://play.google.com/store/apps/details?id=com.zapllo.app" target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" className="border-[#815BF5]/30 bg-[#0A0D28]/50 hover:bg-[#0A0D28] h-14 px-8 rounded-xl">
+                    <FaGooglePlay className="h-8 w-8 mr-4" />
+                    <div className="text-left">
+                      <p className="text-xs">Get it on</p>
+                      <p className="text-lg font-semibold">Google Play</p>
+                    </div>
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            <div className="relative flex-1 flex justify-center">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#815BF5] to-[#FC8929] blur-[100px] opacity-20 z-0"></div>
+              <Image
+                src="/Mobile_Mockup.png"
+                width={400}
+                height={800}
+                alt="Mobile app interface"
+                className="relative z-10 w-full max-w-xs"
+              />
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
 
       {/* Trust Badges Section */}
       <section className="py-16 bg-[#05071E] relative">
@@ -180,7 +244,64 @@ export default function Home() {
 
       {/* Testimonials Section */}
       <PayrollTestimonials />
+  {/** Mobile App CTA Section */}
+      <section className="relative py-16 mt-12 bg-gradient-to-b from-[#0A0D28] to-[#05071E]">
+        <div className="max-w-7xl mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="flex flex-col md:flex-row gap-8 items-center justify-between bg-gradient-to-br from-[#1a1e48]/50 to-[#0A0D28] border border-[#815bf5]/20 rounded-2xl p-8 md:p-12"
+          >
+            <div className="space-y-6 flex-1">
+              <div className="space-y-2">
+                <Badge variant="outline" className="px-4 py-2 border-purple-500/50 bg-purple-500/10 backdrop-blur-sm">
+                  <Sparkles className="h-4 w-4 mr-2 text-purple-400" />
+                  <span className="text-sm">Mobile Experience</span>
+                </Badge>
+                <h2 className="text-3xl md:text-4xl font-bold">
+                  Automation on the Go
+                </h2>
+                <p className="text-[#676B93] text-lg">
+                  Manage your workflows anywhere with our powerful mobile app.
+                  Available on both Android and iOS.
+                </p>
+              </div>
 
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button className="bg-white text-black hover:bg-white/80 hover:opacity-90 h-14 px-8 rounded-xl">
+                  <FaAppStore className="h-10 w-10 mr-4" />
+                  <div className="text-left">
+                    <p className="text-xs">Get it on</p>
+                    <p className="text-lg font-semibold">App Store</p>
+                  </div>
+                </Button>
+                <Link href="https://play.google.com/store/apps/details?id=com.zapllo.app" target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" className="border-[#815BF5]/30 bg-[#0A0D28]/50 hover:bg-[#0A0D28] h-14 px-8 rounded-xl">
+                    <FaGooglePlay className="h-8 w-8 mr-4" />
+                    <div className="text-left">
+                      <p className="text-xs">Get it on</p>
+                      <p className="text-lg font-semibold">Google Play</p>
+                    </div>
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            <div className="relative flex-1 flex justify-center">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#815BF5] to-[#FC8929] blur-[100px] opacity-20 z-0"></div>
+              <Image
+                src="/Mobile_Mockup.png"
+                width={400}
+                height={800}
+                alt="Mobile app interface"
+                className="relative z-10 w-full max-w-xs"
+              />
+            </div>
+          </motion.div>
+        </div>
+      </section>
       {/* CTA Section */}
       <SaveLanding />
 

@@ -145,11 +145,23 @@ export const FloatingNav = ({
                                                     </div>
                                                 </div>
                                             </Link>
-                                           
+
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
                             )}
+
+
+
+
+{/** EXAPANDABLE DROPDOWN To accomodate products with a excerpt */}
+
+
+
+
+
+
+
                         </div>
                     ))}
                 </motion.div>

@@ -16,6 +16,7 @@ import {
     RocketIcon,
     GithubIcon
 } from 'lucide-react'
+import { FaAppStore, FaGooglePlay } from 'react-icons/fa'
 
 export default function Footer() {
     const [email, setEmail] = useState('')
@@ -204,10 +205,10 @@ export default function Footer() {
                             <p className="text-sm text-[#676B93] mb-3">Download our mobile app:</p>
                             <div className="flex gap-3">
                                 <a href="#" className="bg-[#141841] rounded-lg p-2 hover:bg-[#1a1e48] transition-colors">
-                                    <img src="/app-store-badge.png" alt="App Store" className="h-8" onError={(e) => { e.currentTarget.style.display = 'none' }} />
+                                 <FaAppStore className="h-8 w-16" />
                                 </a>
-                                <a href="#" className="bg-[#141841] rounded-lg p-2 hover:bg-[#1a1e48] transition-colors">
-                                    <img src="/google-play-badge.png" alt="Google Play" className="h-8" onError={(e) => { e.currentTarget.style.display = 'none' }} />
+                                <a href="https://play.google.com/store/apps/details?id=com.zapllo.app&hl=en" className="bg-[#141841] rounded-lg p-2 hover:bg-[#1a1e48] transition-colors">
+                                       <FaGooglePlay className="h-8 w-16" />
                                 </a>
                             </div>
                         </div>
