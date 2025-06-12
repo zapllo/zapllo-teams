@@ -272,7 +272,7 @@ const LeaveTypes: React.FC = () => {
   };
 
   return (
-    <div className="h-screen overflow-y-scroll mx-auto p-6">
+    <div className="h-screen overflow-y-scroll scrollbar-hide mx-auto p-6">
       <Card className="shadow-sm border-muted">
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">

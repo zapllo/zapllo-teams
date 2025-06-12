@@ -642,7 +642,7 @@ export default function UserDetailPage({ params }: { params: { userId: string } 
     );
 
     return (
-        <div className="container mt-12 max-w-7xl h-screen overflow-y-scroll mx-auto px-4 py-6 pb-24">
+        <div className="container mt-12 max-w-7xl h-screen overflow-y-scroll mx-auto scrollbar-hide px-4 py-6 pb-24">
             <div className="mb-6 flex items-center">
                 <Button
                     variant="ghost"

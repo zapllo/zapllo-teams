@@ -681,7 +681,7 @@ const MyLeaves: React.FC = () => {
       ) : leaveTypes.length > 0 ? (
         <div className="relative">
           <ScrollArea className="whitespace-nowrap">
-            <div className="grid grid-cols-3 gap-4">
+            <div className=" flex  w-full overflow-x-scroll scrollbar-hide  xl:max-w-5xl 2xl:max-w-6xl gap-4">
               {leaveTypes.map((leaveType) => (
                 <LeaveCard key={leaveType._id} leaveType={leaveType} />
               ))}
@@ -784,7 +784,7 @@ const MyLeaves: React.FC = () => {
       {/* Leave Type Information Modal */}
       {infoModalContent && (
         <Dialog open={isInfoModalOpen} onOpenChange={setIsInfoModalOpen}>
-          <DialogContent className="sm:max-w-md p-6">
+          <DialogContent className="sm:max-w-md z-[100] p-6">
             <DialogTitle className="flex items-center gap-2">
               <Info className="h-5 w-5" />
               {infoModalContent.title}

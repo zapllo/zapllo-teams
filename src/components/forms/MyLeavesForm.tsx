@@ -599,7 +599,7 @@ const MyLeaveForm: React.FC<LeaveFormProps> = ({ leaveTypes, onClose }) => {
                       <SelectTrigger className="w-[140px] h-8">
                         <SelectValue placeholder="Select unit" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="z-[100]">
                         {availableUnits.map((unit) => (
                           <SelectItem key={unit} value={unit}>
                             {unit}
