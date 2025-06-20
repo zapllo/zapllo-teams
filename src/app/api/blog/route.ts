@@ -9,7 +9,7 @@ import { getDataFromToken } from '@/helper/getDataFromToken';
 export async function GET() {
   try {
     await connectDB();
-    const posts = await Blog.find().sort({ createdAt: -1 }).populate('author');
+    const posts = await Blog.find().populate('author');
     return NextResponse.json(posts, { status: 200 });
   } catch (error) {
     console.error(error);
