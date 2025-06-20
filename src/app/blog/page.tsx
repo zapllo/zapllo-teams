@@ -181,7 +181,7 @@ export default function BlogsPage() {
                         </h1>
 
                         <p className="text-lg md:text-xl text-indigo-100 max-w-3xl mx-auto mb-10">
-                            Expert advice, industry trends, and actionable strategies to scale your business with Zapllo's AI-powered automation
+                            Expert advice, industry trends, and actionable strategies to scale your business with Zapllo&apos;s AI-powered automation
                         </p>
                     </motion.div>
 
@@ -342,7 +342,7 @@ export default function BlogsPage() {
                             <BookOpen className="h-12 w-12 text-gray-300 mx-auto mb-4" />
                             <h3 className="text-xl font-semibold text-gray-800 mb-2">No articles found</h3>
                             <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                                We couldn't find any articles matching your current filters or search criteria.
+                                We couldn&apos;t find any articles matching your current filters or search criteria.
                             </p>
                             <Button onClick={resetFilters} variant="outline">
                                 Reset Filters
