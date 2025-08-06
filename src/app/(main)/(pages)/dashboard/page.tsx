@@ -380,7 +380,7 @@ if (isLoading) {
               </CardDescription>
             </CardHeader>
             <CardFooter>
-              <Link href="https://app.zapllo.com/signup" target="_blank" rel="noopener noreferrer">
+              <Link href="https://zaptick.io" target="_blank" rel="noopener noreferrer">
                 <Button className="bg-[#815BF5] py-1 hover:bg-[#5f31e9] text-xs">
                   Go To WhatsApp API
                 </Button>

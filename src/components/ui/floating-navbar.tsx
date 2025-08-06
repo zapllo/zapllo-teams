@@ -10,9 +10,10 @@ import {
     CalendarDays,
     MessageSquare,
     BarChart,
-    FileText,
+    Phone,
     Rocket
 } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 
 export const FloatingNav = ({
     navItems,
@@ -112,14 +113,14 @@ export const FloatingNav = ({
                                                     </div>
                                                 </div>
                                             </Link>
-                                            <Link href="#">
+                                            <Link href="https://ai.zapllo.com">
                                                 <div className="p-2 hover:bg-[#292e6a] rounded-md transition-colors flex items-center gap-3">
                                                     <div className="w-8 h-8 bg-[#815bf5]/20 rounded-md flex items-center justify-center">
                                                         <MessageSquare className="w-4 h-4 text-[#815bf5]" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-sm font-medium">Zapllo AI Assistant</p>
-                                                        <p className="text-xs text-gray-400">AI-powered business help</p>
+                                                        <p className="text-sm font-medium">Zapllo Voice AI</p>
+                                                        <p className="text-xs text-gray-400">AI-powered voice assistant</p>
                                                     </div>
                                                 </div>
                                             </Link>
@@ -134,14 +135,14 @@ export const FloatingNav = ({
                                                     </div>
                                                 </div>
                                             </Link>
-                                            <Link href="#">
+                                            <Link href="https://zaptick.io">
                                                 <div className="p-2 hover:bg-[#292e6a] rounded-md transition-colors flex items-center gap-3">
                                                     <div className="w-8 h-8 bg-[#815bf5]/20 rounded-md flex items-center justify-center">
-                                                        <FileText className="w-4 h-4 text-[#815bf5]" />
+                                                        <FaWhatsapp className="w-4 h-4 text-[#815bf5]" />
                                                     </div>
                                                     <div>
-                                                        <p className="text-sm font-medium">Zapllo Invoice <span className="ml-1 px-1.5 py-0.5 bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white text-[10px] rounded-full">SOON</span></p>
-                                                        <p className="text-xs text-gray-400">Simplify billing & payments</p>
+                                                        <p className="text-sm font-medium">Zaptick <span className="ml-1 px-1.5 py-0.5 bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white text-[10px] rounded-full">NEW</span></p>
+                                                        <p className="text-xs text-gray-400">Official WhatsApp Business API</p>
                                                     </div>
                                                 </div>
                                             </Link>

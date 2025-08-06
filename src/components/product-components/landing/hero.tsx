@@ -23,7 +23,6 @@ export default function HeroLanding() {
             <div className="z-10 flex items-center justify-center mt-20">
                 <Badge variant="outline" className="px-4 py-2 border-purple-500/50 bg-purple-500/10 backdrop-blur-sm">
                     <Sparkles className="h-4 w-4 mr-2 text-purple-400" />
-
                     <span className={cn(`inline text-sm md:text-lg text-muted-foreground`)}>
                         India&apos;s No.1 SaaS for MSMEs 🚀
                     </span>
@@ -37,8 +36,8 @@ export default function HeroLanding() {
                     transition={{ duration: 0.5 }}
                     className='text-center text-3xl font-bold md:text-6xl mx-4 max-w-5xl leading-tight'
                 >
-                    Transform Your Business with
-                    <span className='bg-gradient-to-r from-[#815BF5] to-[#FC8929] bg-clip-text text-transparent font-extrabold'> AI-Powered Automation</span>
+                    Transform Your Business with Zapllo — Your
+                    <span className='bg-gradient-to-r from-[#815BF5] to-[#FC8929] bg-clip-text text-transparent font-extrabold'> AI Co‑Manager</span>
                 </motion.h1>
 
                 <motion.div
@@ -48,7 +47,7 @@ export default function HeroLanding() {
                     className='flex justify-center text-center mt-6'
                 >
                     <h2 className='bg-gradient-to-r from-[#815BF5] bg-clip-text text-transparent font-semibold text-xl md:text-3xl to-[#FC8929]'>
-                        Run Your Business on Autopilot While You Focus on Growth
+                        Put Your Business on Autopilot & Focus on Scaling
                     </h2>
                 </motion.div>
 
@@ -58,7 +57,7 @@ export default function HeroLanding() {
                     transition={{ duration: 0.5, delay: 0.3 }}
                     className={`md:max-w-[800px] max-w-[400px] text-center mx-4 text-sm md:text-lg mt-6 leading-relaxed text-muted-foreground ${golos.className}`}
                 >
-                    Join thousands of business owners who&apos;ve increased productivity by 10x and reclaimed 5+ hours daily with our suite of Business Apps.
+                    Join thousands of MSME owners who&apos;ve boosted productivity by 10x and saved 5+ hours daily using Zapllo&apos;s AI‑Powered Business Apps
                 </motion.p>
 
                 <motion.div

@@ -25,7 +25,7 @@ export default function Home() {
     }, []);
 
     return (
-        <main className="bg-[#05071E] h-full overflow-hidden">
+        <main className="bg-[#05071E] h-full w-screen mx-auto overflow-hidden">
             <FloatingNavbar />
             
             {/* Background effects */}

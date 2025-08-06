@@ -10,12 +10,12 @@ type Props = {
 
 export default function Business({ product }: Props) {
     return (
-        <div className='py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#05071E] via-[#04061a] to-[#05071E] relative'>
+        <div className='py-24 bg-gradient-to-b from-[#05071E] via-[#04061a] to-[#05071E] relative'>
             {/* Background effects */}
             <div className="absolute top-0 left-0 w-full h-40 bg-gradient-to-b from-[#04061E] to-transparent z-0"></div>
             <div className="absolute -top-20 left-20 w-96 h-96 bg-[#815BF5]/5 rounded-full blur-3xl"></div>
 
-            <div className='max-w-7xl mx-auto relative z-10'>
+            <div className=' mx-auto relative z-10'>
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -49,15 +49,14 @@ export default function Business({ product }: Props) {
                     transition={{ duration: 0.5, delay: 0.2 }}
                     className="relative mb-16"
                 >
-                    <div className="absolute inset-x-0 top-1/2 transform -translate-y-1/2 h-24 bg-gradient-to-r from-[#815BF5]/10 via-[#FC8929]/10 to-[#815BF5]/10 blur-xl"></div>
-                    <div className="bg-[#0A0D28]/70 backdrop-blur-sm border border-[#815BF5]/20 rounded-xl py-8">
-                        <div className='w-full text-center justify-center flex gap-2'>
-                            <InfiniteMoving2 />
-                        </div>
-                    </div>
+                  <div className="bg-gradient-to-br from-[#0a0d28]/90 to-[#0a0d28] backdrop-blur-sm py-2 ">
+                           <InfiniteMoving2 />
+                         </div>
+                 
+
                 </motion.div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 px-6 md:grid-cols-3 gap-6">
                     {[
                         {
                             stat: '20,000+',
@@ -65,7 +64,7 @@ export default function Business({ product }: Props) {
                             description: 'Trust Zapllo for their task management'
                         },
                         {
-                            stat: '245,900+',
+                            stat: '439,387+',
                             label: 'Tasks',
                             description: 'Successfully completed every month'
                         },

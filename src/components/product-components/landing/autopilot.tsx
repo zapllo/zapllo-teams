@@ -67,7 +67,7 @@ export default function Autopilot() {
                     <h3 className='text-center text-2xl mb-6'>For Your Everyday Business needs</h3>
                 </motion.div>
 
-                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8'>
+                <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8'>
                     <FeatureCard
                         icon={<img src='/landing/tasks.png' className="h-6 w-6 text-[#815bf5]" />}
                         title="Task Delegation App"
@@ -85,11 +85,20 @@ export default function Autopilot() {
                     />
 
                     <FeatureCard
-                        icon={<img src='/icons/Group.png' className="h-6 w-6 text-[#815bf5]" />}
-                        title="Official WhatsApp API"
-                        description="Accelerate your business growth with Official WhatsApp API, doubling your conversion rates & making your business run 24X7 with automated customer support."
-                        link="#"
+                       icon={<img src='/landing/voice.png' className="h-6 w-6 text-[#815bf5]" />}
+                        title="Zapllo Voice AI"
+                        description="Deploy intelligent AI voice agents for customer support, sales calls, and automated campaigns. Available 24/7 to handle conversations and drive conversions."
+                        link="https://ai.zapllo.com"
+                        badge={<Badge variant="outline" className="text-xs bg-gradient-to-r from-[#815BF5] to-[#FC8929] text-white border-none">NEW</Badge>}
                         delay={0.3}
+                    />
+
+                    <FeatureCard
+                        icon={<img src='/icons/Group.png' className="h-6 w-6 text-[#815bf5]" />}
+                        title="Zaptick"
+                        description="Accelerate your business growth with Official WhatsApp API, doubling your conversion rates & making your business run 24X7 with automated customer support."
+                        link="https://zaptick.io"
+                        delay={0.4}
                     />
 
                     <FeatureCard
@@ -97,7 +106,7 @@ export default function Autopilot() {
                         title="Zapllo CRM"
                         description="Take control of your finances and save upto 40% expenses by optimizing spending through streamlined tracking, approval workflows, and insightful reporting."
                         link="https://crm.zapllo.com"
-                        delay={0.4}
+                        delay={0.5}
                     />
                 </div>
 
@@ -105,7 +114,7 @@ export default function Autopilot() {
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: 0.5 }}
+                    transition={{ duration: 0.5, delay: 0.6 }}
                     className="mt-12 w-full"
                 >
                     <div className="mx-auto max-w-3xl p-6 rounded-xl bg-gradient-to-r from-[#0A0D28]/80 to-[#0A0D28] border border-[#815bf5]/30 text-center">
