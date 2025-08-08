@@ -11,10 +11,10 @@ import ClientThemeProvider from "@/providers/client-theme-provider";
 const inter = Lato({ weight: "400", subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "Zapllo - Your AI Co-Manager",
+  title: "Zapllo - India’s First AI Co-Manager for MSMEs",
   description: "Supercharge your Workflow with Zapllo and unleash the power of AI and Automation. Book your free demo now.",
   openGraph: {
-    title: "Zapllo - Your AI Co-Manager",
+    title: "Zapllo - India’s First AI Co-Manager for MSMEs",
     description: "India's No.1 SaaS for MSMEs 🚀",
     url: "https://zapllo.com",
     type: "website",

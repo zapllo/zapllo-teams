@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { ChevronRight, Clock, BarChart, CalendarDays, MessageSquare } from 'lucide-react'
+import { FaInstagram } from 'react-icons/fa'
 
 const FeatureCard = ({
     icon,
@@ -107,6 +108,14 @@ export default function Autopilot() {
                         description="Take control of your finances and save upto 40% expenses by optimizing spending through streamlined tracking, approval workflows, and insightful reporting."
                         link="https://crm.zapllo.com"
                         delay={0.5}
+                    />
+                     <FeatureCard
+                        icon={<FaInstagram className="h-6 w-6 text-[#815bf5]" />}
+                        title="Instagram Automation"
+                        description="Automate your Instagram marketing with AI-powered content creation, scheduling, engagement, and analytics to grow your social media presence effortlessly."
+                        link="#"
+                        badge={<Badge variant="outline" className="text-[10px] bg-gradient-to-r from-[#676B93] to-[#676B93] text-white border-none">COMING SOON</Badge>}
+                        delay={0.6}
                     />
                 </div>
 
