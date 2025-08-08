@@ -28,13 +28,14 @@ interface ProductCardProps {
   external?: boolean;
   isLocked?: boolean;
   isComingSoon?: boolean;
-  hasAccess?: boolean;
+  hasAccess?: boolean; // Keep as boolean | undefined
   isPlanEligible?: boolean;
   trialExpires?: string;
   remainingTime?: string;
   onStartTrial?: () => void;
   isTrialLoading?: boolean;
 }
+
 
 const ProductCard: React.FC<ProductCardProps> = ({
   icon,
@@ -310,81 +311,81 @@ const DashboardPage = () => {
 
   return (
 
-  <div className="dark:bg-[#04061e] bg-[#ffffff] mb-16 overflow-y-scroll pt-2 scale-95 h-screen relative overflow-x-hidden scrollbar-hide">
-    <div className="mx-auto px-6 mt-12">
-      {/* Welcome Section - Enhanced */}
-      <div className="relative mb-12 overflow-hidden">
-        {/* Background gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#815BF5]/5 via-blue-500/5 to-purple-600/5 rounded-2xl"></div>
-        
-        {/* Decorative elements */}
-        <div className="absolute top-4 right-4 w-32 h-32 bg-gradient-to-br from-[#815BF5]/10 to-blue-500/10 rounded-full blur-2xl"></div>
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-500/10 to-[#815BF5]/10 rounded-full blur-xl"></div>
-        {/* Content */}
-        <div className="relative z-10 p-8  md:p-12">
-          <div className="max-w-4xl">
-            {/* Greeting with time-based message */}
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-[#815BF5] to-purple-600 shadow-lg">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <span className="text-sm font-medium text-[#815BF5] bg-[#815BF5]/10 px-3 py-1 rounded-full">
-                Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening'}
-              </span>
-            </div>
+    <div className="dark:bg-[#04061e] bg-[#ffffff] mb-16 overflow-y-scroll pt-2 scale-95 h-screen relative overflow-x-hidden scrollbar-hide">
+      <div className="mx-auto px-6 mt-12">
+        {/* Welcome Section - Enhanced */}
+        <div className="relative mb-12 overflow-hidden">
+          {/* Background gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#815BF5]/5 via-blue-500/5 to-purple-600/5 rounded-2xl"></div>
 
-            {/* Main heading */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 dark:from-white dark:via-gray-100 dark:to-gray-200 bg-clip-text text-transparent mb-4 leading-tight">
-              Welcome to{' '}
-              <span className="bg-gradient-to-r from-[#815BF5] to-purple-600 bg-clip-text text-transparent">
-                Zapllo Workspace
-              </span>
-            </h1>
-
-            {/* Subtitle with enhanced styling */}
-            <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-6 leading-relaxed max-w-2xl">
-              Your all-in-one business management platform designed to{' '}
-              <span className="font-semibold text-gray-800 dark:text-gray-100">streamline operations</span>,{' '}
-              <span className="font-semibold text-gray-800 dark:text-gray-100">boost productivity</span>, and{' '}
-              <span className="font-semibold text-gray-800 dark:text-gray-100">drive growth</span>.
-            </p>
-
-            {/* Quick stats or features */}
-            <div className="flex flex-wrap gap-4 mb-6">
-              <div className="flex items-center gap-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg px-4 py-2 border border-gray-200/50 dark:border-gray-700/50">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">All Systems Online</span>
+          {/* Decorative elements */}
+          <div className="absolute top-4 right-4 w-32 h-32 bg-gradient-to-br from-[#815BF5]/10 to-blue-500/10 rounded-full blur-2xl"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-500/10 to-[#815BF5]/10 rounded-full blur-xl"></div>
+          {/* Content */}
+          <div className="relative z-10 p-8  md:p-12">
+            <div className="max-w-4xl">
+              {/* Greeting with time-based message */}
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-[#815BF5] to-purple-600 shadow-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <span className="text-sm font-medium text-[#815BF5] bg-[#815BF5]/10 px-3 py-1 rounded-full">
+                  Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening'}
+                </span>
               </div>
-              
-              <div className="flex items-center gap-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg px-4 py-2 border border-gray-200/50 dark:border-gray-700/50">
-                <Users className="w-4 h-4 text-[#815BF5]" />
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Team Management</span>
-              </div>
-              
-              <div className="flex items-center gap-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg px-4 py-2 border border-gray-200/50 dark:border-gray-700/50">
-                <TrendingUp className="w-4 h-4 text-[#815BF5]" />
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Growth Tools</span>
-              </div>
-            </div>
 
-            {/* Call to action */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button className="bg-gradient-to-r from-[#815BF5] to-purple-600 hover:from-[#5f31e9] hover:to-purple-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5">
-                Get Started
-              </Button>
-              
-              <Button variant="outline" className="border-2 border-[#815BF5]/20 hover:border-[#815BF5]/40 text-gray-700 dark:text-gray-300 hover:text-[#815BF5] dark:hover:text-[#815BF5] font-medium px-6 py-3 rounded-lg bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-200">
-                Watch Tutorials
-              </Button>
+              {/* Main heading */}
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 dark:from-white dark:via-gray-100 dark:to-gray-200 bg-clip-text text-transparent mb-4 leading-tight">
+                Welcome to{' '}
+                <span className="bg-gradient-to-r from-[#815BF5] to-purple-600 bg-clip-text text-transparent">
+                  Zapllo Workspace
+                </span>
+              </h1>
+
+              {/* Subtitle with enhanced styling */}
+              <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-6 leading-relaxed max-w-2xl">
+                Your all-in-one business management platform designed to{' '}
+                <span className="font-semibold text-gray-800 dark:text-gray-100">streamline operations</span>,{' '}
+                <span className="font-semibold text-gray-800 dark:text-gray-100">boost productivity</span>, and{' '}
+                <span className="font-semibold text-gray-800 dark:text-gray-100">drive growth</span>.
+              </p>
+
+              {/* Quick stats or features */}
+              <div className="flex flex-wrap gap-4 mb-6">
+                <div className="flex items-center gap-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg px-4 py-2 border border-gray-200/50 dark:border-gray-700/50">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">All Systems Online</span>
+                </div>
+
+                <div className="flex items-center gap-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg px-4 py-2 border border-gray-200/50 dark:border-gray-700/50">
+                  <Users className="w-4 h-4 text-[#815BF5]" />
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Team Management</span>
+                </div>
+
+                <div className="flex items-center gap-2 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg px-4 py-2 border border-gray-200/50 dark:border-gray-700/50">
+                  <TrendingUp className="w-4 h-4 text-[#815BF5]" />
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Growth Tools</span>
+                </div>
+              </div>
+
+              {/* Call to action */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button className="bg-gradient-to-r from-[#815BF5] to-purple-600 hover:from-[#5f31e9] hover:to-purple-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5">
+                  Get Started
+                </Button>
+
+                <Button variant="outline" className="border-2 border-[#815BF5]/20 hover:border-[#815BF5]/40 text-gray-700 dark:text-gray-300 hover:text-[#815BF5] dark:hover:text-[#815BF5] font-medium px-6 py-3 rounded-lg bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm hover:bg-white/80 dark:hover:bg-gray-800/80 transition-all duration-200">
+                  Watch Tutorials
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Bottom border with gradient */}
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#815BF5]/30 to-transparent"></div>
-      </div>
+          {/* Bottom border with gradient */}
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#815BF5]/30 to-transparent"></div>
+        </div>
 
 
         {/* Team Management Section */}
@@ -398,24 +399,24 @@ const DashboardPage = () => {
               <p className="text-sm text-gray-600 dark:text-gray-400">Manage your team, tasks, and workplace efficiency</p>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             <ProductCard
               icon="/icons/atask.png"
               title="Zapllo Tasks"
               description="Delegate one time and recurring tasks to your team members efficiently"
               href="/dashboard/tasks"
-              hasAccess={isTaskAccess || isTaskPlanEligible}
+              hasAccess={!!(isTaskAccess || isTaskPlanEligible)}
               isLocked={!(isTaskAccess || isTaskPlanEligible)}
             />
-            
+
             <ProductCard
               icon="/icons/Zapllo Leaves.png"
               title="Zapllo Leaves"
               description="Manage employee leave requests and holiday schedules seamlessly"
               href="/attendance/my-leaves"
-              hasAccess={isLeaveAcess}
-              isPlanEligible={isPlanEligible}
+              hasAccess={!!isLeaveAcess}
+              isPlanEligible={!!isPlanEligible}
               trialExpires={leavesTrialExpires}
               remainingTime={leavesRemainingTime}
               onStartTrial={() => startTrial("leaves")}
@@ -428,15 +429,16 @@ const DashboardPage = () => {
               title="Zapllo Attendance"
               description="Track team attendance, breaks, and working hours accurately"
               href="/attendance/my-attendance"
-              hasAccess={isLeaveAcess}
-              isPlanEligible={isPlanEligible}
+              hasAccess={!!isLeaveAcess}
+              isPlanEligible={!!isPlanEligible}
               trialExpires={leavesTrialExpires}
               remainingTime={leavesRemainingTime}
               onStartTrial={() => startTrial("attendance")}
               isTrialLoading={isFreeTrialLoading}
               isLocked={role !== "orgAdmin" && !leavesTrialExpires && !isLeaveAcess}
             />
-            
+
+
             <ProductCard
               icon="/icons/Zapllo Intranet.png"
               title="Zapllo Intranet"
@@ -457,7 +459,7 @@ const DashboardPage = () => {
               <p className="text-sm text-gray-600 dark:text-gray-400">Tools to grow your business and manage customer relationships</p>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             <ProductCard
               icon="/icons/Group.png"
@@ -466,7 +468,7 @@ const DashboardPage = () => {
               href="https://zaptick.io"
               external={true}
             />
-            
+
             <ProductCard
               icon="/icons/crm.png"
               title="Zapllo CRM"
@@ -474,8 +476,8 @@ const DashboardPage = () => {
               href="https://crm.zapllo.com/login"
               external={true}
             />
-            
-           
+
+
             <ProductCard
               icon="/branding/AII.png"
               title="Zapllo AI Agents"
@@ -483,13 +485,13 @@ const DashboardPage = () => {
               href="https://ai.zapllo.com"
               isComingSoon={false}
             />
-             <ProductCard
+            <ProductCard
               icon="/branding/teamsicon.png"
               title="Instagram Automations"
               description="Automate your Instagram marketing with AI to grow your social media presence effortlessly."
               isComingSoon={true}
             />
-            
+
           </div>
         </section>
 
@@ -504,7 +506,7 @@ const DashboardPage = () => {
               <p className="text-sm text-gray-600 dark:text-gray-400">Get help, learn new features, and stay updated</p>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* {calculateProgress() < 100 && (
               <Card className="border dark:border-[#E0E0E066] shadow-sm hover:shadow-md transition-shadow duration-200">
