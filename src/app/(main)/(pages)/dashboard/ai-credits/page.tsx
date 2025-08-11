@@ -285,7 +285,7 @@ export default function AiCreditsPage() {
 
       {/* Main Content */}
       <div className="flex-1 overflow-y-auto p-4 md:p-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="max- mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold tracking-tight">AI Credits Management</h1>
             <p className="text-muted-foreground mt-2">

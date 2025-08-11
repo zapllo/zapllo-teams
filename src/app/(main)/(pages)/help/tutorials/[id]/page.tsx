@@ -62,7 +62,7 @@ export default function Tutorials() {
                     <h1 className="text-xl ">{tutorial.title}</h1>
                 </div>
 
-                <div className="w-full border rounded max-w-5xl mt-4 aspect-video">
+                <div className="w-full border rounded max-w mt-4 aspect-video">
                     <iframe className='rounded w-full h-full' src={tutorial.link} title="Zapllo Tutorials" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen ></iframe>
                 </div>
             </div>

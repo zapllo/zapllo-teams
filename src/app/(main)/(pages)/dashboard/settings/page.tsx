@@ -279,7 +279,7 @@ export default function Page() {
   }
 
   return (
-    <div className="container max-w-7xl mx-auto py-8 px-4 sm:px-6">
+    <div className=" mx-auto py-8 px-4 sm:px-6">
       <div className="flex flex-col space-y-8">
         {/* Header */}
         <div className="space-y-2">

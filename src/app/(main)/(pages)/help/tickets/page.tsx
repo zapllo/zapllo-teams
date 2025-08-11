@@ -282,7 +282,7 @@ export default function Tickets() {
     <div className="flex mt-12 h-screen">
 
       <div className="flex-1  p-6">
-        <Card className="w-full max-w-6xl bg-transparent mx-auto">
+        <Card className="w-full max bg-transparent mx-auto">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div>

@@ -541,6 +541,25 @@ const DashboardPage = () => {
                 </CardFooter>
               </Card>
             )} */}
+  {/* Add the new Support Ticket card */}
+            <Card className="border dark:border-[#E0E0E066] shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="pb-4">
+                <div className="rounded-full flex items-center justify-center h-14 w-14 border dark:border-[#E0E0E066] mb-3 bg-gradient-to-br from-[#815BF5]/10 to-[#815BF5]/5">
+                  <HeadphonesIcon className="h-7 w-7 text-[#815BF5]" />
+                </div>
+                <CardTitle className="text-lg font-semibold">Get Support</CardTitle>
+                <CardDescription className="text-sm leading-relaxed">
+                  Need help? Create a support ticket and our team will assist you
+                </CardDescription>
+              </CardHeader>
+              <CardFooter className="pt-0">
+                <Link href="/help/tickets">
+                  <Button className="bg-[#815BF5] py-2 px-4 hover:bg-[#5f31e9] text-sm">
+                    Create Ticket
+                  </Button>
+                </Link>
+              </CardFooter>
+            </Card>
 
             <Card className="border dark:border-[#E0E0E066] shadow-sm hover:shadow-md transition-shadow duration-200">
               <CardHeader className="pb-4">
@@ -579,6 +598,7 @@ const DashboardPage = () => {
                 </Link>
               </CardFooter>
             </Card>
+
           </div>
         </section>
       </div>

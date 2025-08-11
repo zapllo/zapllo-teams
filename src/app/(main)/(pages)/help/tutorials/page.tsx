@@ -94,7 +94,7 @@ export default function Tutorials() {
 
  if (loading) {
   return (
-    <div className="container mx-auto p-6">
+    <div className=" mx-auto p-6">
       {/* Page header skeleton */}
       <div className="mb-8">
         <Skeleton className="h-10 w-64 mb-2" />
@@ -148,7 +148,7 @@ export default function Tutorials() {
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className=" mx-auto p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Video Tutorials</h1>
         <p className="text-muted-foreground">

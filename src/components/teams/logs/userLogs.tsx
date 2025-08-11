@@ -86,7 +86,7 @@ export default function UserLogs({ userId }: { userId: string }) {
 
     console.log(payslipLogData, 'datda')
     return (
-        <div className="w-full max-w-3xl mx-auto ">
+        <div className="w-full max-w- mx-auto ">
             <h1 className="text-lg font-semibold mb-4">User Logs</h1>
             <Separator />
             <Accordion2 type="single" collapsible>

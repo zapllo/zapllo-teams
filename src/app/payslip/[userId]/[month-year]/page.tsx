@@ -86,53 +86,101 @@ export default function PayslipPage({
 
     const printRef = useRef<HTMLDivElement>(null);
 
-    const handlePrint = () => {
-        setLoadingPrint(true);
-        if (printRef.current) {
-            const originalContents = document.body.innerHTML;
-            const printContents = printRef.current.innerHTML;
+  const handlePrint = () => {
+    setLoadingPrint(true);
+    if (printRef.current) {
+        const originalContents = document.body.innerHTML;
+        const printContents = printRef.current.innerHTML;
 
-            document.body.innerHTML = `
-            <style>
-                @media print {
-                    * {
-                        color: black !important;
-                        background-color: white;
-                        -webkit-print-color-adjust: exact;
-                        print-color-adjust: exact;
-                    }
-                    img {
-                        max-width: 100%;
-                    }
-                    body {
-                        font-family: Arial, sans-serif;
-                        margin: 0;
-                        padding: 10px;
-                    }
-                    table {
-                        width: 100%;
-                        border-collapse: collapse;
-                    }
-                    th, td {
-                        border: 1px solid #ddd;
-                        padding: 8px;
-                        text-align: left;
-                    }
-                    @page {
-                        size: auto;
-                        margin: 10mm;
-                    }
+        document.body.innerHTML = `
+        <style>
+            @media print {
+                * {
+                    color: black !important;
+                    background-color: white;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
                 }
-            </style>
-            <div>${printContents}</div>
-        `;
+                img {
+                    max-width: 100%;
+                }
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 5px;
+                    font-size: 11px;
+                    line-height: 1.2;
+                }
+                table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-bottom: 8px;
+                }
+                th, td {
+                    border: 1px solid #ddd;
+                    padding: 4px 6px;
+                    text-align: left;
+                    font-size: 10px;
+                }
+                h1, h2, h3 {
+                    margin: 6px 0 4px 0;
+                    font-size: 14px;
+                }
+                h2 {
+                    font-size: 16px;
+                    padding: 6px;
+                }
+                h3 {
+                    font-size: 12px;
+                    margin-bottom: 6px;
+                }
+                .header-section {
+                    margin-bottom: 8px;
+                    padding: 8px;
+                }
+                .section {
+                    margin-bottom: 8px;
+                }
+                .net-pay-section {
+                    padding: 8px;
+                    margin: 8px 0;
+                }
+                .footer-section {
+                    margin-top: 6px;
+                    padding-top: 6px;
+                }
+                .company-logo {
+                    max-height: 50px !important;
+                }
+                .zapllo-logo {
+                    max-height: 12px !important;
+                }
+                @page {
+                    size: A4;
+                    margin: 8mm;
+                }
+                /* Force single page */
+                .payslip-container {
+                    page-break-inside: avoid;
+                    height: auto;
+                    max-height: none;
+                }
+                /* Reduce spacing */
+                p {
+                    margin: 2px 0;
+                    font-size: 10px;
+                }
+            }
+        </style>
+        <div class="payslip-container">${printContents}</div>
+    `;
 
-            window.print();
-            document.body.innerHTML = originalContents;
-            setLoadingPrint(false);
-        }
-        window.location.reload();
-    };
+        window.print();
+        document.body.innerHTML = originalContents;
+        setLoadingPrint(false);
+    }
+    window.location.reload();
+};
 
     useEffect(() => {
         const fetchPayslipDetails = async () => {

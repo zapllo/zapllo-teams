@@ -124,7 +124,7 @@ export default function PersonalDetails({ userId }: { userId: string }) {
     console.log(personalInfo, 'personal info')
 
     return (
-        <div className="w-full max-w-3xl mx-auto">
+        <div className="w-full max-w- mx-auto">
             <h1 className="text-lg font-semibold mb-4">Personal Details</h1>
             <Separator />
             <Accordion2 type="single" collapsible>

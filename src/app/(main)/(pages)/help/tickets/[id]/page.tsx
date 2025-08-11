@@ -157,7 +157,7 @@ export default function TicketDetails({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className="container py-8 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-16">
+    <div className=" py-8 mx-auto  px-4 sm:px-6 lg:px-8 mt-16">
       <Toaster />
 
       <div className="flex items-center mb-6">

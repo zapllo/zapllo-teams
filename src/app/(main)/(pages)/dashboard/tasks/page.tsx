@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useRef, useState } from 'react'
-import { AnimatePresence } from 'framer-motion';
-import { AlertCircle, Loader2, Plus, Sparkles, User, X } from 'lucide-react'; // Added User icon
+import { AnimatePresence, motion } from 'framer-motion';
+import { AlertCircle, Loader2, Plus, Sparkles, User, X, FileText, Zap, MoreHorizontal, FolderOpen } from 'lucide-react';
 import TaskModal from '@/components/globals/taskModal';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
@@ -36,6 +36,7 @@ export default function TaskManagement() {
     const [isTrialExpired, setIsTrialExpired] = useState(false);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<string>("all");
+    const [isQuickActionsOpen, setIsQuickActionsOpen] = useState(false);
 
     // User mention related states
     const [users, setUsers] = useState<UserType[]>([]);
@@ -177,6 +178,74 @@ export default function TaskManagement() {
         setShowUserPopover(false);
         setMentionStartPosition(-1);
     };
+
+    const toggleQuickActions = () => {
+        setIsQuickActionsOpen(!isQuickActionsOpen);
+    };
+
+    // Update the handleQuickAction function
+    const handleQuickAction = (action: string) => {
+        setIsQuickActionsOpen(false);
+
+        switch (action) {
+            case 'ai-task':
+                openAiPromptDialog();
+                break;
+            case 'manual-task':
+                openModal();
+                break;
+            case 'templates':
+                setActiveTab('taskTemplates');
+                break;
+            case 'directory':
+                setActiveTab('taskDirectory');
+                break;
+        }
+    };
+
+    // Update the quickActions array
+    const quickActions = [
+        {
+            id: 'ai-task',
+            label: 'AI Task',
+            icon: Sparkles,
+            description: 'Create with AI',
+            gradient: 'from-violet-600 to-purple-600',
+            hoverGradient: 'from-violet-500 to-purple-500',
+            iconColor: 'text-violet-100',
+            credits: aiCredits > 0
+        },
+        {
+            id: 'manual-task',
+            label: 'New Task',
+            icon: Plus,
+            description: 'Create manually',
+            gradient: 'from-blue-600 to-indigo-600',
+            hoverGradient: 'from-blue-500 to-indigo-500',
+            iconColor: 'text-blue-100',
+            credits: true
+        },
+        {
+            id: 'templates',
+            label: 'Templates',
+            icon: FileText,
+            description: 'Browse templates',
+            gradient: 'from-emerald-600 to-green-600',
+            hoverGradient: 'from-emerald-500 to-green-500',
+            iconColor: 'text-emerald-100',
+            credits: true
+        },
+        {
+            id: 'directory',
+            label: 'Directory',
+            icon: FolderOpen,
+            description: 'Task directory',
+            gradient: 'from-orange-600 to-amber-600',
+            hoverGradient: 'from-orange-500 to-amber-500',
+            iconColor: 'text-orange-100',
+            credits: true
+        }
+    ];
 
     const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const value = e.target.value;
@@ -373,58 +442,167 @@ export default function TaskManagement() {
                     onTaskUpdate={handleTaskUpdate}
                 />
 
-                {/* Floating Action Buttons */}
-                {/* // Only changing the AI button part */}
+                {/* Quick Actions Menu */}
+                <div className="fixed bottom-8 right-8 z-50">
+                    {/* Backdrop for closing menu */}
+                    {isQuickActionsOpen && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-black/20 backdrop-blur-sm -z-10"
+                            onClick={() => setIsQuickActionsOpen(false)}
+                        />
+                    )}
 
-                {/* Floating Action Buttons */}
-                <div className="fixed bottom-8 right-8 z-50 space-y-2 gap-4">
-                    {/* AI Task Button - Completely redesigned with distinct AI theme */}
-                    <button
-                        className="group relative w-12 h-12 flex items-center justify-center"
-                        onClick={openAiPromptDialog}
+                    {/* Quick Action Buttons */}
+                    <AnimatePresence>
+                        {isQuickActionsOpen && (
+                            <motion.div
+                                className="absolute bottom-20 right-0 space-y-3"
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                transition={{
+                                    type: "spring",
+                                    stiffness: 400,
+                                    damping: 25,
+                                    staggerChildren: 0.1,
+                                    delayChildren: 0.1
+                                }}
+                            >
+                                {quickActions.map((action, index) => (
+                                    <motion.div
+                                        key={action.id}
+                                        initial={{ opacity: 0, x: 50, scale: 0.8 }}
+                                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                                        exit={{ opacity: 0, x: 50, scale: 0.8 }}
+                                        transition={{
+                                            delay: index * 0.05,
+                                            type: "spring",
+                                            stiffness: 400,
+                                            damping: 20
+                                        }}
+                                        className="relative group"
+                                    >
+                                        <button
+                                            onClick={() => handleQuickAction(action.id)}
+                                            disabled={action.id === 'ai-task' && !action.credits}
+                                            className={`
+                                                flex items-center gap-3 px-4 py-3 rounded-2xl shadow-lg
+                                                bg-gradient-to-r ${action.gradient} hover:${action.hoverGradient}
+                                                transform transition-all duration-200 hover:scale-105 hover:shadow-xl
+                                                backdrop-blur-sm border border-white/10
+                                                ${action.id === 'ai-task' && !action.credits
+                                                    ? 'opacity-50 cursor-not-allowed'
+                                                    : 'hover:-translate-y-1'
+                                                }
+                                            `}
+                                        >
+                                            {/* Icon with glow effect */}
+                                            <div className="relative">
+                                                <action.icon
+                                                    size={20}
+                                                    className={`${action.iconColor} drop-shadow-sm relative z-10`}
+                                                />
+                                                {/* Glow effect */}
+                                                <div className="absolute inset-0 blur-md opacity-60">
+                                                    <action.icon size={20} className={action.iconColor} />
+                                                </div>
+                                            </div>
+
+                                            {/* Text content */}
+                                            <div className="text-left min-w-[100px]">
+                                                <div className="text-white font-medium text-sm">
+                                                    {action.label}
+                                                </div>
+                                                <div className="text-white/70 text-xs">
+                                                    {action.description}
+                                                </div>
+                                            </div>
+
+                                            {/* Special indicator for AI task */}
+                                            {action.id === 'ai-task' && (
+                                                <div className={`
+                                                    ml-auto px-2 py-0.5 rounded-full text-xs font-medium
+                                                    ${aiCredits > 10 ? 'bg-emerald-500/20 text-emerald-300' :
+                                                        aiCredits > 0 ? 'bg-amber-500/20 text-amber-300' :
+                                                            'bg-red-500/20 text-red-300'
+                                                    }
+                                                `}>
+                                                    {aiCredits}
+                                                </div>
+                                            )}
+
+                                            {/* Ripple effect on hover */}
+                                            <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                                <div className="absolute inset-0 rounded-2xl bg-white/10 animate-pulse"></div>
+                                            </div>
+                                        </button>
+
+                                        {/* Tooltip */}
+                                        <div className="absolute right-full mr-3 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                                            <div className="bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+                                                {action.description}
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Main Toggle Button */}
+                    <motion.button
+                        onClick={toggleQuickActions}
+                        className="group relative w-14 h-14 flex items-center justify-center"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
                     >
-                        {/* Outer ring with rotating gradient - simulates AI processing */}
-                        <div className="absolute inset-0 rounded-full bg-gradient-to-r from-violet-600 via-cyan-400 to-blue-500 animate-spin-slow blur-[1px]"></div>
+                        {/* Animated background */}
+                        <motion.div
+                            className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 shadow-lg"
+                            animate={{
+                                rotate: isQuickActionsOpen ? 180 : 0,
+                            }}
+                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                        />
 
-                        {/* Inner button with glassy effect */}
-                        <div className="absolute inset-[2px] rounded-full bg-gradient-to-br from-indigo-900/90 to-purple-900/90 backdrop-blur-sm flex items-center justify-center shadow-inner shadow-white/10">
-                            {/* Animated circuit-like pattern */}
-                            {/* <div className="absolute inset-0 opacity-20">
-                                <div className="absolute top-1/4 left-1/4 w-1/2 h-[1px] bg-cyan-300"></div>
-                                <div className="absolute top-3/4 left-1/4 w-1/2 h-[1px] bg-cyan-300"></div>
-                                <div className="absolute top-1/4 left-1/4 h-1/2 w-[1px] bg-cyan-300"></div>
-                                <div className="absolute top-1/4 right-1/4 h-1/2 w-[1px] bg-cyan-300"></div>
-                                <div className="absolute top-1/4 left-1/4 w-1 h-1 rounded-full bg-cyan-400 animate-ping"></div>
-                                <div className="absolute top-3/4 left-1/4 w-1 h-1 rounded-full bg-cyan-400 animate-ping" style={{ animationDelay: '0.5s' }}></div>
-                                <div className="absolute top-1/4 right-1/4 w-1 h-1 rounded-full bg-cyan-400 animate-ping" style={{ animationDelay: '0.3s' }}></div>
-                                <div className="absolute top-3/4 right-1/4 w-1 h-1 rounded-full bg-cyan-400 animate-ping" style={{ animationDelay: '0.7s' }}></div>
-                            </div> */}
+                        {/* Inner shadow/highlight */}
+                        <div className="absolute inset-[1px] rounded-2xl bg-gradient-to-br from-white/20 to-transparent"></div>
 
-                            {/* Center AI icon with glow */}
-                            <div className="z-10 relative">
-                                <Sparkles size={22} className="text-white drop-shadow-[0_0_3px_rgba(255,255,255,0.7)]" />
-                                <div className="absolute inset-0 animate-pulse opacity-80 blur-sm">
-                                    <Sparkles size={22} className="text-cyan-300" />
-                                </div>
-                            </div>
-                        </div>
+                        {/* Icon */}
+                        <motion.div
+                            animate={{
+                                rotate: isQuickActionsOpen ? 45 : 0,
+                            }}
+                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                            className="relative z-10"
+                        >
+                            <Plus size={24} className="text-white drop-shadow-sm" />
+                        </motion.div>
 
-                        {/* Tooltip */}
-                        <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap backdrop-blur-sm border border-indigo-500/30">
-                            Create with AI
-                        </div>
-                    </button>
+                        {/* Pulsing ring effect */}
+                        <motion.div
+                            className="absolute inset-0 rounded-2xl border-2 border-white/30"
+                            animate={{
+                                scale: [1, 1.1, 1],
+                                opacity: [0.5, 0, 0.5],
+                            }}
+                            transition={{
+                                duration: 2,
+                                repeat: Infinity,
+                                ease: "easeInOut",
+                            }}
+                        />
 
-                    {/* Regular Add Task Button */}
-                    <button
-                        className="flex items-center justify-center w-12 h-12 rounded-full text-white bg-primary shadow-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 transition-all"
-                        onClick={() => openModal()}
-                    >
-                        <Plus size={24} />
-                    </button>
+                        {/* Glow effect */}
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+                    </motion.button>
                 </div>
 
-
+                {/* AI Prompt Dialog */}
                 <Dialog open={isAiPromptOpen} onOpenChange={setIsAiPromptOpen}>
                     <DialogContent className="sm:max-w-[550px] h-fit max-h-screen  p-0 overflow-y-auto m-auto bg-gradient-to-b from-slate-950 to-slate-900 border border-indigo-500/30 shadow-lg shadow-indigo-500/20">
                         {/* Header with futuristic design */}
@@ -446,8 +624,8 @@ export default function TaskManagement() {
                                 </div>
 
                                 <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${aiCredits > 10 ? 'bg-emerald-900/60 text-emerald-300 border border-emerald-500/40' :
-                                        aiCredits > 0 ? 'bg-amber-900/60 text-amber-300 border border-amber-500/40' :
-                                            'bg-red-900/60 text-red-300 border border-red-500/40'
+                                    aiCredits > 0 ? 'bg-amber-900/60 text-amber-300 border border-amber-500/40' :
+                                        'bg-red-900/60 text-red-300 border border-red-500/40'
                                     }`}>
                                     {aiCredits <= 5 && <AlertCircle className="h-3.5 w-3.5" />}
                                     <span>{aiCredits} credit{aiCredits !== 1 ? 's' : ''}</span>
@@ -506,43 +684,43 @@ export default function TaskManagement() {
                             {/* User Mention Popover */}
                             {showUserPopover && mentionStartPosition !== -1 && (
                                 <div className='flex justify-center w-full '>
-                                <div
-                                    ref={popoverRef}
-                                    className="absolute z-50 -ml-96 bg-slate-900 border border-indigo-500/40 rounded-md shadow-lg shadow-indigo-500/20 mt-2 w-[92%] max-h-64 overflow-y-auto"
-                                    style={{
-                                        top: `${textareaRef.current ? textareaRef.current.getBoundingClientRect().bottom + window.scrollY + 5 : 0}px`,
-                                        left: `${textareaRef.current ? textareaRef.current.getBoundingClientRect().left + window.scrollX : 0}px`,
-                                    }}
-                                >
+                                    <div
+                                        ref={popoverRef}
+                                        className="absolute z-50 -ml-96 bg-slate-900 border border-indigo-500/40 rounded-md shadow-lg shadow-indigo-500/20 mt-2 w-[92%] max-h-64 overflow-y-auto"
+                                        style={{
+                                            top: `${textareaRef.current ? textareaRef.current.getBoundingClientRect().bottom + window.scrollY + 5 : 0}px`,
+                                            left: `${textareaRef.current ? textareaRef.current.getBoundingClientRect().left + window.scrollX : 0}px`,
+                                        }}
+                                    >
 
 
-                                    <div className="max-h-48 overflow-y-auto py-1">
-                                        {filteredUsers.length === 0 ? (
-                                            <div className="p-3 text-sm text-indigo-400 text-center">
-                                                No users found
-                                            </div>
-                                        ) : (
-                                            filteredUsers.map((user) => (
-                                                <div
-                                                    key={user._id}
-                                                    onClick={() => handleSelectUser(user)}
-                                                    className="flex items-center gap-2.5 px-3 py-2 cursor-pointer hover:bg-indigo-900/40 transition-colors"
-                                                >
-                                                    <Avatar className="h-7 w-7 border border-indigo-500/20">
-                                                        {user.profilePic ? (
-                                                            <AvatarImage src={user.profilePic} />
-                                                        ) : (
-                                                            <AvatarFallback className="bg-indigo-900 text-indigo-200 text-xs">
-                                                                {user.firstName[0]}{user.lastName[0]}
-                                                            </AvatarFallback>
-                                                        )}
-                                                    </Avatar>
-                                                    <span className="text-sm text-indigo-200">{user.firstName} {user.lastName}</span>
+                                        <div className="max-h-48 overflow-y-auto py-1">
+                                            {filteredUsers.length === 0 ? (
+                                                <div className="p-3 text-sm text-indigo-400 text-center">
+                                                    No users found
                                                 </div>
-                                            ))
-                                        )}
+                                            ) : (
+                                                filteredUsers.map((user) => (
+                                                    <div
+                                                        key={user._id}
+                                                        onClick={() => handleSelectUser(user)}
+                                                        className="flex items-center gap-2.5 px-3 py-2 cursor-pointer hover:bg-indigo-900/40 transition-colors"
+                                                    >
+                                                        <Avatar className="h-7 w-7 border border-indigo-500/20">
+                                                            {user.profilePic ? (
+                                                                <AvatarImage src={user.profilePic} />
+                                                            ) : (
+                                                                <AvatarFallback className="bg-indigo-900 text-indigo-200 text-xs">
+                                                                    {user.firstName[0]}{user.lastName[0]}
+                                                                </AvatarFallback>
+                                                            )}
+                                                        </Avatar>
+                                                        <span className="text-sm text-indigo-200">{user.firstName} {user.lastName}</span>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
                                 </div>
                             )}
 
@@ -602,7 +780,7 @@ export default function TaskManagement() {
                                     onClick={processAiPrompt}
                                     disabled={isProcessingAi || !aiPrompt.trim() || aiCredits <= 0}
                                     className={`relative group ${aiCredits <= 0 ? 'bg-slate-800 text-slate-400 cursor-not-allowed' :
-                                            'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white'
+                                        'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white'
                                         }`}
                                 >
                                     {isProcessingAi ? (
@@ -615,7 +793,7 @@ export default function TaskManagement() {
                                         </>
                                     ) : (
                                         <>
-                                            {!aiCredits  && (
+                                            {aiCredits > 0 && (
                                                 <div className="absolute -inset-[1px] bg-gradient-to-r from-cyan-400 to-purple-400 rounded opacity-0 group-hover:opacity-50 blur-sm transition-opacity duration-300"></div>
                                             )}
                                             <div className="relative flex items-center">

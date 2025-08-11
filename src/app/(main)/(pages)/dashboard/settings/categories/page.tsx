@@ -285,7 +285,7 @@ const Categories: React.FC = () => {
   }
 
   return (
-    <div className="container h-screen overflow-y-scroll p-6 mx-auto max-w- scrollbar-hide space-y-8">
+    <div className="h-screen overflow-y-scroll p-6 mx-auto max-w- scrollbar-hide space-y-8">
       <div className="flex flex-col space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">Categories</h1>
         <p className="text-muted-foreground">

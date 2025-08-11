@@ -108,7 +108,7 @@ const BillingSidebar: React.FC<BillingSidebarProps> = ({ sidebarWidth = 20 }) =>
               <span>Billing Logs</span>
             </Button>
 
-            <Button
+            {/* <Button
               variant="ghost"
               className={cn(
                 "w-full justify-start rounded-md gap-3 py-2 h-auto",
@@ -120,7 +120,7 @@ const BillingSidebar: React.FC<BillingSidebarProps> = ({ sidebarWidth = 20 }) =>
             >
               <FaWhatsapp className={cn("h-4 w-4", isActive('/dashboard/wallet-recharge') && "text-primary")} />
               <span>WABA Wallet</span>
-            </Button>
+            </Button> */}
           </div>
         </div>
       </div>

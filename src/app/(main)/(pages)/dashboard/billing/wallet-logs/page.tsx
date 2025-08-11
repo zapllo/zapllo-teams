@@ -240,7 +240,7 @@ export default function WalletLogs({ }: Props) {
       <BillingSidebar />
       {currentUser?.role === "orgAdmin" ? (
         <div className="flex-1 p-4 overflow-y-scroll h-[620px] scrollbar-hide">
-          <div className="w-full ml-2 max-w-8xl mx-auto">
+          <div className="w-full ml-2 max-w- mx-auto">
             <div className="gap-2 flex items-center justify-center mb-4 w-full">
               <div className='flex justify-center w-full max-w-3xl ml-4 gap-4'>
                 <Card className='p-4 h-fit   border border-[#E0E0E066]  w-full'>
