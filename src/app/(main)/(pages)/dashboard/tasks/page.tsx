@@ -1101,9 +1101,9 @@ const processRecording = async (audioBlob: Blob) => {
                     <h4 className="text-sm font-medium text-blue-900 mb-2">💡 Tips for better results</h4>
                     <ul className="text-xs text-blue-700 space-y-1">
                         <li>• Speak clearly and mention specific details</li>
-                        <li>• Include due dates: "next Friday", "January 15th"</li>
-                        <li>• Assign tasks: "assign to John" or "for Sarah"</li>
-                        <li>• Mention priority: "high priority" or "urgent"</li>
+                        <li>• Include due dates: &quot;next Friday&quot;, &quot;January 15th&quot;</li>
+                        <li>• Assign tasks: &quot;assign to John&quot; or &quot;for Sarah&quot;</li>
+                        <li>• Mention priority: &quot;high priority&quot; or &quot;urgent&quot;</li>
                     </ul>
                 </div>
             )}
