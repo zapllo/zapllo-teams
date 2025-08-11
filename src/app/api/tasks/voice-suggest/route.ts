@@ -9,14 +9,12 @@ import mongoose from "mongoose";
 import Organization from "@/models/organizationModel";
 import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 
-// Initialize clients
+// Initialize clients - ElevenLabs client will automatically use ELEVENLABS_API_KEY from env
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-const elevenlabs = new ElevenLabsClient({
-  apiKey: process.env.ELEVENLABS_API_KEY
-});
+const elevenlabs = new ElevenLabsClient();
 
 // Connect to database
 connectDB();
@@ -26,7 +24,6 @@ function parseRelativeDateFromPrompt(prompt: string): Date {
   const today = new Date();
   const lowercasePrompt = prompt.toLowerCase();
 
-  // Check for specific date patterns
   const monthNames = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
 
   for (let i = 0; i < monthNames.length; i++) {
@@ -47,7 +44,6 @@ function parseRelativeDateFromPrompt(prompt: string): Date {
     }
   }
 
-  // Check for "next day-of-week" pattern
   const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
   for (let i = 0; i < daysOfWeek.length; i++) {
     if (lowercasePrompt.includes(`next ${daysOfWeek[i]}`)) {
@@ -60,7 +56,6 @@ function parseRelativeDateFromPrompt(prompt: string): Date {
     }
   }
 
-  // Existing relative date patterns
   if (lowercasePrompt.includes('tomorrow')) {
     return addDays(today, 1);
   } else if (lowercasePrompt.includes('today')) {
@@ -138,30 +133,65 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Audio file is required" }, { status: 400 });
     }
 
-    try {
-      // Convert File to Blob for ElevenLabs SDK
-      const arrayBuffer = await audioFile.arrayBuffer();
-      const audioBlob = new Blob([arrayBuffer], { type: audioFile.type });
+    console.log('Received audio file:', {
+      name: audioFile.name,
+      type: audioFile.type,
+      size: audioFile.size,
+    });
 
-      // Transcribe audio using ElevenLabs SDK
-      const transcription = await elevenlabs.speechToText.convert({
-        file: audioBlob,
-        modelId: "scribe_v1",
-        languageCode: "eng",
-        tagAudioEvents: false, // Set to false for cleaner transcripts
-        diarize: false, // Set to false for single speaker scenarios
+    // Validate audio file
+    if (audioFile.size === 0) {
+      return NextResponse.json({ 
+        success: false, 
+        error: "Audio file is empty. Please try recording again." 
+      }, { status: 400 });
+    }
+
+    if (audioFile.size < 1000) {
+      return NextResponse.json({ 
+        success: false, 
+        error: "Audio recording is too short. Please speak for at least 2-3 seconds." 
+      }, { status: 400 });
+    }
+
+    if (audioFile.size > 25 * 1024 * 1024) {
+      return NextResponse.json({ 
+        success: false, 
+        error: "Audio file is too large (max 25MB)" 
+      }, { status: 400 });
+    }
+
+    try {
+      // Convert the File to a Blob as shown in the ElevenLabs documentation
+      const arrayBuffer = await audioFile.arrayBuffer();
+      const audioBlob = new Blob([arrayBuffer], { type: "audio/wav" });
+
+      console.log('Processing audio blob:', {
+        size: audioBlob.size,
+        type: audioBlob.type
       });
 
-      const transcript = transcription.text || '';
+      // Use ElevenLabs speech-to-text exactly as shown in their documentation
+      const transcription = await elevenlabs.speechToText.convert({
+        file: audioBlob,
+        modelId: "scribe_v1", // Only supported model as per docs
+        languageCode: "eng", // Set to null for auto-detection if needed
+        tagAudioEvents: false, // Set to false for cleaner transcripts
+        diarize: false, // Set to false for single speaker
+      });
+
+      console.log('ElevenLabs transcription result:', transcription);
+
+      const transcript = transcription?.text?.trim() || '';
 
       if (!transcript) {
         return NextResponse.json({ 
           success: false, 
-          error: "No speech detected in audio" 
+          error: "No speech detected in the audio. Please speak clearly and try again." 
         }, { status: 400 });
       }
 
-      console.log('Transcribed text:', transcript);
+      console.log('Successfully transcribed text:', transcript);
 
       // Parse dates and times from transcript
       const parsedDate = parseRelativeDateFromPrompt(transcript);
@@ -311,9 +341,21 @@ export async function POST(request: NextRequest) {
 
     } catch (transcriptionError: any) {
       console.error('ElevenLabs transcription error:', transcriptionError);
+      
+      // Handle specific ElevenLabs errors
+      if (transcriptionError.statusCode === 400) {
+        const errorDetail = transcriptionError.body?.detail;
+        if (errorDetail?.status === 'empty_file') {
+          return NextResponse.json({ 
+            success: false, 
+            error: "Audio file appears to be empty or corrupted. Please try recording again." 
+          }, { status: 400 });
+        }
+      }
+      
       return NextResponse.json({ 
         success: false, 
-        error: `Failed to transcribe audio: ${transcriptionError.message}` 
+        error: `Speech transcription failed: ${transcriptionError.message || 'Please try recording again with clearer audio.'}` 
       }, { status: 500 });
     }
 

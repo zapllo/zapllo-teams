@@ -232,31 +232,106 @@ export default function TaskManagement() {
 
 const startRecording = async () => {
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        const recorder = new MediaRecorder(stream);
-        const chunks: BlobPart[] = [];
+        console.log('Requesting microphone access...');
+        
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true,
+                sampleRate: 44100,
+            }
+        });
+        
+        console.log('Microphone access granted');
+        
+        // Check for supported MIME types
+        const mimeTypes = [
+            'audio/webm;codecs=opus',
+            'audio/webm',
+            'audio/mp4',
+            'audio/wav'
+        ];
+        
+        let selectedMimeType = 'audio/wav'; // fallback
+        for (const mimeType of mimeTypes) {
+            if (MediaRecorder.isTypeSupported(mimeType)) {
+                selectedMimeType = mimeType;
+                break;
+            }
+        }
+        
+        console.log('Using MIME type:', selectedMimeType);
+
+        const recorder = new MediaRecorder(stream, {
+            mimeType: selectedMimeType,
+            audioBitsPerSecond: 128000
+        });
+
+        const chunks: Blob[] = [];
 
         recorder.ondataavailable = (event) => {
+            console.log('Audio data chunk received:', event.data.size, 'bytes');
             if (event.data.size > 0) {
                 chunks.push(event.data);
             }
         };
 
         recorder.onstop = async () => {
-            const blob = new Blob(chunks, { type: 'audio/wav' });
-            setAudioBlob(blob);
-            stream.getTracks().forEach(track => track.stop());
+            console.log('Recording stopped. Processing', chunks.length, 'chunks...');
             
-            // Automatically process the recording
-            await processRecording(blob);
+            // Stop all tracks
+            stream.getTracks().forEach(track => {
+                track.stop();
+                console.log('Track stopped:', track.kind, track.label);
+            });
+
+            if (chunks.length === 0) {
+                toast.error('No audio data was recorded. Please try again.');
+                setIsRecording(false);
+                return;
+            }
+
+            const totalSize = chunks.reduce((sum, chunk) => sum + chunk.size, 0);
+            console.log('Total audio size:', totalSize, 'bytes');
+
+            if (totalSize < 1000) {
+                toast.error('Recording is too short. Please speak for at least 2-3 seconds.');
+                setIsRecording(false);
+                return;
+            }
+
+            // Create the final audio blob
+            const finalBlob = new Blob(chunks, { type: selectedMimeType });
+            
+            console.log('Final audio blob created:', {
+                size: finalBlob.size,
+                type: finalBlob.type
+            });
+
+            setAudioBlob(finalBlob);
+            
+            // Process the recording automatically
+            await processRecording(finalBlob);
         };
 
-        recorder.start();
+        recorder.onerror = (event) => {
+            console.error('MediaRecorder error:', event);
+            toast.error('Recording error occurred. Please try again.');
+            stream.getTracks().forEach(track => track.stop());
+            setIsRecording(false);
+        };
+
+        // Start recording with time slice to ensure regular data collection
+        recorder.start(1000); // Collect data every second
+        console.log('Recording started, state:', recorder.state);
+        
         setMediaRecorder(recorder);
         setIsRecording(true);
+
     } catch (error) {
         console.error('Error starting recording:', error);
-        toast.error('Failed to start recording. Please check your microphone permissions.');
+        toast.error('Failed to access microphone. Please check permissions and try again.');
     }
 };
 
