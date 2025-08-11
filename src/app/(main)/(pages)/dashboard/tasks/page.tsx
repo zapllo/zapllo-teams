@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion';
-import { AlertCircle, Loader2, Plus, Sparkles, User, X, FileText, Zap, MoreHorizontal, FolderOpen } from 'lucide-react';
+import { AlertCircle, Loader2, Plus, Sparkles, User, X, FileText, Zap, MoreHorizontal, FolderOpen, Mic, MicOff, Volume2 } from 'lucide-react';
 import TaskModal from '@/components/globals/taskModal';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
@@ -49,7 +49,13 @@ export default function TaskManagement() {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const popoverRef = useRef<HTMLDivElement>(null);
     const [aiCredits, setAiCredits] = useState<number>(0);
-
+    // Add voice-related states
+    const [isVoiceDialogOpen, setIsVoiceDialogOpen] = useState(false);
+    const [isRecording, setIsRecording] = useState(false);
+    const [isTranscribing, setIsTranscribing] = useState(false);
+    const [voiceTranscript, setVoiceTranscript] = useState('');
+    const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+    const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
     const router = useRouter();
 
     useEffect(() => {
@@ -182,14 +188,16 @@ export default function TaskManagement() {
     const toggleQuickActions = () => {
         setIsQuickActionsOpen(!isQuickActionsOpen);
     };
-
-    // Update the handleQuickAction function
+    // Update handleQuickAction function
     const handleQuickAction = (action: string) => {
         setIsQuickActionsOpen(false);
 
         switch (action) {
             case 'ai-task':
                 openAiPromptDialog();
+                break;
+            case 'voice-task':
+                openVoiceDialog();
                 break;
             case 'manual-task':
                 openModal();
@@ -203,6 +211,165 @@ export default function TaskManagement() {
         }
     };
 
+    // Voice dialog functions
+    const openVoiceDialog = () => {
+        setIsVoiceDialogOpen(true);
+        setVoiceTranscript('');
+        setAudioBlob(null);
+    };
+
+    const closeVoiceDialog = () => {
+        if (mediaRecorder && isRecording) {
+            mediaRecorder.stop();
+        }
+        setIsVoiceDialogOpen(false);
+        setIsRecording(false);
+        setIsTranscribing(false);
+        setVoiceTranscript('');
+        setAudioBlob(null);
+        setMediaRecorder(null);
+    };
+
+const startRecording = async () => {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const recorder = new MediaRecorder(stream);
+        const chunks: BlobPart[] = [];
+
+        recorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+                chunks.push(event.data);
+            }
+        };
+
+        recorder.onstop = async () => {
+            const blob = new Blob(chunks, { type: 'audio/wav' });
+            setAudioBlob(blob);
+            stream.getTracks().forEach(track => track.stop());
+            
+            // Automatically process the recording
+            await processRecording(blob);
+        };
+
+        recorder.start();
+        setMediaRecorder(recorder);
+        setIsRecording(true);
+    } catch (error) {
+        console.error('Error starting recording:', error);
+        toast.error('Failed to start recording. Please check your microphone permissions.');
+    }
+};
+
+const processRecording = async (audioBlob: Blob) => {
+    if (aiCredits <= 0) {
+        toast.error("No AI credits remaining. Please contact your administrator.");
+        return;
+    }
+
+    setIsTranscribing(true);
+    try {
+        // Create FormData for the audio file
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'recording.wav');
+
+        // Send to our API endpoint for transcription and task processing
+        const response = await axios.post('/api/tasks/voice-suggest', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+
+        if (response.data.success) {
+            if (response.data.creditStatus) {
+                setAiCredits(response.data.creditStatus.remaining);
+            }
+
+            setVoiceTranscript(response.data.transcript);
+            setAiTaskData(response.data.taskData);
+            
+            // Close voice dialog and open task modal automatically
+            closeVoiceDialog();
+            openModal(response.data.taskData);
+            
+            toast.success('Task created from your voice recording!');
+        } else {
+            if (response.data.creditStatus && response.data.creditStatus.remaining === 0) {
+                toast.error("No AI credits remaining. Please contact your administrator.");
+            } else {
+                toast.error("Failed to process voice: " + response.data.error);
+            }
+        }
+    } catch (error: any) {
+        console.error('Error processing voice:', error);
+        if (error.response?.data?.creditStatus?.remaining === 0) {
+            toast.error("No AI credits remaining. Please contact your administrator.");
+        } else {
+            toast.error(error.response?.data?.error || "Failed to process voice input");
+        }
+    } finally {
+        setIsTranscribing(false);
+    }
+};
+    const stopRecording = () => {
+        if (mediaRecorder && isRecording) {
+            mediaRecorder.stop();
+            setIsRecording(false);
+            // The processing will be triggered automatically in the recorder.onstop event
+        }
+    };
+
+    const transcribeAndProcess = async () => {
+        if (!audioBlob) {
+            toast.error('No audio recorded');
+            return;
+        }
+
+        if (aiCredits <= 0) {
+            toast.error("No AI credits remaining. Please contact your administrator.");
+            return;
+        }
+
+        setIsTranscribing(true);
+        try {
+            // Create FormData for the audio file
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'recording.wav');
+
+            // Send to our API endpoint for transcription and task processing
+            const response = await axios.post('/api/tasks/voice-suggest', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            if (response.data.success) {
+                if (response.data.creditStatus) {
+                    setAiCredits(response.data.creditStatus.remaining);
+                }
+
+                setVoiceTranscript(response.data.transcript);
+                setAiTaskData(response.data.taskData);
+                closeVoiceDialog();
+                openModal(response.data.taskData);
+            } else {
+                if (response.data.creditStatus && response.data.creditStatus.remaining === 0) {
+                    toast.error("No AI credits remaining. Please contact your administrator.");
+                } else {
+                    toast.error("Failed to process voice: " + response.data.error);
+                }
+            }
+        } catch (error: any) {
+            console.error('Error processing voice:', error);
+            if (error.response?.data?.creditStatus?.remaining === 0) {
+                toast.error("No AI credits remaining. Please contact your administrator.");
+            } else {
+                toast.error(error.response?.data?.error || "Failed to process voice input");
+            }
+        } finally {
+            setIsTranscribing(false);
+        }
+    };
+
     // Update the quickActions array
     const quickActions = [
         {
@@ -213,6 +380,16 @@ export default function TaskManagement() {
             gradient: 'from-violet-600 to-purple-600',
             hoverGradient: 'from-violet-500 to-purple-500',
             iconColor: 'text-violet-100',
+            credits: aiCredits > 0
+        },
+        {
+            id: 'voice-task',
+            label: 'Voice Task',
+            icon: Mic,
+            description: 'Speak your task',
+            gradient: 'from-rose-600 to-pink-600',
+            hoverGradient: 'from-rose-500 to-pink-500',
+            iconColor: 'text-rose-100',
             credits: aiCredits > 0
         },
         {
@@ -765,7 +942,7 @@ export default function TaskManagement() {
                         {/* Footer/actions area */}
                         <div className="flex justify-between items-center p-4 bg-slate-950 border-t border-indigo-500/30">
                             <span className="text-xs text-indigo-400">
-                                Each AI task generation uses 1 credit
+                                Uses 1 credit per generation
                             </span>
 
                             <div className="flex gap-2">
@@ -807,6 +984,164 @@ export default function TaskManagement() {
                         </div>
                     </DialogContent>
                 </Dialog>
+             {/* Voice Dialog - Simplified */}
+<Dialog open={isVoiceDialogOpen} onOpenChange={setIsVoiceDialogOpen}>
+    <DialogContent className="sm:max-w-[500px] max-h-[90vh] p-0 overflow-hidden bg-white border-0 shadow-2xl">
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-rose-50 to-pink-50">
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-rose-600 to-pink-600 flex items-center justify-center">
+                        <Mic className="h-4 w-4 text-white" />
+                    </div>
+                    <div>
+                        <DialogTitle className="text-gray-900 text-lg font-semibold">Voice Task Creator</DialogTitle>
+                        <DialogDescription className="text-gray-500 text-sm">
+                            {isTranscribing ? 'Processing your voice...' : 'Speak your task and we\'ll create it'}
+                        </DialogDescription>
+                    </div>
+                </div>
+                
+                {/* Credits Badge */}
+                <div className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                    aiCredits > 10 ? 'bg-green-100 text-green-700' :
+                    aiCredits > 0 ? 'bg-amber-100 text-amber-700' :
+                    'bg-red-100 text-red-700'
+                }`}>
+                    {aiCredits} {aiCredits === 1 ? 'credit' : 'credits'}
+                </div>
+            </div>
+        </div>
+
+        {/* Content Area */}
+        <div className="p-6 space-y-6">
+            {/* Recording Interface */}
+            <div className="text-center space-y-6">
+                {/* Visual Recording Indicator */}
+                <div className="relative mx-auto w-32 h-32 flex items-center justify-center">
+                    {isRecording && (
+                        <>
+                            <div className="absolute inset-0 rounded-full bg-red-100 animate-ping"></div>
+                            <div className="absolute inset-2 rounded-full bg-red-200 animate-ping animation-delay-75"></div>
+                        </>
+                    )}
+                    {isTranscribing && (
+                        <div className="absolute inset-0 rounded-full bg-blue-100 animate-pulse"></div>
+                    )}
+                    <div className={`relative w-24 h-24 rounded-full flex items-center justify-center transition-all duration-300 ${
+                        isTranscribing 
+                            ? 'bg-blue-500 shadow-lg shadow-blue-500/50 scale-110' 
+                            : isRecording 
+                                ? 'bg-red-500 shadow-lg shadow-red-500/50 scale-110' 
+                                : 'bg-gray-200 hover:bg-gray-300'
+                    }`}>
+                        {isTranscribing ? (
+                            <Loader2 className="h-8 w-8 text-white animate-spin" />
+                        ) : isRecording ? (
+                            <MicOff className="h-8 w-8 text-white animate-pulse" />
+                        ) : (
+                            <Mic className="h-8 w-8 text-gray-600" />
+                        )}
+                    </div>
+                </div>
+
+                {/* Status Text */}
+                <div className="space-y-2">
+                    <h3 className="font-medium text-gray-900">
+                        {isTranscribing ? 'Creating your task...' :
+                         isRecording ? 'Listening... Speak your task' :
+                         'Ready to record'}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                        {isTranscribing ? 'Structuring your Tasks with Zapllo AI' :
+                         isRecording ? 'Describe your task with details like due date, assignee, and priority' :
+                         'Tap record and speak naturally - the task will be created automatically'}
+                    </p>
+                </div>
+
+                {/* Recording Controls */}
+                <div className="flex justify-center">
+                    {!isRecording && !isTranscribing && (
+                        <Button
+                            onClick={startRecording}
+                            disabled={aiCredits <= 0}
+                            className={`px-8 py-3 text-base ${
+                                aiCredits <= 0 
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : 'bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white'
+                            }`}
+                        >
+                            <Mic className="h-5 w-5 mr-2" />
+                            Start Recording
+                        </Button>
+                    )}
+
+                    {isRecording && !isTranscribing && (
+                        <Button
+                            onClick={stopRecording}
+                            className="px-8 py-3 text-base bg-red-600 hover:bg-red-700 text-white"
+                        >
+                            <MicOff className="h-5 w-5 mr-2" />
+                            Stop & Create Task
+                        </Button>
+                    )}
+
+                    {isTranscribing && (
+                        <div className="flex items-center gap-2 text-blue-600">
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                            <span className="font-medium">Processing...</span>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Tips - Show only when not recording or processing */}
+            {!isRecording && !isTranscribing && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="text-sm font-medium text-blue-900 mb-2">💡 Tips for better results</h4>
+                    <ul className="text-xs text-blue-700 space-y-1">
+                        <li>• Speak clearly and mention specific details</li>
+                        <li>• Include due dates: "next Friday", "January 15th"</li>
+                        <li>• Assign tasks: "assign to John" or "for Sarah"</li>
+                        <li>• Mention priority: "high priority" or "urgent"</li>
+                    </ul>
+                </div>
+            )}
+
+            {/* Processing indicator */}
+            {isTranscribing && (
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center gap-3">
+                        <div className="flex space-x-1">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        </div>
+                        <span className="text-sm font-medium text-blue-900">
+                            Converting speech to structured task...
+                        </span>
+                    </div>
+                </div>
+            )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+            <span className="text-xs text-gray-500">
+                {isTranscribing ? 'Processing...' : 'Uses 1 credit per voice recording'}
+            </span>
+
+            <Button
+                variant="outline"
+                onClick={closeVoiceDialog}
+                disabled={isRecording || isTranscribing}
+                className="text-gray-700 border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+            >
+                {isRecording || isTranscribing ? 'Processing...' : 'Cancel'}
+            </Button>
+        </div>
+    </DialogContent>
+</Dialog>
 
                 {/* Task Creation Modal */}
                 <AnimatePresence>

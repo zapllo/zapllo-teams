@@ -11,6 +11,7 @@
   "dependencies": {
     "@aws-sdk/client-rekognition": "^3.666.0",
     "@aws-sdk/client-s3": "^3.633.0",
+    "@elevenlabs/elevenlabs-js": "^2.9.0",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@hookform/resolvers": "^4.1.3",
