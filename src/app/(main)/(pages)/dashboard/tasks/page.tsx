@@ -484,7 +484,7 @@ export default function TaskManagement() {
             icon: FileText,
             description: 'Browse templates',
             gradient: 'from-emerald-600 to-green-600',
-            hoverGradient: 'from-emerald-500 to-green-500',
+            hoverGradient: 'from-green-900 to-green-500',
             iconColor: 'text-emerald-100',
             credits: true
         },
