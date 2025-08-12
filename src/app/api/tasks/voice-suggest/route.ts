@@ -7,14 +7,11 @@ import connectDB from "@/lib/db";
 import { addDays, addWeeks, addMonths, parseISO, set } from "date-fns";
 import mongoose from "mongoose";
 import Organization from "@/models/organizationModel";
-import { ElevenLabsClient } from "@elevenlabs/elevenlabs-js";
 
-// Initialize clients - ElevenLabs client will automatically use ELEVENLABS_API_KEY from env
+// Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
-
-const elevenlabs = new ElevenLabsClient();
 
 // Connect to database
 connectDB();
@@ -162,27 +159,19 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      // Convert the File to a Blob as shown in the ElevenLabs documentation
-      const arrayBuffer = await audioFile.arrayBuffer();
-      const audioBlob = new Blob([arrayBuffer], { type: "audio/wav" });
+      // Use OpenAI Whisper for speech-to-text
+      console.log('Processing audio with OpenAI Whisper...');
 
-      console.log('Processing audio blob:', {
-        size: audioBlob.size,
-        type: audioBlob.type
+      const transcription = await openai.audio.transcriptions.create({
+        file: audioFile,
+        model: "whisper-1",
+        language: "en", // Optional: specify language
+        response_format: "text"
       });
 
-      // Use ElevenLabs speech-to-text exactly as shown in their documentation
-      const transcription = await elevenlabs.speechToText.convert({
-        file: audioBlob,
-        modelId: "scribe_v1", // Only supported model as per docs
-        languageCode: "eng", // Set to null for auto-detection if needed
-        tagAudioEvents: false, // Set to false for cleaner transcripts
-        diarize: false, // Set to false for single speaker
-      });
+      console.log('Whisper transcription result:', transcription);
 
-      console.log('ElevenLabs transcription result:', transcription);
-
-      const transcript = transcription?.text?.trim() || '';
+      const transcript = transcription.trim() || '';
 
       if (!transcript) {
         return NextResponse.json({ 
@@ -340,22 +329,23 @@ export async function POST(request: NextRequest) {
       });
 
     } catch (transcriptionError: any) {
-      console.error('ElevenLabs transcription error:', transcriptionError);
+      console.error('Whisper transcription error:', transcriptionError);
       
-      // Handle specific ElevenLabs errors
-      if (transcriptionError.statusCode === 400) {
-        const errorDetail = transcriptionError.body?.detail;
-        if (errorDetail?.status === 'empty_file') {
-          return NextResponse.json({ 
-            success: false, 
-            error: "Audio file appears to be empty or corrupted. Please try recording again." 
-          }, { status: 400 });
+      // Handle specific OpenAI errors
+      let errorMessage = 'Please try recording again with clearer audio.';
+      
+      if (transcriptionError.error) {
+        const error = transcriptionError.error;
+        if (error.code === 'invalid_request_error') {
+          errorMessage = 'Invalid audio format. Please try recording again.';
+        } else if (error.code === 'rate_limit_exceeded') {
+          errorMessage = 'Too many requests. Please try again in a moment.';
         }
       }
       
       return NextResponse.json({ 
         success: false, 
-        error: `Speech transcription failed: ${transcriptionError.message || 'Please try recording again with clearer audio.'}` 
+        error: `Speech transcription failed: ${errorMessage}` 
       }, { status: 500 });
     }
 

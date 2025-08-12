@@ -230,175 +230,133 @@ export default function TaskManagement() {
         setMediaRecorder(null);
     };
 
-const startRecording = async () => {
-    try {
-        console.log('Requesting microphone access...');
-        
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-            audio: {
-                echoCancellation: true,
-                noiseSuppression: true,
-                autoGainControl: true,
-                sampleRate: 44100,
-            }
-        });
-        
-        console.log('Microphone access granted');
-        
-        // Check for supported MIME types
-        const mimeTypes = [
-            'audio/webm;codecs=opus',
-            'audio/webm',
-            'audio/mp4',
-            'audio/wav'
-        ];
-        
-        let selectedMimeType = 'audio/wav'; // fallback
-        for (const mimeType of mimeTypes) {
-            if (MediaRecorder.isTypeSupported(mimeType)) {
-                selectedMimeType = mimeType;
-                break;
-            }
-        }
-        
-        console.log('Using MIME type:', selectedMimeType);
-
-        const recorder = new MediaRecorder(stream, {
-            mimeType: selectedMimeType,
-            audioBitsPerSecond: 128000
-        });
-
-        const chunks: Blob[] = [];
-
-        recorder.ondataavailable = (event) => {
-            console.log('Audio data chunk received:', event.data.size, 'bytes');
-            if (event.data.size > 0) {
-                chunks.push(event.data);
-            }
-        };
-
-        recorder.onstop = async () => {
-            console.log('Recording stopped. Processing', chunks.length, 'chunks...');
+  // Enhanced audio recording with better format support
+    const startRecording = async () => {
+        try {
+            console.log('Requesting microphone access...');
             
-            // Stop all tracks
-            stream.getTracks().forEach(track => {
-                track.stop();
-                console.log('Track stopped:', track.kind, track.label);
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true,
+                    sampleRate: 44100,
+                }
+            });
+            
+            console.log('Microphone access granted');
+            
+            // Check for supported MIME types - prioritize formats that work well with Whisper
+            const supportedTypes = [
+                'audio/webm;codecs=opus',
+                'audio/webm',
+                'audio/mp4',
+                'audio/wav',
+                'audio/ogg;codecs=opus'
+            ];
+            
+            let selectedMimeType = null;
+            for (const type of supportedTypes) {
+                if (MediaRecorder.isTypeSupported(type)) {
+                    selectedMimeType = type;
+                    break;
+                }
+            }
+            
+            if (!selectedMimeType) {
+                throw new Error('No supported audio format found');
+            }
+            
+            console.log('Using MIME type:', selectedMimeType);
+
+            const recorder = new MediaRecorder(stream, {
+                mimeType: selectedMimeType,
+                audioBitsPerSecond: 128000
             });
 
-            if (chunks.length === 0) {
-                toast.error('No audio data was recorded. Please try again.');
+            const chunks: Blob[] = [];
+
+            recorder.ondataavailable = (event) => {
+                console.log('Audio data chunk received:', event.data.size, 'bytes');
+                if (event.data.size > 0) {
+                    chunks.push(event.data);
+                }
+            };
+
+            recorder.onstop = async () => {
+                console.log('Recording stopped. Processing', chunks.length, 'chunks...');
+                
+                // Stop all tracks
+                stream.getTracks().forEach(track => {
+                    track.stop();
+                    console.log('Track stopped:', track.kind, track.label);
+                });
+
+                if (chunks.length === 0) {
+                    toast.error('No audio data was recorded. Please try again.');
+                    setIsRecording(false);
+                    return;
+                }
+
+                const totalSize = chunks.reduce((sum, chunk) => sum + chunk.size, 0);
+                console.log('Total audio size:', totalSize, 'bytes');
+
+                if (totalSize < 1000) {
+                    toast.error('Recording is too short. Please speak for at least 2-3 seconds.');
+                    setIsRecording(false);
+                    return;
+                }
+
+                // Create the final audio blob with proper file extension based on MIME type
+                let fileExtension = 'wav';
+                if (selectedMimeType.includes('webm')) {
+                    fileExtension = 'webm';
+                } else if (selectedMimeType.includes('mp4')) {
+                    fileExtension = 'm4a';
+                } else if (selectedMimeType.includes('ogg')) {
+                    fileExtension = 'ogg';
+                }
+
+                const finalBlob = new Blob(chunks, { type: selectedMimeType });
+                
+                console.log('Final audio blob created:', {
+                    size: finalBlob.size,
+                    type: finalBlob.type,
+                    extension: fileExtension
+                });
+
+                setAudioBlob(finalBlob);
+                
+                // Process the recording automatically
+                await processRecording(finalBlob, fileExtension);
+            };
+
+            recorder.onerror = (event) => {
+                console.error('MediaRecorder error:', event);
+                toast.error('Recording error occurred. Please try again.');
+                stream.getTracks().forEach(track => track.stop());
                 setIsRecording(false);
-                return;
-            }
+            };
 
-            const totalSize = chunks.reduce((sum, chunk) => sum + chunk.size, 0);
-            console.log('Total audio size:', totalSize, 'bytes');
-
-            if (totalSize < 1000) {
-                toast.error('Recording is too short. Please speak for at least 2-3 seconds.');
-                setIsRecording(false);
-                return;
-            }
-
-            // Create the final audio blob
-            const finalBlob = new Blob(chunks, { type: selectedMimeType });
+            // Start recording with time slice to ensure regular data collection
+            recorder.start(1000); // Collect data every second
+            console.log('Recording started, state:', recorder.state);
             
-            console.log('Final audio blob created:', {
-                size: finalBlob.size,
-                type: finalBlob.type
-            });
+            setMediaRecorder(recorder);
+            setIsRecording(true);
 
-            setAudioBlob(finalBlob);
-            
-            // Process the recording automatically
-            await processRecording(finalBlob);
-        };
-
-        recorder.onerror = (event) => {
-            console.error('MediaRecorder error:', event);
-            toast.error('Recording error occurred. Please try again.');
-            stream.getTracks().forEach(track => track.stop());
-            setIsRecording(false);
-        };
-
-        // Start recording with time slice to ensure regular data collection
-        recorder.start(1000); // Collect data every second
-        console.log('Recording started, state:', recorder.state);
-        
-        setMediaRecorder(recorder);
-        setIsRecording(true);
-
-    } catch (error) {
-        console.error('Error starting recording:', error);
-        toast.error('Failed to access microphone. Please check permissions and try again.');
-    }
-};
-
-const processRecording = async (audioBlob: Blob) => {
-    if (aiCredits <= 0) {
-        toast.error("No AI credits remaining. Please contact your administrator.");
-        return;
-    }
-
-    setIsTranscribing(true);
-    try {
-        // Create FormData for the audio file
-        const formData = new FormData();
-        formData.append('audio', audioBlob, 'recording.wav');
-
-        // Send to our API endpoint for transcription and task processing
-        const response = await axios.post('/api/tasks/voice-suggest', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
-
-        if (response.data.success) {
-            if (response.data.creditStatus) {
-                setAiCredits(response.data.creditStatus.remaining);
-            }
-
-            setVoiceTranscript(response.data.transcript);
-            setAiTaskData(response.data.taskData);
-            
-            // Close voice dialog and open task modal automatically
-            closeVoiceDialog();
-            openModal(response.data.taskData);
-            
-            toast.success('Task created from your voice recording!');
-        } else {
-            if (response.data.creditStatus && response.data.creditStatus.remaining === 0) {
-                toast.error("No AI credits remaining. Please contact your administrator.");
+        } catch (error:any) {
+            console.error('Error starting recording:', error);
+            if (error.name === 'NotAllowedError') {
+                toast.error('Microphone access denied. Please allow microphone access and try again.');
+            } else if (error.name === 'NotFoundError') {
+                toast.error('No microphone found. Please connect a microphone and try again.');
             } else {
-                toast.error("Failed to process voice: " + response.data.error);
+                toast.error('Failed to access microphone. Please check permissions and try again.');
             }
-        }
-    } catch (error: any) {
-        console.error('Error processing voice:', error);
-        if (error.response?.data?.creditStatus?.remaining === 0) {
-            toast.error("No AI credits remaining. Please contact your administrator.");
-        } else {
-            toast.error(error.response?.data?.error || "Failed to process voice input");
-        }
-    } finally {
-        setIsTranscribing(false);
-    }
-};
-    const stopRecording = () => {
-        if (mediaRecorder && isRecording) {
-            mediaRecorder.stop();
-            setIsRecording(false);
-            // The processing will be triggered automatically in the recorder.onstop event
         }
     };
-
-    const transcribeAndProcess = async () => {
-        if (!audioBlob) {
-            toast.error('No audio recorded');
-            return;
-        }
-
+    const processRecording = async (audioBlob: Blob, fileExtension: string = 'wav') => {
         if (aiCredits <= 0) {
             toast.error("No AI credits remaining. Please contact your administrator.");
             return;
@@ -406,15 +364,23 @@ const processRecording = async (audioBlob: Blob) => {
 
         setIsTranscribing(true);
         try {
-            // Create FormData for the audio file
+            // Create FormData for the audio file with proper filename
             const formData = new FormData();
-            formData.append('audio', audioBlob, 'recording.wav');
+            const fileName = `recording.${fileExtension}`;
+            formData.append('audio', audioBlob, fileName);
+
+            console.log('Sending audio to Whisper API:', {
+                size: audioBlob.size,
+                type: audioBlob.type,
+                fileName
+            });
 
             // Send to our API endpoint for transcription and task processing
             const response = await axios.post('/api/tasks/voice-suggest', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
+                timeout: 60000, // 60 second timeout for processing
             });
 
             if (response.data.success) {
@@ -424,26 +390,61 @@ const processRecording = async (audioBlob: Blob) => {
 
                 setVoiceTranscript(response.data.transcript);
                 setAiTaskData(response.data.taskData);
+                
+                // Close voice dialog and open task modal automatically
                 closeVoiceDialog();
                 openModal(response.data.taskData);
+                
+                toast.success('Task created from your voice recording!');
             } else {
                 if (response.data.creditStatus && response.data.creditStatus.remaining === 0) {
                     toast.error("No AI credits remaining. Please contact your administrator.");
                 } else {
-                    toast.error("Failed to process voice: " + response.data.error);
+                    toast.error(response.data.error || "Failed to process voice input");
                 }
             }
         } catch (error: any) {
             console.error('Error processing voice:', error);
-            if (error.response?.data?.creditStatus?.remaining === 0) {
+            if (error.code === 'ECONNABORTED') {
+                toast.error("Request timed out. Please try with a shorter recording.");
+            } else if (error.response?.data?.creditStatus?.remaining === 0) {
                 toast.error("No AI credits remaining. Please contact your administrator.");
             } else {
-                toast.error(error.response?.data?.error || "Failed to process voice input");
+                toast.error(error.response?.data?.error || "Failed to process voice input. Please try again.");
             }
         } finally {
             setIsTranscribing(false);
         }
     };
+
+    const stopRecording = () => {
+        if (mediaRecorder && isRecording) {
+            mediaRecorder.stop();
+            setIsRecording(false);
+            // The processing will be triggered automatically in the recorder.onstop event
+        }
+    };
+
+      // Update the transcribeAndProcess function to use the new processRecording function
+    const transcribeAndProcess = async () => {
+        if (!audioBlob) {
+            toast.error('No audio recorded');
+            return;
+        }
+
+        // Extract file extension from blob type
+        let fileExtension = 'wav';
+        if (audioBlob.type.includes('webm')) {
+            fileExtension = 'webm';
+        } else if (audioBlob.type.includes('mp4')) {
+            fileExtension = 'm4a';
+        } else if (audioBlob.type.includes('ogg')) {
+            fileExtension = 'ogg';
+        }
+
+        await processRecording(audioBlob, fileExtension);
+    };
+
 
     // Update the quickActions array
     const quickActions = [
